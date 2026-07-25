@@ -3,9 +3,14 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useFetchGitHub, useImportGitHub } from "@/features/profile/api/use-github";
+import {
+  usePortfolio,
+  useUpdatePortfolio,
+} from "@/features/portfolio/api/use-portfolio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
@@ -25,6 +30,14 @@ import {
 } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons";
 import type { GitHubData, GitHubRepo } from "@/lib/github";
+import {
+  getStoredSectionLayout,
+  normalizeHidden,
+  normalizeOrder,
+  toSectionLayoutPayload,
+  type ReorderableSectionKey,
+} from "@/features/templates/section-order";
+import type { PortfolioCustomization } from "@/features/templates/types";
 
 const IMPORT_LIST_BATCH_SIZE = 5;
 
@@ -34,8 +47,36 @@ export function GitHubImporter() {
   const [selectedRepos, setSelectedRepos] = useState<Set<number>>(new Set());
   const [visibleCount, setVisibleCount] = useState(IMPORT_LIST_BATCH_SIZE);
 
+  const { data: portfolio } = usePortfolio();
+  const updatePortfolio = useUpdatePortfolio();
   const fetchGitHub = useFetchGitHub();
   const importGitHub = useImportGitHub();
+
+  const customization = (portfolio?.customization ??
+    {}) as PortfolioCustomization;
+  const layout = getStoredSectionLayout(customization);
+  const showHeatmap = !normalizeHidden(layout.hidden).includes("github");
+
+  const setShowHeatmap = (show: boolean) => {
+    if (!portfolio) return;
+
+    const hidden: ReorderableSectionKey[] = normalizeHidden(layout.hidden).filter(
+      (key) => key !== "github",
+    );
+    if (!show) hidden.push("github");
+
+    updatePortfolio.mutate(
+      {
+        customization: {
+          sectionLayout: toSectionLayoutPayload(
+            normalizeOrder(layout.order),
+            hidden,
+          ),
+        },
+      },
+      { onError: (error) => toast.error(error.message) },
+    );
+  };
 
   const handleFetch = () => {
     if (!username.trim()) {
@@ -46,7 +87,6 @@ export function GitHubImporter() {
     fetchGitHub.mutate(username.trim(), {
       onSuccess: (result) => {
         setData(result);
-        // Auto-select top repos (by stars)
         const topIndices = new Set(
           result.repos
             .slice(0, Math.min(6, result.repos.length))
@@ -91,7 +131,7 @@ export function GitHubImporter() {
     );
 
     importGitHub.mutate(
-      { username, repos },
+      { username, repos, showHeatmap },
       {
         onSuccess: (result) => {
           toast.success(`Imported ${result.imported} projects from GitHub`);
@@ -108,7 +148,6 @@ export function GitHubImporter() {
 
   return (
     <div className="space-y-6">
-      {/* Search */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -120,7 +159,7 @@ export function GitHubImporter() {
             projects.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex gap-3">
             <div className="flex-1">
               <Label htmlFor="github-username" className="sr-only">
@@ -147,10 +186,23 @@ export function GitHubImporter() {
               Fetch
             </Button>
           </div>
+
+          {portfolio ? (
+            <div className="flex items-center justify-between gap-4">
+              <Label htmlFor="show-github-heatmap">
+                Show contribution heatmap on portfolio
+              </Label>
+              <Switch
+                id="show-github-heatmap"
+                checked={showHeatmap}
+                disabled={updatePortfolio.isPending}
+                onCheckedChange={setShowHeatmap}
+              />
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
-      {/* Profile */}
       {data && (
         <>
           <Card>
@@ -188,7 +240,6 @@ export function GitHubImporter() {
             </CardContent>
           </Card>
 
-          {/* Repos */}
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-lg font-semibold">

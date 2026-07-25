@@ -25,6 +25,7 @@ export function useImportGitHub() {
     mutationFn: async (data: {
       username: string;
       repos: GitHubRepo[];
+      showHeatmap?: boolean;
     }): Promise<{ imported: number }> => {
       const res = await fetch("/api/profile/github/import", {
         method: "POST",

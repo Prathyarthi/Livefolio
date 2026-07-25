@@ -311,12 +311,6 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             },
           };
         }
-        if (normalizedCustomization) {
-          normalizedCustomization = validateCustomSectionItems(
-            [normalizedCustomization],
-            "Portfolio customization",
-          )[0] as typeof normalizedCustomization;
-        }
         portfolioFields = {
           ...rest,
           ...(title !== undefined
