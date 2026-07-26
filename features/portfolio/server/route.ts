@@ -60,15 +60,21 @@ async function withPortfolioWriteLock<T>(
   portfolioId: string,
   operation: (tx: Prisma.TransactionClient) => Promise<T>,
 ) {
-  return prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`
-      SELECT "id"
-      FROM "portfolios"
-      WHERE "id" = ${portfolioId}
-      FOR UPDATE
-    `;
-    return operation(tx);
-  });
+  return prisma.$transaction(
+    async (tx) => {
+      await tx.$queryRaw`
+        SELECT "id"
+        FROM "portfolios"
+        WHERE "id" = ${portfolioId}
+        FOR UPDATE
+      `;
+      return operation(tx);
+    },
+    {
+      maxWait: 20_000,
+      timeout: 30_000,
+    },
+  );
 }
 
 /** Parses dates often returned by resume parsers (not only ISO YYYY-MM-DD). */
