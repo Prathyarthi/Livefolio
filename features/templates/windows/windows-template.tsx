@@ -27,6 +27,12 @@ import {
 import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { getTemplateSectionLayout } from "../section-layouts";
+import {
+  renderSections,
+  resolveSectionLayout,
+  type ReorderableSectionKey,
+} from "../section-order";
 
 
 export function WindowsTemplate({ data }: { data: PortfolioData }) {
@@ -58,40 +64,16 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
       ? [...featuredProjects, ...projects.filter((p) => !p.featured)]
       : projects;
   const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const resolved = resolveSectionLayout(
+    getTemplateSectionLayout("windows"),
+    portfolio.customization,
+  );
 
-  return (
-    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[#3a6ea5] font-sans text-black selection:bg-[#000080] selection:text-white pb-16 relative")}>
-      <div className="mx-auto max-w-5xl p-4 md:p-8 space-y-8">
 
-        {/* Header Window */}
-        <Window title="System Properties">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="grow">
-              <h1 className="text-3xl font-bold mb-2">{portfolio.title}</h1>
-              {portfolio.headline && (
-                <p className="text-sm mb-4">{portfolio.headline}</p>
-              )}
+  const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
+    about: portfolio.summary ? (
+      <Window key="about" id="about" title={`Notepad - ${labels.about}.txt`} icon={<FileText className="w-4 h-4" />}>
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                <ContactChips
-                  portfolio={portfolio}
-                  chipClassName="win95-button px-2 py-1 text-xs"
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="win95-button px-3 py-1 text-xs font-bold"
-                />
-              </div>
-            </div>
-          </div>
-        </Window>
-
-        {/* About Window */}
-        {portfolio.summary && (
-          <Window id="about" title={`Notepad - ${labels.about}.txt`} icon={<FileText className="w-4 h-4" />}>
             <div className="bg-white win95-inset p-4">
               <DescriptionBlock
                 text={portfolio.summary}
@@ -99,12 +81,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 listClassName="space-y-1 pl-4 font-mono text-sm leading-relaxed text-black"
               />
             </div>
-          </Window>
-        )}
+      </Window>
+    ) : null,
 
-        {/* Projects Window */}
-        {visibleProjects.length > 0 && (
-          <Window id="work" title={`Explorer - ${labels.projects}`} icon={<FolderOpen className="w-4 h-4" />}>
+    projects: visibleProjects.length > 0 ? (
+      <Window key="projects" id="work" title={`Explorer - ${labels.projects}`} icon={<FolderOpen className="w-4 h-4" />}>
+
             <CollapsibleList
               initial={4}
               wrapperClassName={cn(PROJECTS_GRID_2, "gap-4")}
@@ -148,6 +130,8 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                       <ProjectActions
                         liveUrl={project.liveUrl}
                         sourceUrl={project.sourceUrl}
+                        label={project.title}
+                        projectId={project.id}
                         liveClassName="win95-button px-2 py-1 text-xs font-bold mr-2"
                         sourceClassName="win95-button px-2 py-1 text-xs"
                       />
@@ -156,13 +140,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 </div>
               ))}
             </CollapsibleList>
-          </Window>
-        )}
+      </Window>
+    ) : null,
 
-        <div className="flex flex-col gap-8">
-          {/* Experience Window */}
-          {experiences.length > 0 && (
-            <Window id="experience" title={`Task Manager - ${labels.experience}`}>
+    experience: experiences.length > 0 ? (
+      <Window key="experience" id="experience" title={`Task Manager - ${labels.experience}`}>
+
               <CollapsibleList
                 initial={3}
                 wrapperClassName="space-y-4"
@@ -189,13 +172,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                   </div>
                 ))}
               </CollapsibleList>
-            </Window>
-          )}
+      </Window>
+    ) : null,
 
-          <div className="space-y-8">
-            {/* Skills Window */}
-            {skills.length > 0 && (
-              <Window title={`Control Panel - ${labels.skills}`}>
+    skills: skills.length > 0 ? (
+      <Window key="skills" title={`Control Panel - ${labels.skills}`}>
+
                 <div className="win95-inset bg-white p-4 space-y-4">
                   {Object.entries(groupedSkills).map(([category, names]) => (
                     <div key={category}>
@@ -210,12 +192,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                     </div>
                   ))}
                 </div>
-              </Window>
-            )}
+      </Window>
+    ) : null,
 
-            {/* Education Window */}
-            {educations.length > 0 && (
-              <Window title={`Registry - ${labels.education}`}>
+    education: educations.length > 0 ? (
+      <Window key="education" title={`Registry - ${labels.education}`}>
+
                 <CollapsibleList
                   initial={3}
                   wrapperClassName="space-y-2"
@@ -234,11 +216,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                     </div>
                   ))}
                 </CollapsibleList>
-              </Window>
-            )}
-            {/* Certifications Window */}
-            {certifications.length > 0 && (
-              <Window title={`${labels.certifications}.exe`}>
+      </Window>
+    ) : null,
+
+    certifications: certifications.length > 0 ? (
+      <Window key="certifications" title={`${labels.certifications}.exe`}>
+
                 <CollapsibleList
                   initial={3}
                   wrapperClassName="space-y-2"
@@ -266,12 +249,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                     </div>
                   ))}
                 </CollapsibleList>
-              </Window>
-            )}
+      </Window>
+    ) : null,
 
-            {/* Achievements Window */}
-            {achievements.length > 0 && (
-              <Window title={`${labels.achievements}.sys`}>
+    achievements: achievements.length > 0 ? (
+      <Window key="achievements" title={`${labels.achievements}.sys`}>
+
                 <CollapsibleList
                   initial={3}
                   wrapperClassName="space-y-2"
@@ -291,28 +274,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                     </div>
                   ))}
                 </CollapsibleList>
-              </Window>
-            )}
-          </div>
-        </div>
+      </Window>
+    ) : null,
 
-        {/* Custom Sections */}
-        {customSections.length > 0 && customSections.map((cs) => (
-          <Window key={cs.id} title={`Custom - ${cs.label}`}>
-            <div className="win95-inset bg-white p-4">
-              <CustomSectionItems
-                items={cs.items}
-                titleClassName="font-bold text-sm"
-                textClassName="text-xs mt-1"
-                chipClassName="win95-outset bg-[#c0c0c0] px-2 py-0.5 text-[10px]"
-              />
-            </div>
-          </Window>
-        ))}
+    articles: articles.length > 0 ? (
+      <Window key="articles" id="writing" title={`Internet Explorer - ${labels.articles}`} icon={<Globe className="w-4 h-4" />}>
 
-        {/* Articles Window */}
-        {articles.length > 0 && (
-          <Window id="writing" title={`Internet Explorer - ${labels.articles}`} icon={<Globe className="w-4 h-4" />}>
             <CollapsibleList
               initial={4}
               wrapperClassName={cn(PROJECTS_GRID_2, "gap-4")}
@@ -320,7 +287,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
             >
               {articles.map((article) => (
                 <div key={article.id} className="win95-inset bg-white p-3 text-sm flex flex-col">
-                  <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-[#0000ff] underline hover:text-[#ff0000] font-bold mb-2">
+                  <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="text-[#0000ff] underline hover:text-[#ff0000] font-bold mb-2">
                     {article.title}
                   </a>
                   {article.description && (
@@ -335,26 +302,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 </div>
               ))}
             </CollapsibleList>
-          </Window>
-        )}
+      </Window>
+    ) : null,
 
-        {/* GitHub Activity */}
-        {contributionCalendar && (
-          <Window title={`MS-DOS Prompt - ${labels.github}`}>
-            <div className="win95-inset bg-black text-[#c0c0c0] p-4 overflow-x-auto custom-scrollbar">
-              <GitHubContributionHeatmap
-                calendar={contributionCalendar}
-                profileUrl={githubProfile?.url}
-                username={githubProfile?.username}
-                variant="minimal"
-                label={labels.github}
-              />
-            </div>
-          </Window>
-        )}
-        {/* Profiles Window */}
-        {hasProfiles && (
-          <Window id="profiles" title={`Network - ${labels.profiles}`}>
+    profiles: hasProfiles ? (
+      <Window key="profiles" id="profiles" title={`Network - ${labels.profiles}`}>
+
             <div className="win95-inset bg-white p-4">
               <ProfileLinksSection
                 portfolio={portfolio}
@@ -365,8 +318,70 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 textClassName="text-xs text-black/80"
               />
             </div>
+      </Window>
+    ) : null,
+
+    github: contributionCalendar ? (
+      <Window key="github" title={`MS-DOS Prompt - ${labels.github}`}>
+
+            <div className="win95-inset bg-black text-[#c0c0c0] p-4 overflow-x-auto custom-scrollbar">
+              <GitHubContributionHeatmap
+                calendar={contributionCalendar}
+                profileUrl={githubProfile?.url}
+                username={githubProfile?.username}
+                variant="minimal"
+                label={labels.github}
+              />
+            </div>
+      </Window>
+    ) : null,
+  };
+
+  return (
+    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[#3a6ea5] font-sans text-black selection:bg-[#000080] selection:text-white pb-16 relative")}>
+      <div className="mx-auto max-w-5xl p-4 md:p-8 space-y-8">
+
+        {/* Header Window */}
+        <Window title="System Properties">
+          <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="grow">
+              <h1 className="text-3xl font-bold mb-2">{portfolio.title}</h1>
+              {portfolio.headline && (
+                <p className="text-sm mb-4">{portfolio.headline}</p>
+              )}
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                <ContactChips
+                  portfolio={portfolio}
+                  chipClassName="win95-button px-2 py-1 text-xs"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <HeroProfileButtons
+                  profiles={socialProfiles}
+                  className="win95-button px-3 py-1 text-xs font-bold"
+                />
+              </div>
+            </div>
+          </div>
+        </Window>
+
+        {renderSections(resolved, "full", blocks)}
+
+        {customSections.length > 0 && customSections.map((cs) => (
+          <Window key={cs.id} title={`Custom - ${cs.label}`}>
+            <div className="win95-inset bg-white p-4">
+              <CustomSectionItems
+                items={cs.items}
+                titleClassName="font-bold text-sm"
+                textClassName="text-xs mt-1"
+                chipClassName="win95-outset bg-[#c0c0c0] px-2 py-0.5 text-[10px]"
+              />
+            </div>
           </Window>
-        )}
+        ))}
+
       </div>
 
       {/* Taskbar */}

@@ -1,4 +1,6 @@
 import type { PortfolioData } from "../types";
+import { getTemplateSectionLayout } from "../section-layouts";
+import { resolveSectionLayout } from "../section-order";
 import { cn } from "@/lib/utils";
 import {
   GitHubContributionHeatmap,
@@ -59,6 +61,10 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
       ? [...featuredProjects, ...projects.filter((p) => !p.featured)]
       : projects;
   const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const resolved = resolveSectionLayout(
+    getTemplateSectionLayout("bento"),
+    portfolio.customization,
+  );
 
   return (
     <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-zinc-50 text-zinc-900 font-sans")}>
@@ -100,7 +106,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           </header>
 
           {/* About Bento Box */}
-          {portfolio.summary && (
+          {portfolio.summary && !resolved.isHidden("about") && (
             <section id="about" className="col-span-1 @md:col-span-3 @lg:col-span-2 row-span-1 rounded-3xl bg-zinc-900 text-zinc-50 p-8 shadow-sm overflow-hidden relative">
               <div className="absolute -right-10 -bottom-10 opacity-10">
                 <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
@@ -118,7 +124,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* Social Links Bento Box */}
-          {socialProfiles.length > 0 && (
+          {socialProfiles.length > 0 && !resolved.isHidden("profiles") && (
             <div className="col-span-1 @lg:col-span-2 row-span-1 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50 flex flex-col justify-center">
               <h2 className="text-lg font-semibold text-zinc-400 mb-4 flex items-center">
                 <span className="w-2 h-2 rounded-full bg-zinc-300 mr-2" />
@@ -133,7 +139,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* Work Bento Box (Spans full width) */}
-          {visibleProjects.length > 0 && (
+          {visibleProjects.length > 0 && !resolved.isHidden("projects") && (
             <section id="work" className="col-span-1 @md:col-span-3 @lg:col-span-4 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold text-zinc-900 flex items-center">
@@ -220,6 +226,8 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                         <ProjectActions
                           liveUrl={project.liveUrl}
                           sourceUrl={project.sourceUrl}
+                          label={project.title}
+                          projectId={project.id}
                           liveClassName="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-zinc-800"
                           sourceClassName="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900"
                         />
@@ -232,7 +240,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* Experience Bento Box */}
-          {experiences.length > 0 && (
+          {experiences.length > 0 && !resolved.isHidden("experience") && (
             <section id="experience" className="col-span-1 @md:col-span-2 @lg:col-span-2 row-span-2 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
               <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
                 <span className="w-3 h-3 rounded-full bg-purple-500 mr-3" />
@@ -274,7 +282,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* Skills Bento Box */}
-          {skills.length > 0 && (
+          {skills.length > 0 && !resolved.isHidden("skills") && (
             <section className="col-span-1 @md:col-span-1 @lg:col-span-2 row-span-1 rounded-3xl bg-blue-600 p-8 shadow-sm text-white overflow-hidden relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
               <div className="absolute bottom-0 left-0 w-40 h-40 bg-black/10 rounded-full blur-2xl -ml-20 -mb-20" />
@@ -302,7 +310,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* Education Bento Box */}
-          {educations.length > 0 && (
+          {educations.length > 0 && !resolved.isHidden("education") && (
             <section className="col-span-1 @md:col-span-2 @lg:col-span-2 row-span-1 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
               <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
                 <span className="w-3 h-3 rounded-full bg-orange-500 mr-3" />
@@ -335,7 +343,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* Articles Bento Box */}
-          {articles.length > 0 && (
+          {articles.length > 0 && !resolved.isHidden("articles") && (
             <section id="writing" className="col-span-1 @md:col-span-1 @lg:col-span-2 row-span-1 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
               <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
                 <span className="w-3 h-3 rounded-full bg-green-500 mr-3" />
@@ -348,7 +356,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
               >
                 {articles.map((article) => (
                   <article key={article.id} className="group">
-                    <a href={article.url} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-2xl hover:bg-zinc-50 transition-colors border border-transparent hover:border-zinc-200/60">
+                    <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-2xl hover:bg-zinc-50 transition-colors border border-transparent hover:border-zinc-200/60">
                       <h3 className="font-bold text-zinc-900 group-hover:text-green-600 transition-colors flex items-center justify-between">
                         <span className="truncate pr-4">{article.title}</span>
                         <ArrowUpRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-green-600" />
@@ -374,7 +382,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* GitHub Activity Bento Box */}
-          {contributionCalendar && (
+          {contributionCalendar && !resolved.isHidden("github") && (
             <section className="col-span-1 @md:col-span-3 @lg:col-span-4 rounded-3xl bg-zinc-900 p-8 shadow-sm text-white">
               <h2 className="text-xl font-bold text-white mb-6 flex items-center">
                 <span className="w-3 h-3 rounded-full bg-zinc-500 mr-3" />
@@ -395,7 +403,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           {/* Certifications and Achievements */}
           {(certifications.length > 0 || achievements.length > 0) && (
             <>
-              {certifications.length > 0 && (
+              {certifications.length > 0 && !resolved.isHidden("certifications") && (
                 <section className="col-span-full rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
                   <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
                     <span className="w-3 h-3 rounded-full bg-yellow-500 mr-3" />
@@ -425,7 +433,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                 </section>
               )}
 
-              {achievements.length > 0 && (
+              {achievements.length > 0 && !resolved.isHidden("achievements") && (
                 <section className="col-span-full rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
                   <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
                     <span className="w-3 h-3 rounded-full bg-red-500 mr-3" />
@@ -473,7 +481,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             </section>
           ))}
 
-          {hasProfiles && (
+          {hasProfiles && !resolved.isHidden("profiles") && (
             <section
               id="profiles"
               className="col-span-1 @md:col-span-3 @lg:col-span-4 scroll-mt-24 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50"

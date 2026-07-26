@@ -1,4 +1,5 @@
 import type { SectionKey } from "./section-labels";
+import type { SectionLayoutCustomization } from "./section-order";
 
 export type TemplateSectionId = "about" | "work" | "experience" | "profiles";
 
@@ -13,6 +14,8 @@ export interface PortfolioCustomization {
   sectionLabels?: Partial<Record<SectionKey, string>>;
   /** Shown by the Spotlight template as the large hero line under the headline. */
   heroTagline?: string;
+  /** User-controlled body section order and visibility. */
+  sectionLayout?: SectionLayoutCustomization;
   [key: string]: unknown;
 }
 

@@ -2,6 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PortfolioData } from "../types";
+import { getTemplateSectionLayout } from "../section-layouts";
+import {
+  renderSections,
+  resolveSectionLayout,
+  type ReorderableSectionKey,
+} from "../section-order";
 import { motion } from "motion/react";
 import { ExternalLink, Menu, X } from "lucide-react";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/icons";
@@ -131,6 +137,275 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
   ]);
 
   const headlineLines = splitHeadline(portfolio.headline);
+
+  const resolved = resolveSectionLayout(
+    getTemplateSectionLayout("spotlight"),
+    portfolio.customization,
+  );
+  const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
+    about: portfolio.summary?.trim() && (
+                <section key="about" className="container mx-auto mb-16 px-0" id="about">
+                  <SpotlightSectionHeading title={labels.about} />
+                  <div className="rounded-lg border border-gray-200 bg-white p-6 md:p-8">
+                    <DescriptionBlock
+                      text={portfolio.summary}
+                      paragraphClassName="text-base leading-relaxed text-gray-600 md:text-lg"
+                      listClassName="space-y-2 pl-5 text-base leading-relaxed text-gray-600 marker:text-[hsl(45,100%,60%)] md:text-lg"
+                    />
+                  </div>
+                </section>
+              ),
+    projects: projects.length > 0 && (
+                <section key="projects" className="container mx-auto mb-16 mt-8 px-0 scroll-mt-32">
+                  <div
+                    className="-mt-24 mb-10 flex flex-col pt-28 text-center leading-[150%] text-gray-950 lg:-mt-32 lg:pt-32 lg:text-left"
+                    id="projects"
+                  >
+                    <h2 className="text-3xl text-[38px] font-extrabold leading-[140%] lg:text-5xl lg:font-medium">
+                      Where <span className="text-[hsl(45,100%,60%)]">logic</span>{" "}
+                      <span className="m-0 block h-0 p-0 md:block lg:hidden">
+                        <br />
+                      </span>
+                      meets <span className="text-[hsl(45,100%,60%)]">pixel</span>
+                      <span>.</span>
+                    </h2>
+                  </div>
+
+                  <CollapsibleList
+                    initial={4}
+                    wrapperClassName={cn(PROJECTS_GRID_2, "mb-16 gap-8")}
+                    buttonClassName="@md:col-span-2 rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
+                  >
+                    {projects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        livePreviewProjectIds={livePreviewProjectIds}
+                      />
+                    ))}
+                  </CollapsibleList>
+                </section>
+              ),
+    experience: experiences.length > 0 && (
+                <section key="experience" className="container mx-auto mb-16 px-0" id="experience">
+                  <SpotlightSectionHeading title={labels.experience} />
+                  <CollapsibleList
+                    initial={4}
+                    wrapperClassName="space-y-6"
+                    buttonClassName="mx-auto mt-4 block rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
+                  >
+                    {experiences.map((exp) => (
+                      <article
+                        key={exp.id}
+                        className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[hsl(45,100%,60%)]"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-950">{exp.role}</h3>
+                            <p className="mt-1 text-sm font-medium text-gray-600">
+                              {exp.company}
+                              {exp.location ? ` · ${exp.location}` : ""}
+                            </p>
+                          </div>
+                          {(exp.startDate || exp.endDate) && (
+                            <span className="text-xs font-medium text-gray-500">
+                              {formatDateRange(exp.startDate, exp.endDate)}
+                            </span>
+                          )}
+                        </div>
+                        {exp.description && (
+                          <DescriptionBlock
+                            text={exp.description}
+                            paragraphClassName="mt-4 text-sm leading-relaxed text-gray-600"
+                            listClassName="mt-4 space-y-2 pl-5 text-sm leading-relaxed text-gray-600 marker:text-gray-300"
+                          />
+                        )}
+                      </article>
+                    ))}
+                  </CollapsibleList>
+                </section>
+              ),
+    education: educations.length > 0 && (
+                <section key="education" className="container mx-auto mb-16 px-0" id="education">
+                  <SpotlightSectionHeading title={labels.education} />
+                  <CollapsibleList
+                    initial={4}
+                    wrapperClassName="grid gap-6 sm:grid-cols-1 md:grid-cols-2"
+                    buttonClassName="md:col-span-2 mx-auto mt-4 block rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
+                  >
+                    {educations.map((edu) => (
+                      <article
+                        key={edu.id}
+                        className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[hsl(45,100%,60%)]"
+                      >
+                        <h3 className="text-lg font-bold text-gray-950">
+                          {edu.degree}
+                          {edu.field ? (
+                            <span className="font-medium text-gray-600"> in {edu.field}</span>
+                          ) : null}
+                        </h3>
+                        <p className="mt-2 text-sm font-medium text-gray-600">{edu.institution}</p>
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                          {(edu.startDate || edu.endDate) && (
+                            <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
+                          )}
+                          {edu.gpa ? <span>GPA {edu.gpa}</span> : null}
+                        </div>
+                      </article>
+                    ))}
+                  </CollapsibleList>
+                </section>
+              ),
+    skills: skills.length > 0 && (
+                <section key="skills" className="container mx-auto mb-16 px-0" id="skills">
+                  <SpotlightSectionHeading title={labels.skills} />
+                  <div className="space-y-8 rounded-lg border border-gray-200 bg-white p-6 md:p-8">
+                    {Object.entries(groupedSkills).map(([category, names]) => (
+                      <div key={category}>
+                        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500">
+                          {category}
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {names.map((name) => (
+                            <span
+                              key={name}
+                              className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700"
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ),
+    achievements: milestones.length > 0 && (
+                <section key="achievements" className="container mx-auto mb-16 px-0 text-gray-950" id="achievements">
+                  <SpotlightSectionHeading title={labels.achievements} />
+
+                  <div className="relative">
+                    <div className="pointer-events-none absolute bottom-16 left-4 top-0 w-0.5 bg-[hsl(45,100%,60%)] md:left-1/2 md:-translate-x-px" />
+                    <CollapsibleList
+                      initial={4}
+                      buttonClassName="relative z-10 mx-auto mt-4 block rounded-full border border-gray-200 bg-[#fbfffe] px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
+                    >
+                      {milestones.map((m, t) => (
+                        <motion.div
+                          key={m.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.5, delay: t * 0.1 }}
+                          className={cn(
+                            "relative mb-12 flex flex-col gap-8 md:flex-row",
+                            t % 2 === 0 ? "md:flex-row-reverse" : ""
+                          )}
+                        >
+                          <div className="absolute left-4 z-10 mt-1.5 h-4 w-4 -translate-x-2 rounded-full bg-[hsl(45,100%,60%)] md:left-1/2 md:-translate-x-1/2" />
+                          <div className="ml-12 p-4 md:ml-0 md:w-1/2">
+                            <div className="rounded-lg border border-[hsl(45,100%,60%)] bg-[#fbfffe] p-6 shadow-lg">
+                              <span className="font-bold text-[hsl(45,100%,60%)]">{m.year}</span>
+                              <h3 className="mt-2 text-xl font-bold text-gray-950">{m.title}</h3>
+                              {m.body ? (
+                                <p className="mt-2 text-gray-500">{m.body}</p>
+                              ) : null}
+                              <span className="mt-3 inline-block rounded-full bg-[hsl(45,100%,60%)]/20 px-3 py-1 text-sm capitalize text-gray-950">
+                                {m.kind}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </CollapsibleList>
+                  </div>
+                </section>
+              ),
+    articles: articles.length > 0 && (
+                <section key="articles" className="container mx-auto mb-16 px-0" id="writing">
+                  <SpotlightSectionHeading title={labels.articles} />
+                  <CollapsibleList
+                    initial={4}
+                    wrapperClassName="grid gap-8 sm:grid-cols-1 md:mx-auto md:grid-cols-2 lg:grid-cols-2"
+                    buttonClassName="md:col-span-2 rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
+                  >
+                    {articles.map((article) => (
+                      <a
+                        key={article.id}
+                        href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[hsl(45,100%,60%)]"
+                      >
+                        <h3 className="text-xl font-bold text-gray-950">{article.title}</h3>
+                        {article.description && (
+                          <p className="mt-2 text-sm text-gray-500">{article.description}</p>
+                        )}
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                          {article.publishedAt && (
+                            <span>
+                              {new Date(article.publishedAt).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </span>
+                          )}
+                          {article.readTime != null && <span>{article.readTime} min read</span>}
+                        </div>
+                        {article.tags.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {article.tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="rounded-full bg-[hsl(45,100%,60%)]/20 px-2.5 py-1 text-xs capitalize text-gray-950"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </a>
+                    ))}
+                  </CollapsibleList>
+                </section>
+              ),
+    profiles: hasProfiles && (
+                <section key="profiles" className="container mx-auto mb-16 px-0" id="profiles">
+                  <SpotlightSectionHeading title={labels.profiles} />
+                  <div className="rounded-lg border border-gray-200 bg-white p-6 md:p-8">
+                    <ContactChips
+                      portfolio={portfolio}
+                      chipClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[hsl(45,100%,60%)]"
+                    />
+                    <div className="mt-6">
+                      <ProfileLinksSection
+                        portfolio={portfolio}
+                        profiles={socialProfiles}
+                        chipClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[hsl(45,100%,60%)]"
+                        pillClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[hsl(45,100%,60%)]"
+                        titleClassName="font-semibold text-gray-950"
+                        textClassName="text-sm text-gray-600"
+                      />
+                    </div>
+                  </div>
+                </section>
+              ),
+    github: contributionCalendar && (
+                <section key="github" className="container mx-auto mb-16 px-0" id="activity">
+                  <SpotlightSectionHeading title={labels.github} />
+                  <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white p-6">
+                    <GitHubContributionHeatmap
+                      calendar={contributionCalendar}
+                      profileUrl={githubProfile?.url}
+                      username={githubProfile?.username}
+                      variant="minimal"
+                      label="GitHub Contributions"
+                    />
+                  </div>
+                </section>
+              ),
+  };
 
   return (
     <>
@@ -281,261 +556,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             </section>
           </div>
 
-          {portfolio.summary?.trim() && (
-            <section className="container mx-auto mb-16 px-0" id="about">
-              <SpotlightSectionHeading title={labels.about} />
-              <div className="rounded-lg border border-gray-200 bg-white p-6 md:p-8">
-                <DescriptionBlock
-                  text={portfolio.summary}
-                  paragraphClassName="text-base leading-relaxed text-gray-600 md:text-lg"
-                  listClassName="space-y-2 pl-5 text-base leading-relaxed text-gray-600 marker:text-[hsl(45,100%,60%)] md:text-lg"
-                />
-              </div>
-            </section>
-          )}
-
-          {projects.length > 0 && (
-            <section className="container mx-auto mb-16 mt-8 px-0 scroll-mt-32">
-              <div
-                className="-mt-24 mb-10 flex flex-col pt-28 text-center leading-[150%] text-gray-950 lg:-mt-32 lg:pt-32 lg:text-left"
-                id="projects"
-              >
-                <h2 className="text-3xl text-[38px] font-extrabold leading-[140%] lg:text-5xl lg:font-medium">
-                  Where <span className="text-[hsl(45,100%,60%)]">logic</span>{" "}
-                  <span className="m-0 block h-0 p-0 md:block lg:hidden">
-                    <br />
-                  </span>
-                  meets <span className="text-[hsl(45,100%,60%)]">pixel</span>
-                  <span>.</span>
-                </h2>
-              </div>
-
-              <CollapsibleList
-                initial={4}
-                wrapperClassName={cn(PROJECTS_GRID_2, "mb-16 gap-8")}
-                buttonClassName="@md:col-span-2 rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
-              >
-                {projects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    livePreviewProjectIds={livePreviewProjectIds}
-                  />
-                ))}
-              </CollapsibleList>
-            </section>
-          )}
-
-          {experiences.length > 0 && (
-            <section className="container mx-auto mb-16 px-0" id="experience">
-              <SpotlightSectionHeading title={labels.experience} />
-              <CollapsibleList
-                initial={4}
-                wrapperClassName="space-y-6"
-                buttonClassName="mx-auto mt-4 block rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
-              >
-                {experiences.map((exp) => (
-                  <article
-                    key={exp.id}
-                    className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[hsl(45,100%,60%)]"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-950">{exp.role}</h3>
-                        <p className="mt-1 text-sm font-medium text-gray-600">
-                          {exp.company}
-                          {exp.location ? ` · ${exp.location}` : ""}
-                        </p>
-                      </div>
-                      {(exp.startDate || exp.endDate) && (
-                        <span className="text-xs font-medium text-gray-500">
-                          {formatDateRange(exp.startDate, exp.endDate)}
-                        </span>
-                      )}
-                    </div>
-                    {exp.description && (
-                      <DescriptionBlock
-                        text={exp.description}
-                        paragraphClassName="mt-4 text-sm leading-relaxed text-gray-600"
-                        listClassName="mt-4 space-y-2 pl-5 text-sm leading-relaxed text-gray-600 marker:text-gray-300"
-                      />
-                    )}
-                  </article>
-                ))}
-              </CollapsibleList>
-            </section>
-          )}
-
-          {educations.length > 0 && (
-            <section className="container mx-auto mb-16 px-0" id="education">
-              <SpotlightSectionHeading title={labels.education} />
-              <CollapsibleList
-                initial={4}
-                wrapperClassName="grid gap-6 sm:grid-cols-1 md:grid-cols-2"
-                buttonClassName="md:col-span-2 mx-auto mt-4 block rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
-              >
-                {educations.map((edu) => (
-                  <article
-                    key={edu.id}
-                    className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[hsl(45,100%,60%)]"
-                  >
-                    <h3 className="text-lg font-bold text-gray-950">
-                      {edu.degree}
-                      {edu.field ? (
-                        <span className="font-medium text-gray-600"> in {edu.field}</span>
-                      ) : null}
-                    </h3>
-                    <p className="mt-2 text-sm font-medium text-gray-600">{edu.institution}</p>
-                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                      {(edu.startDate || edu.endDate) && (
-                        <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
-                      )}
-                      {edu.gpa ? <span>GPA {edu.gpa}</span> : null}
-                    </div>
-                  </article>
-                ))}
-              </CollapsibleList>
-            </section>
-          )}
-
-          {skills.length > 0 && (
-            <section className="container mx-auto mb-16 px-0" id="skills">
-              <SpotlightSectionHeading title={labels.skills} />
-              <div className="space-y-8 rounded-lg border border-gray-200 bg-white p-6 md:p-8">
-                {Object.entries(groupedSkills).map(([category, names]) => (
-                  <div key={category}>
-                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                      {category}
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {names.map((name) => (
-                        <span
-                          key={name}
-                          className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700"
-                        >
-                          {name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {articles.length > 0 && (
-            <section className="container mx-auto mb-16 px-0" id="writing">
-              <SpotlightSectionHeading title={labels.articles} />
-              <CollapsibleList
-                initial={4}
-                wrapperClassName="grid gap-8 sm:grid-cols-1 md:mx-auto md:grid-cols-2 lg:grid-cols-2"
-                buttonClassName="md:col-span-2 rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
-              >
-                {articles.map((article) => (
-                  <a
-                    key={article.id}
-                    href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[hsl(45,100%,60%)]"
-                  >
-                    <h3 className="text-xl font-bold text-gray-950">{article.title}</h3>
-                    {article.description && (
-                      <p className="mt-2 text-sm text-gray-500">{article.description}</p>
-                    )}
-                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                      {article.publishedAt && (
-                        <span>
-                          {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </span>
-                      )}
-                      {article.readTime != null && <span>{article.readTime} min read</span>}
-                    </div>
-                    {article.tags.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {article.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full bg-[hsl(45,100%,60%)]/20 px-2.5 py-1 text-xs capitalize text-gray-950"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </a>
-                ))}
-              </CollapsibleList>
-            </section>
-          )}
-
-          {milestones.length > 0 && (
-            <section className="container mx-auto mb-16 px-0 text-gray-950" id="achievements">
-              <SpotlightSectionHeading title={labels.achievements} />
-
-              <div className="relative">
-                <div className="pointer-events-none absolute bottom-16 left-4 top-0 w-0.5 bg-[hsl(45,100%,60%)] md:left-1/2 md:-translate-x-px" />
-                <CollapsibleList
-                  initial={4}
-                  buttonClassName="relative z-10 mx-auto mt-4 block rounded-full border border-gray-200 bg-[#fbfffe] px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[hsl(45,100%,60%)]"
-                >
-                  {milestones.map((m, t) => (
-                    <motion.div
-                      key={m.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: t * 0.1 }}
-                      className={cn(
-                        "relative mb-12 flex flex-col gap-8 md:flex-row",
-                        t % 2 === 0 ? "md:flex-row-reverse" : ""
-                      )}
-                    >
-                      <div className="absolute left-4 z-10 mt-1.5 h-4 w-4 -translate-x-2 rounded-full bg-[hsl(45,100%,60%)] md:left-1/2 md:-translate-x-1/2" />
-                      <div className="ml-12 p-4 md:ml-0 md:w-1/2">
-                        <div className="rounded-lg border border-[hsl(45,100%,60%)] bg-[#fbfffe] p-6 shadow-lg">
-                          <span className="font-bold text-[hsl(45,100%,60%)]">{m.year}</span>
-                          <h3 className="mt-2 text-xl font-bold text-gray-950">{m.title}</h3>
-                          {m.body ? (
-                            <p className="mt-2 text-gray-500">{m.body}</p>
-                          ) : null}
-                          <span className="mt-3 inline-block rounded-full bg-[hsl(45,100%,60%)]/20 px-3 py-1 text-sm capitalize text-gray-950">
-                            {m.kind}
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </CollapsibleList>
-              </div>
-            </section>
-          )}
-
-          {hasProfiles && (
-            <section className="container mx-auto mb-16 px-0" id="profiles">
-              <SpotlightSectionHeading title={labels.profiles} />
-              <div className="rounded-lg border border-gray-200 bg-white p-6 md:p-8">
-                <ContactChips
-                  portfolio={portfolio}
-                  chipClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[hsl(45,100%,60%)]"
-                />
-                <div className="mt-6">
-                  <ProfileLinksSection
-                    portfolio={portfolio}
-                    profiles={socialProfiles}
-                    chipClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[hsl(45,100%,60%)]"
-                    pillClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[hsl(45,100%,60%)]"
-                    titleClassName="font-semibold text-gray-950"
-                    textClassName="text-sm text-gray-600"
-                  />
-                </div>
-              </div>
-            </section>
-          )}
+          {renderSections(resolved, "full", blocks)}
 
           {customSections.map((section) => (
             <section
@@ -555,21 +576,6 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
               </div>
             </section>
           ))}
-
-          {contributionCalendar && (
-            <section className="container mx-auto mb-16 px-0" id="activity">
-              <SpotlightSectionHeading title={labels.github} />
-              <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white p-6">
-                <GitHubContributionHeatmap
-                  calendar={contributionCalendar}
-                  profileUrl={githubProfile?.url}
-                  username={githubProfile?.username}
-                  variant="minimal"
-                  label="GitHub Contributions"
-                />
-              </div>
-            </section>
-          )}
 
           {showFloatSocial && socialProfiles.length > 0 && (
             <div className="absolute right-0 top-[290px] z-20 hidden lg:block">
@@ -691,7 +697,7 @@ function ProjectCard({
         <div className="mt-auto flex items-center gap-2 pt-1">
           {project.liveUrl ? (
             <a
-              href={project.liveUrl}
+              href={project.liveUrl} data-lf-track="project_live" data-lf-label={project.title} data-lf-id={project.id}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-md bg-gray-950 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-85"
@@ -701,7 +707,7 @@ function ProjectCard({
           ) : null}
           {project.sourceUrl ? (
             <a
-              href={project.sourceUrl}
+              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={project.title} data-lf-id={project.id}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 transition-colors hover:border-gray-300"

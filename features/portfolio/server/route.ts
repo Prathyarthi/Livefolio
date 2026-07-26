@@ -15,6 +15,10 @@ import {
   sanitizeLivePreviewProjectIds,
 } from "@/lib/live-preview";
 import {
+  normalizeHidden,
+  normalizeOrder,
+} from "@/features/templates/section-order";
+import {
   ContentValidationError,
   MAX_CUSTOM_SECTION_ITEMS,
   MAX_CUSTOM_SECTIONS,
@@ -131,9 +135,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   // Get current user's portfolio
   .get("/", async (ctx) => {
     try {
-      console.log("[GET /api/portfolio] start");
       const session = await getSession(ctx.request);
-      console.log("[GET /api/portfolio] session", session ? { userId: session.userId } : null);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -143,7 +145,6 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         where: { userId: session.userId },
         include: portfolioInclude,
       });
-      console.log("[GET /api/portfolio] portfolio", existing ? { id: existing.id } : null);
 
       if (!existing) {
         ctx.set.status = 404;
@@ -284,11 +285,28 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             ) ?? "",
           };
         }
-        if (normalizedCustomization) {
-          normalizedCustomization = validateCustomSectionItems(
-            [normalizedCustomization],
-            "Portfolio customization",
-          )[0] as typeof normalizedCustomization;
+        if (customization?.sectionLayout !== undefined) {
+          const sectionLayout = customization.sectionLayout;
+          if (
+            sectionLayout === null ||
+            typeof sectionLayout !== "object" ||
+            Array.isArray(sectionLayout)
+          ) {
+            throw new ContentValidationError(
+              "Section layout must be an object",
+            );
+          }
+          normalizedCustomization = {
+            ...normalizedCustomization,
+            sectionLayout: {
+              order: normalizeOrder(
+                (sectionLayout as { order?: unknown }).order,
+              ),
+              hidden: normalizeHidden(
+                (sectionLayout as { hidden?: unknown }).hidden,
+              ),
+            },
+          };
         }
         portfolioFields = {
           ...rest,
@@ -450,6 +468,16 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             ),
             heroTagline: t.Optional(
               t.String({ maxLength: MAX_SHORT_LABEL_CHARS }),
+            ),
+            sectionLayout: t.Optional(
+              t.Object({
+                order: t.Optional(
+                  t.Array(t.String({ maxLength: 64 }), { maxItems: 32 }),
+                ),
+                hidden: t.Optional(
+                  t.Array(t.String({ maxLength: 64 }), { maxItems: 32 }),
+                ),
+              }),
             ),
           }),
         }),

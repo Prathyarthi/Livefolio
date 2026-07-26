@@ -11,6 +11,7 @@ import { FlowFooter } from "@/features/dashboard/components/flow-footer";
 import {
   usePortfolio,
   usePublishPortfolio,
+  useUpdatePortfolio,
   useUpdateTemplate,
 } from "@/features/portfolio/api/use-portfolio";
 import { CreatePortfolioPrompt, PORTFOLIO_ACTION_BUTTON_CLASS } from "@/features/portfolio/components/create-portfolio-prompt";
@@ -20,14 +21,19 @@ import {
 import { PreviewToolbar } from "@/features/portfolio/components/preview-toolbar";
 import { PublishDialog } from "@/features/portfolio/components/publish-dialog";
 import { getTemplate, templateRegistry } from "@/features/templates/registry";
+import { getStoredSectionLayout } from "@/features/templates/section-order";
+import type { SectionLayoutCustomization } from "@/features/templates/section-order";
 import { portfolioToTemplateData } from "@/features/templates/transform";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function PreviewPage() {
   const { data: portfolio, isLoading } = usePortfolio();
   const updateTemplate = useUpdateTemplate();
+  const updatePortfolio = useUpdatePortfolio();
   const publishPortfolio = usePublishPortfolio();
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
+  const [previewSectionLayout, setPreviewSectionLayout] =
+    useState<SectionLayoutCustomization | null>(null);
   const [allowedTemplateIds, setAllowedTemplateIds] = useState<string[] | null>(
     null
   );
@@ -100,6 +106,20 @@ export default function PreviewPage() {
     }
   };
 
+  const handleSectionLayoutSave = async (layout: SectionLayoutCustomization) => {
+    try {
+      await updatePortfolio.mutateAsync({
+        customization: { sectionLayout: layout },
+      });
+      setPreviewSectionLayout(null);
+      toast.success("Section layout applied");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save section layout",
+      );
+    }
+  };
+
   const handlePublishClick = async () => {
     if (!portfolio) return;
 
@@ -169,9 +189,16 @@ export default function PreviewPage() {
   const TemplateComponent = template.component;
   const liveTemplate = getTemplate(savedTemplateId);
   const data = portfolioToTemplateData(portfolio);
+  if (previewSectionLayout) {
+    data.portfolio.customization = {
+      ...data.portfolio.customization,
+      sectionLayout: previewSectionLayout,
+    };
+  }
 
   const isPublished = portfolio.isPublished ?? false;
   const slug = portfolio.slug ?? "";
+  const savedSectionLayout = getStoredSectionLayout(portfolio.customization);
 
   const panelProps = {
     templateId,
@@ -183,6 +210,12 @@ export default function PreviewPage() {
     onTemplateSave: handleTemplateSave,
     templateOptions,
     isTemplateLocked,
+    portfolioData: data,
+    savedSectionLayout,
+    draftSectionLayout: previewSectionLayout,
+    onSectionLayoutDraftChange: setPreviewSectionLayout,
+    onSectionLayoutSave: handleSectionLayoutSave,
+    isSavingSectionLayout: updatePortfolio.isPending,
   };
 
   return (

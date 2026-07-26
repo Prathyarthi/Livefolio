@@ -180,16 +180,6 @@ export function ResumeUploader({
 
       parseResume.mutate(file, {
         onSuccess: (data) => {
-          console.log("========== RESUME PARSE SUCCESS ==========");
-          console.log("Full parsed data:", JSON.stringify(data, null, 2));
-          console.log("Experiences found:", data.experiences.length);
-          console.log("Education found:", data.education.length);
-          console.log("Skills found:", data.skills.length);
-          console.log("Projects found:", data.projects.length);
-          console.log("Achievements found:", data.achievements.length);
-          console.log("Certifications found:", data.certifications.length);
-          console.log("Custom sections found:", data.customSections?.length ?? 0);
-          console.log("==========================================");
           setParsedData(data);
           toast.success("Resume parsed successfully");
         },

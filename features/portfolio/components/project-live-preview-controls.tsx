@@ -50,8 +50,7 @@ export function ProjectLivePreviewControls({
   if (!hasLiveUrl) {
     return (
       <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-        Add a live URL above to configure Microlink live preview for this
-        project.
+        Add a live URL above to enable a screenshot preview for this project.
       </div>
     );
   }
@@ -122,8 +121,8 @@ export function ProjectLivePreviewControls({
           </div>
           <p className="text-sm text-muted-foreground">
             {editEnabled
-              ? "This project’s live URL will be sent to Microlink on your public templates."
-              : "Turn on to show a Microlink screenshot for this project."}{" "}
+              ? "A live screenshot of this project will appear on your portfolio."
+              : "Turn on to show a live screenshot of this project on your portfolio."}{" "}
             ({enabledCount}/{maxAllowed} used)
           </p>
         </div>

@@ -12,6 +12,7 @@ import {
   getSectionLabel,
   NAVBAR_SECTION_TO_KEY,
 } from "./section-labels";
+import { getStoredSectionLayout, normalizeHidden, type ReorderableSectionKey } from "./section-order";
 import { getPlatformIcon } from "./utils";
 import { CollapsibleList } from "./collapsible-list";
 
@@ -115,8 +116,15 @@ export function buildTemplateSections(data: PortfolioData) {
   ].filter((section): section is TemplateSectionId => Boolean(section));
 
   const customization = data.portfolio.customization;
+  const hiddenSections = new Set<ReorderableSectionKey>(
+    normalizeHidden(getStoredSectionLayout(customization).hidden),
+  );
   const sections = availableSections
     .filter((section) => navbar.sections?.[section] !== false)
+    .filter((section) => {
+      const key = NAVBAR_SECTION_TO_KEY[section];
+      return !hiddenSections.has(key as ReorderableSectionKey);
+    })
     .slice(0, 4)
     .map((section) => ({
       id: section,
@@ -267,6 +275,8 @@ export function SocialPills({
           target="_blank"
           rel="noopener noreferrer"
           className={className}
+          data-lf-track="social"
+          data-lf-label={profile.platform}
         >
           {getPlatformIcon(profile.platform)}
           {showUsername && username ? ` · @${username}` : ""}
@@ -302,6 +312,8 @@ export function HeroProfileButtons({
           target="_blank"
           rel="noopener noreferrer"
           className={className}
+          data-lf-track="social"
+          data-lf-label={profile.platform}
         >
           {getPlatformIcon(profile.platform)}
         </a>
@@ -315,11 +327,16 @@ export function ProjectActions({
   sourceUrl,
   liveClassName,
   sourceClassName,
+  label,
+  projectId,
 }: {
   liveUrl: string | null;
   sourceUrl: string | null;
   liveClassName?: string;
   sourceClassName?: string;
+  /** Project title used for analytics labels. */
+  label?: string;
+  projectId?: string;
 }) {
   if (!liveUrl && !sourceUrl) return null;
 
@@ -331,6 +348,9 @@ export function ProjectActions({
           target="_blank"
           rel="noopener noreferrer"
           className={liveClassName}
+          data-lf-track="project_live"
+          data-lf-label={label || undefined}
+          data-lf-id={projectId || undefined}
         >
           Live Demo
         </a>
@@ -341,6 +361,9 @@ export function ProjectActions({
           target="_blank"
           rel="noopener noreferrer"
           className={sourceClassName}
+          data-lf-track="project_source"
+          data-lf-label={label || undefined}
+          data-lf-id={projectId || undefined}
         >
           Source
         </a>
@@ -403,7 +426,14 @@ export function CustomSectionItems({
             {title != null && (
               <p className={titleClassName}>
                 {url ? (
-                  <a href={String(url)} target="_blank" rel="noopener noreferrer" className="underline decoration-dotted hover:decoration-solid">
+                  <a
+                    href={String(url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-dotted hover:decoration-solid"
+                    data-lf-track="custom"
+                    data-lf-label={title != null ? String(title) : undefined}
+                  >
                     <CustomSectionItemValue value={title} />
                   </a>
                 ) : (

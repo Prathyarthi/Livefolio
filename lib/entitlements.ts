@@ -69,6 +69,8 @@ export function resolveAccessForUser(
     paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
   const canUseImports =
     paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
+  const canUseAnalytics =
+    paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
   const allowedTemplateIds = canUsePremiumTemplates
     ? [...FREE_TEMPLATE_IDS, ...PREMIUM_TEMPLATE_IDS]
     : [...FREE_TEMPLATE_IDS];
@@ -79,7 +81,7 @@ export function resolveAccessForUser(
     trialDaysRemaining,
     canUsePremiumTemplates,
     canUseImports,
-    canUseAnalytics: paidPro,
+    canUseAnalytics,
     allowedTemplateIds,
   };
 }

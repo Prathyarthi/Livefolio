@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { enforceAnalyticsViewRateLimit } from "@/lib/analytics-rate-limit";
 
 export async function POST(request: Request) {
+  const rateLimitResponse = await enforceAnalyticsViewRateLimit(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   let slug: string | undefined;
 
   try {

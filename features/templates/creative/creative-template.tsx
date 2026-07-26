@@ -32,6 +32,12 @@ import { formatDate, formatDateRange, groupSkillsByCategory } from "@/features/t
 import { Trophy } from "lucide-react";
 // import { getPreviewImage } from "@/lib/link-preview-code";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { getTemplateSectionLayout } from "../section-layouts";
+import {
+  renderSections,
+  resolveSectionLayout,
+  type ReorderableSectionKey,
+} from "../section-order";
 
 
 export default function CreativeTemplate({ data }: { data: PortfolioData }) {
@@ -52,6 +58,400 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
       ? [...featuredProjects, ...projects.filter((p) => !p.featured)]
       : projects;
   const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const resolved = resolveSectionLayout(
+    getTemplateSectionLayout("creative"),
+    portfolio.customization,
+  );
+
+  const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
+    about: portfolio.summary ? (
+      <section
+        key="about"
+        id="about"
+        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="rose">{labels.about}</SectionHeading>
+        <DescriptionBlock
+          text={portfolio.summary}
+          paragraphClassName="whitespace-pre-line text-base leading-8 text-stone-600"
+          listClassName="space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-rose-300"
+        />
+      </section>
+    ) : null,
+
+    projects: visibleProjects.length > 0 ? (
+      <section
+        key="projects"
+        id="work"
+        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="orange">{labels.projects}</SectionHeading>
+        <CollapsibleList
+          initial={4}
+          wrapperClassName={PROJECTS_GRID_2}
+          buttonClassName="col-span-full mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
+        >
+          {visibleProjects.map((project, index) => (
+            <article
+              key={project.id}
+              className={cn(
+                PROJECT_CARD,
+                "rounded-[1.6rem] border border-rose-100/80 bg-[#fffaf7] shadow-[0_14px_40px_rgba(190,24,93,0.05)]"
+              )}
+            >
+              <TemplateProjectPreview templateId="creative"
+                liveUrl={project.liveUrl ?? null}
+                projectId={project.id}
+                livePreviewProjectIds={livePreviewProjectIds}
+                alt={project.title}
+                loading="lazy"
+              />
+              <div className={PROJECT_CARD_BODY}>
+                <div className={PROJECT_CARD_HEADER}>
+                  <div className="min-w-0 flex-1">
+                    <div className={PROJECT_CARD_META}>
+                      <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-semibold tracking-tight text-stone-950")}>
+                        {project.title}
+                      </h3>
+                      {project.featured && (
+                        <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-rose-500">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                    {project.language && (
+                      <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
+                        {project.language}
+                      </p>
+                    )}
+                  </div>
+
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={project.title}
+                    projectId={project.id}
+                    liveClassName="rounded-full bg-stone-950 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-stone-800"
+                    sourceClassName="rounded-full border border-rose-200 bg-white px-4 py-2 text-xs font-medium text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
+                  />
+                </div>
+
+                {project.description && (
+                  <DescriptionBlock
+                    text={project.description}
+                    paragraphClassName="mt-4 text-sm leading-7 text-stone-600"
+                    listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-rose-300"
+                  />
+                )}
+
+                {(project.techStack.length > 0 ||
+                  project.githubStars !== null ||
+                  project.githubForks !== null) && (
+                    <div className="mt-5 flex flex-wrap items-center gap-2">
+                      {project.techStack.map((tech) => (
+                        <span
+                          key={tech}
+                          className="rounded-full border border-rose-100 bg-white px-3 py-1 text-xs text-stone-500"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                      {project.githubStars !== null && (
+                        <span className="rounded-full bg-rose-50 px-3 py-1 text-xs text-stone-500">
+                          {project.githubStars} stars
+                        </span>
+                      )}
+                      {project.githubForks !== null && (
+                        <span className="rounded-full bg-orange-50 px-3 py-1 text-xs text-stone-500">
+                          {project.githubForks} forks
+                        </span>
+                      )}
+                    </div>
+                  )}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    experience: experiences.length > 0 ? (
+      <section
+        key="experience"
+        id="experience"
+        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="amber">{labels.experience}</SectionHeading>
+        <CollapsibleList
+          initial={4}
+          wrapperClassName="space-y-5"
+          buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
+        >
+          {experiences.map((exp) => (
+            <article
+              key={exp.id}
+              className="rounded-[1.55rem] border border-orange-100/80 bg-[#fffaf7] p-5"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-semibold text-stone-950">{exp.role}</h3>
+                  <p className="mt-1 text-sm font-medium text-rose-500">
+                    {exp.company}
+                    {exp.location ? ` · ${exp.location}` : ""}
+                  </p>
+                </div>
+                {(exp.startDate || exp.endDate) && (
+                  <p className="text-xs uppercase tracking-[0.22em] text-stone-400">
+                    {formatDateRange(exp.startDate, exp.endDate)}
+                  </p>
+                )}
+              </div>
+              {exp.description && (
+                <DescriptionBlock
+                  text={exp.description}
+                  paragraphClassName="mt-4 text-sm leading-7 text-stone-600"
+                  listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-rose-300"
+                />
+              )}
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    articles: articles.length > 0 ? (
+      <section
+        key="articles"
+        id="writing"
+        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="fuchsia">{labels.articles}</SectionHeading>
+        <CollapsibleList
+          initial={4}
+          wrapperClassName="space-y-4"
+          buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
+        >
+          {articles.map((article) => (
+            <article
+              key={article.id}
+              className="rounded-[1.55rem] border border-rose-100/80 bg-[#fffaf7] p-5"
+            >
+              <h3 className="text-lg font-semibold text-stone-950">
+                <a
+                  href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-rose-500"
+                >
+                  {article.title}
+                </a>
+              </h3>
+              {article.description && (
+                <p className="mt-2 text-sm leading-7 text-stone-600">{article.description}</p>
+              )}
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-stone-500">
+                {article.publishedAt && (
+                  <span>
+                    {new Date(article.publishedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                )}
+                {article.readTime != null && <span>{article.readTime} min read</span>}
+              </div>
+              {article.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {article.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-rose-100 bg-white px-3 py-1 text-xs text-stone-500"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    skills: skills.length > 0 ? (
+      <section
+        key="skills"
+        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="fuchsia">{labels.skills}</SectionHeading>
+        <div className="space-y-6">
+          {Object.entries(skillsByCategory).map(([category, names]) => (
+            <div key={category}>
+              <h3 className="mb-3 text-xs uppercase tracking-[0.22em] text-stone-400">
+                {category}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {names.map((name) => (
+                  <span
+                    key={name}
+                    className="rounded-full border border-rose-100 bg-rose-50/80 px-3 py-1.5 text-sm text-stone-700"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    ) : null,
+
+    education: educations.length > 0 ? (
+      <section
+        key="education"
+        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="rose">{labels.education}</SectionHeading>
+        <CollapsibleList
+          initial={4}
+          wrapperClassName="space-y-4"
+          buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
+        >
+          {educations.map((edu) => (
+            <article
+              key={edu.id}
+              className="rounded-[1.55rem] border border-rose-100/80 bg-[#fffaf7] p-5"
+            >
+              <h3 className="text-lg font-semibold text-stone-950">
+                {edu.degree}
+                {edu.field && <span className="text-stone-500"> in {edu.field}</span>}
+              </h3>
+              <p className="mt-2 text-sm text-stone-600">{edu.institution}</p>
+              {(edu.startDate || edu.endDate) && (
+                <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
+                  {formatDateRange(edu.startDate, edu.endDate)}
+                </p>
+              )}
+              {edu.gpa && <p className="mt-3 text-xs text-stone-500">GPA: {edu.gpa}</p>}
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    certifications: certifications.length > 0 ? (
+      <section
+        key="certifications"
+        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="orange">{labels.certifications}</SectionHeading>
+        <CollapsibleList
+          initial={4}
+          wrapperClassName="space-y-4"
+          buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
+        >
+          {certifications.map((cert) => (
+            <article
+              key={cert.id}
+              className="rounded-[1.55rem] border border-orange-100/80 bg-[#fffaf7] p-5"
+            >
+              <h3 className="text-base font-semibold text-stone-950">
+                {cert.url ? (
+                  <a
+                    href={cert.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-rose-500"
+                  >
+                    {cert.name}
+                  </a>
+                ) : (
+                  cert.name
+                )}
+              </h3>
+              <p className="mt-1 text-sm text-stone-500">{cert.issuer}</p>
+              {cert.issueDate && (
+                <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
+                  {formatDate(cert.issueDate)}
+                </p>
+              )}
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    achievements: achievements.length > 0 ? (
+      <section
+        key="achievements"
+        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="amber">{labels.achievements}</SectionHeading>
+        <CollapsibleList
+          initial={4}
+          wrapperClassName="space-y-3"
+          buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
+        >
+          {achievements.map((ach) => (
+            <article
+              key={ach.id}
+              className="flex items-start gap-3 rounded-[1.55rem] border border-orange-100/80 bg-[#fffaf7] p-5"
+            >
+              <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm leading-relaxed text-stone-900">{ach.title}</p>
+                {ach.date && (
+                  <p className="mt-1 text-xs text-stone-500">
+                    {new Date(ach.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </p>
+                )}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    profiles: hasProfiles ? (
+      <section
+        key="profiles"
+        id="profiles"
+        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="fuchsia">{labels.profiles}</SectionHeading>
+        <ProfileLinksSection
+          portfolio={portfolio}
+          profiles={socialProfiles}
+          chipClassName="rounded-full border border-rose-100 bg-rose-50/80 px-3 py-1.5 text-sm text-stone-500"
+          pillClassName="rounded-full border border-rose-100 bg-white px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-rose-200 hover:text-stone-900"
+          titleClassName="text-stone-950"
+          textClassName="text-stone-500"
+        />
+      </section>
+    ) : null,
+
+    github: contributionCalendar ? (
+      <section
+        key="github"
+        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+      >
+        <SectionHeading accent="rose">{labels.github}</SectionHeading>
+        <div className="rounded-[1.5rem] border border-rose-100/80 bg-[#fffaf7] p-4 md:p-6">
+          <GitHubContributionHeatmap
+            calendar={contributionCalendar}
+            profileUrl={githubProfile?.url}
+            username={githubProfile?.username}
+            variant="creative"
+            label={labels.github}
+          />
+        </div>
+      </section>
+    ) : null,
+  };
 
   return (
     <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[linear-gradient(180deg,#fffaf7_0%,#fff7fb_45%,#ffffff_100%)] text-stone-900 selection:bg-rose-200/50")}>
@@ -116,362 +516,8 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
             </div>
           )}
 
-          <div className="mt-8 grid gap-8">
-            <main className="space-y-8">
-              {portfolio.summary && (
-                <section
-                  id="about"
-                  className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-                >
-                  <SectionHeading accent="rose">{labels.about}</SectionHeading>
-                  <DescriptionBlock
-                    text={portfolio.summary}
-                    paragraphClassName="whitespace-pre-line text-base leading-8 text-stone-600"
-                    listClassName="space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-rose-300"
-                  />
-                </section>
-              )}
-
-              {visibleProjects.length > 0 && (
-                <section
-                  id="work"
-                  className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-                >
-                  <SectionHeading accent="orange">{labels.projects}</SectionHeading>
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName={PROJECTS_GRID_2}
-                    buttonClassName="col-span-full mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
-                  >
-                    {visibleProjects.map((project, index) => (
-                      <article
-                        key={project.id}
-                        className={cn(
-                          PROJECT_CARD,
-                          "rounded-[1.6rem] border border-rose-100/80 bg-[#fffaf7] shadow-[0_14px_40px_rgba(190,24,93,0.05)]"
-                        )}
-                      >
-                        <TemplateProjectPreview templateId="creative"
-                          liveUrl={project.liveUrl ?? null}
-                          projectId={project.id}
-                          livePreviewProjectIds={livePreviewProjectIds}
-                          alt={project.title}
-                          loading="lazy"
-                        />
-                        <div className={PROJECT_CARD_BODY}>
-                          <div className={PROJECT_CARD_HEADER}>
-                            <div className="min-w-0 flex-1">
-                              <div className={PROJECT_CARD_META}>
-                                <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-semibold tracking-tight text-stone-950")}>
-                                  {project.title}
-                                </h3>
-                                {project.featured && (
-                                  <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-rose-500">
-                                    Featured
-                                  </span>
-                                )}
-                              </div>
-                              {project.language && (
-                                <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
-                                  {project.language}
-                                </p>
-                              )}
-                            </div>
-
-                            <ProjectActions
-                              liveUrl={project.liveUrl}
-                              sourceUrl={project.sourceUrl}
-                              liveClassName="rounded-full bg-stone-950 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-stone-800"
-                              sourceClassName="rounded-full border border-rose-200 bg-white px-4 py-2 text-xs font-medium text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
-                            />
-                          </div>
-
-                          {project.description && (
-                            <DescriptionBlock
-                              text={project.description}
-                              paragraphClassName="mt-4 text-sm leading-7 text-stone-600"
-                              listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-rose-300"
-                            />
-                          )}
-
-                          {(project.techStack.length > 0 ||
-                            project.githubStars !== null ||
-                            project.githubForks !== null) && (
-                              <div className="mt-5 flex flex-wrap items-center gap-2">
-                                {project.techStack.map((tech) => (
-                                  <span
-                                    key={tech}
-                                    className="rounded-full border border-rose-100 bg-white px-3 py-1 text-xs text-stone-500"
-                                  >
-                                    {tech}
-                                  </span>
-                                ))}
-                                {project.githubStars !== null && (
-                                  <span className="rounded-full bg-rose-50 px-3 py-1 text-xs text-stone-500">
-                                    {project.githubStars} stars
-                                  </span>
-                                )}
-                                {project.githubForks !== null && (
-                                  <span className="rounded-full bg-orange-50 px-3 py-1 text-xs text-stone-500">
-                                    {project.githubForks} forks
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                        </div>
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              )}
-
-              {experiences.length > 0 && (
-                <section
-                  id="experience"
-                  className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-                >
-                  <SectionHeading accent="amber">{labels.experience}</SectionHeading>
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="space-y-5"
-                    buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
-                  >
-                    {experiences.map((exp) => (
-                      <article
-                        key={exp.id}
-                        className="rounded-[1.55rem] border border-orange-100/80 bg-[#fffaf7] p-5"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <h3 className="text-xl font-semibold text-stone-950">{exp.role}</h3>
-                            <p className="mt-1 text-sm font-medium text-rose-500">
-                              {exp.company}
-                              {exp.location ? ` · ${exp.location}` : ""}
-                            </p>
-                          </div>
-                          {(exp.startDate || exp.endDate) && (
-                            <p className="text-xs uppercase tracking-[0.22em] text-stone-400">
-                              {formatDateRange(exp.startDate, exp.endDate)}
-                            </p>
-                          )}
-                        </div>
-                        {exp.description && (
-                          <DescriptionBlock
-                            text={exp.description}
-                            paragraphClassName="mt-4 text-sm leading-7 text-stone-600"
-                            listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-rose-300"
-                          />
-                        )}
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              )}
-
-              {articles.length > 0 && (
-                <section
-                  id="writing"
-                  className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-                >
-                  <SectionHeading accent="fuchsia">{labels.articles}</SectionHeading>
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="space-y-4"
-                    buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
-                  >
-                    {articles.map((article) => (
-                      <article
-                        key={article.id}
-                        className="rounded-[1.55rem] border border-rose-100/80 bg-[#fffaf7] p-5"
-                      >
-                        <h3 className="text-lg font-semibold text-stone-950">
-                          <a
-                            href={article.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="transition-colors hover:text-rose-500"
-                          >
-                            {article.title}
-                          </a>
-                        </h3>
-                        {article.description && (
-                          <p className="mt-2 text-sm leading-7 text-stone-600">{article.description}</p>
-                        )}
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-stone-500">
-                          {article.publishedAt && (
-                            <span>
-                              {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })}
-                            </span>
-                          )}
-                          {article.readTime != null && <span>{article.readTime} min read</span>}
-                        </div>
-                        {article.tags.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {article.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full border border-rose-100 bg-white px-3 py-1 text-xs text-stone-500"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              )}
-
-            </main>
-
-            <aside className="space-y-8">
-              {skills.length > 0 && (
-                <section className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8">
-                  <SectionHeading accent="fuchsia">{labels.skills}</SectionHeading>
-                  <div className="space-y-6">
-                    {Object.entries(skillsByCategory).map(([category, names]) => (
-                      <div key={category}>
-                        <h3 className="mb-3 text-xs uppercase tracking-[0.22em] text-stone-400">
-                          {category}
-                        </h3>
-                        <div className="flex flex-wrap gap-2">
-                          {names.map((name) => (
-                            <span
-                              key={name}
-                              className="rounded-full border border-rose-100 bg-rose-50/80 px-3 py-1.5 text-sm text-stone-700"
-                            >
-                              {name}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {educations.length > 0 && (
-                <section className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8">
-                  <SectionHeading accent="rose">{labels.education}</SectionHeading>
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="space-y-4"
-                    buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
-                  >
-                    {educations.map((edu) => (
-                      <article
-                        key={edu.id}
-                        className="rounded-[1.55rem] border border-rose-100/80 bg-[#fffaf7] p-5"
-                      >
-                        <h3 className="text-lg font-semibold text-stone-950">
-                          {edu.degree}
-                          {edu.field && <span className="text-stone-500"> in {edu.field}</span>}
-                        </h3>
-                        <p className="mt-2 text-sm text-stone-600">{edu.institution}</p>
-                        {(edu.startDate || edu.endDate) && (
-                          <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
-                            {formatDateRange(edu.startDate, edu.endDate)}
-                          </p>
-                        )}
-                        {edu.gpa && <p className="mt-3 text-xs text-stone-500">GPA: {edu.gpa}</p>}
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              )}
-
-              {certifications.length > 0 && (
-                <section className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8">
-                  <SectionHeading accent="orange">{labels.certifications}</SectionHeading>
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="space-y-4"
-                    buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
-                  >
-                    {certifications.map((cert) => (
-                      <article
-                        key={cert.id}
-                        className="rounded-[1.55rem] border border-orange-100/80 bg-[#fffaf7] p-5"
-                      >
-                        <h3 className="text-base font-semibold text-stone-950">
-                          {cert.url ? (
-                            <a
-                              href={cert.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="transition-colors hover:text-rose-500"
-                            >
-                              {cert.name}
-                            </a>
-                          ) : (
-                            cert.name
-                          )}
-                        </h3>
-                        <p className="mt-1 text-sm text-stone-500">{cert.issuer}</p>
-                        {cert.issueDate && (
-                          <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
-                            {formatDate(cert.issueDate)}
-                          </p>
-                        )}
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              )}
-
-              {achievements.length > 0 && (
-                <section className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8">
-                  <SectionHeading accent="amber">{labels.achievements}</SectionHeading>
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="space-y-3"
-                    buttonClassName="mt-2 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-rose-300 hover:text-stone-900"
-                  >
-                    {achievements.map((ach) => (
-                      <article
-                        key={ach.id}
-                        className="flex items-start gap-3 rounded-[1.55rem] border border-orange-100/80 bg-[#fffaf7] p-5"
-                      >
-                        <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm leading-relaxed text-stone-900">{ach.title}</p>
-                          {ach.date && (
-                            <p className="mt-1 text-xs text-stone-500">
-                              {new Date(ach.date).toLocaleDateString("en-US", {
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </p>
-                          )}
-                        </div>
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              )}
-
-              {hasProfiles && (
-                <section
-                  id="profiles"
-                  className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-                >
-                  <SectionHeading accent="fuchsia">{labels.profiles}</SectionHeading>
-                  <ProfileLinksSection
-                    portfolio={portfolio}
-                    profiles={socialProfiles}
-                    chipClassName="rounded-full border border-rose-100 bg-rose-50/80 px-3 py-1.5 text-sm text-stone-500"
-                    pillClassName="rounded-full border border-rose-100 bg-white px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-rose-200 hover:text-stone-900"
-                    titleClassName="text-stone-950"
-                    textClassName="text-stone-500"
-                  />
-                </section>
-              )}
-            </aside>
+          <div className="mt-8 space-y-8">
+            {renderSections(resolved, "full", blocks)}
           </div>
 
           {customSections.length > 0 && (
@@ -488,21 +534,6 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                 </section>
               ))}
             </div>
-          )}
-
-          {contributionCalendar && (
-            <section className="mt-8 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8">
-              <SectionHeading accent="rose">{labels.github}</SectionHeading>
-              <div className="rounded-[1.5rem] border border-rose-100/80 bg-[#fffaf7] p-4 md:p-6">
-                <GitHubContributionHeatmap
-                  calendar={contributionCalendar}
-                  profileUrl={githubProfile?.url}
-                  username={githubProfile?.username}
-                  variant="creative"
-                  label={labels.github}
-                />
-              </div>
-            </section>
           )}
         </div>
       </div>

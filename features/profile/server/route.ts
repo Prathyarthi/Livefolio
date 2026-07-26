@@ -1,4 +1,5 @@
 import Elysia, { t } from "elysia";
+import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import {
@@ -19,6 +20,14 @@ import {
   sanitizeImportedStringList,
   sanitizeImportedStoredUrl,
 } from "@/lib/content-policy";
+import {
+  getStoredSectionLayout,
+  normalizeHidden,
+  normalizeOrder,
+  toSectionLayoutPayload,
+  type ReorderableSectionKey,
+} from "@/features/templates/section-order";
+import type { PortfolioCustomization } from "@/features/templates/types";
 
 async function requireImportEntitlement(request: Request) {
   const session = await getSession(request);
@@ -104,6 +113,7 @@ export const profile = new Elysia({ prefix: "/profile" })
 
       const portfolio = await ensureUserPortfolio(gate.session.userId);
       const username = sanitizeImportedLabel(ctx.body.username);
+      const showHeatmap = ctx.body.showHeatmap !== false;
 
       const projects = ctx.body.repos
         .map((repo, index) => ({
@@ -189,6 +199,32 @@ export const profile = new Elysia({ prefix: "/profile" })
               : {}),
           },
         });
+
+        // Sync heatmap visibility with the import preference.
+        const existing =
+          portfolio.customization &&
+          typeof portfolio.customization === "object" &&
+          !Array.isArray(portfolio.customization)
+            ? (portfolio.customization as PortfolioCustomization)
+            : {};
+        const layout = getStoredSectionLayout(existing);
+        const hidden: ReorderableSectionKey[] = normalizeHidden(
+          layout.hidden,
+        ).filter((key) => key !== "github");
+        if (!showHeatmap) hidden.push("github");
+
+        await prisma.portfolio.update({
+          where: { id: portfolio.id },
+          data: {
+            customization: {
+              ...existing,
+              sectionLayout: toSectionLayoutPayload(
+                normalizeOrder(layout.order),
+                hidden,
+              ),
+            } as unknown as Prisma.InputJsonValue,
+          },
+        });
       }
 
       return { success: true, imported: result.count };
@@ -196,6 +232,7 @@ export const profile = new Elysia({ prefix: "/profile" })
     {
       body: t.Object({
         username: t.String(),
+        showHeatmap: t.Optional(t.Boolean()),
         repos: t.Array(
           t.Object({
             name: t.String(),

@@ -146,6 +146,7 @@ model Portfolio {
   achievements   Achievement[]
   customSections CustomSection[]
   views          PortfolioView[]
+  clicks         PortfolioClick[]
 
   @@index([slug])
   @@map("portfolios")
@@ -160,6 +161,24 @@ model PortfolioView {
 
   @@index([portfolioId, viewedAt])
   @@map("portfolio_views")
+}
+
+model PortfolioClick {
+  id          String   @id @default(uuid())
+  portfolioId String
+  /// project_live | project_source | article | social | custom | outbound
+  type        String
+  /// Human-readable label (project title, platform, article title, etc.)
+  label       String   @default("")
+  url         String
+  targetId    String?
+  clickedAt   DateTime @default(now())
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId, clickedAt])
+  @@index([portfolioId, type, clickedAt])
+  @@map("portfolio_clicks")
 }
 
 model RateLimitBucket {

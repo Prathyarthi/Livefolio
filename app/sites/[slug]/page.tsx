@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { canUseTemplate, resolveAccessForUser } from "@/lib/entitlements";
 import { PortfolioViewTracker } from "@/features/analytics/components/portfolio-view-tracker";
+import { PortfolioClickTracker } from "@/features/analytics/components/portfolio-click-tracker";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 import { siteConfig } from "@/lib/site";
 
@@ -86,6 +87,7 @@ export default async function PortfolioPage({ params }: Props) {
   return (
     <>
       <PortfolioViewTracker slug={slug} />
+      <PortfolioClickTracker slug={slug} />
       <TemplateComponent data={data} />
     </>
   );

@@ -15,7 +15,10 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { EDIT_STEPS, type EditStepValue } from "@/features/portfolio/constants/edit-steps";
 import { EditStepContent } from "@/features/portfolio/components/edit-step-content";
+import { SectionsTabContent } from "@/features/portfolio/components/sections-tab-content";
 import { TemplatePreviewThumbnail } from "@/features/templates/template-preview-thumbnail";
+import type { SectionLayoutCustomization } from "@/features/templates/section-order";
+import type { PortfolioData } from "@/features/templates/types";
 import {
   DASHBOARD_FORM_COMPACT_CLASS,
   PREVIEW_EDIT_SIDEBAR_CLASS,
@@ -33,6 +36,12 @@ type PreviewPanelProps = {
   onTemplateSave?: () => void;
   templateOptions?: any[];
   isTemplateLocked?: (templateId: string) => boolean;
+  portfolioData?: PortfolioData | null;
+  savedSectionLayout?: SectionLayoutCustomization | null;
+  draftSectionLayout?: SectionLayoutCustomization | null;
+  onSectionLayoutDraftChange?: (layout: SectionLayoutCustomization | null) => void;
+  onSectionLayoutSave?: (layout: SectionLayoutCustomization) => Promise<void>;
+  isSavingSectionLayout?: boolean;
 };
 
 function DesignTabContent({
@@ -245,9 +254,10 @@ function EditorBody({
       </div>
 
       <div className="shrink-0 border-b border-border-default px-3 py-2">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="design" className="text-sm">Design</TabsTrigger>
           <TabsTrigger value="content" className="text-sm">Edit</TabsTrigger>
+          <TabsTrigger value="sections" className="text-sm">Sections</TabsTrigger>
         </TabsList>
       </div>
 
@@ -260,6 +270,27 @@ function EditorBody({
 
       <TabsContent value="content" className="flex min-h-0 flex-1 flex-col m-0 data-[state=inactive]:hidden">
         <EditTabContent activeStep={activeStep} onStepChange={onStepChange} />
+      </TabsContent>
+
+      <TabsContent value="sections" className="flex min-h-0 flex-1 flex-col m-0 data-[state=inactive]:hidden">
+        {panelProps.portfolioData &&
+        panelProps.templateId &&
+        panelProps.onSectionLayoutDraftChange &&
+        panelProps.onSectionLayoutSave ? (
+          <SectionsTabContent
+            templateId={panelProps.templateId}
+            data={panelProps.portfolioData}
+            savedLayout={panelProps.savedSectionLayout}
+            draftLayout={panelProps.draftSectionLayout}
+            onDraftChange={panelProps.onSectionLayoutDraftChange}
+            onSave={panelProps.onSectionLayoutSave}
+            isSaving={panelProps.isSavingSectionLayout}
+          />
+        ) : (
+          <p className="px-3 py-8 text-center text-sm text-text-muted">
+            Sections not available
+          </p>
+        )}
       </TabsContent>
     </Tabs>
   );

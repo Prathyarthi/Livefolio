@@ -43,7 +43,7 @@ export function CancelSubscriptionDialog({
         <div className="space-y-3 py-4">
           <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
             <p className="text-sm font-medium text-amber-200">
-              Your subscription will not renew.
+              Your subscription and AutoPay will be cancelled immediately.
             </p>
             <p className="mt-2 text-xs text-amber-300/80">
               You will keep all Pro features until the end of your current paid
@@ -66,7 +66,7 @@ export function CancelSubscriptionDialog({
             onClick={onConfirm}
             disabled={cancelling}
           >
-            {cancelling ? "Scheduling..." : "Cancel at Period End"}
+            {cancelling ? "Cancelling..." : "Cancel Subscription"}
           </Button>
         </DialogFooter>
       </DialogContent>
