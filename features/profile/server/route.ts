@@ -7,6 +7,7 @@ import {
   fetchGitHubContributionsFromProfilePage,
   fetchGitHubProfile,
 } from "@/lib/github";
+import { resolveGitHubProjectDescriptions } from "@/lib/github-project-description";
 import { fetchLeetCodeStats } from "@/lib/leetcode";
 import { fetchMediumArticles } from "@/lib/medium";
 import { getPlanLimitMessage, resolveAccessForUser } from "@/lib/entitlements";
@@ -114,11 +115,15 @@ export const profile = new Elysia({ prefix: "/profile" })
       const portfolio = await ensureUserPortfolio(gate.session.userId);
       const username = sanitizeImportedLabel(ctx.body.username);
       const showHeatmap = ctx.body.showHeatmap !== false;
+      const resolvedDescriptions = await resolveGitHubProjectDescriptions(
+        username,
+        ctx.body.repos,
+      );
 
       const projects = ctx.body.repos
         .map((repo, index) => ({
           title: sanitizeImportedLabel(repo.name),
-          description: sanitizeImportedLongText(repo.description),
+          description: sanitizeImportedLongText(resolvedDescriptions[index]),
           sourceUrl: sanitizeImportedStoredUrl(
             repo.url,
             `Repositories[${index}].url`,
@@ -155,11 +160,13 @@ export const profile = new Elysia({ prefix: "/profile" })
       });
 
       if (username) {
-        const token = process.env.GITHUB_TOKEN;
         let cachedStats: Record<string, unknown> | undefined;
         let lastFetched: Date | undefined;
         try {
-          const ghData = await fetchGitHubProfile(username, token);
+          const ghData = await fetchGitHubProfile(
+            username,
+            process.env.GITHUB_TOKEN,
+          );
           const calendar = await fetchGitHubContributionsFromProfilePage(
             username
           );
