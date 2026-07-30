@@ -12,6 +12,19 @@ function humanizeRepoName(name: string): string {
   return spaced.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function descriptionFromTitle(
+  title: string,
+  language?: string | null,
+  topics?: string[],
+): string {
+  const name = humanizeRepoName(title);
+  const details = [language, topics?.slice(0, 2).join(" & ")].filter(Boolean);
+  if (details.length) {
+    return `${name}\nBuilt with ${details.join(" · ")}.`;
+  }
+  return `${name}\nExplore the repository for features and implementation details.`;
+}
+
 function readmeParagraphs(markdown: string): string[] {
   const plain = markdown
     .replace(/<!--[\s\S]*?-->/g, "")
@@ -45,20 +58,6 @@ function toTwoLines(text: string): string {
 function descriptionFromReadme(readme: string): string | null {
   const paragraph = readmeParagraphs(readme)[0];
   return paragraph ? toTwoLines(paragraph) : null;
-}
-
-function descriptionFromTitle(
-  title: string,
-  language?: string | null,
-  topics?: string[],
-): string {
-  const name = humanizeRepoName(title);
-  const line1 = `${name} is an open-source software project.`;
-  const details = [language, topics?.slice(0, 2).join(" & ")].filter(Boolean);
-  const line2 = details.length
-    ? `Built with ${details.join(" · ")}.`
-    : "Explore the repository for features and implementation details.";
-  return `${line1}\n${line2}`;
 }
 
 async function fetchReadme(owner: string, repo: string): Promise<string | null> {
