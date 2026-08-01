@@ -8,6 +8,7 @@ const NAV = {
   Product: [
     { label: "How it works", href: "/#features" },
     { label: "Examples", href: "/#showcase" },
+    { label: "For recruiters", href: "/#recruiters" },
     { label: "Pricing", href: "/#pricing" },
     { label: "FAQ", href: "/#faq" },
   ],
@@ -15,6 +16,7 @@ const NAV = {
     { label: "Sign in", href: "/sign-in" },
     { label: "Sign up free", href: "/sign-up" },
     { label: "Dashboard", href: "/dashboard" },
+    { label: "Recruiter workspace", href: "/recruiter" },
   ],
   Resources: [
     { label: "Contact & support", href: "/contact" },

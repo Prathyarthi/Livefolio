@@ -589,6 +589,46 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
 
+  // Opt into recruiter talent-graph discovery
+  .patch(
+    "/open-to-opportunities",
+    async (ctx) => {
+      const session = await getSession(ctx.request);
+      if (!session) {
+        ctx.set.status = 401;
+        return { error: "Unauthorized" };
+      }
+
+      const portfolio = await prisma.portfolio.findUnique({
+        where: { userId: session.userId },
+      });
+
+      if (!portfolio) {
+        ctx.set.status = 404;
+        return { error: "Portfolio not found" };
+      }
+
+      const updated = await prisma.portfolio.update({
+        where: { userId: session.userId },
+        data: { openToOpportunities: ctx.body.openToOpportunities },
+      });
+
+      const { upsertLivefolioSignal } = await import("@/lib/recruiter-signals");
+      if (updated.openToOpportunities && updated.isPublished) {
+        await upsertLivefolioSignal(updated.id);
+      } else {
+        await prisma.candidateSignal.deleteMany({
+          where: { portfolioId: updated.id },
+        });
+      }
+
+      return updated;
+    },
+    {
+      body: t.Object({ openToOpportunities: t.Boolean() }),
+    },
+  )
+
   // Check slug availability
   .post(
     "/slug/check",

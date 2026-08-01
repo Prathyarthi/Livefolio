@@ -27,11 +27,14 @@ export async function proxy(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
   const subdomain = extractPortfolioSubdomain(host);
   const { pathname, search } = request.nextUrl;
+  const isMultipart = request.headers
+    .get("content-type")
+    ?.toLowerCase()
+    .includes("multipart/form-data");
   const isResumeUpload =
-    pathname === "/api/resume/parse"
-    && request.headers.get("content-type")?.toLowerCase().includes(
-      "multipart/form-data",
-    );
+    isMultipart
+    && (pathname === "/api/resume/parse"
+      || pathname === "/api/recruiter/candidates/from-resume");
   const isBulkImport = pathname === "/api/portfolio/bulk-import";
 
   const bodyLimitBytes = isResumeUpload

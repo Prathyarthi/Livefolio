@@ -140,6 +140,27 @@ export function usePublishPortfolio() {
   });
 }
 
+export function useUpdateOpenToOpportunities() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (openToOpportunities: boolean) => {
+      const res = await fetch("/api/portfolio/open-to-opportunities", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ openToOpportunities }),
+      });
+      if (!res.ok) {
+        await throwPortfolioApiError(
+          res,
+          "Failed to update open-to-opportunities"
+        );
+      }
+      return res.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["portfolio"] }),
+  });
+}
+
 export function useUpdateSlug() {
   const qc = useQueryClient();
   return useMutation({

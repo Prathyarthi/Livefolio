@@ -34,8 +34,187 @@ model User {
   billingSubscriptions BillingSubscription[]
   billingCheckout      BillingCheckoutAttempt?
   billingPayments      BillingPayment[]
+  organizationMembers  OrganizationMember[]
+  evaluationNotes      EvaluationNote[]
+  searchQueries        RecruiterSearchQuery[]
 
   @@map("users")
+}
+
+// ============================================================
+// RECRUITER / ORGANIZATION MODELS
+// ============================================================
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members    OrganizationMember[]
+  candidates RecruiterCandidate[]
+  searches   RecruiterSearchQuery[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id        String   @id @default(uuid())
+  orgId     String
+  userId    String
+  /// owner | member
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+model RecruiterCandidate {
+  id     String @id @default(uuid())
+  orgId  String
+  /// resume_upload | livefolio_profile
+  source String
+
+  portfolioId String?
+  displayName String  @default("")
+  email       String?
+  headline    String  @default("")
+  summary     String  @default("") @db.Text
+
+  /// Full ParsedResume-shaped JSON (or portfolio snapshot)
+  parsedJson Json @default("{}")
+
+  /// pending | enriching | ready | failed
+  enrichmentStatus String @default("pending")
+
+  overallScore   Int?
+  /// strong_yes | yes | maybe | no
+  recommendation String?
+  /// active | archived
+  status         String   @default("active")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization   Organization          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  portfolio      Portfolio?            @relation(fields: [portfolioId], references: [id], onDelete: SetNull)
+  socialProfiles DossierSocialProfile[]
+  projects       DossierProject[]
+  notes          EvaluationNote[]
+  signal         CandidateSignal?
+
+  @@index([orgId, status])
+  @@index([orgId, source])
+  @@index([portfolioId])
+  @@map("recruiter_candidates")
+}
+
+model DossierSocialProfile {
+  id          String    @id @default(uuid())
+  candidateId String
+  platform    String
+  url         String    @default("")
+  username    String?
+  cachedStats Json?
+  lastFetched DateTime?
+  /// pending | enriched | failed | skipped | link_only
+  fetchStatus String    @default("pending")
+
+  candidate RecruiterCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, platform])
+  @@map("dossier_social_profiles")
+}
+
+model DossierProject {
+  id          String   @id @default(uuid())
+  candidateId String
+  title       String
+  description String   @default("") @db.Text
+  techStack   String[] @default([])
+  liveUrl     String?
+  sourceUrl   String?
+  sortOrder   Int      @default(0)
+  /// resume | github | medium | etc.
+  origin      String   @default("resume")
+  meta        Json?
+
+  candidate RecruiterCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
+  @@map("dossier_projects")
+}
+
+model EvaluationNote {
+  id          String   @id @default(uuid())
+  candidateId String
+  authorId    String
+  body        String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  candidate RecruiterCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  author    User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId, createdAt])
+  @@map("evaluation_notes")
+}
+
+model CandidateSignal {
+  id String @id @default(uuid())
+
+  /// dossier | livefolio
+  corpusType  String
+  candidateId String? @unique
+  portfolioId String? @unique
+  orgId       String?
+
+  displayName String  @default("")
+  headline    String  @default("")
+  skills      String[] @default([])
+  titles      String[] @default([])
+  companies   String[] @default([])
+  projectTech String[] @default([])
+  minYearsEstimate Float?
+  searchText  String  @default("") @db.Text
+
+  /// Generic per-platform amplifier signals
+  platformSignals Json @default("{}")
+  hasLiveDemo     Boolean @default(false)
+  hasPublishedContent Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
+
+  candidate RecruiterCandidate? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  portfolio Portfolio?          @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([corpusType])
+  @@index([orgId])
+  @@map("candidate_signals")
+}
+
+model RecruiterSearchQuery {
+  id           String   @id @default(uuid())
+  orgId        String
+  userId       String
+  /// jd | nl | filters
+  inputType    String
+  rawInput     String   @db.Text
+  compiledAst  Json     @default("{}")
+  resultCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@map("recruiter_search_queries")
 }
 
 model BillingSubscription {
@@ -119,6 +298,9 @@ model Portfolio {
   templateId  String  @default("pulse")
   isPublished Boolean @default(false)
 
+  /// Opt-in for recruiter talent-graph search
+  openToOpportunities Boolean @default(false)
+
   metaTitle       String?
   metaDescription String?
 
@@ -147,8 +329,11 @@ model Portfolio {
   customSections CustomSection[]
   views          PortfolioView[]
   clicks         PortfolioClick[]
+  recruiterCandidates RecruiterCandidate[]
+  signal         CandidateSignal?
 
   @@index([slug])
+  @@index([isPublished, openToOpportunities])
   @@map("portfolios")
 }
 

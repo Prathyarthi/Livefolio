@@ -17,6 +17,7 @@ import {
   usePortfolio,
   useUpdatePortfolio,
 } from "@/features/portfolio/api/use-portfolio";
+import { OpenToOpportunitiesCard } from "@/features/recruiter/components/open-to-opportunities-card";
 import { CreatePortfolioPrompt, PORTFOLIO_ACTION_BUTTON_CLASS } from "@/features/portfolio/components/create-portfolio-prompt";
 import type { PortfolioCustomization, TemplateSectionId } from "@/features/templates/types";
 import { getSectionLabel, NAVBAR_SECTION_TO_KEY } from "@/features/templates/section-labels";
@@ -140,6 +141,12 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {portfolio ? (
+        <OpenToOpportunitiesCard
+          openToOpportunities={Boolean(portfolio.openToOpportunities)}
+        />
+      ) : null}
 
       {portfolio ? (
         <Card>

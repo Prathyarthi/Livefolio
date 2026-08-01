@@ -12,6 +12,7 @@ const LINKS = [
   { label: "How it works", href: "/#features" },
   { label: "Integrations", href: "/#integrations" },
   { label: "Templates", href: "/#showcase" },
+  { label: "For recruiters", href: "/#recruiters" },
   { label: "Pricing", href: "/#pricing" },
   { label: "FAQ", href: "/#faq" },
   { label: "Contact", href: "/contact" },

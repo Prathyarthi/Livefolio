@@ -4,6 +4,7 @@ import { CompanyShowcase } from "@/features/landing/components/company-showcase"
 import { Features } from "@/features/landing/components/features";
 import { Integrations } from "@/features/landing/components/integrations";
 import { TemplateShowcase } from "@/features/landing/components/template-showcase";
+import { ForRecruiters } from "@/features/landing/components/for-recruiters";
 import { Pricing } from "@/features/landing/components/pricing";
 import { FAQ } from "@/features/landing/components/faq";
 import { ContactSection } from "@/features/landing/components/contact-section";
@@ -42,6 +43,7 @@ export default function LandingPage() {
           <Features />
           <Integrations />
           <TemplateShowcase />
+          <ForRecruiters />
           <Pricing />
           <FAQ />
           <ContactSection />
