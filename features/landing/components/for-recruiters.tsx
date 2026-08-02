@@ -58,7 +58,7 @@ export function ForRecruiters() {
 
         <div className="mt-[var(--space-6)] flex justify-center">
           <Button asChild variant="accent" size="lg">
-            <Link href="/sign-in?callbackUrl=/recruiter">
+            <Link href="/sign-in?as=recruiter&callbackUrl=/recruiter">
               Open recruiter workspace
             </Link>
           </Button>

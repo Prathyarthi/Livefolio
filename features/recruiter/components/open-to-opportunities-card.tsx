@@ -25,18 +25,17 @@ export function OpenToOpportunitiesCard({
       <CardHeader>
         <CardTitle>Open to opportunities</CardTitle>
         <CardDescription>
-          Allow recruiters on LiveFolio to discover your published portfolio in
-          talent search. Your profile stays private to orgs until you opt in.
+          Your registered portfolio is already visible in recruiter talent
+          search. Turn this on to mark that you&apos;re actively looking.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between rounded-[var(--radius-md)] border border-border-default bg-surface-sunken px-4 py-3">
           <div className="space-y-1">
-            <Label htmlFor="open-to-opportunities">
-              Discoverable by recruiters
-            </Label>
+            <Label htmlFor="open-to-opportunities">Actively looking</Label>
             <p className="text-body-sm text-text-secondary">
-              Requires a published portfolio. You can turn this off anytime.
+              A preference signal for recruiters. It does not hide your profile
+              from search.
             </p>
           </div>
           <Switch
@@ -48,12 +47,12 @@ export function OpenToOpportunitiesCard({
                 onSuccess: () =>
                   toast.success(
                     checked
-                      ? "You’re discoverable to recruiters"
-                      : "Removed from recruiter search"
+                      ? "Marked as actively looking"
+                      : "Actively looking turned off",
                   ),
                 onError: (error) =>
                   toast.error(
-                    error instanceof Error ? error.message : "Failed to update"
+                    error instanceof Error ? error.message : "Failed to update",
                   ),
               });
             }}

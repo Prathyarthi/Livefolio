@@ -75,9 +75,44 @@ export function usePatchCandidate(id: string) {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to update candidate");
-      return json;
+      return json as {
+        candidate: Pick<
+          RecruiterCandidateDetail,
+          "overallScore" | "recommendation" | "status"
+        >;
+      };
     },
-    onSuccess: () => {
+    onMutate: async (body) => {
+      await qc.cancelQueries({ queryKey: recruiterKeys.candidate(id) });
+      const previous = qc.getQueryData<{
+        candidate: RecruiterCandidateDetail;
+        claimsVsProof: ClaimProofItem[];
+      }>(recruiterKeys.candidate(id));
+
+      if (previous?.candidate) {
+        qc.setQueryData(recruiterKeys.candidate(id), {
+          ...previous,
+          candidate: {
+            ...previous.candidate,
+            ...(body.overallScore !== undefined
+              ? { overallScore: body.overallScore }
+              : {}),
+            ...(body.recommendation !== undefined
+              ? { recommendation: body.recommendation }
+              : {}),
+            ...(body.status !== undefined ? { status: body.status } : {}),
+          },
+        });
+      }
+
+      return { previous };
+    },
+    onError: (_err, _body, context) => {
+      if (context?.previous) {
+        qc.setQueryData(recruiterKeys.candidate(id), context.previous);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: recruiterKeys.candidate(id) });
       qc.invalidateQueries({ queryKey: recruiterKeys.candidates() });
     },

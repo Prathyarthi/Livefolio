@@ -16,7 +16,6 @@ import {
   LogOut,
   User,
   PanelLeft,
-  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -50,12 +49,6 @@ const NAV = [
   { title: "Billing", href: "/dashboard/billing", icon: CreditCard },
   { title: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
-
-const RECRUITER_NAV = {
-  title: "Recruiter",
-  href: "/recruiter",
-  icon: Briefcase,
-};
 
 function AppSidebar() {
   const pathname = usePathname();
@@ -104,7 +97,7 @@ function AppSidebar() {
         <SidebarGroup className="group-data-[collapsible=icon]:p-1.5">
           <SidebarGroupContent>
             <SidebarMenu className="gap-1.5 group-data-[collapsible=icon]:gap-1">
-              {[...NAV, RECRUITER_NAV].map(({ title, href, icon: Icon }) => {
+              {NAV.map(({ title, href, icon: Icon }) => {
                 const active =
                   href === "/dashboard"
                     ? pathname === href

@@ -17,6 +17,8 @@ model User {
   email     String   @unique
   password  String
   avatar    String?
+  /// portfolio | recruiter — controls which dashboard the account can access.
+  accountType String   @default("portfolio")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

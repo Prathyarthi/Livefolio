@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { normalizeOptionalStoredUrl } from "@/lib/content-policy";
+import type { AccountType } from "@/lib/account-type";
 
 const GENERIC_OAUTH_NAMES = new Set(["GitHub User", "Google User"]);
 
@@ -39,9 +40,11 @@ export async function upsertOAuthUser(params: {
   name?: string | null;
   avatar?: string | null;
   defaultName?: string;
+  accountType?: AccountType;
 }) {
   const email = normalizeOAuthEmail(params.email);
   const fallbackName = params.defaultName ?? "User";
+  const accountType = params.accountType ?? "portfolio";
   let avatar: string | null = null;
   try {
     avatar = normalizeOptionalStoredUrl(params.avatar, "OAuth avatar URL");
@@ -59,6 +62,7 @@ export async function upsertOAuthUser(params: {
         email,
         password: "",
         avatar: avatar ?? undefined,
+        accountType,
       },
     });
   }
@@ -71,6 +75,7 @@ export async function upsertOAuthUser(params: {
       (GENERIC_OAUTH_NAMES.has(existing.name) || !existing.name.trim())
         ? { name: params.name.trim() }
         : {}),
+      ...(existing.accountType !== accountType ? { accountType } : {}),
     },
   });
 }

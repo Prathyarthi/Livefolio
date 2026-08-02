@@ -7,9 +7,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PricingPlansSection } from "./pricing-plans-section";
 import { Logo } from "@/components/logo";
+import { homePathForAccountType, parseAccountType } from "@/lib/account-type";
 
 export function PricingPageShell() {
   const { data: session } = useSession();
+  const dashboardHref = session?.user
+    ? homePathForAccountType(parseAccountType(session.user.accountType))
+    : "/dashboard";
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-surface-base">
@@ -29,7 +33,7 @@ export function PricingPageShell() {
             <ThemeToggle />
             {session?.user ? (
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href={dashboardHref}>Dashboard</Link>
               </Button>
             ) : (
               <>
@@ -62,7 +66,7 @@ export function PricingPageShell() {
                 </p>
               </div>
               <Button asChild variant="outline" className="shrink-0">
-                <Link href={session?.user ? "/dashboard" : "/sign-up"}>
+                <Link href={session?.user ? dashboardHref : "/sign-up"}>
                   {session?.user ? "Go to dashboard" : "Start free"}
                 </Link>
               </Button>

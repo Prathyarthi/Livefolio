@@ -5,9 +5,15 @@ import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GoogleIcon, GithubIcon as Github } from "@/components/icons";
+import {
+  homePathForAccountType,
+  setLoginIntentCookie,
+  type AccountType,
+} from "@/lib/account-type";
 
 type OAuthProviderButtonProps = {
   provider: "google" | "github";
+  accountType: AccountType;
   callbackUrl?: string;
   label: string;
   icon: ReactNode;
@@ -15,11 +21,14 @@ type OAuthProviderButtonProps = {
 
 function OAuthProviderButton({
   provider,
-  callbackUrl = "/dashboard",
+  accountType,
+  callbackUrl,
   label,
   icon,
 }: OAuthProviderButtonProps) {
   const [loading, setLoading] = useState(false);
+  const resolvedCallback =
+    callbackUrl ?? homePathForAccountType(accountType);
 
   return (
     <Button
@@ -29,7 +38,8 @@ function OAuthProviderButton({
       disabled={loading}
       onClick={() => {
         setLoading(true);
-        void signIn(provider, { callbackUrl });
+        setLoginIntentCookie(accountType);
+        void signIn(provider, { callbackUrl: resolvedCallback });
       }}
     >
       {loading ? (
@@ -45,12 +55,14 @@ function OAuthProviderButton({
 type OAuthSignInButtonsProps = {
   googleEnabled: boolean;
   githubEnabled: boolean;
+  accountType?: AccountType;
   callbackUrl?: string;
 };
 
 export function OAuthSignInButtons({
   googleEnabled,
   githubEnabled,
+  accountType = "portfolio",
   callbackUrl,
 }: OAuthSignInButtonsProps) {
   if (!googleEnabled && !githubEnabled) {
@@ -67,6 +79,7 @@ export function OAuthSignInButtons({
       {googleEnabled ? (
         <OAuthProviderButton
           provider="google"
+          accountType={accountType}
           callbackUrl={callbackUrl}
           label="Continue with Google"
           icon={<GoogleIcon className="h-4 w-4" />}
@@ -75,6 +88,7 @@ export function OAuthSignInButtons({
       {githubEnabled ? (
         <OAuthProviderButton
           provider="github"
+          accountType={accountType}
           callbackUrl={callbackUrl}
           label="Continue with GitHub"
           icon={<Github className="h-4 w-4" />}

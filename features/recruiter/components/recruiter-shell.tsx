@@ -153,9 +153,6 @@ export function RecruiterShell({ children }: { children: React.ReactNode }) {
             <span>Recruiter workspace</span>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/dashboard">Portfolio dashboard</Link>
-            </Button>
             <ThemeToggle />
           </div>
         </header>

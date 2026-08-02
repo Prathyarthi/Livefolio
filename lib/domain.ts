@@ -150,6 +150,7 @@ export function shouldShowMarketingFooter(
 export const APP_ROUTE_PREFIXES = [
   "/api",
   "/dashboard",
+  "/recruiter",
   "/sign-in",
   "/sign-up",
   "/pricing",

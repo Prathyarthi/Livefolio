@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { PlatformSignalMap } from "@/lib/recruiter-signals";
+import { ensureRegisteredLivefolioSignals } from "@/lib/recruiter-signals";
 
 export type FilterAst = {
   skills?: string[];
@@ -210,7 +211,21 @@ export async function executeRecruiterSearch(input: {
   ast: FilterAst;
   limit?: number;
 }): Promise<SearchHit[]> {
-  const limit = input.limit ?? 40;
+  const hasFilters =
+    (input.ast.skills?.length ?? 0) > 0 ||
+    (input.ast.titles?.length ?? 0) > 0 ||
+    (input.ast.companies?.length ?? 0) > 0 ||
+    (input.ast.keywords?.length ?? 0) > 0 ||
+    typeof input.ast.minYears === "number" ||
+    Boolean(input.ast.activeOnPlatformWithinDays) ||
+    Boolean(input.ast.minPlatformStat) ||
+    input.ast.requiresLiveDemo === true ||
+    input.ast.requiresPublishedContent === true;
+
+  const limit = input.limit ?? (hasFilters ? 40 : 200);
+
+  // Make sure every registered LiveFolio portfolio is searchable.
+  await ensureRegisteredLivefolioSignals();
 
   const dossierSignals = await prisma.candidateSignal.findMany({
     where: { corpusType: "dossier", orgId: input.orgId },
@@ -219,10 +234,6 @@ export async function executeRecruiterSearch(input: {
   const livefolioSignals = await prisma.candidateSignal.findMany({
     where: {
       corpusType: "livefolio",
-      portfolio: {
-        isPublished: true,
-        openToOpportunities: true,
-      },
     },
   });
 

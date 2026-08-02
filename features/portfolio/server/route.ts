@@ -2,6 +2,10 @@ import Elysia, { t } from "elysia";
 import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+
+async function getPortfolioSession(request: Request) {
+  return getSession(request, { requireAccountType: "portfolio" });
+}
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import { validatePortfolioSlug } from "@/lib/slug";
 import {
@@ -141,7 +145,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   // Get current user's portfolio
   .get("/", async (ctx) => {
     try {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -171,7 +175,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -201,7 +205,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -498,7 +502,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/template",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -557,7 +561,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/publish",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -582,6 +586,14 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         data: { isPublished: ctx.body.isPublished },
       });
 
+      const { syncLivefolioSignalForPublishState } = await import(
+        "@/lib/recruiter-signals"
+      );
+      await syncLivefolioSignalForPublishState({
+        portfolioId: updated.id,
+        isPublished: updated.isPublished,
+      });
+
       return updated;
     },
     {
@@ -593,7 +605,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/open-to-opportunities",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -613,14 +625,9 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         data: { openToOpportunities: ctx.body.openToOpportunities },
       });
 
+      // Keep the portfolio indexed for talent search regardless of preference flag.
       const { upsertLivefolioSignal } = await import("@/lib/recruiter-signals");
-      if (updated.openToOpportunities && updated.isPublished) {
-        await upsertLivefolioSignal(updated.id);
-      } else {
-        await prisma.candidateSignal.deleteMany({
-          where: { portfolioId: updated.id },
-        });
-      }
+      await upsertLivefolioSignal(updated.id);
 
       return updated;
     },
@@ -652,7 +659,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/slug",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -686,7 +693,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
 
   // Remove sections typically filled by resume import (avoids duplicates on re-import)
   .post("/clear-importable", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -725,7 +732,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/experience",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -802,7 +809,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/experience/:id",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -882,7 +889,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
   .delete("/experience/:id", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -904,7 +911,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/education",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -993,7 +1000,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/education/:id",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1095,7 +1102,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
   .delete("/education/:id", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -1117,7 +1124,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/skill",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1188,7 +1195,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
   .delete("/skill/:id", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -1208,7 +1215,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/skill/bulk",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1284,7 +1291,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/project",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1392,7 +1399,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/project/:id",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1506,7 +1513,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
   .delete("/project/:id", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -1528,7 +1535,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/certification",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1597,7 +1604,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/certification/:id",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1681,7 +1688,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
   .delete("/certification/:id", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -1703,7 +1710,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/social",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1773,7 +1780,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
   .delete("/social/:id", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -1795,7 +1802,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/achievement",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1848,7 +1855,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/achievement/:id",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -1904,7 +1911,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
   .delete("/achievement/:id", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -1926,7 +1933,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .post(
     "/custom-section",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -2034,7 +2041,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/custom-section/:id",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };
@@ -2101,7 +2108,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
   )
   .delete("/custom-section/:id", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -2121,7 +2128,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
 
   // Bulk import generated portfolio data
   .post("/bulk-import", async (ctx) => {
-    const session = await getSession(ctx.request);
+    const session = await getPortfolioSession(ctx.request);
     if (!session) {
       ctx.set.status = 401;
       return { error: "Unauthorized" };
@@ -2139,7 +2146,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
   .patch(
     "/live-preview",
     async (ctx) => {
-      const session = await getSession(ctx.request);
+      const session = await getPortfolioSession(ctx.request);
       if (!session) {
         ctx.set.status = 401;
         return { error: "Unauthorized" };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, Search } from "lucide-react";
@@ -28,6 +28,40 @@ export function RecruiterSearch() {
   >([]);
   const [ast, setAst] = useState<FilterAst>({});
   const [results, setResults] = useState<SearchHit[]>([]);
+  const [hasLoadedAll, setHasLoadedAll] = useState(false);
+
+  const applySearchResult = (data: {
+    ast: FilterAst;
+    chips: Array<{ id: string; label: string; kind: string }>;
+    results: SearchHit[];
+  }) => {
+    setAst(data.ast);
+    setChips(data.chips);
+    setResults(data.results);
+  };
+
+  const loadAllPortfolios = () => {
+    search.mutate(
+      { inputType: "filters", ast: {} },
+      {
+        onSuccess: (data) => {
+          applySearchResult(data);
+          setHasLoadedAll(true);
+          if (data.results.length === 0) {
+            toast.message("No registered portfolios found yet");
+          }
+        },
+        onError: (e) => toast.error(e.message),
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (!orgData?.org || hasLoadedAll || search.isPending) return;
+    loadAllPortfolios();
+    // Load once when org is ready.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional first load
+  }, [orgData?.org?.id]);
 
   if (orgLoading) {
     return (
@@ -44,17 +78,15 @@ export function RecruiterSearch() {
       { text, inputType },
       {
         onSuccess: (data) => {
-          setAst(data.ast);
-          setChips(data.chips);
-          setResults(data.results);
+          applySearchResult(data);
           if (data.results.length === 0) {
             toast.message(
-              "No matches yet — upload more resumes or widen filters"
+              "No matches yet — try broader filters or show all portfolios",
             );
           }
         },
         onError: (e) => toast.error(e.message),
-      }
+      },
     );
   };
 
@@ -78,22 +110,19 @@ export function RecruiterSearch() {
       delete next.activeOnPlatformWithinDays;
     } else if (id.startsWith("stat:")) {
       delete next.minPlatformStat;
-    } else if (id === "liveDemo") {
+    } else if (id.startsWith("req:live")) {
       delete next.requiresLiveDemo;
-    } else if (id === "published") {
+    } else if (id.startsWith("req:content")) {
       delete next.requiresPublishedContent;
     }
+
     setAst(next);
-    setChips((prev) => prev.filter((c) => c.id !== id));
     search.mutate(
-      { ast: next, inputType: "filters" },
+      { inputType: "filters", ast: next },
       {
-        onSuccess: (data) => {
-          setResults(data.results);
-          setChips(data.chips);
-        },
+        onSuccess: applySearchResult,
         onError: (e) => toast.error(e.message),
-      }
+      },
     );
   };
 
@@ -104,8 +133,8 @@ export function RecruiterSearch() {
           Search talent
         </h1>
         <p className="mt-2 max-w-2xl text-body text-text-secondary">
-          Paste a job description or ask in plain language. Results match
-          structured profile data first; connected-source filters boost when
+          Browse every registered LiveFolio portfolio, or paste a JD / ask in
+          plain language to rank matches. Connected-source filters boost when
           available.
         </p>
       </div>
@@ -122,19 +151,28 @@ export function RecruiterSearch() {
             rows={4}
             placeholder='e.g. "5 years B2B SaaS marketing, strong storytelling, published writing"'
           />
-          <Button
-            disabled={!nl.trim() || search.isPending}
-            onClick={() => runSearch(nl, "nl")}
-          >
-            {search.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Search className="h-4 w-4" />
-                Search
-              </>
-            )}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              disabled={!nl.trim() || search.isPending}
+              onClick={() => runSearch(nl, "nl")}
+            >
+              {search.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Search className="h-4 w-4" />
+                  Search
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={search.isPending}
+              onClick={loadAllPortfolios}
+            >
+              Show all portfolios
+            </Button>
+          </div>
         </TabsContent>
         <TabsContent value="jd" className="space-y-3">
           <Textarea
@@ -143,19 +181,28 @@ export function RecruiterSearch() {
             rows={8}
             placeholder="Paste the full job description…"
           />
-          <Button
-            disabled={!jd.trim() || search.isPending}
-            onClick={() => runSearch(jd, "jd")}
-          >
-            {search.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Search className="h-4 w-4" />
-                Match JD
-              </>
-            )}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              disabled={!jd.trim() || search.isPending}
+              onClick={() => runSearch(jd, "jd")}
+            >
+              {search.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Search className="h-4 w-4" />
+                  Match JD
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={search.isPending}
+              onClick={loadAllPortfolios}
+            >
+              Show all portfolios
+            </Button>
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -184,11 +231,15 @@ export function RecruiterSearch() {
         <h2 className="font-display text-xl font-semibold">
           Results ({results.length})
         </h2>
-        {results.length === 0 ? (
+        {search.isPending && results.length === 0 ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-6 w-6 animate-spin text-brand-primary" />
+          </div>
+        ) : results.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center text-text-secondary">
-              Run a search against your uploaded dossiers and opted-in LiveFolio
-              profiles.
+              No results yet. Registered LiveFolio portfolios and your uploaded
+              dossiers appear here.
             </CardContent>
           </Card>
         ) : (
@@ -228,11 +279,11 @@ export function RecruiterSearch() {
                             onSuccess: (data) => {
                               toast.success("Saved to shortlist");
                               router.push(
-                                `/recruiter/candidates/${data.candidateId}`
+                                `/recruiter/candidates/${data.candidateId}`,
                               );
                             },
                             onError: (e) => toast.error(e.message),
-                          }
+                          },
                         );
                       }}
                     >

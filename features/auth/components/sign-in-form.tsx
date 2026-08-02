@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/card";
 import { siteConfig } from "@/lib/site";
 import { OAuthSignInButtons } from "@/features/auth/components/oauth-sign-in-buttons";
+import {
+  homePathForAccountType,
+  parseAccountType,
+  type AccountType,
+} from "@/lib/account-type";
 
 const AUTH_ERRORS: Record<string, string> = {
   OAuthAccountNotLinked:
@@ -24,6 +29,16 @@ const AUTH_ERRORS: Record<string, string> = {
   GoogleEmailRequired:
     "Google did not share an email address. Try another account.",
 };
+
+function resolveAccountType(searchParams: URLSearchParams): AccountType {
+  const asParam = searchParams.get("as");
+  if (asParam) return parseAccountType(asParam);
+
+  const callbackUrl = searchParams.get("callbackUrl") ?? "";
+  if (callbackUrl.startsWith("/recruiter")) return "recruiter";
+
+  return "portfolio";
+}
 
 type SignInFormProps = {
   githubEnabled: boolean;
@@ -38,16 +53,52 @@ export function SignInForm({ githubEnabled, googleEnabled }: SignInFormProps) {
     ? AUTH_ERRORS[queryError] ?? "Sign in failed. Please try again."
     : "";
 
+  const accountType = resolveAccountType(searchParams);
+  const isRecruiter = accountType === "recruiter";
+  const callbackUrl =
+    searchParams.get("callbackUrl") ?? homePathForAccountType(accountType);
+
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-        <CardDescription>Sign in to your {siteConfig.name} account</CardDescription>
+        <CardTitle className="text-2xl font-bold">
+          {isRecruiter ? "Recruiter sign in" : "Welcome back"}
+        </CardTitle>
+        <CardDescription>
+          {isRecruiter
+            ? `Sign in to the ${siteConfig.name} recruiter workspace`
+            : `Sign in to your ${siteConfig.name} account`}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex rounded-[var(--radius-md)] border border-border-default p-1">
+          <Link
+            href="/sign-in"
+            className={`flex-1 rounded-[var(--radius-sm)] px-3 py-2 text-center text-sm font-medium transition-colors ${
+              !isRecruiter
+                ? "bg-surface-raised text-text-primary"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            Portfolio
+          </Link>
+          <Link
+            href="/sign-in?as=recruiter&callbackUrl=/recruiter"
+            className={`flex-1 rounded-[var(--radius-sm)] px-3 py-2 text-center text-sm font-medium transition-colors ${
+              isRecruiter
+                ? "bg-surface-raised text-text-primary"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            Recruiter
+          </Link>
+        </div>
+
         <OAuthSignInButtons
           googleEnabled={googleEnabled}
           githubEnabled={githubEnabled}
+          accountType={accountType}
+          callbackUrl={callbackUrl}
         />
 
         {authError ? (
@@ -63,7 +114,14 @@ export function SignInForm({ githubEnabled, googleEnabled }: SignInFormProps) {
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="text-primary hover:underline">
+          <Link
+            href={
+              isRecruiter
+                ? "/sign-up?as=recruiter&callbackUrl=/recruiter"
+                : "/sign-up"
+            }
+            className="text-primary hover:underline"
+          >
             Sign up
           </Link>
         </p>

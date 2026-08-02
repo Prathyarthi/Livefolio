@@ -4,6 +4,7 @@ import {
   normalizeOptionalStoredUrl,
 } from "@/lib/content-policy";
 import { getTemplateDefaultAccent } from "@/features/templates/template-accent-palettes";
+import { upsertLivefolioSignal } from "@/lib/recruiter-signals";
 
 type EnsurePortfolioUser = {
   name?: string | null;
@@ -41,7 +42,7 @@ export async function ensureUserPortfolio(
 
   const defaultTemplateId = "pulse";
 
-  return prisma.portfolio.create({
+  const created = await prisma.portfolio.create({
     data: {
       userId,
       slug: null,
@@ -54,4 +55,12 @@ export async function ensureUserPortfolio(
       ...(avatarUrl ? { avatarUrl } : {}),
     },
   });
+
+  try {
+    await upsertLivefolioSignal(created.id);
+  } catch (error) {
+    console.error("[ensureUserPortfolio] failed to index search signal", error);
+  }
+
+  return created;
 }

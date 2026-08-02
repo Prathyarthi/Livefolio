@@ -10,7 +10,7 @@ import {
   detectProfilesFromParsed,
   enrichDetectedProfiles,
 } from "@/lib/recruiter-enrich";
-import { upsertDossierSignal, upsertLivefolioSignal } from "@/lib/recruiter-signals";
+import { upsertDossierSignal, upsertLivefolioSignal, syncLivefolioSignalForPublishState } from "@/lib/recruiter-signals";
 import { buildClaimsVsProof } from "@/lib/recruiter-claims-proof";
 import {
   astToChips,
@@ -40,9 +40,7 @@ function hasPdfMagicBytes(buffer: Buffer) {
 }
 
 async function authUser(request: Request) {
-  const session = await getSession(request);
-  if (!session) return null;
-  return session;
+  return getSession(request, { requireAccountType: "recruiter" });
 }
 
 export const recruiter = new Elysia({ prefix: "/recruiter" })
@@ -467,8 +465,6 @@ export const recruiter = new Elysia({ prefix: "/recruiter" })
       portfolio = await prisma.portfolio.findFirst({
         where: {
           slug: body.slug,
-          isPublished: true,
-          openToOpportunities: true,
         },
         include: {
           experiences: true,
@@ -484,7 +480,7 @@ export const recruiter = new Elysia({ prefix: "/recruiter" })
 
     if (!portfolio) {
       ctx.set.status = 404;
-      return { error: "Published opted-in portfolio not found" };
+      return { error: "Portfolio not found" };
     }
 
     const existing = await prisma.recruiterCandidate.findFirst({
@@ -696,21 +692,14 @@ export const recruiter = new Elysia({ prefix: "/recruiter" })
       ctx.set.status = 401;
       return { error: "Unauthorized" };
     }
-    // Owner can reindex their own portfolio signal after toggling opt-in
     const portfolio = await prisma.portfolio.findUnique({
       where: { userId: session.userId },
-      select: { id: true, openToOpportunities: true, isPublished: true },
+      select: { id: true },
     });
     if (!portfolio) {
       ctx.set.status = 404;
       return { error: "Portfolio not found" };
     }
-    if (portfolio.openToOpportunities && portfolio.isPublished) {
-      await upsertLivefolioSignal(portfolio.id);
-      return { indexed: true };
-    }
-    await prisma.candidateSignal.deleteMany({
-      where: { portfolioId: portfolio.id },
-    });
-    return { indexed: false };
+    await upsertLivefolioSignal(portfolio.id);
+    return { indexed: true };
   });

@@ -281,3 +281,35 @@ export async function upsertLivefolioSignal(portfolioId: string) {
     update: { ...data, updatedAt: new Date() },
   });
 }
+
+/**
+ * Index any registered LiveFolio portfolios that are missing a search signal.
+ * Called before talent search so the corpus includes every portfolio on the platform.
+ */
+export async function ensureRegisteredLivefolioSignals(limit = 500) {
+  const missing = await prisma.portfolio.findMany({
+    where: {
+      signal: null,
+    },
+    select: { id: true },
+    orderBy: { updatedAt: "desc" },
+    take: limit,
+  });
+
+  for (const portfolio of missing) {
+    await upsertLivefolioSignal(portfolio.id);
+  }
+
+  return missing.length;
+}
+
+/** Keep the livefolio search index in sync when a portfolio is created or updated. */
+export async function syncLivefolioSignalForPublishState(input: {
+  portfolioId: string;
+  isPublished: boolean;
+}) {
+  // All registered portfolios stay searchable; publish state does not deindex.
+  void input.isPublished;
+  await upsertLivefolioSignal(input.portfolioId);
+  return { indexed: true };
+}
