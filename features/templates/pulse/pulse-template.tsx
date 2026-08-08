@@ -13,6 +13,7 @@ import {
   formatDate,
   formatDateRange,
   groupSkillsByCategory,
+  sortExperiencesNewestFirst,
 } from "@/features/templates/utils";
 import type {
   PortfolioData,
@@ -326,34 +327,6 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: H
               </div>
             </div>
 
-            {/* Quick Contact Specs */}
-            <div className="grid grid-cols-1 @sm:grid-cols-2 gap-4 pt-2 text-sm text-slate-400 font-mono" id="hero-quick-specs">
-              {portfolio.location && (
-                <div className="flex min-w-0 items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/10">
-                  <MapPin className="h-4 w-4 text-slate-500 shrink-0" />
-                  <span>{portfolio.location}</span>
-                </div>
-              )}
-              {portfolio.phone && (
-                <div className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/10">
-                  <Phone className="h-4 w-4 text-slate-500 shrink-0" />
-                  <span>{portfolio.phone}</span>
-                </div>
-              )}
-              {portfolio.websiteUrl && (
-                <div className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/10">
-                  <Globe className="h-4 w-4 text-slate-500 shrink-0" />
-                  <a
-                    href={portfolio.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="min-w-0 break-all hover:text-white transition-colors underline decoration-slate-700 underline-offset-4"
-                  >
-                    {portfolio.websiteUrl.replace('https://', '')}
-                  </a>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -372,6 +345,7 @@ interface TimelineProps {
 
 function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
   if (experiences.length === 0) return null;
+  const orderedExperiences = sortExperiencesNewestFirst(experiences);
 
   return (
     <section key="experience" className="py-12 scroll-mt-20 bg-transparent" id="experience">
@@ -392,7 +366,7 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                   wrapperClassName="space-y-8"
                   buttonClassName="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-mono text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
                 >
-                  {experiences.map((exp) => {
+                  {orderedExperiences.map((exp) => {
                     const bulletPoints = (exp.description ?? "")
                       .split("\n")
                       .filter((p) => p.trim().length > 0);
@@ -590,9 +564,6 @@ function SkillsMatrix({ skills, primaryColor, labels }: SkillsMatrixProps) {
                     >
                       <div className="flex justify-between items-start">
                         <div className="min-w-0 space-y-1">
-                          <span className="block break-words text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold">
-                            {category}
-                          </span>
                           <h4 className="line-clamp-2 break-words font-display text-base font-bold text-white group-hover:text-white">
                             {name}
                           </h4>
@@ -936,50 +907,6 @@ function ProfilesSection({
   );
 }
 
-// ==========================================
-// 8. CONTACT SECTION
-// ==========================================
-function ContactSection({
-  portfolio,
-  primaryColor,
-  labels,
-}: {
-  portfolio: PortfolioMeta;
-  primaryColor: string;
-  labels: ReturnType<typeof getSectionLabels>;
-}) {
-  const hasContact =
-    Boolean(portfolio.contactEmail) ||
-    Boolean(portfolio.phone) ||
-    Boolean(portfolio.location) ||
-    Boolean(portfolio.websiteUrl);
-
-  if (!hasContact) return null;
-
-  return (
-    <section className="py-12 border-t border-white/10 scroll-mt-20" id="contact">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8 space-y-6">
-        <SectionHeading>{labels.contact}</SectionHeading>
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 @sm:p-8 space-y-6">
-          <ContactChips
-            portfolio={portfolio}
-            chipClassName="rounded-lg border border-white/10 bg-[#0a0a0a] px-3 py-1.5 text-xs font-mono text-slate-300"
-          />
-          {portfolio.contactEmail && (
-            <a
-              href={`mailto:${portfolio.contactEmail}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-white text-slate-950 hover:bg-slate-100 transition-colors"
-              style={{ boxShadow: `0 0 0 1px ${primaryColor}33` }}
-            >
-              <MessageSquare className="h-3.5 w-3.5" style={{ color: primaryColor }} />
-              Email {portfolio.contactEmail}
-            </a>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 // ==========================================
 // 9. MAIN APP COMPONENT
@@ -1195,12 +1122,6 @@ export function PulseTemplate({ data }: AppProps) {
             </div>
           </section>
         )}
-
-        <ContactSection
-          portfolio={portfolio}
-          primaryColor={primaryColor}
-          labels={labels}
-        />
 
       </main>
 

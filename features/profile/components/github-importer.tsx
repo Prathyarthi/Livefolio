@@ -55,7 +55,14 @@ export function GitHubImporter() {
   const customization = (portfolio?.customization ??
     {}) as PortfolioCustomization;
   const layout = getStoredSectionLayout(customization);
-  const showHeatmap = !normalizeHidden(layout.hidden).includes("github");
+  // Heatmap is opt-in: off until the user has an explicit sectionLayout.hidden
+  // preference (or turns the switch on).
+  const hasExplicitHeatmapPreference = Array.isArray(
+    customization.sectionLayout?.hidden,
+  );
+  const showHeatmap = hasExplicitHeatmapPreference
+    ? !normalizeHidden(layout.hidden).includes("github")
+    : false;
 
   const setShowHeatmap = (show: boolean) => {
     if (!portfolio) return;
@@ -123,8 +130,11 @@ export function GitHubImporter() {
     setSelectedRepos(new Set());
   };
 
+  const canImport =
+    Boolean(data) && (selectedRepos.size > 0 || showHeatmap);
+
   const handleImport = () => {
-    if (!data || selectedRepos.size === 0) return;
+    if (!data || !canImport) return;
 
     const repos: GitHubRepo[] = Array.from(selectedRepos).map(
       (i) => data.repos[i]!
@@ -134,7 +144,11 @@ export function GitHubImporter() {
       { username, repos, showHeatmap },
       {
         onSuccess: (result) => {
-          toast.success(`Imported ${result.imported} projects from GitHub`);
+          if (result.imported > 0) {
+            toast.success(`Imported ${result.imported} projects from GitHub`);
+          } else {
+            toast.success("Saved GitHub contribution heatmap");
+          }
           setData(null);
           setUsername("");
           setSelectedRepos(new Set());
@@ -246,20 +260,21 @@ export function GitHubImporter() {
                 Repositories ({data.repos.length})
               </h3>
               <div className="flex flex-wrap items-center gap-2">
-                {data.repos.length > 0 && (
-                  <Button
-                    onClick={handleImport}
-                    disabled={selectedRepos.size === 0 || importGitHub.isPending}
-                  >
-                    {importGitHub.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Download className="mr-2 h-4 w-4" />
-                    )}
-                    Import {selectedRepos.size} Project
-                    {selectedRepos.size !== 1 ? "s" : ""}
-                  </Button>
-                )}
+                <Button
+                  onClick={handleImport}
+                  disabled={!canImport || importGitHub.isPending}
+                >
+                  {importGitHub.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  {selectedRepos.size > 0
+                    ? `Import ${selectedRepos.size} Project${
+                        selectedRepos.size !== 1 ? "s" : ""
+                      }`
+                    : "Import heatmap"}
+                </Button>
                 <Button variant="ghost" size="sm" onClick={selectAll}>
                   Select All
                 </Button>

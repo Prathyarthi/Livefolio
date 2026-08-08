@@ -8,7 +8,7 @@ import {
 } from "@/components/icons";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { cn } from "@/lib/utils";
-import { formatDateRange, groupSkillsByCategory } from "@/features/templates/utils";
+import { formatDateRange, groupSkillsByCategory, sortExperiencesNewestFirst } from "@/features/templates/utils";
 import type { PortfolioData } from "@/features/templates/types";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
 import {
@@ -128,7 +128,7 @@ const jetBrainsMono = JetBrains_Mono({
 export function LedgerTemplate({ data }: AppProps) {
   const {
     portfolio,
-    experiences,
+    experiences: experiencesRaw,
     educations,
     skills,
     projects,
@@ -139,6 +139,7 @@ export function LedgerTemplate({ data }: AppProps) {
     customSections,
     livePreviewProjectIds,
   } = data;
+  const experiences = sortExperiencesNewestFirst(experiencesRaw);
   const primaryColor = resolveAccentColor("ledger", portfolio.customization);
 
   // State management
@@ -999,58 +1000,6 @@ export function LedgerTemplate({ data }: AppProps) {
               </section>
             ))}
           </div>
-        )}
-
-        {(portfolio.contactEmail || portfolio.phone) && (
-        <section id="contact" className="scroll-mt-20">
-          <div className="bg-[#111418] border border-slate-800 p-5 @sm:p-12 rounded-none text-center space-y-6 relative overflow-hidden">
-            <div className="max-w-2xl mx-auto space-y-4">
-              <h2 className="break-words text-2xl @sm:text-4xl font-display font-extrabold text-white uppercase tracking-tight">{labels.contact}</h2>
-            </div>
-
-            <div className="max-w-md mx-auto grid grid-cols-1 @sm:grid-cols-2 gap-3 @sm:gap-4 pt-4 w-full">
-                {/* Email Copier */}
-                {portfolio.contactEmail && (
-                  <button
-                    onClick={() => handleCopy(portfolio.contactEmail, 'email')}
-                    className="w-full bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-[var(--lf-accent)] p-4 rounded-none flex flex-col items-center justify-center gap-2 group transition-all text-center focus:outline-none"
-                    id="contact-email-btn"
-                  >
-                    <div className="p-2.5 rounded-none bg-[color-mix(in_srgb,var(--lf-accent)_8%,transparent)] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] text-[var(--lf-accent)]">
-                      {copiedText === 'email' ? <Check className="w-5 h-5 text-[var(--lf-accent)]" /> : <Mail className="w-5 h-5" />}
-                    </div>
-                    <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Email Address</p>
-                    <p className="text-xs @sm:text-sm font-semibold text-white font-mono break-all group-hover:text-[var(--lf-accent)] transition-colors">
-                      {portfolio.contactEmail}
-                    </p>
-                    <span className="text-[10px] text-slate-500 font-mono mt-0.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
-                      <Copy className="w-3 h-3 text-[var(--lf-accent)]" /> {copiedText === 'email' ? 'Copied!' : 'Click to Copy'}
-                    </span>
-                  </button>
-                )}
-
-                {/* Phone Copier */}
-                {portfolio.phone && (
-                  <button
-                    onClick={() => handleCopy(portfolio.phone, 'phone')}
-                    className="w-full bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-[var(--lf-accent)] p-4 rounded-none flex flex-col items-center justify-center gap-2 group transition-all text-center focus:outline-none"
-                    id="contact-phone-btn"
-                  >
-                    <div className="p-2.5 rounded-none bg-[color-mix(in_srgb,var(--lf-accent)_8%,transparent)] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] text-[var(--lf-accent)]">
-                      {copiedText === 'phone' ? <Check className="w-5 h-5 text-[var(--lf-accent)]" /> : <Phone className="w-5 h-5" />}
-                    </div>
-                    <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Phone Number</p>
-                    <p className="text-xs @sm:text-sm font-semibold text-white font-mono group-hover:text-[var(--lf-accent)] transition-colors">
-                      {portfolio.phone}
-                    </p>
-                    <span className="text-[10px] text-slate-500 font-mono mt-0.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
-                      <Copy className="w-3 h-3 text-[var(--lf-accent)]" /> {copiedText === 'phone' ? 'Copied!' : 'Click to Copy'}
-                    </span>
-                  </button>
-                )}
-              </div>
-          </div>
-        </section>
         )}
 
       </main>

@@ -113,7 +113,7 @@ export const profile = new Elysia({ prefix: "/profile" })
 
       const portfolio = await ensureUserPortfolio(gate.session.userId);
       const username = sanitizeImportedLabel(ctx.body.username);
-      const showHeatmap = ctx.body.showHeatmap !== false;
+      const showHeatmap = ctx.body.showHeatmap === true;
 
       const projects = ctx.body.repos
         .map((repo, index) => ({

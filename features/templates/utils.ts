@@ -24,6 +24,27 @@ export function formatDateRange(start: string | null, end: string | null): strin
   return `${startFormatted} - ${endFormatted}`;
 }
 
+function experienceSortTime(date: string | null, fallback: number): number {
+  if (!date) return fallback;
+  const parsed = new Date(date).getTime();
+  return Number.isNaN(parsed) ? fallback : parsed;
+}
+
+/** Newest → oldest: current roles first, then by end date, then start date. */
+export function sortExperiencesNewestFirst<
+  T extends { startDate: string | null; endDate: string | null },
+>(experiences: T[]): T[] {
+  const now = Date.now();
+  return [...experiences].sort((a, b) => {
+    const endDiff =
+      experienceSortTime(b.endDate, now) - experienceSortTime(a.endDate, now);
+    if (endDiff !== 0) return endDiff;
+    return (
+      experienceSortTime(b.startDate, 0) - experienceSortTime(a.startDate, 0)
+    );
+  });
+}
+
 export function groupSkillsByCategory(
   skills: Array<{ name: string; category: string }>
 ): Record<string, string[]> {

@@ -7,6 +7,7 @@ import {
   formatDate,
   formatDateRange,
   groupSkillsByCategory,
+  sortExperiencesNewestFirst,
 } from "../utils";
 import type { PortfolioData } from "@/features/templates/types";
 import {
@@ -129,7 +130,8 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
       : data.projects;
 
   const topSkills = data.skills.slice(0, 6).map((s) => s.name).filter(Boolean);
-  const latestExperience = data.experiences[0];
+  const experiences = sortExperiencesNewestFirst(data.experiences);
+  const latestExperience = experiences[0];
   const marqueeItems = [
     data.portfolio.headline
       ? `⚡ ${data.portfolio.title} — ${data.portfolio.headline}`
@@ -167,7 +169,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: null,
-    experience: data.experiences.length > 0
+    experience: experiences.length > 0
       ? (
         <section key="experience" id="experience" className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white relative overflow-hidden">
         {/* Ambient Radial Background Glow */}
@@ -188,7 +190,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
               wrapperClassName="space-y-10"
               buttonClassName="mt-8 w-full py-3 bg-black border-4 border-white font-mono text-xs font-black uppercase text-white hover:bg-[var(--lf-accent)] hover:text-black transition-colors neo-shadow"
             >
-              {data.experiences.map((exp, index) => {
+              {experiences.map((exp, index) => {
                 const isCurrent = exp.endDate === null;
 
                 const cardStyle = index === 0
@@ -491,10 +493,9 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
     github: contributionCalendar
       ? (
         <section key="github" className="py-16 bg-black border-b-4 border-white">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-2 font-mono text-xs text-[var(--lf-accent)] font-black uppercase tracking-widest mb-6">
-              <Activity className="w-4 h-4" />
-              <span>{"// "}{labels.github.toUpperCase()}</span>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-6">
+              <SectionHeading>{labels.github.toUpperCase()}</SectionHeading>
             </div>
             <div className="overflow-x-auto">
               <div className="mx-auto w-max max-w-full">
@@ -705,10 +706,6 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {data.customSections.map((sec) => (
               <div key={sec.id} className="bg-black border-4 border-[var(--lf-accent)] p-8 neo-shadow mb-8">
-                <div className="flex items-center gap-2 font-mono text-xs text-[var(--lf-accent)] font-black uppercase tracking-widest mb-2">
-                  <Zap className="w-4 h-4 text-[var(--lf-accent)] fill-[var(--lf-accent)]" />
-                  <span>{`// ${sec.label}`}</span>
-                </div>
                 <SectionHeading>{sec.label}</SectionHeading>
                 <CustomSectionItems
                   items={sec.items}
@@ -981,10 +978,6 @@ function CertificationsSectionComponent({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="space-y-6">
-          <div className="flex items-center gap-2 font-mono text-xs text-[var(--lf-accent)] font-black uppercase tracking-widest">
-            <Award className="w-4 h-4 text-[var(--lf-accent)]" />
-            <span>{`// ${labels.certifications}`}</span>
-          </div>
           <SectionHeading>{labels.certifications}</SectionHeading>
 
           <CollapsibleList
@@ -1100,7 +1093,7 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
       case 'experience':
         output = (
           <div className="space-y-2 text-slate-200">
-            {data.experiences.map((exp) => (
+            {sortExperiencesNewestFirst(data.experiences).map((exp) => (
               <div key={exp.id} className="border-l-2 border-[var(--lf-accent)] pl-2">
                 <div className="font-bold text-[var(--lf-accent)]">{exp.company} — {exp.role}</div>
                 <div className="text-slate-400 text-[11px]">{formatDateRange(exp.startDate, exp.endDate) || "N/A"}</div>
