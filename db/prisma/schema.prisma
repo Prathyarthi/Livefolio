@@ -38,6 +38,11 @@ model User {
   billingSubscriptions BillingSubscription[]
   billingCheckout      BillingCheckoutAttempt?
   billingPayments      BillingPayment[]
+
+  organizationMembers OrganizationMember[]
+  jobsCreated         Job[]
+  applications        Application[]
+  recruiterNotes      RecruiterNote[]
   emailSendLogs        EmailSendLog[]
 
   @@map("users")
@@ -350,6 +355,167 @@ model Template {
   category    String @default("general")
 
   @@map("templates")
+}
+
+// ============================================================
+// HIRING — Organizations, Jobs, Applications
+// ============================================================
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  logoUrl     String?
+  brandColor  String?
+  websiteUrl  String?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members OrganizationMember[]
+  jobs    Job[]
+
+  @@index([slug])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String
+  /// owner | admin | recruiter | hiring_manager
+  role           String   @default("recruiter")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+model Job {
+  id             String @id @default(uuid())
+  organizationId String
+  createdById    String
+
+  title       String
+  slug        String  @unique
+  description String  @db.Text
+  department  String?
+  /// full_time | part_time | contract | internship
+  employmentType String?
+  location       String?
+  /// remote | hybrid | on_site
+  workplaceType String?
+
+  experienceMin Int?
+  experienceMax Int?
+  salaryMin     Int?
+  salaryMax     Int?
+  salaryCurrency String? @default("USD")
+
+  responsibilities String? @db.Text
+  qualifications   String? @db.Text
+  benefits         String? @db.Text
+
+  applicationDeadline DateTime?
+  /// draft | published | paused | closed
+  status      String    @default("draft")
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User             @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  requirements JobRequirement[]
+  applications Application[]
+
+  @@index([organizationId, status])
+  @@index([slug])
+  @@index([status, publishedAt])
+  @@map("jobs")
+}
+
+model JobRequirement {
+  id          String  @id @default(uuid())
+  jobId       String
+  /// required | preferred
+  type        String
+  /// skill | experience | education | other
+  category    String  @default("skill")
+  label       String
+  description String?
+  sortOrder   Int     @default(0)
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("job_requirements")
+}
+
+model Application {
+  id          String  @id @default(uuid())
+  jobId       String
+  userId      String
+  portfolioId String?
+
+  /// applied | under_review | shortlisted | interview | offer | hired | rejected
+  status String @default("applied")
+  /// new | reviewing | shortlisted | interview | offer | hired | rejected
+  stage  String @default("new")
+
+  /// Soft shortlist flag — independent of pipeline stage for compare views
+  shortlisted   Boolean   @default(false)
+  shortlistedAt DateTime?
+
+  coverNote   String?  @db.Text
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  job      Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshot ApplicationSnapshot?
+  notes    RecruiterNote[]
+
+  @@unique([jobId, userId])
+  @@index([userId, submittedAt])
+  @@index([jobId, stage])
+  @@index([jobId, status])
+  @@index([jobId, shortlisted])
+  @@map("applications")
+}
+
+model ApplicationSnapshot {
+  id            String   @id @default(uuid())
+  applicationId String   @unique
+  /// Immutable copy of the candidate Livefolio at submission time
+  data          Json
+  createdAt     DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("application_snapshots")
+}
+
+model RecruiterNote {
+  id            String   @id @default(uuid())
+  applicationId String
+  authorId      String
+  body          String   @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, createdAt])
+  @@index([authorId])
+  @@map("recruiter_notes")
 }
 
 // ============================================================

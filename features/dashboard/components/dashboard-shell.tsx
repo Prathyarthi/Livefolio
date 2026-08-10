@@ -16,6 +16,8 @@ import {
   LogOut,
   User,
   PanelLeft,
+  FileCheck2,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,6 +47,7 @@ const NAV = [
   { title: "Templates", href: "/dashboard/templates", icon: Palette },
   { title: "Import", href: "/dashboard/import", icon: Download },
   { title: "Preview", href: "/dashboard/preview", icon: Eye },
+  { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { title: "Billing", href: "/dashboard/billing", icon: CreditCard },
   { title: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -130,6 +133,26 @@ function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border group-data-[collapsible=icon]:p-1">
+        <SidebarMenu className="mb-1 group-data-[collapsible=icon]:items-center">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              tooltip="Hiring workspace"
+              className="gap-3 text-base [&_svg]:size-5 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:[&_span]:hidden group-data-[collapsible=icon]:[&_svg]:size-5"
+            >
+              <Link
+                href="/company"
+                onClick={() => {
+                  if (isMobile) setOpenMobile(false);
+                }}
+              >
+                <Building2 aria-hidden />
+                <span>Hiring</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <div className="flex items-center gap-2 rounded-md p-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-1.5 group-data-[collapsible=icon]:p-1">
           <Avatar className="h-8 w-8 shrink-0 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8">
             <AvatarImage src={user?.avatar} alt="" />

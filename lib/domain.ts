@@ -23,6 +23,11 @@ export const RESERVED_SUBDOMAINS = new Set([
   "auth",
   "billing",
   "pricing",
+  "jobs",
+  "company",
+  "hiring",
+  "careers",
+  "organizations",
 ]);
 
 export function getPortfolioRootDomain(): string {
