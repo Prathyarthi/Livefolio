@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogoMark, BetaBadge } from "@/components/logo";
+import { LogoMark } from "@/components/logo";
 import { siteConfig } from "@/lib/site";
 import {
   Sidebar,
@@ -104,9 +104,8 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
                 <span className="block truncate font-display text-sm font-bold text-brand-primary">
                   {org?.name ?? "Company"}
                 </span>
-                <span className="flex items-center gap-1 text-[11px] text-text-muted">
+                <span className="block text-[11px] text-text-muted">
                   Hiring workspace
-                  <BetaBadge />
                 </span>
               </span>
             </Link>

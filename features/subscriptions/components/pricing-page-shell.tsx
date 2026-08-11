@@ -23,7 +23,7 @@ export function PricingPageShell() {
         }}
       >
         <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
-          <Logo showBeta />
+          <Logo />
 
           <nav className="flex items-center gap-1.5">
             <ThemeToggle />

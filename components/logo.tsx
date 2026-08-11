@@ -23,30 +23,14 @@ type LogoProps = {
   className?: string;
   wordmarkClassName?: string;
   showWordmark?: boolean;
-  showBeta?: boolean;
   href?: string;
 };
-
-export function BetaBadge({ className }: { className?: string }) {
-  return (
-    <span
-      className={cn(
-        "shrink-0 rounded-full border border-border-default bg-surface-raised/80 px-2 py-0.5",
-        "text-[10px] font-medium uppercase tracking-[0.22em] text-text-muted",
-        className
-      )}
-    >
-      Beta
-    </span>
-  );
-}
 
 export function Logo({
   variant = "default",
   className,
   wordmarkClassName,
   showWordmark = true,
-  showBeta = false,
   href = "/",
 }: LogoProps) {
   const isLight = variant === "light";
@@ -59,17 +43,14 @@ export function Logo({
     >
       <LogoMark />
       {showWordmark ? (
-        <span className="flex min-w-0 items-center gap-2">
-          <span
-            className={cn(
-              "font-display text-[20px] font-bold tracking-[-0.01em]",
-              wordmarkClassName ??
-                (isLight ? "text-white" : "text-brand-primary")
-            )}
-          >
-            {siteConfig.name}
-          </span>
-          {showBeta ? <BetaBadge /> : null}
+        <span
+          className={cn(
+            "font-display text-[20px] font-bold tracking-[-0.01em]",
+            wordmarkClassName ??
+              (isLight ? "text-white" : "text-brand-primary")
+          )}
+        >
+          {siteConfig.name}
         </span>
       ) : null}
     </Link>

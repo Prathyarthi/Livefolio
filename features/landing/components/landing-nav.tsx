@@ -62,7 +62,7 @@ export function LandingNav({ variant = "candidate" }: LandingNavProps) {
   return (
     <header className="glass-nav sticky top-0 z-[100]">
       <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-4 sm:gap-4 sm:px-6">
-        <Logo className="shrink-0" showBeta />
+        <Logo className="shrink-0" />
 
         <nav
           className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 px-2 xl:flex"

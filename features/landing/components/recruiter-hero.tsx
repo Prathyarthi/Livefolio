@@ -9,7 +9,7 @@ export function RecruiterHero() {
       <div className="relative mx-auto max-w-[1200px]">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 flex justify-center">
-            <Logo showBeta className="scale-110" />
+            <Logo className="scale-110" />
           </div>
 
           <p className="eyebrow uppercase">Hiring with Livefolio</p>
