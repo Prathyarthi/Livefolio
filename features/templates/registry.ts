@@ -1,28 +1,4 @@
-import { ModernTemplate } from "./modern/modern-template";
-import { MinimalTemplate } from "./minimal/minimal-template";
-import DeveloperTemplate from "./developer/developer-template";
-import CreativeTemplate from "./creative/creative-template";
-import { CorporateTemplate } from "./corporate/corporate-template";
-import { SpotlightTemplate } from "./spotlight/spotlight-template";
-import { RetroTemplate } from "./retro/retro-template";
-import { BentoTemplate } from "./bento/bento-template";
-import { VibrantTemplate } from "./vibrant/vibrant-template";
-import { SpaceTemplate } from "./space/space-template";
-import { WindowsTemplate } from "./windows/windows-template";
-import { PaperTemplate } from "./paper/paper-template";
-import { CyberpunkTemplate } from "./cyberpunk/cyberpunk-template";
-import { PastelTemplate } from "./pastel/pastel-template";
-import { MonochromeTemplate } from "./monochrome/monochrome-template";
-import { SynthwaveTemplate } from "./synthwave/synthwave-template";
-import { ArtDecoTemplate } from "./artdeco/artdeco-template";
-import { BlueprintTemplate } from "./blueprint/blueprint-template";
-import { AiryTemplate } from "./airy/airy-template";
-import { TerracottaTemplate } from "./terracotta/terracotta-template";
-import { CitrusTemplate } from "./citrus/citrus-template";
-import { ParchmentTemplate } from "./parchment/parchment-template";
-import { LedgerTemplate } from "./ledger/ledger-template";
-import { PulseTemplate } from "./pulse/pulse-template";
-import { MaximalistTemplate } from "./maximalist/maximalist-template";
+import dynamic from "next/dynamic";
 import type { TemplateComponent } from "./types";
 import { getTemplatePreviewImagePath } from "./template-preview-images";
 
@@ -34,7 +10,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Sophisticated dark developer portfolio with accent theming and interactive project cards.",
     previewImage: getTemplatePreviewImagePath("pulse"),
     category: "developer",
-    component: PulseTemplate,
+    component: dynamic(() => import("./pulse/pulse-template").then(m => ({ default: m.PulseTemplate }))),
   },
   modern: {
     id: "modern",
@@ -43,7 +19,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Dark premium presentation with glass cards and product-style composition",
     previewImage: getTemplatePreviewImagePath("modern"),
     category: "general",
-    component: ModernTemplate,
+    component: dynamic(() => import("./modern/modern-template").then(m => ({ default: m.ModernTemplate }))),
   },
   minimal: {
     id: "minimal",
@@ -52,7 +28,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Editorial, quiet, and typography-led for a refined personal brand",
     previewImage: getTemplatePreviewImagePath("minimal"),
     category: "general",
-    component: MinimalTemplate,
+    component: dynamic(() => import("./minimal/minimal-template").then(m => ({ default: m.MinimalTemplate }))),
   },
   developer: {
     id: "developer",
@@ -61,7 +37,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Terminal-inspired but polished for engineers who want proof and personality",
     previewImage: getTemplatePreviewImagePath("developer"),
     category: "developer",
-    component: DeveloperTemplate,
+    component: dynamic(() => import("./developer/developer-template")),
   },
   creative: {
     id: "creative",
@@ -70,7 +46,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Expressive gallery-style layout built for visual work and standout projects",
     previewImage: getTemplatePreviewImagePath("creative"),
     category: "designer",
-    component: CreativeTemplate,
+    component: dynamic(() => import("./creative/creative-template")),
   },
   corporate: {
     id: "corporate",
@@ -79,7 +55,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Executive, structured, and clean without feeling like a PDF export",
     previewImage: getTemplatePreviewImagePath("corporate"),
     category: "corporate",
-    component: CorporateTemplate,
+    component: dynamic(() => import("./corporate/corporate-template").then(m => ({ default: m.CorporateTemplate }))),
   },
   spotlight: {
     id: "spotlight",
@@ -88,7 +64,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Mint canvas (#fbfffe), Made Tommy type, and yellow-accent interactions.",
     previewImage: getTemplatePreviewImagePath("spotlight"),
     category: "developer",
-    component: SpotlightTemplate,
+    component: dynamic(() => import("./spotlight/spotlight-template").then(m => ({ default: m.SpotlightTemplate }))),
   },
   retro: {
     id: "retro",
@@ -97,7 +73,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Bold neo-brutalism with thick borders, bright colors, and high contrast.",
     previewImage: getTemplatePreviewImagePath("retro"),
     category: "designer",
-    component: RetroTemplate,
+    component: dynamic(() => import("./retro/retro-template").then(m => ({ default: m.RetroTemplate }))),
   },
   bento: {
     id: "bento",
@@ -106,7 +82,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Modern grid-based layout with a clean, premium, and highly scannable design.",
     previewImage: getTemplatePreviewImagePath("bento"),
     category: "general",
-    component: BentoTemplate,
+    component: dynamic(() => import("./bento/bento-template").then(m => ({ default: m.BentoTemplate }))),
   },
   vibrant: {
     id: "vibrant",
@@ -115,7 +91,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Dark mode with glowing gradients, glassmorphism, and a highly modern feel.",
     previewImage: getTemplatePreviewImagePath("vibrant"),
     category: "designer",
-    component: VibrantTemplate,
+    component: dynamic(() => import("./vibrant/vibrant-template").then(m => ({ default: m.VibrantTemplate }))),
   },
   space: {
     id: "space",
@@ -124,7 +100,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Deep space theme with glowing cyan and violet accents, perfect for futuristic portfolios.",
     previewImage: getTemplatePreviewImagePath("space"),
     category: "developer",
-    component: SpaceTemplate,
+    component: dynamic(() => import("./space/space-template").then(m => ({ default: m.SpaceTemplate }))),
   },
   windows: {
     id: "windows",
@@ -133,7 +109,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Nostalgic retro OS theme with classic window borders, teal backgrounds, and pixel-perfect details.",
     previewImage: getTemplatePreviewImagePath("windows"),
     category: "developer",
-    component: WindowsTemplate,
+    component: dynamic(() => import("./windows/windows-template").then(m => ({ default: m.WindowsTemplate }))),
   },
   paper: {
     id: "paper",
@@ -142,7 +118,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Elegant, editorial newspaper style with serif typography and clean lines.",
     previewImage: getTemplatePreviewImagePath("paper"),
     category: "general",
-    component: PaperTemplate,
+    component: dynamic(() => import("./paper/paper-template").then(m => ({ default: m.PaperTemplate }))),
   },
   cyberpunk: {
     id: "cyberpunk",
@@ -151,7 +127,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "High-contrast neon hacker aesthetic with glitch effects and terminal vibes.",
     previewImage: getTemplatePreviewImagePath("cyberpunk"),
     category: "developer",
-    component: CyberpunkTemplate,
+    component: dynamic(() => import("./cyberpunk/cyberpunk-template").then(m => ({ default: m.CyberpunkTemplate }))),
   },
   pastel: {
     id: "pastel",
@@ -160,7 +136,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Soft, bubbly, and dreamy with pastel gradients and rounded shapes.",
     previewImage: getTemplatePreviewImagePath("pastel"),
     category: "designer",
-    component: PastelTemplate,
+    component: dynamic(() => import("./pastel/pastel-template").then(m => ({ default: m.PastelTemplate }))),
   },
   monochrome: {
     id: "monochrome",
@@ -169,7 +145,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Strict black and white brutalist design with massive typography.",
     previewImage: getTemplatePreviewImagePath("monochrome"),
     category: "designer",
-    component: MonochromeTemplate,
+    component: dynamic(() => import("./monochrome/monochrome-template").then(m => ({ default: m.MonochromeTemplate }))),
   },
   synthwave: {
     id: "synthwave",
@@ -178,7 +154,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "80s retro-futuristic look with neon sunsets and perspective grids.",
     previewImage: getTemplatePreviewImagePath("synthwave"),
     category: "developer",
-    component: SynthwaveTemplate,
+    component: dynamic(() => import("./synthwave/synthwave-template").then(m => ({ default: m.SynthwaveTemplate }))),
   },
   artdeco: {
     id: "artdeco",
@@ -187,7 +163,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Luxury 1920s style with deep navy, gold accents, and geometric borders.",
     previewImage: getTemplatePreviewImagePath("artdeco"),
     category: "designer",
-    component: ArtDecoTemplate,
+    component: dynamic(() => import("./artdeco/artdeco-template").then(m => ({ default: m.ArtDecoTemplate }))),
   },
   blueprint: {
     id: "blueprint",
@@ -196,7 +172,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Technical drawing aesthetic with blueprint blue, grids, and monospace.",
     previewImage: getTemplatePreviewImagePath("blueprint"),
     category: "developer",
-    component: BlueprintTemplate,
+    component: dynamic(() => import("./blueprint/blueprint-template").then(m => ({ default: m.BlueprintTemplate }))),
   },
   airy: {
     id: "airy",
@@ -204,7 +180,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
     description: "Cloud-like, clean, soft shadows and sky blue accents.",
     previewImage: getTemplatePreviewImagePath("airy"),
     category: "general",
-    component: AiryTemplate,
+    component: dynamic(() => import("./airy/airy-template").then(m => ({ default: m.AiryTemplate }))),
   },
   terracotta: {
     id: "terracotta",
@@ -212,7 +188,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
     description: "Warm Mediterranean style with elegant serif fonts.",
     previewImage: getTemplatePreviewImagePath("terracotta"),
     category: "designer",
-    component: TerracottaTemplate,
+    component: dynamic(() => import("./terracotta/terracotta-template").then(m => ({ default: m.TerracottaTemplate }))),
   },
   citrus: {
     id: "citrus",
@@ -220,7 +196,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
     description: "Energetic and fresh with vibrant orange and yellow accents.",
     previewImage: getTemplatePreviewImagePath("citrus"),
     category: "designer",
-    component: CitrusTemplate,
+    component: dynamic(() => import("./citrus/citrus-template").then(m => ({ default: m.CitrusTemplate }))),
   },
   parchment: {
     id: "parchment",
@@ -228,7 +204,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
     description: "Academic, historical layout with classic red accents.",
     previewImage: getTemplatePreviewImagePath("parchment"),
     category: "corporate",
-    component: ParchmentTemplate,
+    component: dynamic(() => import("./parchment/parchment-template").then(m => ({ default: m.ParchmentTemplate }))),
   },
   ledger: {
     id: "ledger",
@@ -237,7 +213,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Dark developer portfolio with searchable projects and a structured section layout.",
     previewImage: getTemplatePreviewImagePath("ledger"),
     category: "general",
-    component: LedgerTemplate,
+    component: dynamic(() => import("./ledger/ledger-template").then(m => ({ default: m.LedgerTemplate }))),
   },
   maximalist: {
     id: "maximalist",
@@ -246,7 +222,7 @@ export const templateRegistry: Record<string, TemplateComponent> = {
       "Bold high-contrast developer portfolio with an interactive CLI terminal.",
     previewImage: getTemplatePreviewImagePath("maximalist"),
     category: "developer",
-    component: MaximalistTemplate,
+    component: dynamic(() => import("./maximalist/maximalist-template").then(m => ({ default: m.MaximalistTemplate }))),
   },
 };
 

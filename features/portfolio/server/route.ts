@@ -1,4 +1,5 @@
 import Elysia, { t } from "elysia";
+import { revalidatePath } from "next/cache";
 import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
@@ -406,6 +407,10 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         },
       });
 
+      if (updated.slug && updated.isPublished) {
+        revalidatePath(`/sites/${updated.slug}`);
+      }
+
       return updated;
     },
     {
@@ -581,6 +586,10 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         where: { userId: session.userId },
         data: { isPublished: ctx.body.isPublished },
       });
+
+      if (updated.slug) {
+        revalidatePath(`/sites/${updated.slug}`);
+      }
 
       return updated;
     },

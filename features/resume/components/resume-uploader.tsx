@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -70,6 +70,7 @@ import {
   PORTFOLIO_IMPORT_MESSAGES,
   RESUME_PARSE_MESSAGES,
 } from "@/lib/portfolio-loading-messages";
+import { useBilling } from "@/features/subscriptions/api/use-billing";
 
 async function assertApiOk(res: Response, context: string) {
   if (res.ok) return;
@@ -108,40 +109,15 @@ export function ResumeUploader({
   const [clearBeforeImport, setClearBeforeImport] = useState(true);
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(
-    null
-  );
+  const { data: billing } = useBilling();
+  const subscriptionStatus =
+    billing?.subscription?.status?.toLowerCase() === "active" ? "active" : "none";
 
   const parseResume = useParseResume();
   const { data: portfolio } = usePortfolio();
   const createPortfolio = useCreatePortfolio();
   const updatePortfolio = useUpdatePortfolio();
   const clearImportable = useClearImportableContent();
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadBilling = async () => {
-      try {
-        const res = await fetch("/api/billing/me", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json().catch(() => ({}))) as {
-          subscription?: { status?: string | null } | null;
-        };
-        if (cancelled) return;
-        const status = data.subscription?.status ?? null;
-        setSubscriptionStatus(
-          status?.toLowerCase() === "active" ? "active" : "none"
-        );
-      } catch {
-        if (cancelled) return;
-        setSubscriptionStatus("none");
-      }
-    };
-    loadBilling();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const livePreviewCandidates = useMemo<LivePreviewCandidate[]>(() => {
     return (

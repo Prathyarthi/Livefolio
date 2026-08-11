@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -23,11 +23,13 @@ import {
   IMPORT_SOURCES,
   type ImportSourceValue,
 } from "@/features/portfolio/constants/import-sources";
+import { useBilling } from "@/features/subscriptions/api/use-billing";
 
 export default function ImportPage() {
   const router = useRouter();
   const { data: portfolio } = usePortfolio();
-  const [canUseImports, setCanUseImports] = useState(true);
+  const { data: billing } = useBilling();
+  const canUseImports = billing?.access?.canUseImports ?? true;
   const [activeSource, setActiveSource] = useState<ImportSourceValue>("resume");
   const [toolbarActions, setToolbarActions] = useState<ReactNode>(null);
 
@@ -35,28 +37,6 @@ export default function ImportPage() {
     () => IMPORT_SOURCES.find((source) => source.value === activeSource)!,
     [activeSource]
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadAccess = async () => {
-      try {
-        const res = await fetch("/api/billing/me", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json().catch(() => ({}))) as {
-          access?: { canUseImports?: boolean };
-        };
-        if (cancelled) return;
-        setCanUseImports(data.access?.canUseImports ?? true);
-      } catch {
-        if (cancelled) return;
-        setCanUseImports(true);
-      }
-    };
-    loadAccess();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   return (
     <div className={DASHBOARD_IMPORT_PAGE_CLASS}>

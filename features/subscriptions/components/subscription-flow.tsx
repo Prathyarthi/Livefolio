@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
+import { useBilling } from "@/features/subscriptions/api/use-billing";
 import {
   BILLING_INTERVALS,
   BILLING_INTERVAL_LABELS,
@@ -17,21 +18,20 @@ export function SubscriptionFlow() {
   const authLoading = status === "loading";
   const user = session?.user;
 
+  const { data: billingData, isLoading: billingLoading } = useBilling();
+  const paymentsReady = user ? (billingData?.razorpayReady ?? false) : false;
+  const checkoutIntervals: BillingInterval[] = user && billingData?.availableIntervals?.length
+    ? billingData.availableIntervals
+    : ["monthly"];
+  const paidActive = user ? (billingData?.subscription?.status === "ACTIVE") : false;
+  const paidPending = user ? (billingData?.subscription?.status === "PENDING") : false;
+  const accessTier = user ? (billingData?.access?.tier ?? null) : null;
+  const trialDaysRemaining = user ? (billingData?.access?.trialDaysRemaining ?? 0) : 0;
+
   const [subscribing, setSubscribing] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
-  const [billingLoading, setBillingLoading] = useState(false);
-  const [paymentsReady, setPaymentsReady] = useState(false);
-  const [checkoutIntervals, setCheckoutIntervals] = useState<BillingInterval[]>([
-    "monthly",
-  ]);
   const [billingInterval, setBillingInterval] =
     useState<BillingInterval>("monthly");
-  const [paidActive, setPaidActive] = useState(false);
-  const [paidPending, setPaidPending] = useState(false);
-  const [accessTier, setAccessTier] = useState<"free" | "trial" | "pro" | null>(
-    null
-  );
-  const [trialDaysRemaining, setTrialDaysRemaining] = useState(0);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
   useEffect(() => {
@@ -44,60 +44,6 @@ export function SubscriptionFlow() {
       document.body.removeChild(script);
     };
   }, []);
-
-  useEffect(() => {
-    if (!user) {
-      setPaymentsReady(false);
-      setCheckoutIntervals(["monthly"]);
-      setPaidActive(false);
-      setPaidPending(false);
-      setAccessTier(null);
-      setTrialDaysRemaining(0);
-      return;
-    }
-
-    let cancelled = false;
-    const loadBillingState = async () => {
-      setBillingLoading(true);
-      try {
-        const res = await fetch("/api/billing/me", { cache: "no-store" });
-        const data = (await res.json().catch(() => ({}))) as {
-          razorpayReady?: boolean;
-          availableIntervals?: BillingInterval[];
-          subscription?: { status?: string } | null;
-          access?: { tier?: "free" | "trial" | "pro"; trialDaysRemaining?: number };
-        };
-        if (cancelled) return;
-
-        const intervals =
-          data.availableIntervals?.length
-            ? data.availableIntervals
-            : (["monthly"] as BillingInterval[]);
-
-        setPaymentsReady(Boolean(data.razorpayReady));
-        setCheckoutIntervals(intervals);
-        setPaidActive(data.subscription?.status === "ACTIVE");
-        setPaidPending(data.subscription?.status === "PENDING");
-        setAccessTier(data.access?.tier ?? null);
-        setTrialDaysRemaining(data.access?.trialDaysRemaining ?? 0);
-      } catch {
-        if (cancelled) return;
-        setPaymentsReady(false);
-        setCheckoutIntervals(["monthly"]);
-        setPaidActive(false);
-        setPaidPending(false);
-        setAccessTier(null);
-        setTrialDaysRemaining(0);
-      } finally {
-        if (!cancelled) setBillingLoading(false);
-      }
-    };
-
-    loadBillingState();
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
 
   const subscribeToPaid = useCallback(async () => {
     setBanner(null);

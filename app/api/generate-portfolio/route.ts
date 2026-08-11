@@ -1,4 +1,4 @@
-import { generateOpenRouterText } from "@/lib/openrouter";
+import { streamOpenRouterText } from "@/lib/openrouter";
 import {
   AI_USER_CONTEXT_LIMIT_CHARS,
   guardAiRequest,
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const text = await generateOpenRouterText({
+    const stream = await streamOpenRouterText({
       messages: [
         {
           role: "user",
@@ -112,15 +112,12 @@ export async function POST(request: Request) {
       temperature: 0.5,
     });
 
-    const cleaned = text
-      .replace(/^```(?:json)?\s*\n?/i, "")
-      .replace(/\n?```\s*$/, "")
-      .trim();
-
-    const jsonMatch = cleaned.match(/\{[\s\S]*\}/)?.[0]?.trim() ?? cleaned;
-    const data = JSON.parse(jsonMatch);
-
-    return NextResponse.json({ data });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+      },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Generation failed";
     return NextResponse.json({ error: message }, { status: 500 });

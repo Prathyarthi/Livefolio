@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Clock, CreditCard, Crown, Loader2 } from "lucide-react";
@@ -16,23 +16,7 @@ import {
 import { BillingIntervalToggle } from "@/features/subscriptions/components/billing-interval-toggle";
 import { startProCheckout } from "@/features/subscriptions/lib/checkout";
 import { getIntervalCheckoutUnavailableMessage } from "@/lib/billing";
-
-interface BillingState {
-  razorpayReady: boolean;
-  availableIntervals?: BillingInterval[];
-  subscription: {
-    status: "ACTIVE" | "PENDING";
-    cancelAtPeriodEnd: boolean;
-    currentPeriodEnd: string | null;
-  } | null;
-  access: {
-    tier: "free" | "trial" | "pro";
-    trialDaysRemaining: number;
-    canUsePremiumTemplates: boolean;
-    canUseImports: boolean;
-    canUseAnalytics: boolean;
-  } | null;
-}
+import { useBilling } from "@/features/subscriptions/api/use-billing";
 
 function formatBillingDate(value: string | null | undefined) {
   if (!value) return null;
@@ -41,13 +25,15 @@ function formatBillingDate(value: string | null | undefined) {
   }).format(new Date(value));
 }
 
-export default function BillingPage() {
+function BillingContent() {
   const searchParams = useSearchParams();
   const returning = searchParams.has("return");
   const cancelled = searchParams.has("cancelled");
 
-  const [billing, setBilling] = useState<BillingState | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: billing, isLoading: loading, refetch: loadBilling } = useBilling();
+  const checkoutIntervals: BillingInterval[] = billing?.availableIntervals?.length
+    ? billing.availableIntervals
+    : ["monthly"];
   const [subscribing, setSubscribing] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,43 +41,13 @@ export default function BillingPage() {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [billingInterval, setBillingInterval] =
     useState<BillingInterval>("monthly");
-  const [checkoutIntervals, setCheckoutIntervals] = useState<BillingInterval[]>([
-    "monthly",
-  ]);
-
-  const loadBilling = useCallback(async () => {
-    try {
-      const res = await fetch("/api/billing/me", { cache: "no-store" });
-      const data = await res.json();
-      setBilling(data);
-      const intervals =
-        data.availableIntervals?.length
-          ? data.availableIntervals
-          : (["monthly"] as BillingInterval[]);
-      setCheckoutIntervals(intervals);
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- state updates after the async response
-    void loadBilling();
-  }, [loadBilling]);
 
   useEffect(() => {
     if (!returning) return;
-
     const tier = billing?.access?.tier;
     const pending = billing?.subscription?.status === "PENDING";
     if (tier === "pro" || !pending) return;
-
-    const interval = window.setInterval(() => {
-      void loadBilling();
-    }, 3000);
-
+    const interval = window.setInterval(() => { void loadBilling(); }, 3000);
     return () => window.clearInterval(interval);
   }, [returning, billing, loadBilling]);
 
@@ -377,5 +333,13 @@ export default function BillingPage() {
         cancelling={cancelling}
       />
     </div>
+  );
+}
+
+export default function BillingPage() {
+  return (
+    <Suspense>
+      <BillingContent />
+    </Suspense>
   );
 }

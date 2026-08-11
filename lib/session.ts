@@ -9,6 +9,9 @@ function shouldUseSecureCookies() {
   );
 }
 
+const SESSION_CACHE_TTL_MS = 5 * 60 * 1000;
+const sessionCache = new Map<string, { userId: string; expiresAt: number }>();
+
 async function resolveUserIdFromToken(token: {
   id?: unknown;
   email?: unknown;
@@ -21,10 +24,18 @@ async function resolveUserIdFromToken(token: {
     return null;
   }
 
+  const email = token.email;
+  const cached = sessionCache.get(email);
+  if (cached && Date.now() < cached.expiresAt) return cached.userId;
+
   const dbUser = await prisma.user.findUnique({
-    where: { email: normalizeOAuthEmail(token.email) },
+    where: { email: normalizeOAuthEmail(email) },
     select: { id: true },
   });
+
+  if (dbUser) {
+    sessionCache.set(email, { userId: dbUser.id, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
+  }
 
   return dbUser?.id ?? null;
 }

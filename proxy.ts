@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 import {
   APP_ROUTE_PREFIXES,
   extractPortfolioSubdomain,
@@ -57,6 +58,18 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!subdomain) {
+    if (pathname.startsWith("/dashboard")) {
+      const token = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET,
+        secureCookie:
+          process.env.NEXTAUTH_URL?.startsWith("https://") === true ||
+          process.env.VERCEL === "1",
+      });
+      if (!token) {
+        return NextResponse.redirect(new URL("/sign-in", request.url));
+      }
+    }
     return NextResponse.next();
   }
 

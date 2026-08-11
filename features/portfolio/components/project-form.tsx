@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   usePortfolio,
   useAddProject,
@@ -59,6 +59,7 @@ import {
   MAX_TECH_STACK_ITEMS,
   normalizeStringList,
 } from "@/lib/content-policy";
+import { useBilling } from "@/features/subscriptions/api/use-billing";
 
 interface ProjectEntry {
   id?: string;
@@ -128,34 +129,9 @@ export function ProjectForm() {
   const [enableLivePreviewOnSave, setEnableLivePreviewOnSave] = useState(false);
   const [editLivePreviewEnabled, setEditLivePreviewEnabled] = useState(false);
   const editingCardRef = useScrollIntoView<HTMLDivElement>(Boolean(editingId));
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(
-    null
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadBilling = async () => {
-      try {
-        const res = await fetch("/api/billing/me", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json().catch(() => ({}))) as {
-          subscription?: { status?: string | null } | null;
-        };
-        if (cancelled) return;
-        const status = data.subscription?.status ?? null;
-        setSubscriptionStatus(
-          status?.toLowerCase() === "active" ? "active" : "none"
-        );
-      } catch {
-        if (cancelled) return;
-        setSubscriptionStatus("none");
-      }
-    };
-    loadBilling();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: billing } = useBilling();
+  const subscriptionStatus =
+    billing?.subscription?.status?.toLowerCase() === "active" ? "active" : "none";
 
   const livePreviewProjectIds = Array.isArray(portfolio?.livePreviewProjectIds)
     ? portfolio.livePreviewProjectIds

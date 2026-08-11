@@ -15,14 +15,10 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    await reconcileUserBilling(session.user.id);
-  } catch (error) {
-    console.error("[billing.me] reconciliation failed", {
-      error,
-      userId: session.user.id,
-    });
-  }
+  // Fire-and-forget — webhooks keep DB current; reconcile is a defensive fallback
+  void reconcileUserBilling(session.user.id).catch((error) =>
+    console.error("[billing.me] reconciliation failed", { error, userId: session.user.id })
+  );
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -59,10 +55,8 @@ export async function GET() {
         : null;
 
   // Keep response shape aligned with Xchat's subscription flow contract.
-  return NextResponse.json({
-    razorpayReady: paymentsReady,
-    availableIntervals,
-    subscription,
-    access,
-  });
+  return NextResponse.json(
+    { razorpayReady: paymentsReady, availableIntervals, subscription, access },
+    { headers: { "Cache-Control": "private, max-age=30" } }
+  );
 }

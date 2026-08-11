@@ -29,6 +29,21 @@ import {
 } from "@/features/templates/section-order";
 import type { PortfolioCustomization } from "@/features/templates/types";
 
+const PROFILE_CACHE_TTL_MS = 5 * 60 * 1000;
+
+type ProfileCacheEntry = { data: unknown; expiresAt: number };
+const profileCache = new Map<string, ProfileCacheEntry>();
+
+function getCachedProfile(key: string): unknown | null {
+  const entry = profileCache.get(key);
+  if (!entry || Date.now() >= entry.expiresAt) return null;
+  return entry.data;
+}
+
+function setCachedProfile(key: string, data: unknown) {
+  profileCache.set(key, { data, expiresAt: Date.now() + PROFILE_CACHE_TTL_MS });
+}
+
 async function requireImportEntitlement(request: Request) {
   const session = await getSession(request);
   if (!session) {
@@ -78,11 +93,15 @@ export const profile = new Elysia({ prefix: "/profile" })
         return gate.body;
       }
 
+      const githubKey = `github:${ctx.body.username.toLowerCase()}`;
+      const cachedGitHub = getCachedProfile(githubKey);
+      if (cachedGitHub) return { success: true, data: cachedGitHub };
       try {
         const data = await fetchGitHubProfile(
           ctx.body.username,
           process.env.GITHUB_TOKEN
         );
+        setCachedProfile(githubKey, data);
         return { success: true, data };
       } catch (error: unknown) {
         ctx.set.status = 400;
@@ -258,8 +277,12 @@ export const profile = new Elysia({ prefix: "/profile" })
         return gate.body;
       }
 
+      const leetcodeKey = `leetcode:${ctx.body.username.toLowerCase()}`;
+      const cachedLeetCode = getCachedProfile(leetcodeKey);
+      if (cachedLeetCode) return { success: true, data: cachedLeetCode };
       try {
         const data = await fetchLeetCodeStats(ctx.body.username);
+        setCachedProfile(leetcodeKey, data);
         return { success: true, data };
       } catch (error) {
         ctx.set.status = 400;
@@ -353,8 +376,12 @@ export const profile = new Elysia({ prefix: "/profile" })
         return gate.body;
       }
 
+      const mediumKey = `medium:${ctx.body.username.toLowerCase()}`;
+      const cachedMedium = getCachedProfile(mediumKey);
+      if (cachedMedium) return { success: true, data: cachedMedium };
       try {
         const data = await fetchMediumArticles(ctx.body.username);
+        setCachedProfile(mediumKey, data);
         return { success: true, data };
       } catch (error: unknown) {
         ctx.set.status = 400;

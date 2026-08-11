@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useBilling } from "@/features/subscriptions/api/use-billing";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -43,9 +44,8 @@ export default function PreviewPage() {
   const [previewPrimaryColor, setPreviewPrimaryColor] = useState<string | null>(
     null,
   );
-  const [allowedTemplateIds, setAllowedTemplateIds] = useState<string[] | null>(
-    null
-  );
+  const { data: billing } = useBilling();
+  const allowedTemplateIds = billing?.access?.allowedTemplateIds ?? null;
   const isMobile = useIsMobile();
   const [editOpen, setEditOpen] = useState(false);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
@@ -54,28 +54,6 @@ export default function PreviewPage() {
   useEffect(() => {
     setEditOpen(!isMobile);
   }, [isMobile]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadAccess = async () => {
-      try {
-        const res = await fetch("/api/billing/me", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json().catch(() => ({}))) as {
-          access?: { allowedTemplateIds?: string[] };
-        };
-        if (cancelled) return;
-        setAllowedTemplateIds(data.access?.allowedTemplateIds ?? null);
-      } catch {
-        if (cancelled) return;
-        setAllowedTemplateIds(null);
-      }
-    };
-    loadAccess();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     if (

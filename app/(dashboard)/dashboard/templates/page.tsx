@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -26,49 +26,19 @@ import {
   getTemplateDefaultAccent,
 } from "@/features/templates/template-accent-palettes";
 import { TemplatePreviewThumbnail } from "@/features/templates/template-preview-thumbnail";
+import { useBilling } from "@/features/subscriptions/api/use-billing";
 
 export default function TemplatesPage() {
   const router = useRouter();
   const { data: portfolio, isLoading } = usePortfolio();
   const updateTemplate = useUpdateTemplate();
   const updatePortfolio = useUpdatePortfolio();
-  const [allowedTemplateIds, setAllowedTemplateIds] = useState<string[] | null>(
-    null
-  );
-  const [accessTier, setAccessTier] = useState<
-    "free" | "trial" | "pro" | null
-  >(null);
-  const [trialDaysRemaining, setTrialDaysRemaining] = useState<number>(0);
+  const { data: billing } = useBilling();
+  const allowedTemplateIds = billing?.access?.allowedTemplateIds ?? null;
+  const accessTier = billing?.access?.tier ?? null;
+  const trialDaysRemaining = billing?.access?.trialDaysRemaining ?? 0;
   const [isApplying, setIsApplying] = useState(false);
   const currentTemplate = portfolio?.templateId ?? "pulse";
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadAccess = async () => {
-      try {
-        const res = await fetch("/api/billing/me", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json().catch(() => ({}))) as {
-          access?: {
-            allowedTemplateIds?: string[];
-            tier?: "free" | "trial" | "pro";
-            trialDaysRemaining?: number;
-          };
-        };
-        if (cancelled) return;
-        setAllowedTemplateIds(data.access?.allowedTemplateIds ?? null);
-        setAccessTier(data.access?.tier ?? null);
-        setTrialDaysRemaining(data.access?.trialDaysRemaining ?? 0);
-      } catch {
-        if (cancelled) return;
-        setAllowedTemplateIds(null);
-      }
-    };
-    loadAccess();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const handleSelect = async (templateId: string) => {
     if (allowedTemplateIds && !allowedTemplateIds.includes(templateId)) {

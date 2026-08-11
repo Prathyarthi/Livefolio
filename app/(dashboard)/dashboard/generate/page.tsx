@@ -118,9 +118,22 @@ function PromptTab({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
-      const json = (await res.json()) as { data?: PortfolioData; error?: string };
-      if (!res.ok || json.error) throw new Error(json.error ?? "Generation failed");
-      onData(json.data!);
+      if (!res.ok) {
+        const err = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(err.error ?? "Generation failed");
+      }
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += decoder.decode(value, { stream: true });
+      }
+      const cleaned = fullText.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/, "").trim();
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/)?.[0]?.trim() ?? cleaned;
+      const data = JSON.parse(jsonMatch) as PortfolioData;
+      onData(data);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Generation failed");
     } finally {

@@ -1,15 +1,13 @@
-import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
 const WINDOW_MS = 60 * 60 * 1000;
 
-/** Dashboard stats fetches (including forced refresh). */
 const ME_USER_LIMIT = 60;
-/** Public portfolio view beacons. */
 const VIEW_IP_LIMIT = 120;
-/** Public link-click beacons. */
 const CLICK_IP_LIMIT = 240;
+
+type Bucket = { count: number; windowStart: number };
+const store = new Map<string, Bucket>();
 
 function getClientIp(request: Request) {
   const value =
@@ -22,80 +20,45 @@ function getClientIp(request: Request) {
   return normalized ? normalized.slice(0, 128) : null;
 }
 
-function bucketKey(prefix: string, identifier: string, windowStart: number) {
-  const digest = createHash("sha256").update(identifier).digest("hex");
-  return `${prefix}:${digest}:${windowStart}`;
-}
+function checkQuota(key: string, limit: number): boolean {
+  const now = Date.now();
+  const windowStart = Math.floor(now / WINDOW_MS) * WINDOW_MS;
+  const entry = store.get(key);
 
-async function consumeQuota(
-  keyPrefix: string,
-  identifier: string,
-  limit: number,
-  errorMessage: string
-) {
-  const now = new Date();
-  const windowStart = Math.floor(now.getTime() / WINDOW_MS) * WINDOW_MS;
-  const expiresAt = new Date(windowStart + WINDOW_MS);
-  const key = bucketKey(keyPrefix, identifier, windowStart);
-
-  try {
-    const bucket = await prisma.rateLimitBucket.upsert({
-      where: { key },
-      create: { key, count: 1, expiresAt },
-      update: { count: { increment: 1 }, expiresAt },
-      select: { count: true },
-    });
-
-    if (bucket.count <= limit) return null;
-
-    return NextResponse.json(
-      { error: errorMessage },
-      {
-        status: 429,
-        headers: {
-          "Retry-After": String(
-            Math.max(
-              1,
-              Math.ceil((expiresAt.getTime() - now.getTime()) / 1000)
-            )
-          ),
-        },
-      }
-    );
-  } catch (error) {
-    console.error(`[analytics.rate-limit] ${keyPrefix} failed`, error);
-    return NextResponse.json(
-      { error: "Analytics is temporarily unavailable." },
-      { status: 503 }
-    );
+  if (!entry || entry.windowStart !== windowStart) {
+    store.set(key, { count: 1, windowStart });
+    return true;
   }
+
+  entry.count += 1;
+  return entry.count <= limit;
 }
 
-export async function enforceAnalyticsMeRateLimit(userId: string) {
-  return consumeQuota(
-    "analytics:me:user",
-    userId,
-    ME_USER_LIMIT,
-    "Too many analytics requests. Try again later."
+function tooManyResponse(message: string) {
+  return NextResponse.json(
+    { error: message },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(Math.ceil(WINDOW_MS / 1000)),
+      },
+    }
   );
 }
 
-export async function enforceAnalyticsViewRateLimit(request: Request) {
+export function enforceAnalyticsMeRateLimit(userId: string) {
+  const allowed = checkQuota(`analytics:me:user:${userId}`, ME_USER_LIMIT);
+  return allowed ? null : tooManyResponse("Too many analytics requests. Try again later.");
+}
+
+export function enforceAnalyticsViewRateLimit(request: Request) {
   const ip = getClientIp(request) ?? "unknown";
-  return consumeQuota(
-    "analytics:view:ip",
-    ip,
-    VIEW_IP_LIMIT,
-    "Too many view events. Try again later."
-  );
+  const allowed = checkQuota(`analytics:view:ip:${ip}`, VIEW_IP_LIMIT);
+  return allowed ? null : tooManyResponse("Too many view events. Try again later.");
 }
 
-export async function enforceAnalyticsClickRateLimit(request: Request) {
+export function enforceAnalyticsClickRateLimit(request: Request) {
   const ip = getClientIp(request) ?? "unknown";
-  return consumeQuota(
-    "analytics:click:ip",
-    ip,
-    CLICK_IP_LIMIT,
-    "Too many click events. Try again later."
-  );
+  const allowed = checkQuota(`analytics:click:ip:${ip}`, CLICK_IP_LIMIT);
+  return allowed ? null : tooManyResponse("Too many click events. Try again later.");
 }
