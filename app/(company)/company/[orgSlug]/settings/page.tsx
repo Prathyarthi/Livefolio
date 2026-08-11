@@ -13,6 +13,7 @@ import {
   useOrganization,
   useUpdateOrganization,
 } from "@/features/organization/api/use-organization";
+import { CompanyTeamSection } from "@/features/organization/components/company-team-section";
 import { useOrgJobs } from "@/features/jobs/api/use-jobs";
 
 export default function CompanySettingsPage() {
@@ -183,6 +184,12 @@ export default function CompanySettingsPage() {
           </div>
         </div>
       )}
+
+      <CompanyTeamSection
+        orgSlug={orgSlug}
+        canManage={org.permissions.manageOrganization}
+        viewerRole={org.role}
+      />
     </div>
   );
 }

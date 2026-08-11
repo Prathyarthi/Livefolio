@@ -7,8 +7,21 @@ export const ORG_ROLES = [
 
 export type OrgRole = (typeof ORG_ROLES)[number];
 
+/** Roles that can be assigned when adding or updating members (not owner). */
+export const ASSIGNABLE_ORG_ROLES = [
+  "admin",
+  "recruiter",
+  "hiring_manager",
+] as const;
+
+export type AssignableOrgRole = (typeof ASSIGNABLE_ORG_ROLES)[number];
+
 export function isOrgRole(value: string): value is OrgRole {
   return (ORG_ROLES as readonly string[]).includes(value);
+}
+
+export function isAssignableOrgRole(value: string): value is AssignableOrgRole {
+  return (ASSIGNABLE_ORG_ROLES as readonly string[]).includes(value);
 }
 
 /** Can manage company settings and members. */

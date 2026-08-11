@@ -143,3 +143,85 @@ export function useUpdateOrganization(slug: string) {
     },
   });
 }
+
+export type OrgMember = {
+  id: string;
+  role: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    avatar: string | null;
+  };
+};
+
+export function useOrgMembers(slug: string | undefined) {
+  return useQuery({
+    queryKey: ["organizations", slug, "members"],
+    enabled: Boolean(slug),
+    queryFn: async () => {
+      const res = await fetch(`/api/organizations/${slug}/members`, {
+        cache: "no-store",
+      });
+      if (!res.ok) await throwApiError(res, "Failed to load members");
+      return res.json() as Promise<OrgMember[]>;
+    },
+  });
+}
+
+function invalidateOrgMembers(qc: ReturnType<typeof useQueryClient>, slug: string) {
+  qc.invalidateQueries({ queryKey: ["organizations", slug, "members"] });
+  qc.invalidateQueries({ queryKey: ["organizations"] });
+  qc.invalidateQueries({ queryKey: ["organizations", slug] });
+}
+
+export function useAddOrgMember(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { email: string; role: string }) => {
+      const res = await fetch(`/api/organizations/${slug}/members`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) await throwApiError(res, "Failed to add member");
+      return res.json() as Promise<OrgMember>;
+    },
+    onSuccess: () => invalidateOrgMembers(qc, slug),
+  });
+}
+
+export function useUpdateOrgMemberRole(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { memberId: string; role: string }) => {
+      const res = await fetch(
+        `/api/organizations/${slug}/members/${data.memberId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: data.role }),
+        },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to update member role");
+      return res.json() as Promise<OrgMember>;
+    },
+    onSuccess: () => invalidateOrgMembers(qc, slug),
+  });
+}
+
+export function useRemoveOrgMember(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (memberId: string) => {
+      const res = await fetch(
+        `/api/organizations/${slug}/members/${memberId}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to remove member");
+      return res.json() as Promise<{ ok: boolean }>;
+    },
+    onSuccess: () => invalidateOrgMembers(qc, slug),
+  });
+}
