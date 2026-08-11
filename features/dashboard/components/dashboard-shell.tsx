@@ -142,7 +142,7 @@ function AppSidebar() {
               className="gap-3 text-base [&_svg]:size-5 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:[&_span]:hidden group-data-[collapsible=icon]:[&_svg]:size-5"
             >
               <Link
-                href="/company"
+                href="/recruiters"
                 onClick={() => {
                   if (isMobile) setOpenMobile(false);
                 }}

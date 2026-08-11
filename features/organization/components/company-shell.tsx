@@ -13,6 +13,7 @@ import {
   PanelLeft,
   ArrowLeft,
   Plus,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,6 +45,8 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
   const { state, toggleSidebar, isMobile, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
 
+  const canManageBilling = Boolean(org?.permissions.manageOrganization);
+
   const nav = [
     {
       title: "Overview",
@@ -60,6 +63,15 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
       href: `/company/${orgSlug}/settings`,
       icon: Settings,
     },
+    ...(canManageBilling
+      ? [
+          {
+            title: "Billing",
+            href: `/company/${orgSlug}/billing`,
+            icon: CreditCard,
+          },
+        ]
+      : []),
   ];
 
   return (

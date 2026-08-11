@@ -2,6 +2,21 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+export class ApiRequestError extends Error {
+  upgradeRequired?: boolean;
+  upgradeOrgSlug?: string | null;
+
+  constructor(
+    message: string,
+    extras?: { upgradeRequired?: boolean; upgradeOrgSlug?: string | null },
+  ) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.upgradeRequired = extras?.upgradeRequired;
+    this.upgradeOrgSlug = extras?.upgradeOrgSlug;
+  }
+}
+
 async function throwApiError(
   response: Response,
   fallbackMessage: string,
@@ -9,13 +24,25 @@ async function throwApiError(
   const body = (await response
     .clone()
     .json()
-    .catch(() => null)) as { error?: unknown; message?: unknown } | null;
+    .catch(() => null)) as {
+    error?: unknown;
+    message?: unknown;
+    upgradeRequired?: unknown;
+    upgradeOrgSlug?: unknown;
+  } | null;
   const text = body ? "" : await response.text().catch(() => "");
   const message = [body?.error, body?.message].find(
     (value): value is string =>
       typeof value === "string" && value.trim().length > 0,
   );
-  throw new Error(message?.trim() || text.trim() || fallbackMessage);
+  throw new ApiRequestError(
+    message?.trim() || text.trim() || fallbackMessage,
+    {
+      upgradeRequired: body?.upgradeRequired === true,
+      upgradeOrgSlug:
+        typeof body?.upgradeOrgSlug === "string" ? body.upgradeOrgSlug : null,
+    },
+  );
 }
 
 export type OrganizationSummary = {
@@ -50,9 +77,10 @@ export type OrganizationDetail = OrganizationSummary & {
   };
 };
 
-export function useOrganizations() {
+export function useOrganizations(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["organizations"],
+    enabled: options?.enabled ?? true,
     queryFn: async () => {
       const res = await fetch("/api/organizations", { cache: "no-store" });
       if (!res.ok) await throwApiError(res, "Failed to load organizations");

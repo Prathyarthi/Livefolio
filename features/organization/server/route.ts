@@ -12,6 +12,10 @@ import {
   requireOrgMember,
 } from "@/features/organization/lib/org-access";
 import { canManageJobs, canManageOrganization } from "@/features/organization/lib/permissions";
+import {
+  canUserCreateOrganization,
+  orgUpgradeMessage,
+} from "@/lib/org-entitlements";
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -66,6 +70,16 @@ export const organization = new Elysia({ prefix: "/organizations" })
       if (!name) {
         ctx.set.status = 400;
         return { error: "Company name is required" };
+      }
+
+      const createAccess = await canUserCreateOrganization(session.userId);
+      if (!createAccess.allowed) {
+        ctx.set.status = 402;
+        return {
+          error: orgUpgradeMessage("workspace"),
+          upgradeRequired: true,
+          upgradeOrgSlug: createAccess.upgradeOrgSlug,
+        };
       }
 
       const requestedSlug = ctx.body.slug

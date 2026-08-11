@@ -12,6 +12,8 @@ const RESERVED_ORG_SLUGS = new Set([
   "create",
   "settings",
   "organizations",
+  "recruiters",
+  "billing",
 ]);
 
 export function sanitizeHiringSlug(value: string): string {

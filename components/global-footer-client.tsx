@@ -17,7 +17,8 @@ export function GlobalFooterClient({ host }: GlobalFooterClientProps) {
 
   if (
     pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/company")
+    pathname.startsWith("/company") ||
+    pathname.startsWith("/recruiters")
   ) {
     return null;
   }

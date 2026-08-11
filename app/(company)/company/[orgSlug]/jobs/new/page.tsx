@@ -85,8 +85,29 @@ export default function NewJobPage() {
       toast.success(publish ? "Job published" : "Draft saved");
       router.push(`/company/${orgSlug}/jobs/${job.id}`);
     } catch (error) {
+      const upgradeSlug =
+        error &&
+        typeof error === "object" &&
+        "upgradeOrgSlug" in error &&
+        typeof (error as { upgradeOrgSlug?: unknown }).upgradeOrgSlug === "string"
+          ? (error as { upgradeOrgSlug: string }).upgradeOrgSlug
+          : orgSlug;
+      const upgradeRequired =
+        error &&
+        typeof error === "object" &&
+        "upgradeRequired" in error &&
+        (error as { upgradeRequired?: unknown }).upgradeRequired === true;
       toast.error(
         error instanceof Error ? error.message : "Failed to create job",
+        upgradeRequired
+          ? {
+              action: {
+                label: "Upgrade",
+                onClick: () =>
+                  router.push(`/company/${upgradeSlug}/billing`),
+              },
+            }
+          : undefined,
       );
     }
   }

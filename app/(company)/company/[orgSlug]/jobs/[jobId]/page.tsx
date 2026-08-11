@@ -56,7 +56,22 @@ export default function ManageJobPage() {
       await updateJob.mutateAsync({ id: jobId, data: { status } });
       toast.success(`Job ${JOB_STATUS_LABELS[status]?.toLowerCase() ?? status}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed");
+      const upgradeRequired =
+        err &&
+        typeof err === "object" &&
+        "upgradeRequired" in err &&
+        (err as { upgradeRequired?: unknown }).upgradeRequired === true;
+      toast.error(
+        err instanceof Error ? err.message : "Update failed",
+        upgradeRequired
+          ? {
+              action: {
+                label: "Upgrade",
+                onClick: () => router.push(`/company/${orgSlug}/billing`),
+              },
+            }
+          : undefined,
+      );
     }
   }
 

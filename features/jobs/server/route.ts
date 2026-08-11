@@ -3,6 +3,50 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { createUniqueJobPublicId } from "@/features/jobs/lib/slug-server";
 import { requireJobManager, requireOrgMember } from "@/features/organization/lib/org-access";
+import {
+  orgUpgradeMessage,
+  resolveOrgAccess,
+} from "@/lib/org-entitlements";
+
+const OPEN_JOB_STATUSES = new Set(["published", "paused"]);
+
+async function assertCanOpenJob(
+  organizationId: string,
+  opts?: { excludeJobId?: string },
+) {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: {
+      id: true,
+      slug: true,
+      subscriptionStatus: true,
+      subscriptionCancelAtPeriodEnd: true,
+      subscriptionCurrentPeriodEnd: true,
+    },
+  });
+  if (!org) return { ok: false as const, status: 404 as const, body: { error: "Organization not found" } };
+
+  const openJobCount = await prisma.job.count({
+    where: {
+      organizationId,
+      status: { in: ["published", "paused"] },
+      ...(opts?.excludeJobId ? { id: { not: opts.excludeJobId } } : {}),
+    },
+  });
+  const access = await resolveOrgAccess(org, openJobCount);
+  if (!access.canPublishMoreJobs) {
+    return {
+      ok: false as const,
+      status: 402 as const,
+      body: {
+        error: orgUpgradeMessage("job"),
+        upgradeRequired: true,
+        upgradeOrgSlug: org.slug,
+      },
+    };
+  }
+  return { ok: true as const };
+}
 
 const JOB_STATUSES = ["draft", "published", "paused", "closed"] as const;
 const EMPLOYMENT_TYPES = [
@@ -215,6 +259,14 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         return { error: "Invalid status" };
       }
 
+      if (OPEN_JOB_STATUSES.has(resolvedStatus)) {
+        const gate = await assertCanOpenJob(org.id);
+        if (!gate.ok) {
+          ctx.set.status = gate.status;
+          return gate.body;
+        }
+      }
+
       const job = await prisma.job.create({
         data: {
           organizationId: org.id,
@@ -327,6 +379,20 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       let publishedAt = existing.publishedAt;
       if (nextStatus === "published" && existing.status !== "published") {
         publishedAt = new Date();
+      }
+
+      const becomingOpen =
+        nextStatus !== undefined &&
+        OPEN_JOB_STATUSES.has(nextStatus) &&
+        !OPEN_JOB_STATUSES.has(existing.status);
+      if (becomingOpen) {
+        const gate = await assertCanOpenJob(existing.organizationId, {
+          excludeJobId: existing.id,
+        });
+        if (!gate.ok) {
+          ctx.set.status = gate.status;
+          return gate.body;
+        }
       }
 
       await prisma.job.update({

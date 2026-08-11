@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +13,22 @@ import {
   useOrganization,
   useUpdateOrganization,
 } from "@/features/organization/api/use-organization";
+import { useOrgJobs } from "@/features/jobs/api/use-jobs";
 
 export default function CompanySettingsPage() {
   const params = useParams<{ orgSlug: string }>();
   const orgSlug = params.orgSlug;
   const { data: org, isLoading } = useOrganization(orgSlug);
+  const { data: jobs } = useOrgJobs(orgSlug);
   const updateOrg = useUpdateOrganization(orgSlug);
+
+  const previewJob = useMemo(
+    () =>
+      (jobs ?? []).find(
+        (job) => job.status === "published" || job.status === "paused",
+      ) ?? null,
+    [jobs],
+  );
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -65,12 +76,28 @@ export default function CompanySettingsPage() {
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
       </Button>
-      <header className="space-y-1">
-        <p className="eyebrow uppercase">Settings</p>
-        <h1 className="text-h2 text-text-primary">Company branding</h1>
-        <p className="text-body-sm text-text-secondary">
-          These details appear on public job pages.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1">
+          <p className="eyebrow uppercase">Settings</p>
+          <h1 className="text-h2 text-text-primary">Company branding</h1>
+          <p className="text-body-sm text-text-secondary">
+            These details appear on public job pages.
+          </p>
+        </div>
+        {previewJob ? (
+          <Button variant="outline" asChild>
+            <Link href={`/jobs/${previewJob.slug}`} target="_blank">
+              <ExternalLink className="h-4 w-4" />
+              View public page
+            </Link>
+          </Button>
+        ) : (
+          <Button variant="outline" asChild>
+            <Link href={`/company/${orgSlug}/jobs/new`}>
+              Publish a job to preview
+            </Link>
+          </Button>
+        )}
       </header>
 
       {!org.permissions.manageOrganization ? (
@@ -124,17 +151,36 @@ export default function CompanySettingsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="brand">Brand color</Label>
-              <Input
-                id="brand"
-                value={brandColor}
-                onChange={(e) => setBrandColor(e.target.value)}
-                placeholder="#1a1a1a"
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  id="brand"
+                  value={brandColor}
+                  onChange={(e) => setBrandColor(e.target.value)}
+                  placeholder="#1a1a1a"
+                />
+                <span
+                  aria-hidden
+                  className="h-10 w-10 shrink-0 rounded-[var(--radius-md)] border border-border-default"
+                  style={{
+                    background: brandColor.trim() || "var(--brand-primary)",
+                  }}
+                />
+              </div>
             </div>
           </div>
-          <Button onClick={handleSave} disabled={updateOrg.isPending}>
-            Save changes
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={handleSave} disabled={updateOrg.isPending}>
+              Save changes
+            </Button>
+            {previewJob ? (
+              <Button variant="outline" asChild>
+                <Link href={`/jobs/${previewJob.slug}`} target="_blank">
+                  <ExternalLink className="h-4 w-4" />
+                  Preview branding
+                </Link>
+              </Button>
+            ) : null}
+          </div>
         </div>
       )}
     </div>

@@ -34,10 +34,11 @@ model User {
   noPortfolioReminderSentAt    DateTime?
   unpublishedReminderSentAt    DateTime?
 
-  portfolio            Portfolio?
-  billingSubscriptions BillingSubscription[]
-  billingCheckout      BillingCheckoutAttempt?
-  billingPayments      BillingPayment[]
+  portfolio               Portfolio?
+  billingSubscriptions    BillingSubscription[]
+  billingCheckout         BillingCheckoutAttempt?
+  orgBillingCheckouts     OrgBillingCheckoutAttempt[]
+  billingPayments         BillingPayment[]
 
   organizationMembers OrganizationMember[]
   jobsCreated         Job[]
@@ -51,6 +52,8 @@ model User {
 model BillingSubscription {
   id                     String    @id @default(uuid())
   userId                 String
+  /// Set for organization (hiring) subscriptions; null for personal Pro.
+  organizationId         String?
   providerSubscriptionId String    @unique
   providerPlanId         String
   interval               String
@@ -62,11 +65,32 @@ model BillingSubscription {
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
-  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payments BillingPayment[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  payments     BillingPayment[]
 
   @@index([userId, status])
+  @@index([organizationId, status])
   @@map("billing_subscriptions")
+}
+
+/// Org checkout attempts (separate from personal BillingCheckoutAttempt).
+model OrgBillingCheckoutAttempt {
+  id                     String   @id @default(uuid())
+  organizationId         String   @unique
+  userId                 String
+  providerSubscriptionId String?  @unique
+  providerPlanId         String
+  interval               String
+  status                 String   @default("creating")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("org_billing_checkout_attempts")
 }
 
 model BillingCheckoutAttempt {
@@ -373,8 +397,16 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members OrganizationMember[]
-  jobs    Job[]
+  /// none | pending | active — Org Pro is `active`.
+  subscriptionStatus String @default("none")
+  razorpaySubscriptionId String?
+  subscriptionCancelAtPeriodEnd Boolean   @default(false)
+  subscriptionCurrentPeriodEnd  DateTime?
+
+  members              OrganizationMember[]
+  jobs                 Job[]
+  billingSubscriptions BillingSubscription[]
+  billingCheckout      OrgBillingCheckoutAttempt?
 
   @@index([slug])
   @@map("organizations")

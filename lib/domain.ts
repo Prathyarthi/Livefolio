@@ -28,6 +28,7 @@ export const RESERVED_SUBDOMAINS = new Set([
   "hiring",
   "careers",
   "organizations",
+  "recruiters",
 ]);
 
 export function getPortfolioRootDomain(): string {
@@ -158,5 +159,8 @@ export const APP_ROUTE_PREFIXES = [
   "/sign-in",
   "/sign-up",
   "/pricing",
+  "/recruiters",
+  "/company",
+  "/jobs",
   "/_next",
 ] as const;

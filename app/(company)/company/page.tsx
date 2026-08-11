@@ -62,8 +62,23 @@ export default function CompanyIndexPage() {
       toast.success("Hiring workspace created");
       router.push(`/company/${result.organization.slug}`);
     } catch (error) {
+      const upgradeSlug =
+        error &&
+        typeof error === "object" &&
+        "upgradeOrgSlug" in error &&
+        typeof (error as { upgradeOrgSlug?: unknown }).upgradeOrgSlug === "string"
+          ? (error as { upgradeOrgSlug: string }).upgradeOrgSlug
+          : null;
       toast.error(
         error instanceof Error ? error.message : "Failed to create company",
+        upgradeSlug
+          ? {
+              action: {
+                label: "Upgrade",
+                onClick: () => router.push(`/company/${upgradeSlug}/billing`),
+              },
+            }
+          : undefined,
       );
     }
   }

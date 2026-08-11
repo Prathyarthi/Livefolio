@@ -50,6 +50,17 @@ function getUserIdFromPayload(payload: RazorpayWebhookPayload): string | null {
   return fromPayment ?? null;
 }
 
+function getOrganizationIdFromPayload(
+  payload: RazorpayWebhookPayload,
+): string | null {
+  const fromSubscription =
+    payload.payload?.subscription?.entity?.notes?.organizationId;
+  if (fromSubscription) return fromSubscription;
+
+  const fromPayment = payload.payload?.payment?.entity?.notes?.organizationId;
+  return fromPayment ?? null;
+}
+
 function statusFromEvent(
   event: string | undefined,
   entityStatus: unknown
@@ -115,6 +126,24 @@ export async function POST(req: Request) {
       ? new Date(body.created_at * 1000)
       : new Date();
   let userId = getUserIdFromPayload(body);
+  let organizationId = getOrganizationIdFromPayload(body);
+
+  if (!organizationId && subscriptionId) {
+    const existingOrgSub = await prisma.billingSubscription.findUnique({
+      where: { providerSubscriptionId: subscriptionId },
+      select: { organizationId: true, userId: true },
+    });
+    if (existingOrgSub?.organizationId) {
+      organizationId = existingOrgSub.organizationId;
+      userId = userId ?? existingOrgSub.userId;
+    } else {
+      const org = await prisma.organization.findFirst({
+        where: { razorpaySubscriptionId: subscriptionId },
+        select: { id: true },
+      });
+      organizationId = org?.id ?? null;
+    }
+  }
 
   if (!userId && subscriptionId) {
     const user = await prisma.user.findFirst({
@@ -124,14 +153,7 @@ export async function POST(req: Request) {
     userId = user?.id ?? null;
   }
 
-  if (!userId) {
-    return NextResponse.json({ ok: true, ignored: true });
-  }
-  const targetUser = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true },
-  });
-  if (!targetUser) {
+  if (!userId && !organizationId) {
     return NextResponse.json({ ok: true, ignored: true });
   }
 
@@ -163,6 +185,25 @@ export async function POST(req: Request) {
         await tx.billingSubscription.findUnique({
           where: { providerSubscriptionId: subscriptionId },
         });
+      const resolvedOrganizationId =
+        organizationId ?? existingSubscription?.organizationId ?? null;
+      const resolvedUserId = userId ?? existingSubscription?.userId;
+      if (!resolvedUserId) return "ignored";
+
+      if (resolvedOrganizationId) {
+        const targetOrg = await tx.organization.findUnique({
+          where: { id: resolvedOrganizationId },
+          select: { id: true },
+        });
+        if (!targetOrg) return "ignored";
+      } else {
+        const targetUser = await tx.user.findUnique({
+          where: { id: resolvedUserId },
+          select: { id: true },
+        });
+        if (!targetUser) return "ignored";
+      }
+
       const providerPlanId =
         subscriptionEntity?.plan_id ??
         existingSubscription?.providerPlanId ??
@@ -170,7 +211,14 @@ export async function POST(req: Request) {
       const configuredInterval = getIntervalForPlanId(providerPlanId);
       if (
         existingSubscription &&
-        existingSubscription.userId !== userId
+        existingSubscription.userId !== resolvedUserId
+      ) {
+        return "ownership-mismatch";
+      }
+      if (
+        existingSubscription?.organizationId &&
+        resolvedOrganizationId &&
+        existingSubscription.organizationId !== resolvedOrganizationId
       ) {
         return "ownership-mismatch";
       }
@@ -199,7 +247,8 @@ export async function POST(req: Request) {
         await tx.billingSubscription.upsert({
           where: { providerSubscriptionId: subscriptionId },
           create: {
-            userId,
+            userId: resolvedUserId,
+            organizationId: resolvedOrganizationId,
             providerSubscriptionId: subscriptionId,
             providerPlanId,
             interval:
@@ -213,6 +262,9 @@ export async function POST(req: Request) {
             lastEventId: providerEventId,
           },
           update: {
+            ...(resolvedOrganizationId && {
+              organizationId: resolvedOrganizationId,
+            }),
             providerPlanId,
             ...(configuredInterval && { interval: configuredInterval }),
             status: providerStatus,
@@ -229,7 +281,7 @@ export async function POST(req: Request) {
           where: { providerPaymentId: paymentEntity.id },
           create: {
             providerPaymentId: paymentEntity.id,
-            userId,
+            userId: resolvedUserId,
             billingSubscriptionId: billingSubscription.id,
             providerSubscriptionId: subscriptionId,
             status: paymentEntity.status ?? "unknown",
@@ -240,8 +292,76 @@ export async function POST(req: Request) {
         });
       }
 
+      if (resolvedOrganizationId) {
+        const currentOrg = await tx.organization.findUnique({
+          where: { id: resolvedOrganizationId },
+          select: {
+            razorpaySubscriptionId: true,
+            subscriptionCancelAtPeriodEnd: true,
+            subscriptionCurrentPeriodEnd: true,
+          },
+        });
+        const isCurrent =
+          currentOrg?.razorpaySubscriptionId === subscriptionId;
+        const canRecoverCurrent =
+          !currentOrg?.razorpaySubscriptionId &&
+          providerStatus === "active" &&
+          configuredInterval !== null;
+        if (!isCurrent && !canRecoverCurrent) return "recorded";
+
+        const terminal = isTerminalProviderStatus(providerStatus);
+        const paidThrough =
+          currentPeriodEnd ??
+          billingSubscription.currentPeriodEnd ??
+          currentOrg?.subscriptionCurrentPeriodEnd ??
+          null;
+        const retainPaidAccess =
+          terminal &&
+          (currentOrg?.subscriptionCancelAtPeriodEnd === true ||
+            billingSubscription.cancelAtPeriodEnd) &&
+          paidThrough !== null &&
+          paidThrough.getTime() > Date.now();
+        await tx.organization.update({
+          where: { id: resolvedOrganizationId },
+          data: terminal && !retainPaidAccess
+            ? {
+                subscriptionStatus: "none",
+                razorpaySubscriptionId: null,
+                subscriptionCancelAtPeriodEnd: false,
+                subscriptionCurrentPeriodEnd: null,
+              }
+            : {
+                subscriptionStatus: retainPaidAccess
+                  ? "active"
+                  : configuredInterval || providerStatus !== "active"
+                    ? legacyStatusForProvider(providerStatus)
+                    : "none",
+                razorpaySubscriptionId:
+                  configuredInterval || providerStatus !== "active"
+                    ? billingSubscription.providerSubscriptionId
+                    : null,
+                subscriptionCancelAtPeriodEnd: retainPaidAccess
+                  ? true
+                  : billingSubscription.cancelAtPeriodEnd,
+                ...(paidThrough && {
+                  subscriptionCurrentPeriodEnd: paidThrough,
+                }),
+              },
+        });
+
+        if (
+          providerStatus === "active" ||
+          isTerminalProviderStatus(providerStatus)
+        ) {
+          await tx.orgBillingCheckoutAttempt.deleteMany({
+            where: { providerSubscriptionId: subscriptionId },
+          });
+        }
+        return "processed-org";
+      }
+
       const currentUser = await tx.user.findUnique({
-        where: { id: userId },
+        where: { id: resolvedUserId },
         select: {
           razorpaySubscriptionId: true,
           subscriptionCancelAtPeriodEnd: true,
@@ -269,7 +389,7 @@ export async function POST(req: Request) {
         paidThrough !== null &&
         paidThrough.getTime() > Date.now();
       await tx.user.update({
-        where: { id: userId },
+        where: { id: resolvedUserId },
         data: terminal && !retainPaidAccess
           ? {
               subscriptionStatus: "none",
