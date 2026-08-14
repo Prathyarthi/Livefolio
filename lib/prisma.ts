@@ -10,6 +10,21 @@ const globalForPrisma = globalThis as unknown as {
   pool: Pool | undefined;
 };
 
+const LIBPQ_ALIAS_SSL_MODES = new Set(["prefer", "require", "verify-ca"]);
+
+function withVerifyFullSsl(connectionString: string): string {
+  try {
+    const url = new URL(connectionString);
+    const sslmode = url.searchParams.get("sslmode");
+    if (sslmode && LIBPQ_ALIAS_SSL_MODES.has(sslmode)) {
+      url.searchParams.set("sslmode", "verify-full");
+    }
+    return url.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 function createPool() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
@@ -17,7 +32,7 @@ function createPool() {
   }
 
   return new Pool({
-    connectionString,
+    connectionString: withVerifyFullSsl(connectionString),
     max: 10,
     connectionTimeoutMillis: 20_000,
     idleTimeoutMillis: 30_000,

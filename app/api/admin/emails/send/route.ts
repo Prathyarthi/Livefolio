@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
-import { renderTemplatePlaceholders, sendEmail } from "@/lib/email";
+import {
+  renderTemplatePlaceholders,
+  sendEmailBatch,
+  type SendEmailInput,
+} from "@/lib/email";
 
 const MAX_RECIPIENTS = 200;
-const CONCURRENCY = 5;
 
 const sendSchema = z.object({
   subject: z.string().trim().min(1).max(200),
@@ -17,19 +20,6 @@ const sendSchema = z.object({
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
-}
-
-async function mapPool<T, R>(
-  items: T[],
-  concurrency: number,
-  worker: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = [];
-  for (let i = 0; i < items.length; i += concurrency) {
-    const batch = items.slice(i, i + concurrency);
-    results.push(...(await Promise.all(batch.map((item) => worker(item)))));
-  }
-  return results;
 }
 
 export async function POST(req: Request) {
@@ -127,31 +117,33 @@ export async function POST(req: Request) {
     },
   });
 
-  let sent = 0;
-  let failed = 0;
-
-  await mapPool(recipients, CONCURRENCY, async (recipient) => {
-    const personalizedSubject = renderTemplatePlaceholders(subject, {
+  const inputs: SendEmailInput[] = recipients.map((recipient) => ({
+    to: recipient.email,
+    subject: renderTemplatePlaceholders(subject, {
       name: recipient.name,
       email: recipient.email,
-    });
-    const personalizedHtml = renderTemplatePlaceholders(bodyHtml, {
+    }),
+    html: renderTemplatePlaceholders(bodyHtml, {
       name: recipient.name,
       email: recipient.email,
-    });
+    }),
+    tags: [
+      { name: "type", value: "blast" },
+      { name: "campaign_id", value: campaign.id },
+    ],
+  }));
 
-    const result = await sendEmail({
-      to: recipient.email,
-      subject: personalizedSubject,
-      html: personalizedHtml,
-      tags: [
-        { name: "type", value: "blast" },
-        { name: "campaign_id", value: campaign.id },
-      ],
-    });
+  const { results } = await sendEmailBatch(inputs, {
+    idempotencyKey: `blast-${campaign.id}`,
+  });
 
-    await prisma.emailSendLog.create({
-      data: {
+  await prisma.emailSendLog.createMany({
+    data: recipients.map((recipient, index) => {
+      const result = results[index] ?? {
+        id: null,
+        error: "Unknown send error",
+      };
+      return {
         userId: recipient.userId,
         toEmail: recipient.email,
         type: "blast",
@@ -159,15 +151,12 @@ export async function POST(req: Request) {
         resendId: result.id,
         status: result.error ? "failed" : "sent",
         error: result.error,
-      },
-    });
-
-    if (result.error) {
-      failed += 1;
-    } else {
-      sent += 1;
-    }
+      };
+    }),
   });
+
+  const sent = results.filter((result) => !result.error).length;
+  const failed = recipients.length - sent;
 
   await prisma.emailCampaign.update({
     where: { id: campaign.id },

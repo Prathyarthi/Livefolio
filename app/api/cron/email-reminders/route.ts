@@ -1,29 +1,95 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/email";
+import { sendEmailBatch, type SendEmailInput } from "@/lib/email";
 import {
   noPortfolioReminderEmailHtml,
   unpublishedReminderEmailHtml,
 } from "@/lib/email-templates";
 
+export const maxDuration = 300;
+
 const NO_PORTFOLIO_DAYS = 3;
 const UNPUBLISHED_DAYS = 7;
 const PAGE_SIZE = 100;
-const CONCURRENCY = 5;
+
+type ReminderUser = { id: string; email: string; name: string };
+type ReminderType = "no_portfolio" | "unpublished";
 
 function daysAgo(days: number): Date {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 }
 
-async function mapPool<T>(
-  items: T[],
-  concurrency: number,
-  worker: (item: T) => Promise<void>,
-): Promise<void> {
-  for (let i = 0; i < items.length; i += concurrency) {
-    const batch = items.slice(i, i + concurrency);
-    await Promise.all(batch.map((item) => worker(item)));
+async function sendReminderPage(opts: {
+  users: ReminderUser[];
+  type: ReminderType;
+  buildEmail: (name: string) => { subject: string; html: string };
+  sentAtField: "noPortfolioReminderSentAt" | "unpublishedReminderSentAt";
+}): Promise<{ sent: number; failed: number }> {
+  if (opts.users.length === 0) {
+    return { sent: 0, failed: 0 };
   }
+
+  const firstId = opts.users[0]?.id;
+  const lastId = opts.users.at(-1)?.id;
+  const inputs: SendEmailInput[] = opts.users.map((user) => {
+    const { subject, html } = opts.buildEmail(user.name);
+    return {
+      to: user.email,
+      subject,
+      html,
+      tags: [
+        { name: "type", value: opts.type },
+        { name: "user_id", value: user.id },
+      ],
+    };
+  });
+
+  const { results, error } = await sendEmailBatch(inputs, {
+    idempotencyKey:
+      firstId && lastId ? `${opts.type}-${firstId}-${lastId}` : undefined,
+  });
+
+  const logs = opts.users.map((user, index) => {
+    const result = results[index] ?? {
+      id: null,
+      error: error ?? "Unknown send error",
+    };
+    return {
+      userId: user.id,
+      toEmail: user.email,
+      type: opts.type,
+      resendId: result.id,
+      status: result.error ? "failed" : "sent",
+      error: result.error,
+    };
+  });
+
+  await prisma.emailSendLog.createMany({ data: logs });
+
+  const succeededIds = opts.users
+    .filter((_, index) => results[index] != null && !results[index].error)
+    .map((user) => user.id);
+
+  if (succeededIds.length > 0) {
+    const now = new Date();
+    await prisma.user.updateMany({
+      where: { id: { in: succeededIds } },
+      data:
+        opts.sentAtField === "noPortfolioReminderSentAt"
+          ? { noPortfolioReminderSentAt: now }
+          : { unpublishedReminderSentAt: now },
+    });
+  }
+
+  const failed = opts.users.length - succeededIds.length;
+  if (error || failed > 0) {
+    console.error(`[email.cron.${opts.type}] failed`, {
+      count: failed,
+      error,
+    });
+  }
+
+  return { sent: succeededIds.length, failed };
 }
 
 export async function GET(req: Request) {
@@ -64,45 +130,14 @@ export async function GET(req: Request) {
       }),
     });
 
-    await mapPool(users, CONCURRENCY, async (user) => {
-      const { subject, html } = noPortfolioReminderEmailHtml(user.name);
-      const result = await sendEmail({
-        to: user.email,
-        subject,
-        html,
-        tags: [
-          { name: "type", value: "no_portfolio" },
-          { name: "user_id", value: user.id },
-        ],
-        idempotencyKey: `no-portfolio-${user.id}`,
-      });
-
-      await prisma.emailSendLog.create({
-        data: {
-          userId: user.id,
-          toEmail: user.email,
-          type: "no_portfolio",
-          resendId: result.id,
-          status: result.error ? "failed" : "sent",
-          error: result.error,
-        },
-      });
-
-      if (result.error) {
-        noPortfolioFailed += 1;
-        console.error("[email.cron.no_portfolio] failed", {
-          userId: user.id,
-          error: result.error,
-        });
-        return;
-      }
-
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { noPortfolioReminderSentAt: new Date() },
-      });
-      noPortfolioSent += 1;
+    const page = await sendReminderPage({
+      users,
+      type: "no_portfolio",
+      buildEmail: noPortfolioReminderEmailHtml,
+      sentAtField: "noPortfolioReminderSentAt",
     });
+    noPortfolioSent += page.sent;
+    noPortfolioFailed += page.failed;
 
     noPortfolioCursor =
       users.length === PAGE_SIZE ? users.at(-1)?.id : undefined;
@@ -128,45 +163,14 @@ export async function GET(req: Request) {
       }),
     });
 
-    await mapPool(users, CONCURRENCY, async (user) => {
-      const { subject, html } = unpublishedReminderEmailHtml(user.name);
-      const result = await sendEmail({
-        to: user.email,
-        subject,
-        html,
-        tags: [
-          { name: "type", value: "unpublished" },
-          { name: "user_id", value: user.id },
-        ],
-        idempotencyKey: `unpublished-${user.id}`,
-      });
-
-      await prisma.emailSendLog.create({
-        data: {
-          userId: user.id,
-          toEmail: user.email,
-          type: "unpublished",
-          resendId: result.id,
-          status: result.error ? "failed" : "sent",
-          error: result.error,
-        },
-      });
-
-      if (result.error) {
-        unpublishedFailed += 1;
-        console.error("[email.cron.unpublished] failed", {
-          userId: user.id,
-          error: result.error,
-        });
-        return;
-      }
-
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { unpublishedReminderSentAt: new Date() },
-      });
-      unpublishedSent += 1;
+    const page = await sendReminderPage({
+      users,
+      type: "unpublished",
+      buildEmail: unpublishedReminderEmailHtml,
+      sentAtField: "unpublishedReminderSentAt",
     });
+    unpublishedSent += page.sent;
+    unpublishedFailed += page.failed;
 
     unpublishedCursor =
       users.length === PAGE_SIZE ? users.at(-1)?.id : undefined;
