@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { Logo } from "@/components/logo";
+import { AdminNav } from "./admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -10,42 +10,24 @@ export default async function AdminLayout({
 }) {
   const admin = await requireAdmin();
   if (!admin.ok) {
-    redirect(admin.status === 401 ? "/sign-in?callbackUrl=/admin/emails" : "/");
+    redirect(admin.status === 401 ? "/sign-in?callbackUrl=/admin" : "/");
   }
 
   return (
-    <div className="min-h-screen bg-surface-base text-text-primary">
-      <header className="border-b border-border-default bg-surface-raised">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-          <div className="flex items-center gap-4">
+    <div className="relative min-h-screen overflow-hidden bg-surface-base text-text-primary">
+      <div className="glass-ambient" aria-hidden />
+      <header className="sticky top-0 z-20 glass-nav">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
+          <div className="flex min-w-0 items-center gap-3">
             <Logo href="/dashboard" className="h-7" />
-            <span className="rounded-md bg-surface-sunken px-2 py-0.5 text-xs font-medium text-text-secondary">
+            <span className="rounded-full border border-border-default bg-brand-light px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-brand-primary">
               Admin
             </span>
           </div>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link
-              href="/admin/emails"
-              className="text-text-secondary hover:text-text-primary"
-            >
-              Emails
-            </Link>
-            <Link
-              href="/admin/emails/preview"
-              className="text-text-secondary hover:text-text-primary"
-            >
-              Previews
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-text-secondary hover:text-text-primary"
-            >
-              Dashboard
-            </Link>
-          </nav>
+          <AdminNav />
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+      <main className="relative z-10 mx-auto max-w-6xl px-6 py-10">{children}</main>
     </div>
   );
 }
