@@ -12,6 +12,7 @@ import {
 import { bulkImportPortfolioData } from "./bulk-import";
 import {
   getMaxLivePreviews,
+  isProSubscriptionStatus,
   sanitizeLivePreviewProjectIds,
 } from "@/lib/live-preview";
 import {
@@ -157,6 +158,14 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
       if (!existing) {
         ctx.set.status = 404;
         return { error: "Portfolio not found" };
+      }
+
+      const owner = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { subscriptionStatus: true },
+      });
+      if (!isProSubscriptionStatus(owner?.subscriptionStatus)) {
+        return { ...existing, livePreviewProjectIds: [] };
       }
 
       return existing;

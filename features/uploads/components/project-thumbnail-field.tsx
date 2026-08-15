@@ -23,6 +23,7 @@ export function ProjectThumbnailField({
   usage,
   storageConfigured,
   livePreviewEnabled = false,
+  hideLabel = false,
   onImageUrlChange,
   onPendingFileChange,
   onUsageChange,
@@ -33,6 +34,7 @@ export function ProjectThumbnailField({
   usage: { used: number; max: number } | null;
   storageConfigured: boolean | null;
   livePreviewEnabled?: boolean;
+  hideLabel?: boolean;
   onImageUrlChange: (url: string) => void;
   onPendingFileChange?: (file: File | null) => void;
   onUsageChange?: (usage: { used: number; max: number }) => void;
@@ -109,12 +111,16 @@ export function ProjectThumbnailField({
     onImageUrlChange("");
   }
 
+  const inputId = `proj-thumbnail-file-${projectId ?? "new"}`;
+
   return (
     <div className="space-y-2">
-      <FieldLabel htmlFor="proj-thumbnail-file" unsaved={unsaved}>
-        <ImageIcon className="h-4 w-4 text-muted-foreground" />
-        Thumbnail
-      </FieldLabel>
+      {hideLabel ? null : (
+        <FieldLabel htmlFor={inputId} unsaved={unsaved}>
+          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+          Thumbnail
+        </FieldLabel>
+      )}
       {imageUrl && !livePreviewEnabled ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -151,7 +157,7 @@ export function ProjectThumbnailField({
           Turn live preview off to upload a thumbnail instead.
         </p>
       ) : null}
-      {usage && !livePreviewEnabled ? (
+      {usage && !livePreviewEnabled && !hideLabel ? (
         <p className="text-xs text-muted-foreground">
           {usage.used} of {usage.max} uploaded thumbnails used
           {usage.used >= usage.max ? (
@@ -165,7 +171,7 @@ export function ProjectThumbnailField({
         </p>
       ) : null}
       <input
-        id="proj-thumbnail-file"
+        id={inputId}
         ref={inputRef}
         type="file"
         accept={ACCEPT}

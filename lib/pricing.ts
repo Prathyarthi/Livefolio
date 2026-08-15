@@ -133,7 +133,7 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       { label: "Public portfolio at your Livefolio link", included: true },
       { label: "Resume, GitHub, and LeetCode imports during free month", included: true },
-      { label: "Editor, live preview, and publish", included: true },
+      { label: "Editor and publish", included: true },
       { label: "All templates during free month", included: true },
     ],
   },
@@ -155,6 +155,7 @@ export const pricingPlans: PricingPlan[] = [
       { label: "Everything in Starter", included: true },
       { label: "Premium portfolio templates", included: true },
       { label: "Portfolio visit analytics", included: true },
+      { label: "Live project screenshots", included: true },
       { label: "Priority email support", included: true },
       { label: "Early access to more integrations and features", included: true },
     ],

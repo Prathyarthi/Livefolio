@@ -145,13 +145,19 @@ export function ResumeUploader({
 
   const livePreviewCandidates = useMemo<LivePreviewCandidate[]>(() => {
     return (
-      portfolio?.projects
-        ?.filter((project: { liveUrl?: string | null }) => project.liveUrl)
-        .map((project: { id: string; title: string; liveUrl: string }) => ({
+      portfolio?.projects?.map(
+        (project: {
+          id: string;
+          title: string;
+          liveUrl?: string | null;
+          imageUrl?: string | null;
+        }) => ({
           id: project.id,
           title: project.title,
-          liveUrl: project.liveUrl,
-        })) ?? []
+          liveUrl: project.liveUrl ?? "",
+          imageUrl: project.imageUrl ?? null,
+        }),
+      ) ?? []
     );
   }, [portfolio?.projects]);
 
@@ -433,12 +439,11 @@ export function ResumeUploader({
       setParsedData(null);
       toast.success("Resume data imported to your portfolio");
 
-      const importedLiveProjects =
-        refreshedPortfolio?.projects?.some(
-          (project: { liveUrl?: string | null }) => project.liveUrl
-        ) ?? false;
+      const importedProjects =
+        Array.isArray(refreshedPortfolio?.projects) &&
+        refreshedPortfolio.projects.length > 0;
 
-      if (importedLiveProjects) {
+      if (importedProjects) {
         setPreviewDialogOpen(true);
       } else {
         goToPreview();
@@ -695,7 +700,7 @@ export function ResumeUploader({
         selectedProjectIds={selectedLivePreviewProjectIds}
         subscriptionStatus={subscriptionStatus}
         onSaved={() => {
-          toast.success("Live preview selection saved");
+          toast.success("Project covers saved");
         }}
       />
 

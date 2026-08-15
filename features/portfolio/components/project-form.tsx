@@ -317,7 +317,11 @@ export function ProjectForm() {
       !alreadySaved &&
       livePreviewProjectIds.length >= maxAllowed
     ) {
-      toast.error("Please upgrade the plan for more preview links");
+      toast.error(
+        maxAllowed === 0
+          ? "Live preview is a Pro feature"
+          : "Please upgrade the plan for more preview links",
+      );
       return;
     }
 
@@ -432,7 +436,11 @@ export function ProjectForm() {
         !alreadySaved &&
         livePreviewProjectIds.length >= maxAllowed
       ) {
-        toast.error("Please upgrade the plan for more preview links");
+        toast.error(
+          maxAllowed === 0
+            ? "Live preview is a Pro feature"
+            : "Please upgrade the plan for more preview links",
+        );
         return;
       }
 
