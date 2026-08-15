@@ -45,6 +45,7 @@ model User {
   applications        Application[]
   recruiterNotes      RecruiterNote[]
   emailSendLogs        EmailSendLog[]
+  storedFiles          StoredFile[]
 
   @@map("users")
 }
@@ -181,6 +182,7 @@ model Portfolio {
   customSections CustomSection[]
   views          PortfolioView[]
   clicks         PortfolioClick[]
+  storedFiles    StoredFile[]
 
   @@index([slug])
   @@map("portfolios")
@@ -289,7 +291,8 @@ model Project {
   githubForks Int?
   language    String?
 
-  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio   Portfolio    @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  storedFiles StoredFile[]
 
   @@map("projects")
 }
@@ -407,6 +410,7 @@ model Organization {
   jobs                 Job[]
   billingSubscriptions BillingSubscription[]
   billingCheckout      OrgBillingCheckoutAttempt?
+  storedFiles          StoredFile[]
 
   @@index([slug])
   @@map("organizations")
@@ -466,6 +470,7 @@ model Job {
   createdBy    User             @relation(fields: [createdById], references: [id], onDelete: Restrict)
   requirements JobRequirement[]
   applications Application[]
+  storedFiles  StoredFile[]
 
   @@index([organizationId, status])
   @@index([slug])
@@ -532,6 +537,32 @@ model ApplicationSnapshot {
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@map("application_snapshots")
+}
+
+model StoredFile {
+  id             String   @id @default(uuid())
+  key            String   @unique
+  /// resume | project_thumb | job_source
+  kind           String
+  contentType    String
+  sizeBytes      Int
+  userId         String?
+  organizationId String?
+  portfolioId    String?
+  projectId      String?
+  jobId          String?
+  createdAt      DateTime @default(now())
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  portfolio    Portfolio?    @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  project      Project?      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  job          Job?          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind])
+  @@index([projectId, kind])
+  @@index([jobId, kind])
+  @@map("stored_files")
 }
 
 model RecruiterNote {

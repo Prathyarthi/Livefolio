@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
     "@prisma/client",
     "@prisma/adapter-pg",
     "pg",
+    "@aws-sdk/client-s3",
+    "@aws-sdk/s3-request-presigner",
   ],
   images: {
     remotePatterns: [

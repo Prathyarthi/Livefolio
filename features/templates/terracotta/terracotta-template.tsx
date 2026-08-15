@@ -80,6 +80,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                         <div className="overflow-hidden rounded-t-[50px]">
                           <TemplateProjectPreview templateId="terracotta"
                             liveUrl={project.liveUrl ?? null}
+                            imageUrl={project.imageUrl ?? null}
                             projectId={project.id}
                             livePreviewProjectIds={livePreviewProjectIds}
                             alt={project.title}

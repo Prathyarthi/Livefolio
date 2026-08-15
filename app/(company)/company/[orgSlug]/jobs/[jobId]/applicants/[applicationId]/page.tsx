@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -182,6 +182,18 @@ export default function ApplicantDetailPage() {
             <a href={livefolioUrl} target="_blank" rel="noreferrer">
               <ExternalLink className="h-4 w-4" />
               View Livefolio
+            </a>
+          </Button>
+        ) : null}
+        {data.resumeFileId ? (
+          <Button variant="outline" asChild>
+            <a
+              href={`/api/uploads/${data.resumeFileId}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <FileText className="h-4 w-4" />
+              Resume
             </a>
           </Button>
         ) : null}

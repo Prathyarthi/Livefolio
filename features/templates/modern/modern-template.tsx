@@ -114,6 +114,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
             >
               <TemplateProjectPreview templateId="modern"
                 liveUrl={project.liveUrl ?? null}
+                imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
                 alt={project.title}

@@ -542,7 +542,12 @@ export function ResumeUploader({
             portfolio, and take you straight to preview.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {portfolio?.resumeUrl ? (
+            <p className="text-sm text-muted-foreground">
+              Original PDF saved
+            </p>
+          ) : null}
           <div
             onClick={() => fileInputRef.current?.click()}
             className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/25 p-10 cursor-pointer hover:border-muted-foreground/50 transition-colors"

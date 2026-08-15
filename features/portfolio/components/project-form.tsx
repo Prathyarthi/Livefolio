@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   usePortfolio,
   useAddProject,
@@ -37,6 +38,12 @@ import {
 } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons";
 import { ProjectLivePreviewControls } from "@/features/portfolio/components/project-live-preview-controls";
+import { ProjectThumbnailField } from "@/features/uploads/components/project-thumbnail-field";
+import {
+  getUploadUsage,
+  uploadStoredFile,
+  UploadRequestError,
+} from "@/features/uploads/api/client";
 import {
   getMaxLivePreviews,
   isLivePreviewEnabledForProject,
@@ -66,6 +73,7 @@ interface ProjectEntry {
   description: string;
   liveUrl: string;
   sourceUrl: string;
+  imageUrl: string;
   techStack: string[];
   featured: boolean;
 }
@@ -75,6 +83,7 @@ type ProjectField =
   | "description"
   | "liveUrl"
   | "sourceUrl"
+  | "imageUrl"
   | "techStack";
 
 const emptyEntry: ProjectEntry = {
@@ -82,6 +91,7 @@ const emptyEntry: ProjectEntry = {
   description: "",
   liveUrl: "",
   sourceUrl: "",
+  imageUrl: "",
   techStack: [],
   featured: false,
 };
@@ -100,6 +110,11 @@ function validateProject(form: ProjectEntry) {
   validateField(errors, "sourceUrl", () =>
     clientValidators.optionalUrl(form.sourceUrl, "Project source URL")
   );
+  validateField(errors, "imageUrl", () =>
+    form.imageUrl.startsWith("blob:")
+      ? undefined
+      : clientValidators.optionalUrl(form.imageUrl, "Project image URL")
+  );
   validateField(errors, "techStack", () =>
     normalizeStringList(
       form.techStack,
@@ -112,6 +127,7 @@ function validateProject(form: ProjectEntry) {
 }
 
 export function ProjectForm() {
+  const router = useRouter();
   const { data: portfolio, isLoading } = usePortfolio();
   const addProject = useAddProject();
   const updateProject = useUpdateProject();
@@ -127,6 +143,14 @@ export function ProjectForm() {
   >({});
   const [enableLivePreviewOnSave, setEnableLivePreviewOnSave] = useState(false);
   const [editLivePreviewEnabled, setEditLivePreviewEnabled] = useState(false);
+  const [pendingThumbFile, setPendingThumbFile] = useState<File | null>(null);
+  const [thumbUsage, setThumbUsage] = useState<{
+    used: number;
+    max: number;
+  } | null>(null);
+  const [storageConfigured, setStorageConfigured] = useState<boolean | null>(
+    null
+  );
   const editingCardRef = useScrollIntoView<HTMLDivElement>(Boolean(editingId));
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(
     null
@@ -152,6 +176,24 @@ export function ProjectForm() {
       }
     };
     loadBilling();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadUsage = async () => {
+      try {
+        const usage = await getUploadUsage();
+        if (cancelled) return;
+        setStorageConfigured(usage.configured);
+        setThumbUsage(usage.projectThumbnails);
+      } catch {
+        if (!cancelled) setStorageConfigured(false);
+      }
+    };
+    void loadUsage();
     return () => {
       cancelled = true;
     };
@@ -187,9 +229,11 @@ export function ProjectForm() {
       description: project.description ?? "",
       liveUrl: project.liveUrl ?? "",
       sourceUrl: project.sourceUrl ?? "",
+      imageUrl: project.imageUrl ?? "",
       techStack: project.techStack ?? [],
       featured: project.featured ?? false,
     });
+    setPendingThumbFile(null);
     setTechInput("");
     setFieldErrors({});
   }
@@ -202,6 +246,7 @@ export function ProjectForm() {
     setFieldErrors({});
     setEnableLivePreviewOnSave(false);
     setEditLivePreviewEnabled(false);
+    setPendingThumbFile(null);
   }
 
   function startAdding() {
@@ -211,6 +256,7 @@ export function ProjectForm() {
     setTechInput("");
     setFieldErrors({});
     setEnableLivePreviewOnSave(false);
+    setPendingThumbFile(null);
   }
 
   function addTechTag() {
@@ -276,6 +322,12 @@ export function ProjectForm() {
     }
 
     setEditLivePreviewEnabled(enabled);
+    if (enabled) {
+      setPendingThumbFile(null);
+      setForm((prev) =>
+        prev.imageUrl.startsWith("blob:") ? { ...prev, imageUrl: "" } : prev,
+      );
+    }
   }
 
   function buildEditLivePreviewIds(): string[] {
@@ -293,6 +345,34 @@ export function ProjectForm() {
     return [...livePreviewProjectIds, editingId].slice(0, maxAllowed);
   }
 
+  async function persistPendingThumbnail(projectId: string) {
+    if (!pendingThumbFile) return;
+    try {
+      const result = await uploadStoredFile({
+        kind: "project_thumb",
+        file: pendingThumbFile,
+        projectId,
+      });
+      if (result.usage) setThumbUsage(result.usage);
+    } catch (error) {
+      toast.error(
+        error instanceof UploadRequestError || error instanceof Error
+          ? error.message
+          : "Project saved, but the thumbnail failed to upload",
+        error instanceof UploadRequestError && error.upgradeRequired
+          ? {
+              action: {
+                label: "Upgrade",
+                onClick: () => {
+                  router.push("/dashboard/billing");
+                },
+              },
+            }
+          : undefined,
+      );
+    }
+  }
+
   async function handleAdd() {
     const errors = validateProject(form);
     setFieldErrors(errors);
@@ -304,9 +384,14 @@ export function ProjectForm() {
         description: form.description.trim(),
         liveUrl: form.liveUrl || null,
         sourceUrl: form.sourceUrl || null,
+        imageUrl: form.imageUrl.startsWith("blob:") ? null : form.imageUrl || null,
         techStack: form.techStack,
         featured: form.featured,
       });
+
+      if (created?.id && pendingThumbFile && !enableLivePreviewOnSave) {
+        await persistPendingThumbnail(created.id);
+      }
 
       if (
         enableLivePreviewOnSave &&
@@ -357,6 +442,7 @@ export function ProjectForm() {
         description: form.description.trim(),
         liveUrl: form.liveUrl || null,
         sourceUrl: form.sourceUrl || null,
+        imageUrl: form.imageUrl.startsWith("blob:") ? null : form.imageUrl || null,
         techStack: form.techStack,
         featured: form.featured,
       });
@@ -403,11 +489,13 @@ export function ProjectForm() {
           description: form.description,
           liveUrl: form.liveUrl,
           sourceUrl: form.sourceUrl,
+          imageUrl: form.imageUrl.startsWith("blob:") ? "" : form.imageUrl,
         }) ||
         form.techStack.length > 0 ||
         techInput.trim() !== "" ||
         form.featured ||
-        enableLivePreviewOnSave
+        enableLivePreviewOnSave ||
+        pendingThumbFile != null
       );
     }
 
@@ -423,8 +511,9 @@ export function ProjectForm() {
         description: original.description ?? "",
         liveUrl: original.liveUrl ?? "",
         sourceUrl: original.sourceUrl ?? "",
+        imageUrl: original.imageUrl ?? "",
       },
-      ["title", "description", "liveUrl", "sourceUrl"]
+      ["title", "description", "liveUrl", "sourceUrl", "imageUrl"]
     );
     const techChanged =
       JSON.stringify(form.techStack) !==
@@ -450,6 +539,7 @@ export function ProjectForm() {
     editLivePreviewEnabled,
     projects,
     livePreviewProjectIds,
+    pendingThumbFile,
   ]);
 
   useEditStepDirty("projects", isDirty);
@@ -466,12 +556,13 @@ export function ProjectForm() {
       description: original.description ?? "",
       liveUrl: original.liveUrl ?? "",
       sourceUrl: original.sourceUrl ?? "",
+      imageUrl: original.imageUrl ?? "",
       techStack: original.techStack ?? [],
       featured: original.featured ?? false,
     };
   }, [isAdding, editingId, projects]);
 
-  const isFieldUnsaved = (key: keyof Omit<ProjectEntry, "techStack" | "featured">) =>
+  const isFieldUnsaved = (key: keyof Omit<ProjectEntry, "id" | "techStack" | "featured">) =>
     isAdding || editingId
       ? fieldDiffers(form[key] ?? "", savedForm[key] ?? "")
       : false;
@@ -648,6 +739,27 @@ export function ProjectForm() {
           </div>
         </div>
 
+        <ProjectThumbnailField
+          projectId={editingId ?? undefined}
+          imageUrl={form.imageUrl}
+          unsaved={isFieldUnsaved("imageUrl")}
+          usage={thumbUsage}
+          storageConfigured={storageConfigured}
+          livePreviewEnabled={
+            Boolean(form.liveUrl.trim()) &&
+            (editingId ? editLivePreviewEnabled : enableLivePreviewOnSave)
+          }
+          onImageUrlChange={(url) => {
+            setForm((prev) => ({ ...prev, imageUrl: url }));
+            setFieldErrors((prev) => ({ ...prev, imageUrl: undefined }));
+          }}
+          onPendingFileChange={setPendingThumbFile}
+          onUsageChange={setThumbUsage}
+        />
+        {fieldErrors.imageUrl && (
+          <p className="text-sm text-destructive">{fieldErrors.imageUrl}</p>
+        )}
+
         <div className="space-y-2">
           <FieldLabel unsaved={isTechUnsaved}>Tech Stack</FieldLabel>
           <div className="flex gap-2">
@@ -759,7 +871,17 @@ export function ProjectForm() {
               livePreviewProjectIds={livePreviewProjectIds}
               subscriptionStatus={subscriptionStatus}
               enableOnSave={enableLivePreviewOnSave}
-              onEnableOnSaveChange={setEnableLivePreviewOnSave}
+              onEnableOnSaveChange={(enabled) => {
+                setEnableLivePreviewOnSave(enabled);
+                if (enabled) {
+                  setPendingThumbFile(null);
+                  setForm((prev) =>
+                    prev.imageUrl.startsWith("blob:")
+                      ? { ...prev, imageUrl: "" }
+                      : prev,
+                  );
+                }
+              }}
               isSaving={isMutating}
             />
             <div className="flex justify-end gap-2">

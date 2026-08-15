@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ExternalLink, Copy } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,6 +19,8 @@ import {
   formatJobMeta,
 } from "@/features/jobs/constants/labels";
 import { getAppOrigin } from "@/lib/domain";
+import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field";
+import { uploadStoredFile } from "@/features/uploads/api/client";
 
 export default function ManageJobPage() {
   const params = useParams<{ orgSlug: string; jobId: string }>();
@@ -27,6 +30,7 @@ export default function ManageJobPage() {
   const { data: job, isLoading, error } = useJob(jobId);
   const updateJob = useUpdateJob(orgSlug);
   const deleteJob = useDeleteJob(orgSlug);
+  const queryClient = useQueryClient();
 
   if (isLoading) {
     return (
@@ -194,6 +198,23 @@ export default function ManageJobPage() {
 
       <section className="space-y-3">
         <h2 className="text-h3 text-text-primary">Description</h2>
+        <PdfExtractField
+          hint="Replace the description from a PDF. You can still edit the text afterward."
+          onExtracted={async (text, file) => {
+            await updateJob.mutateAsync({
+              id: jobId,
+              data: { description: text },
+            });
+            await uploadStoredFile({
+              kind: "job_source",
+              file,
+              jobId,
+            });
+            await queryClient.invalidateQueries({
+              queryKey: ["jobs", "id", jobId],
+            });
+          }}
+        />
         <p className="whitespace-pre-wrap text-body-sm text-text-secondary">
           {job.description}
         </p>

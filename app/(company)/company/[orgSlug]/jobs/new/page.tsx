@@ -19,6 +19,8 @@ import {
   useCreateJob,
   type JobRequirement,
 } from "@/features/jobs/api/use-jobs";
+import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field";
+import { uploadStoredFile } from "@/features/uploads/api/client";
 
 type RequirementDraft = JobRequirement & { key: string };
 
@@ -48,6 +50,7 @@ export default function NewJobPage() {
   const [responsibilities, setResponsibilities] = useState("");
   const [qualifications, setQualifications] = useState("");
   const [benefits, setBenefits] = useState("");
+  const [sourcePdf, setSourcePdf] = useState<File | null>(null);
   const [requirements, setRequirements] = useState<RequirementDraft[]>([
     emptyRequirement("required"),
   ]);
@@ -82,6 +85,21 @@ export default function NewJobPage() {
             sortOrder: index,
           })),
       });
+      if (sourcePdf) {
+        try {
+          await uploadStoredFile({
+            kind: "job_source",
+            file: sourcePdf,
+            jobId: job.id,
+          });
+        } catch (persistError) {
+          toast.error(
+            persistError instanceof Error
+              ? persistError.message
+              : "Job saved, but the source PDF could not be stored",
+          );
+        }
+      }
       toast.success(publish ? "Job published" : "Draft saved");
       router.push(`/company/${orgSlug}/jobs/${job.id}`);
     } catch (error) {
@@ -143,6 +161,12 @@ export default function NewJobPage() {
 
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
+          <PdfExtractField
+            onExtracted={(text, file) => {
+              setDescription(text);
+              setSourcePdf(file);
+            }}
+          />
           <Textarea
             id="description"
             value={description}

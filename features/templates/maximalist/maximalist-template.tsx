@@ -300,6 +300,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                       <TemplateProjectPreview
                         templateId="maximalist"
                         liveUrl={proj.liveUrl}
+                        imageUrl={proj.imageUrl}
                         projectId={proj.id}
                         livePreviewProjectIds={livePreviewProjectIds}
                         alt={proj.title}

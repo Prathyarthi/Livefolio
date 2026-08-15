@@ -8,6 +8,8 @@ import { structureResumeWithAi } from "@/lib/gemini";
 import { prisma } from "@/lib/prisma";
 import { getPlanLimitMessage, resolveAccessForUser } from "@/lib/entitlements";
 import { enforceAiRateLimit } from "@/lib/ai-request-guard";
+import { isR2Configured } from "@/lib/r2";
+import { persistResumePdf, resumeDownloadUrl } from "@/features/uploads/server/stored-files";
 
 const MAX_RESUME_FILE_BYTES = 10 * 1024 * 1024;
 
@@ -146,7 +148,17 @@ export const resume = new Elysia({ prefix: "/resume" })
         clearTimeout(aiTimeout);
       }
 
-      return { success: true, data: parsed };
+      let resumeUrl: string | undefined;
+      if (isR2Configured()) {
+        try {
+          const stored = await persistResumePdf(session.userId, buffer);
+          resumeUrl = resumeDownloadUrl(stored.id);
+        } catch (persistError) {
+          console.error("[POST /api/resume/parse] R2 persist failed", persistError);
+        }
+      }
+
+      return { success: true, data: parsed, resumeUrl };
     } catch (error) {
       if (error instanceof PdfLimitError) {
         ctx.set.status = 400;

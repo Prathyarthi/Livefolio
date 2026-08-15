@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Search, Star, X } from "lucide-react";
+import { ExternalLink, FileText, Search, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -414,6 +414,18 @@ export default function JobApplicantsPage() {
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
                           Livefolio
+                        </a>
+                      </Button>
+                    ) : null}
+                    {applicant.resumeFileId ? (
+                      <Button size="sm" variant="outline" asChild>
+                        <a
+                          href={`/api/uploads/${applicant.resumeFileId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          Resume
                         </a>
                       </Button>
                     ) : null}

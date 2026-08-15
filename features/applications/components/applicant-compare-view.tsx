@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ExternalLink, Columns2, X } from "lucide-react";
+import { Check, ExternalLink, FileText, Columns2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -195,6 +195,18 @@ export function ApplicantCompareView({
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
                           Livefolio
+                        </a>
+                      </Button>
+                    ) : null}
+                    {applicant.resumeFileId ? (
+                      <Button size="sm" variant="ghost" asChild>
+                        <a
+                          href={`/api/uploads/${applicant.resumeFileId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          Resume
                         </a>
                       </Button>
                     ) : null}

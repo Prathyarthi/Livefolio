@@ -7,6 +7,7 @@ import { publicPortfolio } from "@/features/public/server/route";
 import { organization } from "@/features/organization/server/route";
 import { jobs } from "@/features/jobs/server/route";
 import { applications } from "@/features/applications/server/route";
+import { uploads } from "@/features/uploads/server/route";
 
 export const maxDuration = 300;
 
@@ -18,7 +19,8 @@ const app = new Elysia({ prefix: "/api" })
   .use(publicPortfolio)
   .use(organization)
   .use(jobs)
-  .use(applications);
+  .use(applications)
+  .use(uploads);
 
 export const GET = app.fetch;
 export const POST = app.fetch;

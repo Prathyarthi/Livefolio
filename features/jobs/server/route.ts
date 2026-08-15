@@ -7,6 +7,7 @@ import {
   orgUpgradeMessage,
   resolveOrgAccess,
 } from "@/lib/org-entitlements";
+import { deleteObjectQuiet, isR2Configured } from "@/lib/r2";
 
 const OPEN_JOB_STATUSES = new Set(["published", "paused"]);
 
@@ -83,6 +84,17 @@ const jobPublicInclude = {
 const jobCompanyInclude = {
   ...jobPublicInclude,
   _count: { select: { applications: true } },
+  storedFiles: {
+    where: { kind: "job_source" },
+    select: {
+      id: true,
+      contentType: true,
+      sizeBytes: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" as const },
+    take: 1,
+  },
 } as const;
 
 function optionalTrim(value?: string | null) {
@@ -537,6 +549,13 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       return { error: "Only draft jobs can be deleted. Close published jobs instead." };
     }
 
+    const files = isR2Configured()
+      ? await prisma.storedFile.findMany({
+          where: { jobId: existing.id },
+          select: { key: true },
+        })
+      : [];
     await prisma.job.delete({ where: { id: existing.id } });
+    await Promise.all(files.map((file) => deleteObjectQuiet(file.key)));
     return { ok: true };
   });

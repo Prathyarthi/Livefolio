@@ -91,6 +91,12 @@ export type Job = {
   organization: JobOrganization;
   requirements: JobRequirement[];
   _count?: { applications: number };
+  storedFiles?: Array<{
+    id: string;
+    contentType: string;
+    sizeBytes: number;
+    createdAt: string;
+  }>;
 };
 
 export type JobInput = {

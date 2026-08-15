@@ -33,7 +33,7 @@ export const publicPortfolio = new Elysia({ prefix: "/public" })
     }
 
     // Strip sensitive fields
-    const { userId, user, ...publicData } = portfolio;
+    const { userId, user, resumeUrl: _resumeUrl, ...publicData } = portfolio;
     const access = resolveAccessForUser(user);
     const templateId = canUseTemplate(access, publicData.templateId)
       ? publicData.templateId

@@ -189,6 +189,7 @@ export type ApplicantCard = {
     educationHighlights: string[];
   };
   evidence: ApplicantEvidenceSummary;
+  resumeFileId: string | null;
 };
 
 export type ApplicantPoolFilters = {
@@ -267,6 +268,7 @@ export type CompanyApplicationDetail = {
   summary: ApplicantCard["summary"];
   snapshotData: ApplicationSnapshotData | null;
   evidence: ApplicantEvidenceSummary;
+  resumeFileId: string | null;
   requirements?: Array<{
     id: string;
     type: string;

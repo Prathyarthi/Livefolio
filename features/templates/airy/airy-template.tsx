@@ -80,6 +80,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                       <article key={project.id} className={cn(PROJECT_CARD, "group rounded-3xl border border-slate-100 bg-white shadow-xs transition-all hover:shadow-md")}>
                         <TemplateProjectPreview templateId="airy"
                           liveUrl={project.liveUrl ?? null}
+                          imageUrl={project.imageUrl ?? null}
                           projectId={project.id}
                           livePreviewProjectIds={livePreviewProjectIds}
                           alt={project.title}

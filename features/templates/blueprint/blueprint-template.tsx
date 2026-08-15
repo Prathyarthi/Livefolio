@@ -108,6 +108,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                   <div className="border-b-2 border-white/50 p-2">
                     <TemplateProjectPreview templateId="blueprint"
                       liveUrl={project.liveUrl ?? null}
+                      imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
                       alt={project.title}

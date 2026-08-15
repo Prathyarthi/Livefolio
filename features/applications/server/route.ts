@@ -16,6 +16,7 @@ import {
 } from "@/features/applications/lib/pipeline";
 import { summarizeSnapshot } from "@/features/applications/lib/applicant-summary";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { latestResumeIdsByUserId } from "@/features/uploads/server/stored-files";
 import {
   filterApplicantsBySearch,
   interpretApplicantQuery,
@@ -382,6 +383,10 @@ export const applications = new Elysia({ prefix: "/applications" })
       stageCounts[row.stage] = row._count._all;
     }
 
+    const resumeByUser = await latestResumeIdsByUserId(
+      applications.map((app) => app.user.id),
+    );
+
     const enriched = applications.map((app) => {
       const snapshot = parseSnapshot(app.snapshot?.data);
       const summary = summarizeSnapshot(snapshot);
@@ -396,6 +401,7 @@ export const applications = new Elysia({ prefix: "/applications" })
         coverNote: app.coverNote,
         noteCount: app._count.notes,
         user: app.user,
+        resumeFileId: resumeByUser.get(app.user.id) ?? null,
         snapshot,
         evidence,
         summary: {
@@ -481,6 +487,8 @@ export const applications = new Elysia({ prefix: "/applications" })
     const summary = summarizeSnapshot(snapshot);
     const evidence = buildApplicantEvidence(snapshot, job.requirements);
 
+    const resumeByUser = await latestResumeIdsByUserId([application.user.id]);
+
     return {
       id: application.id,
       stage: application.stage,
@@ -490,6 +498,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       coverNote: application.coverNote,
       submittedAt: application.submittedAt,
       user: application.user,
+      resumeFileId: resumeByUser.get(application.user.id) ?? null,
       notes: application.notes,
       job: {
         ...job,
