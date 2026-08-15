@@ -23,6 +23,7 @@ import {
   type ApplicantSearchFilters,
 } from "@/features/applications/lib/search";
 import { buildApplicantEvidence } from "@/features/applications/lib/evidence";
+import { buildPoolGapReport } from "@/features/applications/lib/pool-gaps";
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -429,6 +430,8 @@ export const applications = new Elysia({ prefix: "/applications" })
       },
     );
 
+    const gaps = buildPoolGapReport(enriched, job.requirements);
+
     return {
       job: {
         id: job.id,
@@ -443,6 +446,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       matchedCount: filtered.length,
       filters: searchFilters,
       interpreted: interpretApplicantQuery(searchFilters.q),
+      gaps,
       applicants: filtered.map(({ snapshot: _snapshot, ...rest }) => rest),
     };
   })

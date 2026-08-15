@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import type { PoolGapReport } from "@/features/applications/lib/pool-gaps";
 
 async function throwApiError(
   response: Response,
@@ -231,6 +232,7 @@ export type ApplicantPool = {
   matchedCount: number;
   filters: ApplicantPoolFilters;
   interpreted?: InterpretedApplicantQuery;
+  gaps: PoolGapReport;
   applicants: ApplicantCard[];
 };
 

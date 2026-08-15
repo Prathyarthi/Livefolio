@@ -21,6 +21,7 @@ import {
   CompareSelectionBar,
   MAX_COMPARE_CANDIDATES,
 } from "@/features/applications/components/applicant-compare-view";
+import { ApplicantPoolGapReport } from "@/features/applications/components/applicant-pool-gap-report";
 import {
   PIPELINE_STAGE_LABELS,
   PIPELINE_STAGES,
@@ -255,6 +256,19 @@ export default function JobApplicantsPage() {
           </Button>
         ))}
       </div>
+
+      {data?.gaps ? (
+        <ApplicantPoolGapReport
+          report={data.gaps}
+          orgSlug={orgSlug}
+          jobId={jobId}
+          caption={
+            tab === "all"
+              ? `Evidence across ${data.gaps.poolSize} applicant${data.gaps.poolSize === 1 ? "" : "s"} for this role. Search does not change this.`
+              : `Evidence across ${data.gaps.poolSize} applicant${data.gaps.poolSize === 1 ? "" : "s"} in ${PIPELINE_STAGE_LABELS[tab] ?? tab}. Search does not change this.`
+          }
+        />
+      ) : null}
 
       {poolQuery.isLoading ? (
         <p className="text-body-sm text-text-muted">Loading applicants…</p>
