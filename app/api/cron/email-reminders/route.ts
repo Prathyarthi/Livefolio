@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendEmailBatch, type SendEmailInput } from "@/lib/email";
+import { sendEmail, sendEmailBatch, type SendEmailInput } from "@/lib/email";
 import {
   noPortfolioReminderEmailHtml,
   unpublishedReminderEmailHtml,
+  welcomeEmailHtml,
 } from "@/lib/email-templates";
 
 export const maxDuration = 300;
@@ -107,10 +108,64 @@ export async function GET(req: Request) {
   const noPortfolioCutoff = daysAgo(NO_PORTFOLIO_DAYS);
   const unpublishedCutoff = daysAgo(UNPUBLISHED_DAYS);
 
+  let welcomeSent = 0;
+  let welcomeFailed = 0;
   let noPortfolioSent = 0;
   let noPortfolioFailed = 0;
   let unpublishedSent = 0;
   let unpublishedFailed = 0;
+
+  // Retry welcome emails that failed on a previous attempt.
+  const welcomeRetryUsers = await prisma.user.findMany({
+    where: {
+      welcomeEmailSentAt: null,
+      emailSendLogs: {
+        some: { type: "welcome", status: "failed" },
+      },
+    },
+    select: { id: true, email: true, name: true },
+    take: PAGE_SIZE,
+  });
+
+  for (const user of welcomeRetryUsers) {
+    const { subject, html } = welcomeEmailHtml(user.name);
+    const result = await sendEmail({
+      to: user.email,
+      subject,
+      html,
+      tags: [
+        { name: "type", value: "welcome" },
+        { name: "user_id", value: user.id },
+      ],
+      idempotencyKey: `welcome-${user.id}`,
+    });
+
+    await prisma.emailSendLog.create({
+      data: {
+        userId: user.id,
+        toEmail: user.email,
+        type: "welcome",
+        resendId: result.id,
+        status: result.error ? "failed" : "sent",
+        error: result.error,
+      },
+    });
+
+    if (result.error) {
+      welcomeFailed += 1;
+      console.error("[email.cron.welcome] retry failed", {
+        userId: user.id,
+        error: result.error,
+      });
+      continue;
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { welcomeEmailSentAt: new Date() },
+    });
+    welcomeSent += 1;
+  }
 
   // --- No portfolio reminders ---
   let noPortfolioCursor: string | undefined;
@@ -178,6 +233,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     ok: true,
+    welcome: { sent: welcomeSent, failed: welcomeFailed },
     noPortfolio: { sent: noPortfolioSent, failed: noPortfolioFailed },
     unpublished: { sent: unpublishedSent, failed: unpublishedFailed },
   });

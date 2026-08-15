@@ -53,6 +53,25 @@ function isRateLimitError(error: ResendError): boolean {
   );
 }
 
+function isRetryableError(error: ResendError): boolean {
+  if (isRateLimitError(error)) return true;
+  if (
+    error.statusCode === 500 ||
+    error.statusCode === 502 ||
+    error.statusCode === 503 ||
+    error.statusCode === 504
+  ) {
+    return true;
+  }
+  if (error.name === "internal_server_error") return true;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("unable to fetch data") ||
+    message.includes("could not be resolved") ||
+    message.includes("timeout")
+  );
+}
+
 function retryDelayMs(
   attempt: number,
   headers: Record<string, string> | null,
@@ -77,7 +96,7 @@ async function withRateLimitRetry<T>(
     last = await send();
     if (
       !last.error ||
-      !isRateLimitError(last.error) ||
+      !isRetryableError(last.error) ||
       attempt === MAX_RATE_LIMIT_RETRIES
     ) {
       return last;
