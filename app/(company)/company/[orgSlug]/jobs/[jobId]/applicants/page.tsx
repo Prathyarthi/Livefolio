@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, Search, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,12 @@ import {
   useApplicantPool,
   useToggleShortlist,
   useUpdateApplicationStage,
+  type ApplicantCard,
 } from "@/features/applications/api/use-applications";
+import {
+  CompareSelectionBar,
+  MAX_COMPARE_CANDIDATES,
+} from "@/features/applications/components/applicant-compare-view";
 import {
   PIPELINE_STAGE_LABELS,
   PIPELINE_STAGES,
@@ -29,6 +34,10 @@ export default function JobApplicantsPage() {
   const orgSlug = params.orgSlug;
   const jobId = params.jobId;
   const [tab, setTab] = useState<PoolTab>("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedById, setSelectedById] = useState<Record<string, ApplicantCard>>(
+    {},
+  );
 
   const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
@@ -62,6 +71,14 @@ export default function JobApplicantsPage() {
     q || location || skill || role || education || minExperience,
   );
 
+  const selectedApplicants = useMemo(
+    () =>
+      selectedIds
+        .map((id) => selectedById[id])
+        .filter((a): a is ApplicantCard => Boolean(a)),
+    [selectedIds, selectedById],
+  );
+
   const tabs: Array<{ id: PoolTab; label: string; count: number }> = [
     { id: "all", label: "All", count: counts?.all ?? 0 },
     ...PIPELINE_STAGES.map((stage) => ({
@@ -79,6 +96,33 @@ export default function JobApplicantsPage() {
     setRole("");
     setEducation("");
     setMinExperience("");
+  }
+
+  function toggleSelected(applicant: ApplicantCard) {
+    if (selectedIds.includes(applicant.id)) {
+      removeSelection(applicant.id);
+      return;
+    }
+    if (selectedIds.length >= MAX_COMPARE_CANDIDATES) {
+      toast.error(`Compare up to ${MAX_COMPARE_CANDIDATES} candidates`);
+      return;
+    }
+    setSelectedIds((prev) => [...prev, applicant.id]);
+    setSelectedById((map) => ({ ...map, [applicant.id]: applicant }));
+  }
+
+  function clearSelection() {
+    setSelectedIds([]);
+    setSelectedById({});
+  }
+
+  function removeSelection(id: string) {
+    setSelectedIds((prev) => prev.filter((value) => value !== id));
+    setSelectedById((map) => {
+      const next = { ...map };
+      delete next[id];
+      return next;
+    });
   }
 
   async function handleStage(applicationId: string, stage: string) {
@@ -104,7 +148,11 @@ export default function JobApplicantsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
+    <div
+      className={`mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8 ${
+        selectedIds.length > 0 ? "pb-28" : ""
+      }`}
+    >
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/jobs/${jobId}`}>← Back to job</Link>
       </Button>
@@ -118,7 +166,7 @@ export default function JobApplicantsPage() {
             <p className="text-body-sm text-text-secondary">
               {hasActiveFilters
                 ? `${data?.matchedCount ?? 0} matching · ${counts?.all ?? 0} total in this job`
-                : `${counts?.all ?? 0} applicants · search within this job only`}
+                : `${counts?.all ?? 0} applicants · select 2–${MAX_COMPARE_CANDIDATES} to compare evidence`}
             </p>
           </div>
         </div>
@@ -225,156 +273,190 @@ export default function JobApplicantsPage() {
         </div>
       ) : (
         <ul className="space-y-3">
-          {data.applicants.map((applicant) => (
-            <li
-              key={applicant.id}
-              className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-5"
-            >
-              <div className="flex flex-wrap items-start gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage
-                    src={applicant.summary.avatarUrl ?? undefined}
-                    alt=""
-                  />
-                  <AvatarFallback>
-                    {applicant.summary.name.slice(0, 1).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+          {data.applicants.map((applicant) => {
+            const selected = selectedIds.includes(applicant.id);
+            return (
+              <li
+                key={applicant.id}
+                className={`rounded-[var(--radius-lg)] border bg-surface-raised p-4 transition-colors md:p-5 ${
+                  selected
+                    ? "border-brand-secondary/50 ring-1 ring-brand-secondary/30"
+                    : "border-border-default"
+                }`}
+              >
+                <div className="flex flex-wrap items-start gap-4">
+                  <label className="mt-1 flex cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleSelected(applicant)}
+                      className="h-4 w-4 rounded border-border-default accent-[var(--brand-secondary)]"
+                      aria-label={`Select ${applicant.summary.name} for comparison`}
+                    />
+                  </label>
 
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                      href={`/company/${orgSlug}/jobs/${jobId}/applicants/${applicant.id}`}
-                      className="font-medium text-text-primary hover:underline"
-                    >
-                      {applicant.summary.name}
-                    </Link>
-                    <Badge
-                      variant={
-                        applicant.stage === "shortlisted" ? "success" : "neutral"
-                      }
-                    >
-                      {PIPELINE_STAGE_LABELS[
-                        applicant.stage as PipelineStage
-                      ] ?? applicant.stage}
-                    </Badge>
-                    {applicant.evidence.totalRequired > 0 ? (
-                      <Badge variant="neutral">
-                        {applicant.evidence.matchedRequired}/
-                        {applicant.evidence.totalRequired} required
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage
+                      src={applicant.summary.avatarUrl ?? undefined}
+                      alt=""
+                    />
+                    <AvatarFallback>
+                      {applicant.summary.name.slice(0, 1).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/company/${orgSlug}/jobs/${jobId}/applicants/${applicant.id}`}
+                        className="font-medium text-text-primary hover:underline"
+                      >
+                        {applicant.summary.name}
+                      </Link>
+                      <Badge
+                        variant={
+                          applicant.stage === "shortlisted"
+                            ? "success"
+                            : "neutral"
+                        }
+                      >
+                        {PIPELINE_STAGE_LABELS[
+                          applicant.stage as PipelineStage
+                        ] ?? applicant.stage}
                       </Badge>
+                      {applicant.evidence.totalRequired > 0 ? (
+                        <Badge variant="neutral">
+                          {applicant.evidence.matchedRequired}/
+                          {applicant.evidence.totalRequired} required
+                        </Badge>
+                      ) : null}
+                    </div>
+
+                    {applicant.summary.headline ? (
+                      <p className="text-body-sm text-text-secondary">
+                        {applicant.summary.headline}
+                      </p>
+                    ) : null}
+
+                    <p className="text-body-sm text-text-muted">
+                      {[
+                        applicant.summary.location,
+                        applicant.summary.yearsExperience != null
+                          ? `${applicant.summary.yearsExperience}+ yrs experience`
+                          : null,
+                        `Applied ${new Date(applicant.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`,
+                        applicant.noteCount
+                          ? `${applicant.noteCount} notes`
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+
+                    {applicant.summary.recentRoles[0] ? (
+                      <p className="text-body-sm text-text-secondary">
+                        {applicant.summary.recentRoles[0]}
+                      </p>
+                    ) : null}
+
+                    {applicant.summary.skills.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {applicant.summary.skills.slice(0, 6).map((s) => (
+                          <span
+                            key={s}
+                            className="rounded-[var(--radius-sm)] bg-surface-base px-2 py-0.5 text-xs text-text-secondary"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {applicant.evidence.highlights.length > 0 ? (
+                      <div className="space-y-1">
+                        <p className="text-label uppercase text-text-muted">
+                          Relevant evidence
+                        </p>
+                        <ul className="space-y-0.5 text-body-sm text-text-secondary">
+                          {applicant.evidence.highlights
+                            .slice(0, 3)
+                            .map((item) => (
+                              <li key={`${item.kind}-${item.label}`}>
+                                <span className="text-text-muted">
+                                  {item.kind}:
+                                </span>{" "}
+                                {item.label}
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
                     ) : null}
                   </div>
 
-                  {applicant.summary.headline ? (
-                    <p className="text-body-sm text-text-secondary">
-                      {applicant.summary.headline}
-                    </p>
-                  ) : null}
-
-                  <p className="text-body-sm text-text-muted">
-                    {[
-                      applicant.summary.location,
-                      applicant.summary.yearsExperience != null
-                        ? `${applicant.summary.yearsExperience}+ yrs experience`
-                        : null,
-                      `Applied ${new Date(applicant.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`,
-                      applicant.noteCount
-                        ? `${applicant.noteCount} notes`
-                        : null,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-
-                  {applicant.summary.recentRoles[0] ? (
-                    <p className="text-body-sm text-text-secondary">
-                      {applicant.summary.recentRoles[0]}
-                    </p>
-                  ) : null}
-
-                  {applicant.summary.skills.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {applicant.summary.skills.slice(0, 6).map((s) => (
-                        <span
-                          key={s}
-                          className="rounded-[var(--radius-sm)] bg-surface-base px-2 py-0.5 text-xs text-text-secondary"
-                        >
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  {applicant.evidence.highlights.length > 0 ? (
-                    <div className="space-y-1">
-                      <p className="text-label uppercase text-text-muted">
-                        Relevant evidence
-                      </p>
-                      <ul className="space-y-0.5 text-body-sm text-text-secondary">
-                        {applicant.evidence.highlights.slice(0, 3).map((item) => (
-                          <li key={`${item.kind}-${item.label}`}>
-                            <span className="text-text-muted">{item.kind}:</span>{" "}
-                            {item.label}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
-                  <Button size="sm" asChild>
-                    <Link
-                      href={`/company/${orgSlug}/jobs/${jobId}/applicants/${applicant.id}`}
-                    >
-                      Open
-                    </Link>
-                  </Button>
-                  {applicant.summary.slug ? (
-                    <Button size="sm" variant="outline" asChild>
-                      <a
-                        href={getPortfolioPublicUrl(applicant.summary.slug)}
-                        target="_blank"
-                        rel="noreferrer"
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
+                    <Button size="sm" asChild>
+                      <Link
+                        href={`/company/${orgSlug}/jobs/${jobId}/applicants/${applicant.id}`}
                       >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                        Livefolio
-                      </a>
+                        Open
+                      </Link>
                     </Button>
-                  ) : null}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      handleShortlist(applicant.id, !applicant.shortlisted)
-                    }
-                    disabled={toggleShortlist.isPending}
-                  >
-                    <Star
-                      className={`h-3.5 w-3.5 ${applicant.shortlisted ? "fill-current" : ""}`}
-                    />
-                    {applicant.shortlisted ? "Unshortlist" : "Shortlist"}
-                  </Button>
-                  <select
-                    className="h-9 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-2 text-sm text-text-primary"
-                    value={applicant.stage}
-                    onChange={(e) => handleStage(applicant.id, e.target.value)}
-                    disabled={updateStage.isPending}
-                    aria-label="Move stage"
-                  >
-                    {PIPELINE_STAGES.map((stage) => (
-                      <option key={stage} value={stage}>
-                        {PIPELINE_STAGE_LABELS[stage]}
-                      </option>
-                    ))}
-                  </select>
+                    {applicant.summary.slug ? (
+                      <Button size="sm" variant="outline" asChild>
+                        <a
+                          href={getPortfolioPublicUrl(applicant.summary.slug)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Livefolio
+                        </a>
+                      </Button>
+                    ) : null}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        handleShortlist(applicant.id, !applicant.shortlisted)
+                      }
+                      disabled={toggleShortlist.isPending}
+                    >
+                      <Star
+                        className={`h-3.5 w-3.5 ${applicant.shortlisted ? "fill-current" : ""}`}
+                      />
+                      {applicant.shortlisted ? "Unshortlist" : "Shortlist"}
+                    </Button>
+                    <select
+                      className="h-9 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-2 text-sm text-text-primary"
+                      value={applicant.stage}
+                      onChange={(e) =>
+                        handleStage(applicant.id, e.target.value)
+                      }
+                      disabled={updateStage.isPending}
+                      aria-label="Move stage"
+                    >
+                      {PIPELINE_STAGES.map((stage) => (
+                        <option key={stage} value={stage}>
+                          {PIPELINE_STAGE_LABELS[stage]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
+
+      <CompareSelectionBar
+        orgSlug={orgSlug}
+        jobId={jobId}
+        selectedIds={selectedIds}
+        selectedApplicants={selectedApplicants}
+        onClear={clearSelection}
+        onRemove={removeSelection}
+      />
     </div>
   );
 }
