@@ -18,6 +18,7 @@ import { summarizeSnapshot } from "@/features/applications/lib/applicant-summary
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import {
   filterApplicantsBySearch,
+  interpretApplicantQuery,
   type ApplicantSearchFilters,
 } from "@/features/applications/lib/search";
 import { buildApplicantEvidence } from "@/features/applications/lib/evidence";
@@ -435,6 +436,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       stageCounts,
       matchedCount: filtered.length,
       filters: searchFilters,
+      interpreted: interpretApplicantQuery(searchFilters.q),
       applicants: filtered.map(({ snapshot: _snapshot, ...rest }) => rest),
     };
   })

@@ -15,6 +15,7 @@ import {
   useToggleShortlist,
   useUpdateApplicationStage,
   type ApplicantCard,
+  type InterpretedApplicantQuery,
 } from "@/features/applications/api/use-applications";
 import {
   CompareSelectionBar,
@@ -179,9 +180,12 @@ export default function JobApplicantsPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="pl-9"
-            placeholder='Search applicants — e.g. "B2B SaaS", "team leadership", "Bangalore"'
+            placeholder='Try “4 years of experience in Marketing” or “suggest someone with content strategy”'
           />
         </div>
+        {q && data?.interpreted ? (
+          <InterpretedQueryChips interpreted={data.interpreted} />
+        ) : null}
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
@@ -457,6 +461,43 @@ export default function JobApplicantsPage() {
         onClear={clearSelection}
         onRemove={removeSelection}
       />
+    </div>
+  );
+}
+
+function InterpretedQueryChips({
+  interpreted,
+}: {
+  interpreted: InterpretedApplicantQuery;
+}) {
+  const chips = [
+    interpreted.minExperience != null
+      ? `${interpreted.minExperience}+ years`
+      : null,
+    interpreted.location,
+    ...interpreted.keywords,
+  ].filter((value): value is string => Boolean(value));
+
+  if (chips.length === 0) {
+    return (
+      <p className="text-xs text-text-muted">
+        No specific skills or years detected — showing the full pool ranked by
+        evidence.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-xs text-text-muted">Understood as</span>
+      {chips.map((chip) => (
+        <span
+          key={chip}
+          className="rounded-full bg-surface-base px-2 py-0.5 text-xs text-text-secondary"
+        >
+          {chip}
+        </span>
+      ))}
     </div>
   );
 }

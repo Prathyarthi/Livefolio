@@ -203,6 +203,14 @@ export type ApplicantPoolFilters = {
   appliedBefore?: string;
 };
 
+export type InterpretedApplicantQuery = {
+  raw: string;
+  keywords: string[];
+  skills: string[];
+  minExperience?: number;
+  location?: string;
+};
+
 export type ApplicantPool = {
   job: {
     id: string;
@@ -221,6 +229,7 @@ export type ApplicantPool = {
   stageCounts: Record<string, number>;
   matchedCount: number;
   filters: ApplicantPoolFilters;
+  interpreted?: InterpretedApplicantQuery;
   applicants: ApplicantCard[];
 };
 
