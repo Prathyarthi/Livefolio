@@ -1,7 +1,7 @@
 const FAQS = [
   {
     q: "Can recruiters browse all Livefolio users?",
-    a: "No. Hiring search is limited to applicants for each job. That keeps the product focused and respectful of candidate privacy.",
+    a: "No. They can search people who opted in, plus applicants for each job. Opting in is not shown on anyone’s public Livefolio.",
   },
   {
     q: "What’s free vs Org Pro?",

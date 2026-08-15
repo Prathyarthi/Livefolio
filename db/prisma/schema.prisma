@@ -153,6 +153,8 @@ model Portfolio {
 
   templateId  String  @default("pulse")
   isPublished Boolean @default(false)
+  /// Opt-in for recruiter talent search. Never shown on the public Livefolio.
+  openToWork  Boolean @default(false)
 
   metaTitle       String?
   metaDescription String?
@@ -185,6 +187,7 @@ model Portfolio {
   storedFiles    StoredFile[]
 
   @@index([slug])
+  @@index([openToWork, isPublished])
   @@map("portfolios")
 }
 

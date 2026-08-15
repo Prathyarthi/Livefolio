@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Plus,
   CreditCard,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -57,6 +58,11 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
       title: "Jobs",
       href: `/company/${orgSlug}/jobs`,
       icon: Briefcase,
+    },
+    {
+      title: "Talent",
+      href: `/company/${orgSlug}/talent`,
+      icon: Users,
     },
     {
       title: "Settings",

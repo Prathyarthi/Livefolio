@@ -232,6 +232,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         websiteUrl,
         metaTitle,
         metaDescription,
+        openToWork,
         ...rest
       } = body;
       const existingCustomization = customization
@@ -381,6 +382,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
                 ),
               }
             : {}),
+          ...(typeof openToWork === "boolean" ? { openToWork } : {}),
         };
       } catch (error) {
         ctx.set.status = 400;
@@ -460,6 +462,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
             t.Null(),
           ]),
+          openToWork: t.Boolean(),
           customization: t.Object({
             navbar: t.Optional(
               t.Object({

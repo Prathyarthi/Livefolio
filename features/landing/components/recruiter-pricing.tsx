@@ -12,6 +12,7 @@ const PLANS = [
       "1 open job posting",
       "Unlimited drafts",
       "Applicant pool & shortlist",
+      "Search talent who opted in",
     ],
     cta: "Start free",
     highlight: false,

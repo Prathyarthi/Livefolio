@@ -203,6 +203,50 @@ function tokenize(query: string): string[] {
     .filter((t) => t.length >= 2);
 }
 
+const MAX_JSON_STRINGS = 200;
+
+/** Collect string/number values from custom-section JSON (not keys). */
+export function flattenSearchableJson(
+  value: unknown,
+  out: string[] = [],
+  depth = 0,
+): string[] {
+  if (out.length >= MAX_JSON_STRINGS || depth > 6 || value == null) return out;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed) out.push(trimmed);
+    return out;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    out.push(String(value));
+    return out;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      flattenSearchableJson(item, out, depth + 1);
+      if (out.length >= MAX_JSON_STRINGS) break;
+    }
+    return out;
+  }
+  if (typeof value === "object") {
+    for (const nested of Object.values(value as Record<string, unknown>)) {
+      flattenSearchableJson(nested, out, depth + 1);
+      if (out.length >= MAX_JSON_STRINGS) break;
+    }
+  }
+  return out;
+}
+
+function customSectionSearchParts(
+  sections: ApplicationSnapshotData["customSections"] | undefined,
+): string[] {
+  return (sections ?? []).flatMap((section) => [
+    section.label,
+    section.sectionType,
+    ...flattenSearchableJson(section.items),
+  ]);
+}
+
 /** Flatten snapshot into searchable text for keyword matching. */
 export function snapshotSearchBlob(
   snapshot: ApplicationSnapshotData | null | undefined,
@@ -235,7 +279,7 @@ export function snapshotSearchBlob(
       e.field ?? undefined,
       e.description ?? undefined,
     ]),
-    ...snapshot.skills.map((s) => s.name),
+    ...snapshot.skills.flatMap((s) => [s.name, s.category]),
     ...snapshot.projects.flatMap((p) => [
       p.title,
       p.description,
@@ -248,7 +292,7 @@ export function snapshotSearchBlob(
       s.platform,
       s.username ?? undefined,
     ]),
-    ...snapshot.customSections.map((c) => c.label),
+    ...customSectionSearchParts(snapshot.customSections),
   ];
 
   return parts
@@ -286,13 +330,24 @@ export function matchesStructuredFilters(
     if (!hay.includes(needle)) return false;
   }
 
+  const customText = customSectionSearchParts(snapshot?.customSections).map(
+    normalize,
+  );
+
   if (filters.skill?.trim()) {
     const needle = normalize(filters.skill);
-    const skills = (snapshot?.skills ?? []).map((s) => normalize(s.name));
+    const skills = (snapshot?.skills ?? []).flatMap((s) => [
+      normalize(s.name),
+      normalize(s.category),
+    ]);
     const projectTech = (snapshot?.projects ?? []).flatMap((p) =>
       p.techStack.map(normalize),
     );
-    if (![...skills, ...projectTech].some((s) => s.includes(needle))) {
+    if (
+      ![...skills, ...projectTech, ...customText].some((s) =>
+        s.includes(needle),
+      )
+    ) {
       return false;
     }
   }
@@ -302,8 +357,11 @@ export function matchesStructuredFilters(
     const roles = (snapshot?.experiences ?? []).flatMap((e) => [
       normalize(e.role),
       normalize(e.company),
+      normalize(e.description),
     ]);
-    if (!roles.some((r) => r.includes(needle))) return false;
+    if (![...roles, ...customText].some((r) => r.includes(needle))) {
+      return false;
+    }
   }
 
   if (filters.education?.trim()) {
@@ -312,8 +370,9 @@ export function matchesStructuredFilters(
       normalize(e.institution),
       normalize(e.degree),
       normalize(e.field),
+      normalize(e.description),
     ]);
-    if (!edu.some((e) => e.includes(needle))) return false;
+    if (![...edu, ...customText].some((e) => e.includes(needle))) return false;
   }
 
   if (filters.minExperience != null && Number.isFinite(filters.minExperience)) {

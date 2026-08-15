@@ -134,6 +134,7 @@ export const pricingPlans: PricingPlan[] = [
       { label: "Public portfolio at your Livefolio link", included: true },
       { label: "Resume, GitHub, and LeetCode imports during free month", included: true },
       { label: "Editor and publish", included: true },
+      { label: "Opt in so recruiters can find you — not shown on your Livefolio", included: true },
       { label: "All templates during free month", included: true },
     ],
   },

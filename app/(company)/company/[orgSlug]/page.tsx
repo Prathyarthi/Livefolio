@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Briefcase, Plus, Settings } from "lucide-react";
+import { Briefcase, Plus, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useOrganization } from "@/features/organization/api/use-organization";
@@ -61,6 +61,12 @@ export default function CompanyOverviewPage() {
             <Link href={`/company/${orgSlug}/jobs/new`}>
               <Plus className="h-4 w-4" />
               Create job
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href={`/company/${orgSlug}/talent`}>
+              <Users className="h-4 w-4" />
+              Find talent
             </Link>
           </Button>
           <Button variant="outline" asChild>
