@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail, sendEmailBatch, type SendEmailInput } from "@/lib/email";
 import {
   noPortfolioReminderEmailHtml,
+  publishedPortfolioEmailHtml,
   unpublishedReminderEmailHtml,
   welcomeEmailHtml,
 } from "@/lib/email-templates";
@@ -114,6 +115,8 @@ export async function GET(req: Request) {
   let noPortfolioFailed = 0;
   let unpublishedSent = 0;
   let unpublishedFailed = 0;
+  let publishedSent = 0;
+  let publishedFailed = 0;
 
   // Retry welcome emails that failed on a previous attempt.
   const welcomeRetryUsers = await prisma.user.findMany({
@@ -165,6 +168,70 @@ export async function GET(req: Request) {
       data: { welcomeEmailSentAt: new Date() },
     });
     welcomeSent += 1;
+  }
+
+  // Retry published emails that failed on a previous attempt.
+  const publishedRetryUsers = await prisma.user.findMany({
+    where: {
+      publishedCongratsSentAt: null,
+      emailSendLogs: {
+        some: { type: "published", status: "failed" },
+      },
+      portfolio: {
+        isPublished: true,
+        slug: { not: null },
+      },
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      portfolio: { select: { slug: true } },
+    },
+    take: PAGE_SIZE,
+  });
+
+  for (const user of publishedRetryUsers) {
+    const { subject, html } = publishedPortfolioEmailHtml(
+      user.name,
+      user.portfolio?.slug,
+    );
+    const result = await sendEmail({
+      to: user.email,
+      subject,
+      html,
+      tags: [
+        { name: "type", value: "published" },
+        { name: "user_id", value: user.id },
+      ],
+      idempotencyKey: `published-${user.id}`,
+    });
+
+    await prisma.emailSendLog.create({
+      data: {
+        userId: user.id,
+        toEmail: user.email,
+        type: "published",
+        resendId: result.id,
+        status: result.error ? "failed" : "sent",
+        error: result.error,
+      },
+    });
+
+    if (result.error) {
+      publishedFailed += 1;
+      console.error("[email.cron.published] retry failed", {
+        userId: user.id,
+        error: result.error,
+      });
+      continue;
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { publishedCongratsSentAt: new Date() },
+    });
+    publishedSent += 1;
   }
 
   // --- No portfolio reminders ---
@@ -236,5 +303,6 @@ export async function GET(req: Request) {
     welcome: { sent: welcomeSent, failed: welcomeFailed },
     noPortfolio: { sent: noPortfolioSent, failed: noPortfolioFailed },
     unpublished: { sent: unpublishedSent, failed: unpublishedFailed },
+    published: { sent: publishedSent, failed: publishedFailed },
   });
 }

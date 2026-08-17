@@ -16,6 +16,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  defaultComposeBodyHtml,
+  wrapEmailHtmlIfNeeded,
+} from "@/lib/email-templates";
 
 type EmailTemplate = {
   id: string;
@@ -90,9 +94,7 @@ export default function AdminEmailsPage() {
   const [csvInvalid, setCsvInvalid] = useState<string[]>([]);
 
   const [subject, setSubject] = useState("");
-  const [bodyHtml, setBodyHtml] = useState(
-    `<p>Hi {{name}},</p>\n<p>Your message here.</p>\n<p>— Livefolio</p>`,
-  );
+  const [bodyHtml, setBodyHtml] = useState(defaultComposeBodyHtml);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
 
   const [templateForm, setTemplateForm] = useState({
@@ -488,8 +490,10 @@ export default function AdminEmailsPage() {
                     {bodyHtml.trim() ? (
                       <iframe
                         title="Compose preview"
-                        srcDoc={bodyHtml}
-                        className="h-[420px] w-full bg-white"
+                        srcDoc={wrapEmailHtmlIfNeeded(bodyHtml, {
+                          title: subject || "Livefolio",
+                        })}
+                        className="h-[560px] w-full bg-white"
                       />
                     ) : (
                       <p className="px-4 py-10 text-center text-sm text-text-muted">
@@ -585,8 +589,10 @@ export default function AdminEmailsPage() {
                   {templateForm.bodyHtml.trim() ? (
                     <iframe
                       title="Template editor preview"
-                      srcDoc={templateForm.bodyHtml}
-                      className="h-[420px] w-full bg-white"
+                      srcDoc={wrapEmailHtmlIfNeeded(templateForm.bodyHtml, {
+                        title: templateForm.subject || "Livefolio",
+                      })}
+                      className="h-[560px] w-full bg-white"
                     />
                   ) : (
                     <p className="px-4 py-10 text-center text-sm text-text-muted">
@@ -669,7 +675,9 @@ export default function AdminEmailsPage() {
                     <div className="overflow-hidden rounded-md border border-border-default bg-surface-sunken">
                       <iframe
                         title={`Preview ${template.name}`}
-                        srcDoc={template.bodyHtml}
+                        srcDoc={wrapEmailHtmlIfNeeded(template.bodyHtml, {
+                          title: template.subject,
+                        })}
                         className="h-[560px] w-full bg-white"
                       />
                     </div>

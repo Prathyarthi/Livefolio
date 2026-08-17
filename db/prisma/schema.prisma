@@ -33,6 +33,7 @@ model User {
   welcomeEmailSentAt           DateTime?
   noPortfolioReminderSentAt    DateTime?
   unpublishedReminderSentAt    DateTime?
+  publishedCongratsSentAt      DateTime?
 
   portfolio            Portfolio?
   billingSubscriptions BillingSubscription[]
@@ -391,7 +392,7 @@ model EmailSendLog {
   id         String   @id @default(uuid())
   userId     String?
   toEmail    String
-  /// welcome | no_portfolio | unpublished | blast
+  /// welcome | no_portfolio | unpublished | published | blast
   type       String
   campaignId String?
   resendId   String?
