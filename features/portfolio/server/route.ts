@@ -18,6 +18,7 @@ import {
   normalizeHidden,
   normalizeOrder,
 } from "@/features/templates/section-order";
+import { sendPublishedPortfolioEmailSafe } from "@/lib/email-published";
 import {
   ContentValidationError,
   MAX_CUSTOM_SECTION_ITEMS,
@@ -565,6 +566,16 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
 
       const portfolio = await prisma.portfolio.findUnique({
         where: { userId: session.userId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              publishedCongratsSentAt: true,
+            },
+          },
+        },
       });
 
       if (!portfolio) {
@@ -581,6 +592,20 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         where: { userId: session.userId },
         data: { isPublished: ctx.body.isPublished },
       });
+
+      const firstPublish =
+        ctx.body.isPublished &&
+        !portfolio.isPublished &&
+        !portfolio.user.publishedCongratsSentAt;
+
+      if (firstPublish) {
+        void sendPublishedPortfolioEmailSafe({
+          id: portfolio.user.id,
+          email: portfolio.user.email,
+          name: portfolio.user.name,
+          slug: updated.slug ?? portfolio.slug,
+        });
+      }
 
       return updated;
     },

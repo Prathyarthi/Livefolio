@@ -7,6 +7,7 @@ import {
   sendEmailBatch,
   type SendEmailInput,
 } from "@/lib/email";
+import { wrapEmailHtmlIfNeeded } from "@/lib/email-templates";
 
 const MAX_RECIPIENTS = 200;
 
@@ -123,10 +124,13 @@ export async function POST(req: Request) {
       name: recipient.name,
       email: recipient.email,
     }),
-    html: renderTemplatePlaceholders(bodyHtml, {
-      name: recipient.name,
-      email: recipient.email,
-    }),
+    html: wrapEmailHtmlIfNeeded(
+      renderTemplatePlaceholders(bodyHtml, {
+        name: recipient.name,
+        email: recipient.email,
+      }),
+      { title: subject },
+    ),
     tags: [
       { name: "type", value: "blast" },
       { name: "campaign_id", value: campaign.id },

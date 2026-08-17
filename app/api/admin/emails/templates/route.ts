@@ -14,15 +14,22 @@ const DEFAULT_TEMPLATE_NAMES = [
   "Welcome (on signup)",
   "No portfolio reminder",
   "Unpublished reminder",
+  "Portfolio published",
 ] as const;
 
 async function ensureDefaultTemplates() {
-  const existingCount = await prisma.emailTemplate.count();
-  if (existingCount > 0) return;
+  const existing = await prisma.emailTemplate.findMany({
+    where: { name: { in: [...DEFAULT_TEMPLATE_NAMES] } },
+    select: { name: true },
+  });
+  const existingNames = new Set(existing.map((row) => row.name));
+  const missing = getAutomatedEmailDemos("{{name}}", { preview: false }).filter(
+    (demo) => !existingNames.has(demo.label),
+  );
+  if (missing.length === 0) return;
 
-  const demos = getAutomatedEmailDemos("{{name}}", { preview: false });
   await prisma.emailTemplate.createMany({
-    data: demos.map((demo) => ({
+    data: missing.map((demo) => ({
       name: demo.label,
       subject: demo.subject,
       bodyHtml: demo.html,

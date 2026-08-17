@@ -11,8 +11,8 @@ export default function AdminEmailPreviewPage() {
         <div>
           <h1 className="text-h2 text-text-primary">Email template demos</h1>
           <p className="mt-1 max-w-2xl text-body-sm text-text-secondary">
-            Preview of the automated emails Livefolio sends. Logo uses your local
-            asset here so you can see branding before deploy.
+            Preview of the automated emails Livefolio sends. Layout matches the
+            branded letter used for waitlist and product mail.
           </p>
         </div>
         <Link
@@ -39,7 +39,7 @@ export default function AdminEmailPreviewPage() {
               <iframe
                 title={demo.label}
                 srcDoc={demo.html}
-                className="h-[640px] w-full bg-white"
+                className="h-[720px] w-full bg-white"
               />
             </div>
           </section>
