@@ -210,17 +210,34 @@ export default function ApplicantDetailPage() {
 
       {data.evidence &&
       (data.evidence.requirementMatches.length > 0 ||
-        data.evidence.highlights.length > 0) ? (
+        data.evidence.highlights.length > 0 ||
+        (data.evidence.rankReasons && data.evidence.rankReasons.length > 0) ||
+        data.evidence.rankScore) ? (
         <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5">
           <div>
             <h2 className="text-h3 text-text-primary">
               Relevant evidence & requirements
             </h2>
             <p className="text-body-sm text-text-muted">
-              Matched against this job&apos;s structured requirements from the
-              application snapshot.
+              Ranked against the job description and this person&apos;s
+              Livefolio.
             </p>
           </div>
+
+          {data.evidence.rankScore ? (
+            <p className="text-body-sm text-text-secondary">
+              Match {data.evidence.rankScore}
+            </p>
+          ) : null}
+
+          {data.evidence.rankReasons &&
+          data.evidence.rankReasons.length > 0 ? (
+            <ul className="space-y-1 text-body-sm text-text-secondary">
+              {data.evidence.rankReasons.map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
+          ) : null}
 
           {data.evidence.totalRequired > 0 || data.evidence.totalPreferred > 0 ? (
             <p className="text-body-sm text-text-secondary">

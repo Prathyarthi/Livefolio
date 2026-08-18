@@ -61,6 +61,7 @@ export type ApplicationSnapshotData = {
     platform: string;
     url: string;
     username: string | null;
+    cachedStats?: unknown;
   }>;
   customSections: Array<{
     sectionType: string;

@@ -7,8 +7,8 @@ import {
   talentIdsMatchingJsonAndArrays,
   talentTextSearchOr,
 } from "@/features/talent/lib/search";
+import { parsePageParams } from "@/lib/pagination";
 
-const TALENT_LIMIT = 50;
 const QUERY_MAX = 80;
 
 function optionalTrim(value?: string | null) {
@@ -48,6 +48,7 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
     const q = optionalTrim(ctx.query.q);
     const location = optionalTrim(ctx.query.location);
     const skill = optionalTrim(ctx.query.skill);
+    const { page: requestedPage, pageSize } = parsePageParams(ctx.query);
 
     const jsonAndArrayIds = q ? await talentIdsMatchingJsonAndArrays(q) : [];
 
@@ -60,35 +61,40 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       ...(q ? { OR: talentTextSearchOr(q, jsonAndArrayIds) } : {}),
     };
 
-    const [rows, total] = await Promise.all([
-      prisma.portfolio.findMany({
-        where,
-        select: {
-          slug: true,
-          title: true,
-          headline: true,
-          location: true,
-          avatarUrl: true,
-          updatedAt: true,
-          skills: {
-            orderBy: { sortOrder: "asc" },
-            take: 8,
-            select: { name: true },
-          },
-          experiences: {
-            orderBy: { sortOrder: "asc" },
-            take: 1,
-            select: { role: true, company: true },
-          },
+    const total = await prisma.portfolio.count({ where });
+    const pageCount = Math.max(1, Math.ceil(total / pageSize) || 1);
+    const page = Math.min(requestedPage, pageCount);
+
+    const rows = await prisma.portfolio.findMany({
+      where,
+      select: {
+        slug: true,
+        title: true,
+        headline: true,
+        location: true,
+        avatarUrl: true,
+        updatedAt: true,
+        skills: {
+          orderBy: { sortOrder: "asc" },
+          take: 8,
+          select: { name: true },
         },
-        orderBy: { updatedAt: "desc" },
-        take: TALENT_LIMIT,
-      }),
-      prisma.portfolio.count({ where }),
-    ]);
+        experiences: {
+          orderBy: { sortOrder: "asc" },
+          take: 1,
+          select: { role: true, company: true },
+        },
+      },
+      orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
 
     return {
       total,
+      page,
+      pageSize,
+      pageCount,
       people: rows.map((row) => {
         const slug = row.slug!;
         const recent = row.experiences[0];
@@ -112,6 +118,8 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       q: t.Optional(t.String()),
       location: t.Optional(t.String()),
       skill: t.Optional(t.String()),
+      page: t.Optional(t.String()),
+      pageSize: t.Optional(t.String()),
     }),
   },
 );

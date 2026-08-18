@@ -23,7 +23,13 @@ import {
   type ApplicantSearchFilters,
 } from "@/features/applications/lib/search";
 import { buildApplicantEvidence } from "@/features/applications/lib/evidence";
+import {
+  attachRank,
+  rankApplicantAgainstJob,
+} from "@/features/applications/lib/rank";
+import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import { buildPoolGapReport } from "@/features/applications/lib/pool-gaps";
+import { parsePageParams, paginateSlice } from "@/lib/pagination";
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -140,21 +146,38 @@ function parseSnapshot(data: unknown): ApplicationSnapshotData | null {
 
 export const applications = new Elysia({ prefix: "/applications" })
   // Candidate: list my applications
-  .get("/mine", async (ctx) => {
-    const session = await getSession(ctx.request);
-    if (!session) {
-      ctx.set.status = 401;
-      return { error: "Unauthorized" };
-    }
+  .get(
+    "/mine",
+    async (ctx) => {
+      const session = await getSession(ctx.request);
+      if (!session) {
+        ctx.set.status = 401;
+        return { error: "Unauthorized" };
+      }
 
-    const list = await prisma.application.findMany({
-      where: { userId: session.userId },
-      include: candidateApplicationInclude,
-      orderBy: { submittedAt: "desc" },
-    });
+      const where = { userId: session.userId };
+      const { page: requestedPage, pageSize } = parsePageParams(ctx.query);
+      const total = await prisma.application.count({ where });
+      const pageCount = Math.max(1, Math.ceil(total / pageSize) || 1);
+      const page = Math.min(requestedPage, pageCount);
 
-    return list;
-  })
+      const applications = await prisma.application.findMany({
+        where,
+        include: candidateApplicationInclude,
+        orderBy: [{ submittedAt: "desc" }, { id: "asc" }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      });
+
+      return { applications, total, page, pageSize, pageCount };
+    },
+    {
+      query: t.Object({
+        page: t.Optional(t.String()),
+        pageSize: t.Optional(t.String()),
+      }),
+    },
+  )
 
   // Candidate: get one application (never includes recruiter notes)
   .get("/mine/:id", async (ctx) => {
@@ -387,11 +410,20 @@ export const applications = new Elysia({ prefix: "/applications" })
     const resumeByUser = await latestResumeIdsByUserId(
       applications.map((app) => app.user.id),
     );
+    const searchProfile = await refreshJobSearchProfile(job.id);
 
     const enriched = applications.map((app) => {
       const snapshot = parseSnapshot(app.snapshot?.data);
       const summary = summarizeSnapshot(snapshot);
-      const evidence = buildApplicantEvidence(snapshot, job.requirements);
+      const rank = rankApplicantAgainstJob(snapshot, searchProfile, {
+        name: app.user.name,
+        email: app.user.email,
+        coverNote: app.coverNote,
+      });
+      const evidence = attachRank(
+        buildApplicantEvidence(snapshot, job.requirements),
+        rank,
+      );
       return {
         id: app.id,
         stage: app.stage,
@@ -418,6 +450,8 @@ export const applications = new Elysia({ prefix: "/applications" })
 
     const filtered = filterApplicantsBySearch(enriched, searchFilters).sort(
       (a, b) => {
+        const rankDiff = b.evidence.rankScore - a.evidence.rankScore;
+        if (rankDiff !== 0) return rankDiff;
         const reqDiff =
           b.evidence.matchedRequired - a.evidence.matchedRequired;
         if (reqDiff !== 0) return reqDiff;
@@ -429,6 +463,9 @@ export const applications = new Elysia({ prefix: "/applications" })
         );
       },
     );
+
+    const { page: requestedPage, pageSize } = parsePageParams(ctx.query);
+    const paged = paginateSlice(filtered, requestedPage, pageSize);
 
     const gaps = buildPoolGapReport(enriched, job.requirements);
 
@@ -444,10 +481,13 @@ export const applications = new Elysia({ prefix: "/applications" })
       },
       stageCounts,
       matchedCount: filtered.length,
+      page: paged.page,
+      pageSize: paged.pageSize,
+      pageCount: paged.pageCount,
       filters: searchFilters,
       interpreted: interpretApplicantQuery(searchFilters.q),
       gaps,
-      applicants: filtered.map(({ snapshot: _snapshot, ...rest }) => rest),
+      applicants: paged.items.map(({ snapshot: _snapshot, ...rest }) => rest),
     };
   })
 
@@ -489,7 +529,16 @@ export const applications = new Elysia({ prefix: "/applications" })
 
     const snapshot = parseSnapshot(application.snapshot?.data);
     const summary = summarizeSnapshot(snapshot);
-    const evidence = buildApplicantEvidence(snapshot, job.requirements);
+    const searchProfile = await refreshJobSearchProfile(job.id);
+    const rank = rankApplicantAgainstJob(snapshot, searchProfile, {
+      name: application.user.name,
+      email: application.user.email,
+      coverNote: application.coverNote,
+    });
+    const evidence = attachRank(
+      buildApplicantEvidence(snapshot, job.requirements),
+      rank,
+    );
 
     const resumeByUser = await latestResumeIdsByUserId([application.user.id]);
 

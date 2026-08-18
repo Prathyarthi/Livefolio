@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTalentSearch } from "@/features/talent/api/use-talent";
+import { ListPagination } from "@/components/list-pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 
 export default function CompanyTalentPage() {
   const params = useParams<{ orgSlug: string }>();
@@ -18,16 +20,23 @@ export default function CompanyTalentPage() {
   const [q, setQ] = useState("");
   const [location, setLocation] = useState("");
   const [skill, setSkill] = useState("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setQ(searchInput.trim()), 250);
     return () => window.clearTimeout(timer);
   }, [searchInput]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [q, location, skill]);
+
   const talentQuery = useTalentSearch(orgSlug, {
     q: q || undefined,
     location: location.trim() || undefined,
     skill: skill.trim() || undefined,
+    page,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
 
   const people = talentQuery.data?.people ?? [];
@@ -102,11 +111,6 @@ export default function CompanyTalentPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-body-sm text-text-muted">
-            {total === people.length
-              ? `${total} ${total === 1 ? "person" : "people"}`
-              : `Showing ${people.length} of ${total}`}
-          </p>
           <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
             {people.map((person) => (
               <li
@@ -166,6 +170,12 @@ export default function CompanyTalentPage() {
               </li>
             ))}
           </ul>
+          <ListPagination
+            page={talentQuery.data?.page ?? page}
+            pageSize={talentQuery.data?.pageSize ?? DEFAULT_PAGE_SIZE}
+            total={total}
+            onPageChange={setPage}
+          />
         </div>
       )}
     </div>

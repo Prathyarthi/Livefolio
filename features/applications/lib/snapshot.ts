@@ -93,6 +93,7 @@ export async function buildApplicationSnapshot(
       platform: s.platform,
       url: s.url,
       username: s.username,
+      cachedStats: s.cachedStats ?? null,
     })),
     customSections: portfolio.customSections.map((c) => ({
       sectionType: c.sectionType,

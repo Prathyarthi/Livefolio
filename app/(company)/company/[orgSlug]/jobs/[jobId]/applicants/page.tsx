@@ -28,6 +28,8 @@ import {
   type PipelineStage,
 } from "@/features/jobs/constants/labels";
 import { getPortfolioPublicUrl } from "@/lib/domain";
+import { ListPagination } from "@/components/list-pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 
 type PoolTab = "all" | PipelineStage;
 
@@ -49,11 +51,16 @@ export default function JobApplicantsPage() {
   const [education, setEducation] = useState("");
   const [minExperience, setMinExperience] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setQ(searchInput.trim()), 250);
     return () => window.clearTimeout(timer);
   }, [searchInput]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [tab, q, location, skill, role, education, minExperience]);
 
   const poolQuery = useApplicantPool(jobId, {
     stage: tab !== "all" ? tab : undefined,
@@ -63,6 +70,8 @@ export default function JobApplicantsPage() {
     role: role.trim() || undefined,
     education: education.trim() || undefined,
     minExperience: minExperience ? Number(minExperience) : undefined,
+    page,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
   const updateStage = useUpdateApplicationStage(jobId);
   const toggleShortlist = useToggleShortlist(jobId);
@@ -290,7 +299,8 @@ export default function JobApplicantsPage() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <div className="space-y-3">
+          <ul className="space-y-3">
           {data.applicants.map((applicant) => {
             const selected = selectedIds.includes(applicant.id);
             return (
@@ -342,6 +352,11 @@ export default function JobApplicantsPage() {
                           applicant.stage as PipelineStage
                         ] ?? applicant.stage}
                       </Badge>
+                      {applicant.evidence.rankScore ? (
+                        <Badge variant="neutral">
+                          Match {applicant.evidence.rankScore}
+                        </Badge>
+                      ) : null}
                       {applicant.evidence.totalRequired > 0 ? (
                         <Badge variant="neutral">
                           {applicant.evidence.matchedRequired}/
@@ -390,7 +405,21 @@ export default function JobApplicantsPage() {
                       </div>
                     ) : null}
 
-                    {applicant.evidence.highlights.length > 0 ? (
+                    {applicant.evidence.rankReasons &&
+                    applicant.evidence.rankReasons.length > 0 ? (
+                      <div className="space-y-1">
+                        <p className="text-label uppercase text-text-muted">
+                          Why this rank
+                        </p>
+                        <ul className="space-y-0.5 text-body-sm text-text-secondary">
+                          {applicant.evidence.rankReasons
+                            .slice(0, 3)
+                            .map((reason) => (
+                              <li key={reason}>{reason}</li>
+                            ))}
+                        </ul>
+                      </div>
+                    ) : applicant.evidence.highlights.length > 0 ? (
                       <div className="space-y-1">
                         <p className="text-label uppercase text-text-muted">
                           Relevant evidence
@@ -400,10 +429,16 @@ export default function JobApplicantsPage() {
                             .slice(0, 3)
                             .map((item) => (
                               <li key={`${item.kind}-${item.label}`}>
-                                <span className="text-text-muted">
-                                  {item.kind}:
-                                </span>{" "}
-                                {item.label}
+                                {item.kind === "match" ? (
+                                  item.label
+                                ) : (
+                                  <>
+                                    <span className="text-text-muted">
+                                      {item.kind}:
+                                    </span>{" "}
+                                    {item.label}
+                                  </>
+                                )}
                               </li>
                             ))}
                         </ul>
@@ -477,6 +512,13 @@ export default function JobApplicantsPage() {
             );
           })}
         </ul>
+          <ListPagination
+            page={data.page ?? page}
+            pageSize={data.pageSize ?? DEFAULT_PAGE_SIZE}
+            total={data.matchedCount}
+            onPageChange={setPage}
+          />
+        </div>
       )}
 
       <CompareSelectionBar

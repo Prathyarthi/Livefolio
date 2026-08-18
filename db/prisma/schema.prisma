@@ -466,6 +466,9 @@ model Job {
   status      String    @default("draft")
   publishedAt DateTime?
 
+  /// AI-extracted ranking profile from the job description. Null until first extract.
+  searchProfile Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

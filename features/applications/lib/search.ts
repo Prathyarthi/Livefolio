@@ -195,10 +195,10 @@ function normalize(value: string | null | undefined): string {
   return (value ?? "").toLowerCase().trim();
 }
 
-function tokenize(query: string): string[] {
+export function tokenize(query: string): string[] {
   return query
     .toLowerCase()
-    .split(/[^a-z0-9+#.]+/i)
+    .split(/[^a-z0-9+\-#.]+/i)
     .map((t) => t.trim())
     .filter((t) => t.length >= 2);
 }

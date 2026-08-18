@@ -81,13 +81,27 @@ export type ApplicationPreview = {
   portfolioId: string;
 };
 
-export function useMyApplications() {
+export function useMyApplications(options?: { page?: number; pageSize?: number }) {
+  const page = options?.page ?? 1;
+  const pageSize = options?.pageSize ?? 20;
+
   return useQuery({
-    queryKey: ["applications", "mine"],
+    queryKey: ["applications", "mine", page, pageSize],
     queryFn: async () => {
-      const res = await fetch("/api/applications/mine", { cache: "no-store" });
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("pageSize", String(pageSize));
+      const res = await fetch(`/api/applications/mine?${params}`, {
+        cache: "no-store",
+      });
       if (!res.ok) await throwApiError(res, "Failed to load applications");
-      return res.json() as Promise<CandidateApplication[]>;
+      return res.json() as Promise<{
+        applications: CandidateApplication[];
+        total: number;
+        page: number;
+        pageSize: number;
+        pageCount: number;
+      }>;
     },
   });
 }
@@ -160,6 +174,8 @@ export type ApplicantEvidenceSummary = {
   totalRequired: number;
   matchedPreferred: number;
   totalPreferred: number;
+  rankScore?: number;
+  rankReasons?: string[];
 };
 
 export type ApplicantCard = {
@@ -230,6 +246,9 @@ export type ApplicantPool = {
   };
   stageCounts: Record<string, number>;
   matchedCount: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
   filters: ApplicantPoolFilters;
   interpreted?: InterpretedApplicantQuery;
   gaps: PoolGapReport;
@@ -283,6 +302,8 @@ export function useApplicantPool(
   jobId: string | undefined,
   options?: {
     stage?: string;
+    page?: number;
+    pageSize?: number;
   } & ApplicantPoolFilters,
 ) {
   const stage = options?.stage;
@@ -295,6 +316,8 @@ export function useApplicantPool(
   const maxExperience = options?.maxExperience;
   const appliedAfter = options?.appliedAfter;
   const appliedBefore = options?.appliedBefore;
+  const page = options?.page ?? 1;
+  const pageSize = options?.pageSize ?? 20;
 
   return useQuery({
     queryKey: [
@@ -311,6 +334,8 @@ export function useApplicantPool(
       maxExperience ?? "",
       appliedAfter ?? "",
       appliedBefore ?? "",
+      page,
+      pageSize,
     ],
     enabled: Boolean(jobId),
     queryFn: async () => {
@@ -325,6 +350,8 @@ export function useApplicantPool(
       if (maxExperience != null) params.set("maxExperience", String(maxExperience));
       if (appliedAfter) params.set("appliedAfter", appliedAfter);
       if (appliedBefore) params.set("appliedBefore", appliedBefore);
+      params.set("page", String(page));
+      params.set("pageSize", String(pageSize));
       const qs = params.toString();
       const res = await fetch(
         `/api/applications/job/${jobId}${qs ? `?${qs}` : ""}`,

@@ -7,6 +7,7 @@ import {
   orgUpgradeMessage,
   resolveOrgAccess,
 } from "@/lib/org-entitlements";
+import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import { deleteObjectQuiet, isR2Configured } from "@/lib/r2";
 
 const OPEN_JOB_STATUSES = new Set(["published", "paused"]);
@@ -306,6 +307,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       });
 
       await replaceRequirements(job.id, ctx.body.requirements);
+      await refreshJobSearchProfile(job.id);
 
       return prisma.job.findUniqueOrThrow({
         where: { id: job.id },
@@ -469,6 +471,18 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       });
 
       await replaceRequirements(existing.id, ctx.body.requirements);
+
+      if (
+        ctx.body.title !== undefined ||
+        ctx.body.description !== undefined ||
+        ctx.body.responsibilities !== undefined ||
+        ctx.body.qualifications !== undefined ||
+        ctx.body.location !== undefined ||
+        ctx.body.experienceMin !== undefined ||
+        ctx.body.department !== undefined
+      ) {
+        await refreshJobSearchProfile(existing.id);
+      }
 
       return prisma.job.findUniqueOrThrow({
         where: { id: existing.id },

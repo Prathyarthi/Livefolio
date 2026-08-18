@@ -10,7 +10,8 @@ export type EvidenceItem = {
     | "education"
     | "certification"
     | "publication"
-    | "achievement";
+    | "achievement"
+    | "match";
   label: string;
   detail?: string;
 };
@@ -30,6 +31,8 @@ export type ApplicantEvidenceSummary = {
   totalRequired: number;
   matchedPreferred: number;
   totalPreferred: number;
+  rankScore: number;
+  rankReasons: string[];
 };
 
 const TOKEN_STOP_WORDS = new Set([
@@ -300,6 +303,8 @@ export function buildApplicantEvidence(
       totalRequired: 0,
       matchedPreferred: 0,
       totalPreferred: 0,
+      rankScore: 0,
+      rankReasons: [],
     };
   }
 
@@ -341,5 +346,7 @@ export function buildApplicantEvidence(
     totalRequired: required.length,
     matchedPreferred: preferred.filter((r) => r.matched).length,
     totalPreferred: preferred.length,
+    rankScore: 0,
+    rankReasons: [],
   };
 }
