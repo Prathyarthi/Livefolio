@@ -58,7 +58,7 @@ export default function CompanyTalentPage() {
         </p>
       </header>
 
-      <div className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4">
+      <div className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)] md:p-6">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <Input
@@ -98,7 +98,7 @@ export default function CompanyTalentPage() {
           Couldn’t load talent. Try again in a moment.
         </p>
       ) : people.length === 0 ? (
-        <div className="rounded-[var(--radius-lg)] border border-dashed border-border-default bg-surface-raised px-6 py-10 text-center">
+        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
           <Users className="mx-auto h-8 w-8 text-text-muted" />
           <h3 className="mt-3 text-h3 text-text-primary">
             {hasFilters ? "No matches" : "No talent yet"}
@@ -111,7 +111,7 @@ export default function CompanyTalentPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
+          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
             {people.map((person) => (
               <li
                 key={person.slug}

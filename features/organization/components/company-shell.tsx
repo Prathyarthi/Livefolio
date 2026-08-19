@@ -222,14 +222,16 @@ export function CompanyShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <CompanySidebar orgSlug={orgSlug} />
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-2 border-b border-border-default px-4 md:hidden">
+      <SidebarInset className="relative min-w-0 overflow-x-hidden bg-surface-base">
+        <header className="glass-nav sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border-default px-4 md:hidden">
           <SidebarTrigger />
           <span className="text-sm font-medium text-text-primary">
             Hiring workspace
           </span>
         </header>
-        <div className="flex flex-1 flex-col">{children}</div>
+        <main className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

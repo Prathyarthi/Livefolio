@@ -96,7 +96,7 @@ export default function CompanyIndexPage() {
         </header>
 
         {orgs && orgs.length > 0 ? (
-          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
+          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
             {orgs.map(({ organization, role }) => (
               <li key={organization.id}>
                 <Link
@@ -122,7 +122,7 @@ export default function CompanyIndexPage() {
             ))}
           </ul>
         ) : (
-          <div className="rounded-[var(--radius-lg)] border border-dashed border-border-default px-6 py-10 text-center">
+          <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
             <Building2 className="mx-auto h-8 w-8 text-text-muted" />
             <h2 className="mt-3 text-h3 text-text-primary">
               No hiring workspace yet
@@ -138,7 +138,7 @@ export default function CompanyIndexPage() {
             Create a hiring workspace
           </Button>
         ) : (
-          <div className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6">
+          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
             <h2 className="text-h3 text-text-primary">New company</h2>
             <div className="space-y-2">
               <Label htmlFor="company-name">Company name</Label>

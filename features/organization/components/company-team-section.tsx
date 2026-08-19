@@ -115,7 +115,7 @@ export function CompanyTeamSection({
   }
 
   return (
-    <section className="space-y-5 border-t border-border-default pt-8">
+    <section className="space-y-5 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
       <div className="space-y-1">
         <h2 className="text-h3 text-text-primary">Team</h2>
         <p className="text-body-sm text-text-secondary">
@@ -127,7 +127,7 @@ export function CompanyTeamSection({
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading team…</p>
       ) : (
-        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
+        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
           {(members ?? []).map((member) => {
             const editable = canEditMember(member);
             const removable = canRemoveMember(member);
@@ -203,7 +203,7 @@ export function CompanyTeamSection({
       )}
 
       {canManage ? (
-        <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4">
+        <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]">
           <p className="text-body-sm font-medium text-text-primary">
             Add teammate
           </p>

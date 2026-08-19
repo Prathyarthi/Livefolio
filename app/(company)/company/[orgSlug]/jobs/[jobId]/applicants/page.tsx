@@ -183,7 +183,7 @@ export default function JobApplicantsPage() {
         </div>
       </header>
 
-      <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4">
+      <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)] md:p-6">
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <Input
@@ -288,7 +288,7 @@ export default function JobApplicantsPage() {
             : "Failed to load applicants"}
         </p>
       ) : !data || data.applicants.length === 0 ? (
-        <div className="rounded-[var(--radius-lg)] border border-dashed border-border-default px-6 py-12 text-center">
+        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-12 text-center shadow-[var(--shadow-card)] md:p-8">
           <h2 className="text-h3 text-text-primary">
             {hasActiveFilters ? "No matching applicants" : "No applicants here"}
           </h2>
@@ -306,7 +306,7 @@ export default function JobApplicantsPage() {
             return (
               <li
                 key={applicant.id}
-                className={`rounded-[var(--radius-lg)] border bg-surface-raised p-4 transition-colors md:p-5 ${
+                className={`rounded-[var(--radius-lg)] border bg-surface-raised p-4 transition-colors shadow-[var(--shadow-card)] md:p-6 ${
                   selected
                     ? "border-brand-secondary/50 ring-1 ring-brand-secondary/30"
                     : "border-border-default"

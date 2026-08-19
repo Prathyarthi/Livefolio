@@ -91,7 +91,7 @@ export default function ManageJobPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/jobs`}>← Back to jobs</Link>
       </Button>
@@ -173,7 +173,7 @@ export default function ManageJobPage() {
       </div>
 
       {(job.status === "published" || job.status === "paused") && (
-        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4">
+        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)] md:p-6">
           <p className="text-label uppercase text-text-secondary">
             Shareable job link
           </p>
@@ -196,8 +196,9 @@ export default function ManageJobPage() {
         </div>
       )}
 
-      <section className="space-y-3">
-        <h2 className="text-h3 text-text-primary">Description</h2>
+      <div className="space-y-8 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <section className="space-y-3">
+          <h2 className="text-h3 text-text-primary">Description</h2>
         <PdfExtractField
           hint="Replace the description from a PDF. You can still edit the text afterward."
           onExtracted={async (text, file) => {
@@ -258,6 +259,7 @@ export default function ManageJobPage() {
           </div>
         </section>
       )}
+      </div>
 
       <p className="text-body-sm text-text-muted">
         Open the applicant pool to move candidates through the pipeline, shortlist,

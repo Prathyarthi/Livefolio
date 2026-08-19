@@ -131,7 +131,7 @@ export default function NewJobPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/jobs`}>← Back to jobs</Link>
       </Button>
@@ -144,7 +144,8 @@ export default function NewJobPage() {
         </p>
       </header>
 
-      <div className="space-y-5">
+      <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <div className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="title">Job title</Label>
           <Input
@@ -344,9 +345,9 @@ export default function NewJobPage() {
             ))}
           </div>
         </div>
-      </div>
+        </div>
 
-      <div className="flex flex-wrap gap-3 border-t border-border-default pt-6">
+        <div className="flex flex-wrap gap-3 border-t border-border-default pt-6">
         <Button
           onClick={() => handleSubmit(false)}
           disabled={createJob.isPending}
@@ -363,6 +364,7 @@ export default function NewJobPage() {
         <Button variant="ghost" asChild>
           <Link href={`/company/${orgSlug}/jobs`}>Cancel</Link>
         </Button>
+        </div>
       </div>
     </div>
   );

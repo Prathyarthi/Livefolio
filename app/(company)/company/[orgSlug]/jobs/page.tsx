@@ -72,14 +72,14 @@ export default function CompanyJobsPage() {
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading jobs…</p>
       ) : !jobs || jobs.length === 0 ? (
-        <div className="rounded-[var(--radius-lg)] border border-dashed border-border-default px-6 py-12 text-center">
+        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-12 text-center shadow-[var(--shadow-card)] md:p-8">
           <h2 className="text-h3 text-text-primary">No jobs in this view</h2>
           <p className="mt-1 text-body-sm text-text-secondary">
             Create a job draft, then publish when you&apos;re ready.
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
+        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
           {jobs.map((job) => (
             <li
               key={job.id}

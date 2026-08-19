@@ -106,7 +106,7 @@ export function ApplicantCompareView({
         </p>
       </header>
 
-      <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
+      <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
         <div
           className="min-w-[640px]"
           style={{

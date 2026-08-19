@@ -86,7 +86,7 @@ export default function CompanyOverviewPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5"
+            className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]"
           >
             <p className="text-label uppercase text-text-secondary">
               {stat.label}
@@ -107,7 +107,7 @@ export default function CompanyOverviewPage() {
         {jobsLoading ? (
           <p className="text-body-sm text-text-muted">Loading jobs…</p>
         ) : recentJobs.length === 0 ? (
-          <div className="rounded-[var(--radius-lg)] border border-dashed border-border-default bg-surface-raised px-6 py-10 text-center">
+          <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
             <Briefcase className="mx-auto h-8 w-8 text-text-muted" />
             <h3 className="mt-3 text-h3 text-text-primary">No jobs yet</h3>
             <p className="mt-1 text-body-sm text-text-secondary">
@@ -118,7 +118,7 @@ export default function CompanyOverviewPage() {
             </Button>
           </div>
         ) : (
-          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
+          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
             {recentJobs.map((job) => (
               <li key={job.id}>
                 <Link

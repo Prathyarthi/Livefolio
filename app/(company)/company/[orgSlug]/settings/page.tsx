@@ -73,7 +73,7 @@ export default function CompanySettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
       </Button>
@@ -106,8 +106,9 @@ export default function CompanySettingsPage() {
           Only owners and admins can edit company settings.
         </p>
       ) : (
-        <div className="space-y-5">
-          <div className="space-y-2">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+          <div className="space-y-5">
+            <div className="space-y-2">
             <Label htmlFor="name">Company name</Label>
             <Input
               id="name"
@@ -169,7 +170,8 @@ export default function CompanySettingsPage() {
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          </div>
+          <div className="flex flex-wrap items-center gap-2 border-t border-border-default pt-6">
             <Button onClick={handleSave} disabled={updateOrg.isPending}>
               Save changes
             </Button>

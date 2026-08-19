@@ -173,7 +173,7 @@ export default function CompanyBillingPage() {
 
   if (!billing) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-6 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-6 p-6 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
         </Button>
@@ -211,7 +211,7 @@ export default function CompanyBillingPage() {
   const intervalCheckoutReady = checkoutIntervals.includes(billingInterval);
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-6 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
       </Button>
@@ -249,7 +249,7 @@ export default function CompanyBillingPage() {
         </p>
       ) : null}
 
-      <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5">
+      <section className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-text-secondary" />

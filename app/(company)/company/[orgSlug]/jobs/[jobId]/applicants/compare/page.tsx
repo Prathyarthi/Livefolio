@@ -42,7 +42,7 @@ export default function CompareApplicantsPage() {
 
   if (ids.length < MIN_COMPARE_CANDIDATES) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-4 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants
@@ -67,7 +67,7 @@ export default function CompareApplicantsPage() {
 
   if (poolQuery.error || !poolQuery.data) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-4 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants
@@ -84,7 +84,7 @@ export default function CompareApplicantsPage() {
 
   if (selected.length < MIN_COMPARE_CANDIDATES) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-4 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants
