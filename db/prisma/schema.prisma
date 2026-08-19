@@ -41,6 +41,7 @@ model User {
   billingPayments         BillingPayment[]
 
   organizationMembers OrganizationMember[]
+  workspaceMembers    WorkspaceMember[]
   jobsCreated         Job[]
   applications        Application[]
   recruiterNotes      RecruiterNote[]
@@ -410,6 +411,7 @@ model Organization {
   subscriptionCurrentPeriodEnd  DateTime?
 
   members              OrganizationMember[]
+  workspaces           Workspace[]
   jobs                 Job[]
   billingSubscriptions BillingSubscription[]
   billingCheckout      OrgBillingCheckoutAttempt?
@@ -436,9 +438,46 @@ model OrganizationMember {
   @@map("organization_members")
 }
 
+/// Hiring space inside an organization (e.g. Engineering vs Marketing).
+/// Org Pro is billed on Organization; workspaces share that plan.
+model Workspace {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  slug           String
+  description    String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      WorkspaceMember[]
+  jobs         Job[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@map("workspaces")
+}
+
+/// Assigns an org member to a workspace. Owners and admins can enter every
+/// workspace without a row here.
+model WorkspaceMember {
+  id          String   @id @default(uuid())
+  workspaceId String
+  userId      String
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@map("workspace_members")
+}
+
 model Job {
   id             String @id @default(uuid())
   organizationId String
+  workspaceId    String
   createdById    String
 
   title       String
@@ -473,12 +512,14 @@ model Job {
   updatedAt DateTime @updatedAt
 
   organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdBy    User             @relation(fields: [createdById], references: [id], onDelete: Restrict)
   requirements JobRequirement[]
   applications Application[]
   storedFiles  StoredFile[]
 
   @@index([organizationId, status])
+  @@index([workspaceId, status])
   @@index([slug])
   @@index([status, publishedAt])
   @@map("jobs")

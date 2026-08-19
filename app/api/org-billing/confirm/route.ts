@@ -112,7 +112,7 @@ export async function POST(req: Request) {
       subscription.notes?.orgSlug !== orgSlug
     ) {
       return NextResponse.json(
-        { error: "Subscription does not belong to this workspace." },
+        { error: "Subscription does not belong to this organization." },
         { status: 403 },
       );
     }

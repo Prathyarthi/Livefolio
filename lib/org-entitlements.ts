@@ -3,6 +3,7 @@ import { isProSubscription } from "@/lib/entitlements";
 
 export const FREE_OWNED_ORG_LIMIT = 1;
 export const FREE_OPEN_JOB_LIMIT = 1;
+export const FREE_WORKSPACE_LIMIT = 1;
 
 export type OrgPlan = "free" | "pro";
 
@@ -17,8 +18,11 @@ export type OrgBillingProfile = {
 export type OrgAccessSnapshot = {
   plan: OrgPlan;
   maxOpenJobs: number | null;
+  maxWorkspaces: number | null;
   canPublishMoreJobs: boolean;
+  canCreateMoreWorkspaces: boolean;
   openJobCount: number;
+  workspaceCount: number;
   upgradeRequired: boolean;
 };
 
@@ -40,21 +44,31 @@ export async function countOpenJobs(organizationId: string): Promise<number> {
   });
 }
 
+export async function countWorkspaces(organizationId: string): Promise<number> {
+  return prisma.workspace.count({ where: { organizationId } });
+}
+
 export async function resolveOrgAccess(
   org: OrgBillingProfile,
-  openJobCount?: number,
+  counts?: { openJobCount?: number; workspaceCount?: number },
 ): Promise<OrgAccessSnapshot> {
-  const open =
-    openJobCount ?? (await countOpenJobs(org.id));
+  const open = counts?.openJobCount ?? (await countOpenJobs(org.id));
+  const workspaces =
+    counts?.workspaceCount ?? (await countWorkspaces(org.id));
   const pro = isPaidOrgPro(org);
   const maxOpenJobs = pro ? null : FREE_OPEN_JOB_LIMIT;
+  const maxWorkspaces = pro ? null : FREE_WORKSPACE_LIMIT;
   const canPublishMoreJobs = pro || open < FREE_OPEN_JOB_LIMIT;
+  const canCreateMoreWorkspaces = pro || workspaces < FREE_WORKSPACE_LIMIT;
 
   return {
     plan: pro ? "pro" : "free",
     maxOpenJobs,
+    maxWorkspaces,
     canPublishMoreJobs,
+    canCreateMoreWorkspaces,
     openJobCount: open,
+    workspaceCount: workspaces,
     upgradeRequired: !canPublishMoreJobs,
   };
 }
@@ -130,9 +144,14 @@ export async function canUserCreateOrganization(userId: string): Promise<{
   };
 }
 
-export function orgUpgradeMessage(kind: "workspace" | "job"): string {
+export function orgUpgradeMessage(
+  kind: "organization" | "workspace" | "job",
+): string {
+  if (kind === "organization") {
+    return "Free plans include 1 organization. Upgrade to Org Pro to create more.";
+  }
   if (kind === "workspace") {
-    return "Free plans include 1 company workspace. Upgrade to Org Pro to create more.";
+    return "Free plans include 1 workspace per organization. Upgrade to Org Pro to create more.";
   }
   return "Free plans include 1 open job posting. Upgrade to Org Pro to publish more roles.";
 }

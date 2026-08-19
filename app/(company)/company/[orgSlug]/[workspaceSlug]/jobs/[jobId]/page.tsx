@@ -23,8 +23,9 @@ import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field
 import { uploadStoredFile } from "@/features/uploads/api/client";
 
 export default function ManageJobPage() {
-  const params = useParams<{ orgSlug: string; jobId: string }>();
+  const params = useParams<{ orgSlug: string; workspaceSlug: string; jobId: string }>();
   const orgSlug = params.orgSlug;
+  const workspaceSlug = params.workspaceSlug;
   const jobId = params.jobId;
   const router = useRouter();
   const { data: job, isLoading, error } = useJob(jobId);
@@ -43,7 +44,7 @@ export default function ManageJobPage() {
       <div className="p-8">
         <h1 className="text-h3">Job not found</h1>
         <Button asChild className="mt-4">
-          <Link href={`/company/${orgSlug}/jobs`}>Back to jobs</Link>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>Back to jobs</Link>
         </Button>
       </div>
     );
@@ -84,7 +85,7 @@ export default function ManageJobPage() {
     try {
       await deleteJob.mutateAsync(jobId);
       toast.success("Draft deleted");
-      router.push(`/company/${orgSlug}/jobs`);
+      router.push(`/company/${orgSlug}/${workspaceSlug}/jobs`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed");
     }
@@ -93,7 +94,7 @@ export default function ManageJobPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}/jobs`}>← Back to jobs</Link>
+        <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>← Back to jobs</Link>
       </Button>
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -121,7 +122,7 @@ export default function ManageJobPage() {
 
       <div className="flex flex-wrap gap-2">
         <Button asChild>
-          <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             View applicants ({job._count?.applications ?? 0})
           </Link>
         </Button>

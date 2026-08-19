@@ -34,8 +34,9 @@ function emptyRequirement(type: "required" | "preferred"): RequirementDraft {
 }
 
 export default function NewJobPage() {
-  const params = useParams<{ orgSlug: string }>();
+  const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
   const orgSlug = params.orgSlug;
+  const workspaceSlug = params.workspaceSlug;
   const router = useRouter();
   const createJob = useCreateJob(orgSlug);
 
@@ -63,6 +64,7 @@ export default function NewJobPage() {
 
     try {
       const job = await createJob.mutateAsync({
+        workspaceSlug,
         title: title.trim(),
         description: description.trim(),
         department: department.trim() || undefined,
@@ -101,7 +103,7 @@ export default function NewJobPage() {
         }
       }
       toast.success(publish ? "Job published" : "Draft saved");
-      router.push(`/company/${orgSlug}/jobs/${job.id}`);
+      router.push(`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}`);
     } catch (error) {
       const upgradeSlug =
         error &&
@@ -133,7 +135,7 @@ export default function NewJobPage() {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}/jobs`}>← Back to jobs</Link>
+        <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>← Back to jobs</Link>
       </Button>
       <header className="space-y-1">
         <p className="eyebrow uppercase">New job</p>
@@ -362,7 +364,7 @@ export default function NewJobPage() {
           Publish job
         </Button>
         <Button variant="ghost" asChild>
-          <Link href={`/company/${orgSlug}/jobs`}>Cancel</Link>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>Cancel</Link>
         </Button>
         </div>
       </div>

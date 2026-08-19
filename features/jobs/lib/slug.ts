@@ -16,6 +16,14 @@ const RESERVED_ORG_SLUGS = new Set([
   "billing",
 ]);
 
+export const RESERVED_WORKSPACE_SLUGS = new Set([
+  "settings",
+  "billing",
+  "members",
+  "new",
+  "workspaces",
+]);
+
 export function sanitizeHiringSlug(value: string): string {
   return value
     .toLowerCase()
@@ -29,6 +37,12 @@ export function isValidOrgSlug(slug: string): boolean {
   if (!slug || slug.length < 2) return false;
   if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(slug)) return false;
   return !RESERVED_ORG_SLUGS.has(slug);
+}
+
+export function isValidWorkspaceSlug(slug: string): boolean {
+  if (!slug || slug.length < 2) return false;
+  if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(slug)) return false;
+  return !RESERVED_WORKSPACE_SLUGS.has(slug);
 }
 
 /** Public job IDs are opaque unique tokens, not role titles. */

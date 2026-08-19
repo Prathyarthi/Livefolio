@@ -8,7 +8,7 @@ const PLANS = [
     price: "₹0",
     note: "Try hiring with Livefolio",
     features: [
-      "1 company workspace",
+      "1 organization · 1 workspace",
       "1 open job posting",
       "Unlimited drafts",
       "Applicant pool & shortlist",

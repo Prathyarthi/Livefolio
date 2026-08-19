@@ -125,7 +125,7 @@ export async function POST(req: Request) {
       });
     } else if (org.subscriptionStatus === "active") {
       return NextResponse.json(
-        { error: "Org Pro is already active for this workspace." },
+        { error: "Org Pro is already active for this organization." },
         { status: 409 },
       );
     }
@@ -300,7 +300,7 @@ export async function POST(req: Request) {
         where: { id: checkoutAttempt.id },
       });
       return NextResponse.json(
-        { error: "Org Pro is already active for this workspace." },
+        { error: "Org Pro is already active for this organization." },
         { status: 409 },
       );
     }

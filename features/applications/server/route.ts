@@ -6,8 +6,8 @@ import {
   snapshotAsJson,
 } from "@/features/applications/lib/snapshot";
 import {
-  requireApplicantManager,
-  requireApplicantViewer,
+  requireWorkspaceApplicantManager,
+  requireWorkspaceApplicantViewer,
 } from "@/features/organization/lib/org-access";
 import {
   isPipelineStage,
@@ -111,7 +111,11 @@ async function loadJobForCompany(jobId: string) {
       slug: true,
       status: true,
       organizationId: true,
+      workspaceId: true,
       organization: {
+        select: { id: true, name: true, slug: true },
+      },
+      workspace: {
         select: { id: true, name: true, slug: true },
       },
       requirements: { orderBy: { sortOrder: "asc" as const } },
@@ -354,8 +358,9 @@ export const applications = new Elysia({ prefix: "/applications" })
       return { error: "Job not found" };
     }
 
-    const membership = await requireApplicantViewer(
+    const membership = await requireWorkspaceApplicantViewer(
       job.organizationId,
+      job.workspaceId,
       session.userId,
     );
     if (!membership) {
@@ -505,8 +510,9 @@ export const applications = new Elysia({ prefix: "/applications" })
       return { error: "Job not found" };
     }
 
-    const membership = await requireApplicantViewer(
+    const membership = await requireWorkspaceApplicantViewer(
       job.organizationId,
+      job.workspaceId,
       session.userId,
     );
     if (!membership) {
@@ -586,8 +592,9 @@ export const applications = new Elysia({ prefix: "/applications" })
         return { error: "Job not found" };
       }
 
-      const membership = await requireApplicantManager(
+      const membership = await requireWorkspaceApplicantManager(
         job.organizationId,
+        job.workspaceId,
         session.userId,
       );
       if (!membership) {
@@ -653,8 +660,9 @@ export const applications = new Elysia({ prefix: "/applications" })
         return { error: "Job not found" };
       }
 
-      const membership = await requireApplicantManager(
+      const membership = await requireWorkspaceApplicantManager(
         job.organizationId,
+        job.workspaceId,
         session.userId,
       );
       if (!membership) {
@@ -721,8 +729,9 @@ export const applications = new Elysia({ prefix: "/applications" })
         return { error: "Job not found" };
       }
 
-      const membership = await requireApplicantManager(
+      const membership = await requireWorkspaceApplicantManager(
         job.organizationId,
+        job.workspaceId,
         session.userId,
       );
       if (!membership) {
@@ -781,8 +790,9 @@ export const applications = new Elysia({ prefix: "/applications" })
       return { error: "Job not found" };
     }
 
-    const membership = await requireApplicantManager(
+    const membership = await requireWorkspaceApplicantManager(
       job.organizationId,
+      job.workspaceId,
       session.userId,
     );
     if (!membership) {

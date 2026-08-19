@@ -5,7 +5,7 @@ const FAQS = [
   },
   {
     q: "What’s free vs Org Pro?",
-    a: "Free includes one company workspace and one open job at a time. Org Pro unlocks unlimited open jobs and workspaces.",
+    a: "Free includes one organization, one workspace, and one open job at a time. Org Pro unlocks unlimited open jobs and workspaces on that organization.",
   },
   {
     q: "Is this the same as personal Livefolio Pro?",

@@ -37,8 +37,11 @@ type OrgBillingState = {
   access: {
     plan: "free" | "pro";
     maxOpenJobs: number | null;
+    maxWorkspaces: number | null;
     canPublishMoreJobs: boolean;
+    canCreateMoreWorkspaces: boolean;
     openJobCount: number;
+    workspaceCount: number;
   };
 };
 
@@ -220,8 +223,8 @@ export default function CompanyBillingPage() {
         <p className="eyebrow uppercase">Billing</p>
         <h1 className="text-h2 text-text-primary">Organization plan</h1>
         <p className="text-body-sm text-text-secondary">
-          Free includes 1 open job. Org Pro unlocks unlimited published roles and
-          workspaces.
+          Free includes 1 workspace and 1 open job. Org Pro unlocks unlimited
+          workspaces and published roles on this organization.
         </p>
       </header>
 
@@ -270,7 +273,7 @@ export default function CompanyBillingPage() {
                   : "Org Pro is active"}
               </p>
               <p className="mt-0.5 text-body-sm text-text-secondary">
-                Unlimited open job postings and company workspaces.
+                Unlimited open jobs and workspaces on this organization.
                 {currentPeriodEnd
                   ? ` Current period ends ${currentPeriodEnd}.`
                   : ""}
@@ -283,7 +286,7 @@ export default function CompanyBillingPage() {
               Free hiring plan
             </p>
             <p className="mt-0.5 text-body-sm text-text-secondary">
-              1 company workspace · 1 open job ({billing.access.openJobCount}{" "}
+              1 workspace · 1 open job ({billing.access.openJobCount}{" "}
               open now). Drafts are unlimited.
             </p>
           </div>
@@ -296,6 +299,15 @@ export default function CompanyBillingPage() {
               {billing.access.openJobCount}
               {billing.access.maxOpenJobs != null
                 ? ` / ${billing.access.maxOpenJobs}`
+                : " · unlimited"}
+            </span>
+          </div>
+          <div className="flex justify-between py-2">
+            <span className="text-text-secondary">Workspaces</span>
+            <span className="text-text-primary">
+              {billing.access.workspaceCount}
+              {billing.access.maxWorkspaces != null
+                ? ` / ${billing.access.maxWorkspaces}`
                 : " · unlimited"}
             </span>
           </div>

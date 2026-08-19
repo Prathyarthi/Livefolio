@@ -24,12 +24,16 @@ const FILTERS = [
 ] as const;
 
 export default function CompanyJobsPage() {
-  const params = useParams<{ orgSlug: string }>();
+  const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
   const orgSlug = params.orgSlug;
+  const workspaceSlug = params.workspaceSlug;
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
   const { data: jobs, isLoading } = useOrgJobs(
     orgSlug,
-    filter === "all" ? undefined : filter,
+    {
+      status: filter === "all" ? undefined : filter,
+      workspaceSlug,
+    },
   );
 
   const origin = useMemo(() => getAppOrigin(), []);
@@ -37,7 +41,7 @@ export default function CompanyJobsPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
+        <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
       </Button>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
@@ -49,7 +53,7 @@ export default function CompanyJobsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href={`/company/${orgSlug}/jobs/new`}>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/new`}>
             <Plus className="h-4 w-4" />
             Create job
           </Link>
@@ -88,7 +92,7 @@ export default function CompanyJobsPage() {
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
-                    href={`/company/${orgSlug}/jobs/${job.id}`}
+                    href={`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}`}
                     className="truncate font-medium text-text-primary hover:underline"
                   >
                     {job.title}
@@ -116,7 +120,7 @@ export default function CompanyJobsPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" asChild>
-                  <Link href={`/company/${orgSlug}/jobs/${job.id}/applicants`}>
+                  <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}/applicants`}>
                     Applicants ({job._count?.applications ?? 0})
                   </Link>
                 </Button>
@@ -129,7 +133,7 @@ export default function CompanyJobsPage() {
                   </Button>
                 )}
                 <Button variant="outline" size="sm" asChild>
-                  <Link href={`/company/${orgSlug}/jobs/${job.id}`}>
+                  <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}`}>
                     Manage
                   </Link>
                 </Button>

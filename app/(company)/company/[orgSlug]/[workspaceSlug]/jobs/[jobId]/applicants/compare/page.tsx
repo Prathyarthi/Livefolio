@@ -12,9 +12,10 @@ import {
 } from "@/features/applications/components/applicant-compare-view";
 
 export default function CompareApplicantsPage() {
-  const params = useParams<{ orgSlug: string; jobId: string }>();
+  const params = useParams<{ orgSlug: string; workspaceSlug: string; jobId: string }>();
   const searchParams = useSearchParams();
   const orgSlug = params.orgSlug;
+  const workspaceSlug = params.workspaceSlug;
   const jobId = params.jobId;
 
   const ids = useMemo(() => {
@@ -44,7 +45,7 @@ export default function CompareApplicantsPage() {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
-          <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants
           </Link>
         </Button>
@@ -69,7 +70,7 @@ export default function CompareApplicantsPage() {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
-          <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants
           </Link>
         </Button>
@@ -86,7 +87,7 @@ export default function CompareApplicantsPage() {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
-          <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants
           </Link>
         </Button>
@@ -102,6 +103,7 @@ export default function CompareApplicantsPage() {
   return (
     <ApplicantCompareView
       orgSlug={orgSlug}
+      workspaceSlug={workspaceSlug}
       jobId={jobId}
       jobTitle={poolQuery.data.job.title}
       applicants={selected}

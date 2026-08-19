@@ -75,12 +75,14 @@ function findMatch(applicant: ApplicantCard, row: RequirementRow) {
 
 export function ApplicantCompareView({
   orgSlug,
+  workspaceSlug,
   jobId,
   jobTitle,
   applicants,
   requirements,
 }: {
   orgSlug: string;
+  workspaceSlug: string;
   jobId: string;
   jobTitle: string;
   applicants: ApplicantCard[];
@@ -92,7 +94,7 @@ export function ApplicantCompareView({
   return (
     <div className="mx-auto w-full max-w-[1200px] space-y-6 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
+        <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
           ← Back to applicants
         </Link>
       </Button>
@@ -136,7 +138,7 @@ export function ApplicantCompareView({
                 <div className="min-w-0 space-y-2">
                   <div>
                     <Link
-                      href={`/company/${orgSlug}/jobs/${jobId}/applicants/${applicant.id}`}
+                      href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants/${applicant.id}`}
                       className="font-medium text-text-primary hover:underline"
                     >
                       {applicant.summary.name}
@@ -181,7 +183,7 @@ export function ApplicantCompareView({
                   <div className="flex flex-wrap gap-1.5">
                     <Button size="sm" variant="outline" asChild>
                       <Link
-                        href={`/company/${orgSlug}/jobs/${jobId}/applicants/${applicant.id}`}
+                        href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants/${applicant.id}`}
                       >
                         Open
                       </Link>
@@ -405,6 +407,7 @@ function RequirementCompareRow({
 
 export function CompareSelectionBar({
   orgSlug,
+  workspaceSlug,
   jobId,
   selectedIds,
   selectedApplicants,
@@ -412,6 +415,7 @@ export function CompareSelectionBar({
   onRemove,
 }: {
   orgSlug: string;
+  workspaceSlug: string;
   jobId: string;
   selectedIds: string[];
   selectedApplicants: ApplicantCard[];
@@ -420,7 +424,7 @@ export function CompareSelectionBar({
 }) {
   if (selectedIds.length === 0) return null;
 
-  const compareHref = `/company/${orgSlug}/jobs/${jobId}/applicants/compare?ids=${selectedIds.join(",")}`;
+  const compareHref = `/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants/compare?ids=${selectedIds.join(",")}`;
   const canCompare = selectedIds.length >= MIN_COMPARE_CANDIDATES;
 
   return (

@@ -13,8 +13,9 @@ import { ListPagination } from "@/components/list-pagination";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 
 export default function CompanyTalentPage() {
-  const params = useParams<{ orgSlug: string }>();
+  const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
   const orgSlug = params.orgSlug;
+  const workspaceSlug = params.workspaceSlug;
 
   const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
@@ -46,7 +47,7 @@ export default function CompanyTalentPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
+        <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
       </Button>
 
       <header className="space-y-1">

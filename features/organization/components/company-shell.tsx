@@ -38,7 +38,13 @@ import {
 } from "@/components/ui/sidebar";
 import { useOrganization } from "@/features/organization/api/use-organization";
 
-function CompanySidebar({ orgSlug }: { orgSlug: string }) {
+function CompanySidebar({
+  orgSlug,
+  workspaceSlug,
+}: {
+  orgSlug: string;
+  workspaceSlug?: string;
+}) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { data: org } = useOrganization(orgSlug);
@@ -47,27 +53,40 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
   const isCollapsed = state === "collapsed";
 
   const canManageBilling = Boolean(org?.permissions.manageOrganization);
+  const activeWorkspaceSlug =
+    workspaceSlug ?? org?.workspaces?.[0]?.slug ?? null;
+  const workspaceBase = activeWorkspaceSlug
+    ? `/company/${orgSlug}/${activeWorkspaceSlug}`
+    : `/company/${orgSlug}`;
 
   const nav = [
     {
-      title: "Overview",
+      title: "Workspaces",
       href: `/company/${orgSlug}`,
       icon: LayoutDashboard,
+      exact: true,
     },
-    {
-      title: "Jobs",
-      href: `/company/${orgSlug}/jobs`,
-      icon: Briefcase,
-    },
-    {
-      title: "Talent",
-      href: `/company/${orgSlug}/talent`,
-      icon: Users,
-    },
+    ...(activeWorkspaceSlug
+      ? [
+          {
+            title: "Jobs",
+            href: `${workspaceBase}/jobs`,
+            icon: Briefcase,
+            exact: false,
+          },
+          {
+            title: "Talent",
+            href: `${workspaceBase}/talent`,
+            icon: Users,
+            exact: false,
+          },
+        ]
+      : []),
     {
       title: "Settings",
       href: `/company/${orgSlug}/settings`,
       icon: Settings,
+      exact: false,
     },
     ...(canManageBilling
       ? [
@@ -75,6 +94,7 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
             title: "Billing",
             href: `/company/${orgSlug}/billing`,
             icon: CreditCard,
+            exact: false,
           },
         ]
       : []),
@@ -111,7 +131,7 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
                   {org?.name ?? "Company"}
                 </span>
                 <span className="block text-[11px] text-text-muted">
-                  Hiring workspace
+                  {org?.name ? "Organization" : "Hiring"}
                 </span>
               </span>
             </Link>
@@ -123,11 +143,10 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
         <SidebarGroup className="group-data-[collapsible=icon]:p-1.5">
           <SidebarGroupContent>
             <SidebarMenu className="gap-1.5 group-data-[collapsible=icon]:gap-1">
-              {nav.map(({ title, href, icon: Icon }) => {
-                const active =
-                  href === `/company/${orgSlug}`
-                    ? pathname === href
-                    : pathname.startsWith(href);
+              {nav.map(({ title, href, icon: Icon, exact }) => {
+                const active = exact
+                  ? pathname === href
+                  : pathname.startsWith(href);
                 return (
                   <SidebarMenuItem key={href}>
                     <SidebarMenuButton
@@ -155,14 +174,16 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
 
       <SidebarFooter className="border-t border-sidebar-border gap-2 p-2">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="New job">
-              <Link href={`/company/${orgSlug}/jobs/new`}>
-                <Plus />
-                <span>New job</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {activeWorkspaceSlug ? (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="New job">
+                <Link href={`${workspaceBase}/jobs/new`}>
+                  <Plus />
+                  <span>New job</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ) : null}
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Your Livefolio">
               <Link href="/dashboard">
@@ -207,8 +228,14 @@ function CompanySidebar({ orgSlug }: { orgSlug: string }) {
 }
 
 export function CompanyShell({ children }: { children: React.ReactNode }) {
-  const params = useParams<{ orgSlug: string }>();
+  const params = useParams<{ orgSlug: string; workspaceSlug?: string }>();
   const orgSlug = params.orgSlug;
+  const workspaceSlug =
+    params.workspaceSlug &&
+    params.workspaceSlug !== "settings" &&
+    params.workspaceSlug !== "billing"
+      ? params.workspaceSlug
+      : undefined;
 
   useEffect(() => {
     document.body.dataset.hiring = "company";
@@ -221,12 +248,12 @@ export function CompanyShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <CompanySidebar orgSlug={orgSlug} />
+      <CompanySidebar orgSlug={orgSlug} workspaceSlug={workspaceSlug} />
       <SidebarInset className="relative min-w-0 overflow-x-hidden bg-surface-base">
         <header className="glass-nav sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border-default px-4 md:hidden">
           <SidebarTrigger />
           <span className="text-sm font-medium text-text-primary">
-            Hiring workspace
+            Hiring
           </span>
         </header>
         <main className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">

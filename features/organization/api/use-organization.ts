@@ -52,7 +52,13 @@ export type OrganizationSummary = {
   logoUrl: string | null;
   brandColor: string | null;
   description: string | null;
-  _count?: { jobs: number; members: number };
+  _count?: { jobs: number; members: number; workspaces?: number };
+  workspaces?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    description?: string | null;
+  }>;
 };
 
 export type OrganizationMembership = {
@@ -63,6 +69,32 @@ export type OrganizationMembership = {
 export type OrganizationDetail = OrganizationSummary & {
   websiteUrl: string | null;
   location: string | null;
+  role: string;
+  permissions: {
+    manageOrganization: boolean;
+    manageJobs: boolean;
+  };
+  jobCounts: {
+    draft: number;
+    published: number;
+    paused: number;
+    closed: number;
+    total: number;
+  };
+  workspaces: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+  }>;
+};
+
+export type WorkspaceDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  organization: { id: string; slug: string; name: string };
   role: string;
   permissions: {
     manageOrganization: boolean;
@@ -99,6 +131,52 @@ export function useOrganization(slug: string | undefined) {
       });
       if (!res.ok) await throwApiError(res, "Failed to load organization");
       return res.json() as Promise<OrganizationDetail>;
+    },
+  });
+}
+
+export function useWorkspace(
+  orgSlug: string | undefined,
+  workspaceSlug: string | undefined,
+) {
+  return useQuery({
+    queryKey: ["organizations", orgSlug, "workspaces", workspaceSlug],
+    enabled: Boolean(orgSlug && workspaceSlug),
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/organizations/${orgSlug}/workspaces/${workspaceSlug}`,
+        { cache: "no-store" },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to load workspace");
+      return res.json() as Promise<WorkspaceDetail>;
+    },
+  });
+}
+
+export function useCreateWorkspace(orgSlug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      name: string;
+      slug?: string;
+      description?: string;
+    }) => {
+      const res = await fetch(`/api/organizations/${orgSlug}/workspaces`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) await throwApiError(res, "Failed to create workspace");
+      return res.json() as Promise<{
+        id: string;
+        name: string;
+        slug: string;
+        description: string | null;
+      }>;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["organizations"] });
+      qc.invalidateQueries({ queryKey: ["organizations", orgSlug] });
     },
   });
 }
@@ -154,6 +232,7 @@ export type OrgMember = {
     email: string;
     avatar: string | null;
   };
+  workspaceIds: string[];
 };
 
 export function useOrgMembers(slug: string | undefined) {
@@ -179,7 +258,11 @@ function invalidateOrgMembers(qc: ReturnType<typeof useQueryClient>, slug: strin
 export function useAddOrgMember(slug: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { email: string; role: string }) => {
+    mutationFn: async (data: {
+      email: string;
+      role: string;
+      workspaceIds?: string[];
+    }) => {
       const res = await fetch(`/api/organizations/${slug}/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -195,13 +278,20 @@ export function useAddOrgMember(slug: string) {
 export function useUpdateOrgMemberRole(slug: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { memberId: string; role: string }) => {
+    mutationFn: async (data: {
+      memberId: string;
+      role?: string;
+      workspaceIds?: string[];
+    }) => {
       const res = await fetch(
         `/api/organizations/${slug}/members/${data.memberId}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role: data.role }),
+          body: JSON.stringify({
+            role: data.role,
+            workspaceIds: data.workspaceIds,
+          }),
         },
       );
       if (!res.ok) await throwApiError(res, "Failed to update member role");

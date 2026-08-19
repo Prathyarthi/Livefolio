@@ -6,11 +6,13 @@ import type { PoolGapReport } from "@/features/applications/lib/pool-gaps";
 export function ApplicantPoolGapReport({
   report,
   orgSlug,
+  workspaceSlug,
   jobId,
   caption,
 }: {
   report: PoolGapReport;
   orgSlug: string;
+  workspaceSlug: string;
   jobId: string;
   caption: string;
 }) {
@@ -22,7 +24,7 @@ export function ApplicantPoolGapReport({
           Add structured requirements on this job to see which must-haves nobody
           in the pool can prove.{" "}
           <Link
-            href={`/company/${orgSlug}/jobs/${jobId}`}
+            href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}`}
             className="underline underline-offset-2"
           >
             Edit job

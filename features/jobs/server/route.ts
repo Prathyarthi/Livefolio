@@ -2,7 +2,12 @@ import Elysia, { t } from "elysia";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { createUniqueJobPublicId } from "@/features/jobs/lib/slug-server";
-import { requireJobManager, requireOrgMember } from "@/features/organization/lib/org-access";
+import {
+  listAccessibleWorkspaces,
+  requireOrgMember,
+  requireWorkspaceAccess,
+  requireWorkspaceJobManager,
+} from "@/features/organization/lib/org-access";
 import {
   orgUpgradeMessage,
   resolveOrgAccess,
@@ -35,7 +40,7 @@ async function assertCanOpenJob(
       ...(opts?.excludeJobId ? { id: { not: opts.excludeJobId } } : {}),
     },
   });
-  const access = await resolveOrgAccess(org, openJobCount);
+  const access = await resolveOrgAccess(org, { openJobCount });
   if (!access.canPublishMoreJobs) {
     return {
       ok: false as const,
@@ -77,6 +82,13 @@ const jobPublicInclude = {
       description: true,
       websiteUrl: true,
       location: true,
+    },
+  },
+  workspace: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
     },
   },
   requirements: { orderBy: { sortOrder: "asc" as const } },
@@ -163,7 +175,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
     return job;
   })
 
-  // Company: list jobs for an organization
+  // Company: list jobs for an organization (optionally one workspace)
   .get("/org/:orgSlug", async (ctx) => {
     const session = await getSession(ctx.request);
     if (!session) {
@@ -186,10 +198,35 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       return { error: "Forbidden" };
     }
 
+    const workspaceSlug = ctx.query.workspace;
+    let workspaceIdFilter: string | { in: string[] } | undefined;
+
+    if (workspaceSlug) {
+      const access = await requireWorkspaceAccess(
+        org.id,
+        workspaceSlug,
+        session.userId,
+      );
+      if (!access) {
+        ctx.set.status = 404;
+        return { error: "Workspace not found" };
+      }
+      workspaceIdFilter = access.workspace.id;
+    } else {
+      const workspaces = await listAccessibleWorkspaces(
+        org.id,
+        session.userId,
+        membership.role,
+      );
+      if (workspaces.length === 0) return [];
+      workspaceIdFilter = { in: workspaces.map((ws) => ws.id) };
+    }
+
     const status = ctx.query.status;
     const jobsList = await prisma.job.findMany({
       where: {
         organizationId: org.id,
+        workspaceId: workspaceIdFilter,
         ...(status ? { status } : {}),
       },
       include: jobCompanyInclude,
@@ -197,6 +234,11 @@ export const jobs = new Elysia({ prefix: "/jobs" })
     });
 
     return jobsList;
+  }, {
+    query: t.Object({
+      status: t.Optional(t.String()),
+      workspace: t.Optional(t.String()),
+    }),
   })
 
   // Company: get job by id (member)
@@ -225,6 +267,16 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       return { error: "Forbidden" };
     }
 
+    const workspaceAccess = await requireWorkspaceAccess(
+      job.organizationId,
+      job.workspace.slug,
+      session.userId,
+    );
+    if (!workspaceAccess) {
+      ctx.set.status = 403;
+      return { error: "Forbidden" };
+    }
+
     return job;
   })
 
@@ -247,8 +299,18 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         return { error: "Organization not found" };
       }
 
-      const membership = await requireJobManager(org.id, session.userId);
-      if (!membership) {
+      const workspaceSlug = ctx.body.workspaceSlug?.trim();
+      if (!workspaceSlug) {
+        ctx.set.status = 400;
+        return { error: "Workspace is required" };
+      }
+
+      const access = await requireWorkspaceJobManager(
+        org.id,
+        workspaceSlug,
+        session.userId,
+      );
+      if (!access) {
         ctx.set.status = 403;
         return { error: "Forbidden" };
       }
@@ -283,6 +345,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       const job = await prisma.job.create({
         data: {
           organizationId: org.id,
+          workspaceId: access.workspace.id,
           createdById: session.userId,
           title,
           slug,
@@ -316,6 +379,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
     },
     {
       body: t.Object({
+        workspaceSlug: t.String({ minLength: 2, maxLength: 60 }),
         title: t.String({ minLength: 1, maxLength: 200 }),
         description: t.String({ minLength: 1, maxLength: 50000 }),
         department: t.Optional(t.String({ maxLength: 120 })),
@@ -365,15 +429,23 @@ export const jobs = new Elysia({ prefix: "/jobs" })
 
       const existing = await prisma.job.findUnique({
         where: { id: ctx.params.id },
-        select: { id: true, organizationId: true, status: true, publishedAt: true },
+        select: {
+          id: true,
+          organizationId: true,
+          workspaceId: true,
+          status: true,
+          publishedAt: true,
+          workspace: { select: { slug: true } },
+        },
       });
       if (!existing) {
         ctx.set.status = 404;
         return { error: "Job not found" };
       }
 
-      const membership = await requireJobManager(
+      const membership = await requireWorkspaceJobManager(
         existing.organizationId,
+        existing.workspace.slug,
         session.userId,
       );
       if (!membership) {
@@ -542,15 +614,21 @@ export const jobs = new Elysia({ prefix: "/jobs" })
 
     const existing = await prisma.job.findUnique({
       where: { id: ctx.params.id },
-      select: { id: true, organizationId: true, status: true },
+      select: {
+        id: true,
+        organizationId: true,
+        status: true,
+        workspace: { select: { slug: true } },
+      },
     });
     if (!existing) {
       ctx.set.status = 404;
       return { error: "Job not found" };
     }
 
-    const membership = await requireJobManager(
+    const membership = await requireWorkspaceJobManager(
       existing.organizationId,
+      existing.workspace.slug,
       session.userId,
     );
     if (!membership) {

@@ -68,6 +68,7 @@ export type JobOrganization = {
 export type Job = {
   id: string;
   organizationId: string;
+  workspaceId: string;
   title: string;
   slug: string;
   description: string;
@@ -89,6 +90,7 @@ export type Job = {
   createdAt: string;
   updatedAt: string;
   organization: JobOrganization;
+  workspace?: { id: string; name: string; slug: string };
   requirements: JobRequirement[];
   _count?: { applications: number };
   storedFiles?: Array<{
@@ -100,6 +102,7 @@ export type Job = {
 };
 
 export type JobInput = {
+  workspaceSlug?: string;
   title: string;
   description: string;
   department?: string;
@@ -132,13 +135,21 @@ export function usePublicJob(slug: string | undefined) {
   });
 }
 
-export function useOrgJobs(orgSlug: string | undefined, status?: string) {
+export function useOrgJobs(
+  orgSlug: string | undefined,
+  options?: { status?: string; workspaceSlug?: string },
+) {
+  const status = options?.status;
+  const workspaceSlug = options?.workspaceSlug;
   return useQuery({
-    queryKey: ["jobs", "org", orgSlug, status ?? "all"],
+    queryKey: ["jobs", "org", orgSlug, workspaceSlug ?? "all", status ?? "all"],
     enabled: Boolean(orgSlug),
     queryFn: async () => {
-      const params = status ? `?status=${encodeURIComponent(status)}` : "";
-      const res = await fetch(`/api/jobs/org/${orgSlug}${params}`, {
+      const params = new URLSearchParams();
+      if (status) params.set("status", status);
+      if (workspaceSlug) params.set("workspace", workspaceSlug);
+      const qs = params.toString() ? `?${params.toString()}` : "";
+      const res = await fetch(`/api/jobs/org/${orgSlug}${qs}`, {
         cache: "no-store",
       });
       if (!res.ok) await throwApiError(res, "Failed to load jobs");

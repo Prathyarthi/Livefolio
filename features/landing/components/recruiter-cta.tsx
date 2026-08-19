@@ -10,8 +10,8 @@ export function RecruiterCTA() {
             Start hiring with Livefolio
           </h2>
           <p className="prose-measure mx-auto mt-4 text-body-lg text-text-secondary">
-            Create a workspace, publish your first role free, and receive Apply
-            with Livefolio applications.
+            Create an organization, add workspaces for each hiring team, and
+            publish your first role free.
           </p>
           <AuthAwareCtas
             variant="recruiter"

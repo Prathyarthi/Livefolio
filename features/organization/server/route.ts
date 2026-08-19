@@ -3,13 +3,15 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import {
   isValidOrgSlug,
+  isValidWorkspaceSlug,
   sanitizeHiringSlug,
 } from "@/features/jobs/lib/slug";
-import { uniqueOrgSlug } from "@/features/organization/lib/slug-server";
 import {
   getMembershipByOrgSlug,
+  listAccessibleWorkspaces,
   requireOrgAdmin,
   requireOrgMember,
+  requireWorkspaceAccess,
 } from "@/features/organization/lib/org-access";
 import {
   canManageJobs,
@@ -19,6 +21,7 @@ import {
 import {
   canUserCreateOrganization,
   orgUpgradeMessage,
+  resolveOrgAccess,
 } from "@/lib/org-entitlements";
 import { normalizeOAuthEmail } from "@/lib/oauth-users";
 
@@ -26,6 +29,15 @@ function optionalTrim(value?: string | null) {
   if (value == null) return null;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function isUniqueConstraintError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code: unknown }).code === "P2002"
+  );
 }
 
 const memberUserSelect = {
@@ -45,12 +57,14 @@ function serializeMember(m: {
     email: string;
     avatar: string | null;
   };
+  workspaceIds?: string[];
 }) {
   return {
     id: m.id,
     role: m.role,
     createdAt: m.createdAt,
     user: m.user,
+    workspaceIds: m.workspaceIds ?? [],
   };
 }
 
@@ -58,6 +72,33 @@ async function countOwners(organizationId: string) {
   return prisma.organizationMember.count({
     where: { organizationId, role: "owner" },
   });
+}
+
+async function assignUserToWorkspaces(
+  organizationId: string,
+  userId: string,
+  workspaceIds?: string[],
+) {
+  const orgWorkspaces = await prisma.workspace.findMany({
+    where: { organizationId },
+    select: { id: true },
+  });
+  const allowed = new Set(orgWorkspaces.map((ws) => ws.id));
+  const ids = (
+    workspaceIds && workspaceIds.length > 0
+      ? workspaceIds
+      : orgWorkspaces.map((ws) => ws.id)
+  ).filter((id) => allowed.has(id));
+
+  await prisma.workspaceMember.deleteMany({
+    where: { userId, workspace: { organizationId } },
+  });
+  if (ids.length > 0) {
+    await prisma.workspaceMember.createMany({
+      data: ids.map((workspaceId) => ({ workspaceId, userId })),
+    });
+  }
+  return ids;
 }
 
 export const organization = new Elysia({ prefix: "/organizations" })
@@ -80,17 +121,41 @@ export const organization = new Elysia({ prefix: "/organizations" })
             logoUrl: true,
             brandColor: true,
             description: true,
-            _count: { select: { jobs: true, members: true } },
+            _count: { select: { jobs: true, members: true, workspaces: true } },
+            workspaces: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                description: true,
+                members: {
+                  where: { userId: session.userId },
+                  select: { id: true },
+                },
+              },
+              orderBy: { createdAt: "asc" },
+            },
           },
         },
       },
       orderBy: { createdAt: "asc" },
     });
 
-    return memberships.map((m) => ({
-      role: m.role,
-      organization: m.organization,
-    }));
+    return memberships.map((m) => {
+      const workspaces = (
+        canManageOrganization(m.role)
+          ? m.organization.workspaces
+          : m.organization.workspaces.filter((ws) => ws.members.length > 0)
+      ).map(({ members: _members, ...workspace }) => workspace);
+
+      return {
+        role: m.role,
+        organization: {
+          ...m.organization,
+          workspaces,
+        },
+      };
+    });
   })
 
   // Create a company workspace
@@ -113,7 +178,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
       if (!createAccess.allowed) {
         ctx.set.status = 402;
         return {
-          error: orgUpgradeMessage("workspace"),
+          error: orgUpgradeMessage("organization"),
           upgradeRequired: true,
           upgradeOrgSlug: createAccess.upgradeOrgSlug,
         };
@@ -132,33 +197,54 @@ export const organization = new Elysia({ prefix: "/organizations" })
         where: { slug: requestedSlug },
         select: { id: true },
       });
+      if (slugTaken) {
+        ctx.set.status = 409;
+        return { error: "This organization slug is already in use" };
+      }
 
-      const slug = slugTaken
-        ? await uniqueOrgSlug(requestedSlug)
-        : requestedSlug;
-
-      const org = await prisma.organization.create({
-        data: {
-          name,
-          slug,
-          description: optionalTrim(ctx.body.description),
-          websiteUrl: optionalTrim(ctx.body.websiteUrl),
-          location: optionalTrim(ctx.body.location),
-          logoUrl: optionalTrim(ctx.body.logoUrl),
-          brandColor: optionalTrim(ctx.body.brandColor),
-          members: {
-            create: {
-              userId: session.userId,
-              role: "owner",
+      try {
+        const org = await prisma.organization.create({
+          data: {
+            name,
+            slug: requestedSlug,
+            description: optionalTrim(ctx.body.description),
+            websiteUrl: optionalTrim(ctx.body.websiteUrl),
+            location: optionalTrim(ctx.body.location),
+            logoUrl: optionalTrim(ctx.body.logoUrl),
+            brandColor: optionalTrim(ctx.body.brandColor),
+            members: {
+              create: {
+                userId: session.userId,
+                role: "owner",
+              },
+            },
+            workspaces: {
+              create: {
+                name: "Hiring",
+                slug: "general",
+                members: {
+                  create: { userId: session.userId },
+                },
+              },
             },
           },
-        },
-        include: {
-          _count: { select: { jobs: true, members: true } },
-        },
-      });
+          include: {
+            _count: { select: { jobs: true, members: true, workspaces: true } },
+            workspaces: {
+              select: { id: true, name: true, slug: true },
+              orderBy: { createdAt: "asc" },
+            },
+          },
+        });
 
-      return { role: "owner", organization: org };
+        return { role: "owner", organization: org };
+      } catch (error) {
+        if (isUniqueConstraintError(error)) {
+          ctx.set.status = 409;
+          return { error: "This organization slug is already in use" };
+        }
+        throw error;
+      }
     },
     {
       body: t.Object({
@@ -187,9 +273,22 @@ export const organization = new Elysia({ prefix: "/organizations" })
       return { error: "Organization not found" };
     }
 
+    const workspaces = await listAccessibleWorkspaces(
+      access.organization.id,
+      session.userId,
+      access.role,
+    );
+
+    const accessibleWorkspaceIds = workspaces.map((ws) => ws.id);
+
     const jobCounts = await prisma.job.groupBy({
       by: ["status"],
-      where: { organizationId: access.organization.id },
+      where: {
+        organizationId: access.organization.id,
+        ...(accessibleWorkspaceIds.length > 0
+          ? { workspaceId: { in: accessibleWorkspaceIds } }
+          : { id: { in: [] } }),
+      },
       _count: { _all: true },
     });
 
@@ -216,6 +315,12 @@ export const organization = new Elysia({ prefix: "/organizations" })
         manageJobs: canManageJobs(access.role),
       },
       jobCounts: counts,
+      workspaces: workspaces.map((ws) => ({
+        id: ws.id,
+        name: ws.name,
+        slug: ws.slug,
+        description: ws.description,
+      })),
     };
   })
 
@@ -282,6 +387,267 @@ export const organization = new Elysia({ prefix: "/organizations" })
     },
   )
 
+  .get("/:slug/workspaces/:workspaceSlug", async (ctx) => {
+    const session = await getSession(ctx.request);
+    if (!session) {
+      ctx.set.status = 401;
+      return { error: "Unauthorized" };
+    }
+
+    const org = await prisma.organization.findUnique({
+      where: { slug: ctx.params.slug },
+      select: { id: true, slug: true, name: true },
+    });
+    if (!org) {
+      ctx.set.status = 404;
+      return { error: "Organization not found" };
+    }
+
+    const access = await requireWorkspaceAccess(
+      org.id,
+      ctx.params.workspaceSlug,
+      session.userId,
+    );
+    if (!access) {
+      ctx.set.status = 404;
+      return { error: "Workspace not found" };
+    }
+
+    const jobCounts = await prisma.job.groupBy({
+      by: ["status"],
+      where: { workspaceId: access.workspace.id },
+      _count: { _all: true },
+    });
+    const counts = {
+      draft: 0,
+      published: 0,
+      paused: 0,
+      closed: 0,
+      total: 0,
+    };
+    for (const row of jobCounts) {
+      const n = row._count._all;
+      counts.total += n;
+      if (row.status in counts) {
+        counts[row.status as keyof typeof counts] = n;
+      }
+    }
+
+    return {
+      id: access.workspace.id,
+      name: access.workspace.name,
+      slug: access.workspace.slug,
+      description: access.workspace.description,
+      organization: org,
+      role: access.role,
+      permissions: {
+        manageOrganization: canManageOrganization(access.role),
+        manageJobs: canManageJobs(access.role),
+      },
+      jobCounts: counts,
+    };
+  })
+
+  .post(
+    "/:slug/workspaces",
+    async (ctx) => {
+      const session = await getSession(ctx.request);
+      if (!session) {
+        ctx.set.status = 401;
+        return { error: "Unauthorized" };
+      }
+
+      const org = await prisma.organization.findUnique({
+        where: { slug: ctx.params.slug },
+        select: {
+          id: true,
+          slug: true,
+          subscriptionStatus: true,
+          subscriptionCancelAtPeriodEnd: true,
+          subscriptionCurrentPeriodEnd: true,
+        },
+      });
+      if (!org) {
+        ctx.set.status = 404;
+        return { error: "Organization not found" };
+      }
+
+      const actor = await requireOrgAdmin(org.id, session.userId);
+      if (!actor) {
+        ctx.set.status = 403;
+        return { error: "Forbidden" };
+      }
+
+      const name = ctx.body.name.trim();
+      if (!name) {
+        ctx.set.status = 400;
+        return { error: "Workspace name is required" };
+      }
+
+      const entitlement = await resolveOrgAccess(org);
+      if (!entitlement.canCreateMoreWorkspaces) {
+        ctx.set.status = 402;
+        return {
+          error: orgUpgradeMessage("workspace"),
+          upgradeRequired: true,
+          upgradeOrgSlug: org.slug,
+        };
+      }
+
+      const requestedSlug = ctx.body.slug
+        ? sanitizeHiringSlug(ctx.body.slug)
+        : sanitizeHiringSlug(name);
+      if (!isValidWorkspaceSlug(requestedSlug)) {
+        ctx.set.status = 400;
+        return { error: "Invalid workspace slug" };
+      }
+
+      const slugTaken = await prisma.workspace.findUnique({
+        where: {
+          organizationId_slug: { organizationId: org.id, slug: requestedSlug },
+        },
+        select: { id: true },
+      });
+      if (slugTaken) {
+        ctx.set.status = 409;
+        return { error: "This workspace slug is already in use" };
+      }
+
+      const ownersAndAdmins = await prisma.organizationMember.findMany({
+        where: {
+          organizationId: org.id,
+          role: { in: ["owner", "admin"] },
+        },
+        select: { userId: true },
+      });
+
+      try {
+        const workspace = await prisma.workspace.create({
+          data: {
+            organizationId: org.id,
+            name,
+            slug: requestedSlug,
+            description: optionalTrim(ctx.body.description),
+            members: {
+              create: ownersAndAdmins.map((row) => ({ userId: row.userId })),
+            },
+          },
+        });
+
+        return workspace;
+      } catch (error) {
+        if (isUniqueConstraintError(error)) {
+          ctx.set.status = 409;
+          return { error: "This workspace slug is already in use" };
+        }
+        throw error;
+      }
+    },
+    {
+      body: t.Object({
+        name: t.String({ minLength: 1, maxLength: 120 }),
+        slug: t.Optional(t.String({ maxLength: 60 })),
+        description: t.Optional(t.String({ maxLength: 5000 })),
+      }),
+    },
+  )
+
+  .patch(
+    "/:slug/workspaces/:workspaceSlug",
+    async (ctx) => {
+      const session = await getSession(ctx.request);
+      if (!session) {
+        ctx.set.status = 401;
+        return { error: "Unauthorized" };
+      }
+
+      const org = await prisma.organization.findUnique({
+        where: { slug: ctx.params.slug },
+        select: { id: true },
+      });
+      if (!org) {
+        ctx.set.status = 404;
+        return { error: "Organization not found" };
+      }
+
+      const actor = await requireOrgAdmin(org.id, session.userId);
+      if (!actor) {
+        ctx.set.status = 403;
+        return { error: "Forbidden" };
+      }
+
+      const workspace = await prisma.workspace.findUnique({
+        where: {
+          organizationId_slug: {
+            organizationId: org.id,
+            slug: ctx.params.workspaceSlug,
+          },
+        },
+      });
+      if (!workspace) {
+        ctx.set.status = 404;
+        return { error: "Workspace not found" };
+      }
+
+      const nextSlug =
+        ctx.body.slug !== undefined
+          ? sanitizeHiringSlug(ctx.body.slug)
+          : undefined;
+      if (nextSlug !== undefined && !isValidWorkspaceSlug(nextSlug)) {
+        ctx.set.status = 400;
+        return { error: "Invalid workspace slug" };
+      }
+
+      if (nextSlug !== undefined && nextSlug !== workspace.slug) {
+        const slugTaken = await prisma.workspace.findUnique({
+          where: {
+            organizationId_slug: {
+              organizationId: org.id,
+              slug: nextSlug,
+            },
+          },
+          select: { id: true },
+        });
+        if (slugTaken) {
+          ctx.set.status = 409;
+          return { error: "This workspace slug is already in use" };
+        }
+      }
+
+      try {
+        const updated = await prisma.workspace.update({
+          where: { id: workspace.id },
+          data: {
+            ...(ctx.body.name !== undefined
+              ? { name: ctx.body.name.trim() }
+              : {}),
+            ...(ctx.body.description !== undefined
+              ? { description: optionalTrim(ctx.body.description) }
+              : {}),
+            ...(nextSlug && nextSlug !== workspace.slug
+              ? { slug: nextSlug }
+              : {}),
+          },
+        });
+
+        return updated;
+      } catch (error) {
+        if (isUniqueConstraintError(error)) {
+          ctx.set.status = 409;
+          return { error: "This workspace slug is already in use" };
+        }
+        throw error;
+      }
+    },
+    {
+      body: t.Object({
+        name: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
+        slug: t.Optional(t.String({ maxLength: 60 })),
+        description: t.Optional(t.Nullable(t.String({ maxLength: 5000 }))),
+      }),
+    },
+  )
+
   // List members
   .get("/:slug/members", async (ctx) => {
     const session = await getSession(ctx.request);
@@ -311,7 +677,26 @@ export const organization = new Elysia({ prefix: "/organizations" })
       orderBy: { createdAt: "asc" },
     });
 
-    return members.map(serializeMember);
+    const assignments = await prisma.workspaceMember.findMany({
+      where: {
+        workspace: { organizationId: org.id },
+        userId: { in: members.map((m) => m.userId) },
+      },
+      select: { userId: true, workspaceId: true },
+    });
+    const workspaceIdsByUser = new Map<string, string[]>();
+    for (const row of assignments) {
+      const current = workspaceIdsByUser.get(row.userId) ?? [];
+      current.push(row.workspaceId);
+      workspaceIdsByUser.set(row.userId, current);
+    }
+
+    return members.map((m) =>
+      serializeMember({
+        ...m,
+        workspaceIds: workspaceIdsByUser.get(m.userId) ?? [],
+      }),
+    );
   })
 
   // Add member
@@ -385,12 +770,19 @@ export const organization = new Elysia({ prefix: "/organizations" })
         include: { user: { select: memberUserSelect } },
       });
 
-      return serializeMember(member);
+      const workspaceIds = await assignUserToWorkspaces(
+        org.id,
+        user.id,
+        ctx.body.workspaceIds,
+      );
+
+      return serializeMember({ ...member, workspaceIds });
     },
     {
       body: t.Object({
         email: t.String({ minLength: 3, maxLength: 320 }),
         role: t.String({ minLength: 1, maxLength: 32 }),
+        workspaceIds: t.Optional(t.Array(t.String())),
       }),
     },
   )
@@ -420,7 +812,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
         return { error: "Forbidden" };
       }
 
-      if (!isAssignableOrgRole(ctx.body.role)) {
+      if (ctx.body.role !== undefined && !isAssignableOrgRole(ctx.body.role)) {
         ctx.set.status = 400;
         return { error: "Invalid role" };
       }
@@ -440,22 +832,44 @@ export const organization = new Elysia({ prefix: "/organizations" })
       }
 
       // Only owners may change another admin's role
-      if (target.role === "admin" && actor.role !== "owner") {
+      if (
+        ctx.body.role &&
+        target.role === "admin" &&
+        actor.role !== "owner"
+      ) {
         ctx.set.status = 403;
         return { error: "Only the owner can change an admin's role." };
       }
 
       const updated = await prisma.organizationMember.update({
         where: { id: target.id },
-        data: { role: ctx.body.role },
+        data: ctx.body.role ? { role: ctx.body.role } : {},
         include: { user: { select: memberUserSelect } },
       });
 
-      return serializeMember(updated);
+      const workspaceIds =
+        ctx.body.workspaceIds !== undefined
+          ? await assignUserToWorkspaces(
+              org.id,
+              updated.userId,
+              ctx.body.workspaceIds,
+            )
+          : (
+              await prisma.workspaceMember.findMany({
+                where: {
+                  userId: updated.userId,
+                  workspace: { organizationId: org.id },
+                },
+                select: { workspaceId: true },
+              })
+            ).map((row) => row.workspaceId);
+
+      return serializeMember({ ...updated, workspaceIds });
     },
     {
       body: t.Object({
-        role: t.String({ minLength: 1, maxLength: 32 }),
+        role: t.Optional(t.String({ minLength: 1, maxLength: 32 })),
+        workspaceIds: t.Optional(t.Array(t.String())),
       }),
     },
   )

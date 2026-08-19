@@ -59,7 +59,7 @@ export default function CompanyIndexPage() {
         slug: slugPreview || undefined,
         description: description.trim() || undefined,
       });
-      toast.success("Hiring workspace created");
+      toast.success("Organization created");
       router.push(`/company/${result.organization.slug}`);
     } catch (error) {
       const upgradeSlug =
@@ -88,10 +88,10 @@ export default function CompanyIndexPage() {
       <div className="mx-auto w-full max-w-2xl space-y-8 px-6 py-16">
         <header className="space-y-2">
           <p className="eyebrow uppercase">Hiring</p>
-          <h1 className="text-h2 text-text-primary">Company workspaces</h1>
+          <h1 className="text-h2 text-text-primary">Companies</h1>
           <p className="text-body-sm text-text-secondary">
-            Create a hiring workspace to post jobs and receive Livefolio
-            applications.
+            Create an organization to post jobs. Workspaces inside it keep
+            different roles separate. Billing is on the organization.
           </p>
         </header>
 
@@ -125,7 +125,7 @@ export default function CompanyIndexPage() {
           <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
             <Building2 className="mx-auto h-8 w-8 text-text-muted" />
             <h2 className="mt-3 text-h3 text-text-primary">
-              No hiring workspace yet
+              No organization yet
             </h2>
             <p className="mt-1 text-body-sm text-text-secondary">
               Set up a company account to start posting jobs.
@@ -135,7 +135,7 @@ export default function CompanyIndexPage() {
 
         {!showCreate ? (
           <Button onClick={() => setShowCreate(true)}>
-            Create a hiring workspace
+            Create an organization
           </Button>
         ) : (
           <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
@@ -150,7 +150,7 @@ export default function CompanyIndexPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="company-slug">Workspace slug</Label>
+              <Label htmlFor="company-slug">Organization slug</Label>
               <Input
                 id="company-slug"
                 value={slug}
@@ -158,7 +158,7 @@ export default function CompanyIndexPage() {
                 placeholder={slugPreview || "acme"}
               />
               <p className="text-xs text-text-muted">
-                Workspace path: /company/{slugPreview || "…"}
+                Organization path: /company/{slugPreview || "…"}
               </p>
             </div>
             <div className="space-y-2">
@@ -172,7 +172,7 @@ export default function CompanyIndexPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleCreate} disabled={createOrg.isPending}>
-                Create workspace
+                Create organization
               </Button>
               <Button variant="ghost" onClick={() => setShowCreate(false)}>
                 Cancel

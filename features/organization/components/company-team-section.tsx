@@ -21,6 +21,7 @@ import {
 } from "@/features/organization/lib/permissions";
 import {
   useAddOrgMember,
+  useOrganization,
   useOrgMembers,
   useRemoveOrgMember,
   useUpdateOrgMemberRole,
@@ -51,13 +52,16 @@ export function CompanyTeamSection({
   const router = useRouter();
   const { data: session } = useSession();
   const viewerUserId = session?.user?.id;
+  const { data: org } = useOrganization(orgSlug);
   const { data: members, isLoading } = useOrgMembers(orgSlug);
   const addMember = useAddOrgMember(orgSlug);
   const updateRole = useUpdateOrgMemberRole(orgSlug);
   const removeMember = useRemoveOrgMember(orgSlug);
+  const workspaces = org?.workspaces ?? [];
 
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<AssignableOrgRole>("recruiter");
+  const [workspaceIds, setWorkspaceIds] = useState<string[]>([]);
 
   async function handleAdd() {
     if (!email.trim()) {
@@ -65,10 +69,18 @@ export function CompanyTeamSection({
       return;
     }
     try {
-      await addMember.mutateAsync({ email: email.trim(), role });
+      await addMember.mutateAsync({
+        email: email.trim(),
+        role,
+        workspaceIds:
+          workspaceIds.length > 0
+            ? workspaceIds
+            : workspaces.map((ws) => ws.id),
+      });
       toast.success("Member added");
       setEmail("");
       setRole("recruiter");
+      setWorkspaceIds([]);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to add member",
@@ -119,8 +131,9 @@ export function CompanyTeamSection({
       <div className="space-y-1">
         <h2 className="text-h3 text-text-primary">Team</h2>
         <p className="text-body-sm text-text-secondary">
-          People with access to this hiring workspace. New members must already
-          have a Livefolio account.
+          People in this organization. Recruiters and hiring managers only
+          see the workspaces you assign. New members must already have a
+          Livefolio account.
         </p>
       </div>
 
@@ -159,6 +172,39 @@ export function CompanyTeamSection({
                   <p className="truncate text-body-sm text-text-secondary">
                     {member.user.email}
                   </p>
+                  {workspaces.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {workspaces.map((ws) => {
+                        const assigned = member.workspaceIds.includes(ws.id);
+                        const canToggle =
+                          canManage && member.role !== "owner";
+                        return (
+                          <button
+                            key={ws.id}
+                            type="button"
+                            disabled={!canToggle || updateRole.isPending}
+                            onClick={() => {
+                              if (!canToggle) return;
+                              const next = assigned
+                                ? member.workspaceIds.filter((id) => id !== ws.id)
+                                : [...member.workspaceIds, ws.id];
+                              void updateRole.mutateAsync({
+                                memberId: member.id,
+                                workspaceIds: next,
+                              });
+                            }}
+                            className={`rounded-full px-2 py-0.5 text-xs ${
+                              assigned || member.role === "owner" || member.role === "admin"
+                                ? "bg-brand-light text-brand-primary"
+                                : "bg-surface-base text-text-muted"
+                            } ${canToggle ? "cursor-pointer" : "cursor-default"}`}
+                          >
+                            {ws.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : null}
                 </div>
 
                 {editable ? (
@@ -249,6 +295,41 @@ export function CompanyTeamSection({
               </Button>
             </div>
           </div>
+          {workspaces.length > 0 ? (
+            <div className="space-y-2">
+              <Label>Workspaces</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {workspaces.map((ws) => {
+                  const selected =
+                    workspaceIds.length === 0 || workspaceIds.includes(ws.id);
+                  return (
+                    <button
+                      key={ws.id}
+                      type="button"
+                      onClick={() => {
+                        setWorkspaceIds((current) => {
+                          const base =
+                            current.length === 0
+                              ? workspaces.map((item) => item.id)
+                              : current;
+                          return base.includes(ws.id)
+                            ? base.filter((id) => id !== ws.id)
+                            : [...base, ws.id];
+                        });
+                      }}
+                      className={`rounded-full px-2 py-0.5 text-xs ${
+                        selected
+                          ? "bg-brand-light text-brand-primary"
+                          : "bg-surface-base text-text-muted"
+                      }`}
+                    >
+                      {ws.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
           <p className="text-xs text-text-muted">
             That email must already have a Livefolio account.
           </p>

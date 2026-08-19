@@ -27,10 +27,11 @@ import { getPortfolioPublicUrl } from "@/lib/domain";
 export default function ApplicantDetailPage() {
   const params = useParams<{
     orgSlug: string;
+    workspaceSlug: string;
     jobId: string;
     applicationId: string;
   }>();
-  const { orgSlug, jobId, applicationId } = params;
+  const { orgSlug, workspaceSlug, jobId, applicationId } = params;
   const { data, isLoading, error } = useCompanyApplication(
     jobId,
     applicationId,
@@ -52,7 +53,7 @@ export default function ApplicantDetailPage() {
       <div className="space-y-4 p-8">
         <h1 className="text-h3 text-text-primary">Applicant not found</h1>
         <Button asChild variant="outline">
-          <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             Back to pool
           </Link>
         </Button>
@@ -106,7 +107,7 @@ export default function ApplicantDetailPage() {
     <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
       <div className="flex flex-wrap gap-2">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
+          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             ← Applicants
           </Link>
         </Button>

@@ -34,8 +34,9 @@ import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 type PoolTab = "all" | PipelineStage;
 
 export default function JobApplicantsPage() {
-  const params = useParams<{ orgSlug: string; jobId: string }>();
+  const params = useParams<{ orgSlug: string; workspaceSlug: string; jobId: string }>();
   const orgSlug = params.orgSlug;
+  const workspaceSlug = params.workspaceSlug;
   const jobId = params.jobId;
   const [tab, setTab] = useState<PoolTab>("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -165,7 +166,7 @@ export default function JobApplicantsPage() {
       }`}
     >
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}/jobs/${jobId}`}>← Back to job</Link>
+        <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}`}>← Back to job</Link>
       </Button>
       <header className="space-y-2">
         <p className="eyebrow uppercase">Applicants</p>
@@ -270,6 +271,7 @@ export default function JobApplicantsPage() {
         <ApplicantPoolGapReport
           report={data.gaps}
           orgSlug={orgSlug}
+          workspaceSlug={workspaceSlug}
           jobId={jobId}
           caption={
             tab === "all"
@@ -336,7 +338,7 @@ export default function JobApplicantsPage() {
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
-                        href={`/company/${orgSlug}/jobs/${jobId}/applicants/${applicant.id}`}
+                        href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants/${applicant.id}`}
                         className="font-medium text-text-primary hover:underline"
                       >
                         {applicant.summary.name}
@@ -449,7 +451,7 @@ export default function JobApplicantsPage() {
                   <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
                     <Button size="sm" asChild>
                       <Link
-                        href={`/company/${orgSlug}/jobs/${jobId}/applicants/${applicant.id}`}
+                        href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants/${applicant.id}`}
                       >
                         Open
                       </Link>
@@ -523,6 +525,7 @@ export default function JobApplicantsPage() {
 
       <CompareSelectionBar
         orgSlug={orgSlug}
+        workspaceSlug={workspaceSlug}
         jobId={jobId}
         selectedIds={selectedIds}
         selectedApplicants={selectedApplicants}

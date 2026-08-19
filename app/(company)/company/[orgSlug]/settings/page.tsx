@@ -94,7 +94,13 @@ export default function CompanySettingsPage() {
           </Button>
         ) : (
           <Button variant="outline" asChild>
-            <Link href={`/company/${orgSlug}/jobs/new`}>
+            <Link
+              href={
+                org.workspaces[0]
+                  ? `/company/${orgSlug}/${org.workspaces[0].slug}/jobs/new`
+                  : `/company/${orgSlug}`
+              }
+            >
               Publish a job to preview
             </Link>
           </Button>
