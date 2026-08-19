@@ -12,6 +12,7 @@ import {
 import { bulkImportPortfolioData } from "./bulk-import";
 import {
   getMaxLivePreviews,
+  isProSubscriptionStatus,
   sanitizeLivePreviewProjectIds,
 } from "@/lib/live-preview";
 import {
@@ -44,6 +45,8 @@ import {
   normalizeStoredUrlsInJson,
   validateCustomSectionItems,
 } from "@/lib/content-policy";
+import { deleteObjectQuiet, isR2Configured, publicObjectUrl } from "@/lib/r2";
+import { deleteStoredFileRows } from "@/features/uploads/server/stored-files";
 
 function toDateOrThrow(value: string) {
   const normalized = /^\d{4}-\d{2}-\d{2}$/.test(value)
@@ -158,6 +161,14 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         return { error: "Portfolio not found" };
       }
 
+      const owner = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { subscriptionStatus: true },
+      });
+      if (!isProSubscriptionStatus(owner?.subscriptionStatus)) {
+        return { ...existing, livePreviewProjectIds: [] };
+      }
+
       return existing;
     } catch (error) {
       console.error("[GET /api/portfolio] error", error);
@@ -222,6 +233,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         websiteUrl,
         metaTitle,
         metaDescription,
+        openToWork,
         ...rest
       } = body;
       const existingCustomization = customization
@@ -371,6 +383,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
                 ),
               }
             : {}),
+          ...(typeof openToWork === "boolean" ? { openToWork } : {}),
         };
       } catch (error) {
         ctx.set.status = 400;
@@ -450,6 +463,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
             t.Null(),
           ]),
+          openToWork: t.Boolean(),
           customization: t.Object({
             navbar: t.Optional(
               t.Object({
@@ -1456,6 +1470,20 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         return { error: "Project not found" };
       }
 
+      if (ctx.body.imageUrl !== undefined && isR2Configured()) {
+        const stored = await prisma.storedFile.findMany({
+          where: { projectId: ctx.params.id, kind: "project_thumb" },
+          select: { id: true, key: true },
+        });
+        const nextUrl = data.imageUrl ?? null;
+        const stale = stored.filter(
+          (file) => publicObjectUrl(file.key) !== nextUrl,
+        );
+        if (stale.length > 0) {
+          await deleteStoredFileRows(stale);
+        }
+      }
+
       return prisma.project.findUniqueOrThrow({
         where: { id: ctx.params.id },
       });
@@ -1496,6 +1524,15 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
       ctx.set.status = 401;
       return { error: "Unauthorized" };
     }
+    const files = isR2Configured()
+      ? await prisma.storedFile.findMany({
+          where: {
+            projectId: ctx.params.id,
+            project: { portfolio: { userId: session.userId } },
+          },
+          select: { key: true },
+        })
+      : [];
     const { count } = await prisma.project.deleteMany({
       where: {
         id: ctx.params.id,
@@ -1506,6 +1543,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
       ctx.set.status = 404;
       return { error: "Project not found" };
     }
+    await Promise.all(files.map((file) => deleteObjectQuiet(file.key)));
     return { success: true };
   })
 

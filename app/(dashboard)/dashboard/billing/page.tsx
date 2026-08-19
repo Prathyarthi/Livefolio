@@ -16,6 +16,7 @@ import {
 import { BillingIntervalToggle } from "@/features/subscriptions/components/billing-interval-toggle";
 import { startProCheckout } from "@/features/subscriptions/lib/checkout";
 import { getIntervalCheckoutUnavailableMessage } from "@/lib/billing";
+import { ACTIVE_MAX_LIVE_PREVIEWS } from "@/lib/live-preview";
 
 interface BillingState {
   razorpayReady: boolean;
@@ -263,7 +264,7 @@ export default function BillingPage() {
               <p className="text-body-sm font-medium text-text-primary">Free plan</p>
               <p className="mt-0.5 text-body-sm text-text-secondary">
                 Your trial has ended. Upgrade to Pro to unlock premium templates,
-                imports, and more live preview slots.
+                imports, and live project screenshots.
               </p>
             </div>
           )}
@@ -316,7 +317,7 @@ export default function BillingPage() {
             <div className="flex items-center justify-between py-2">
               <span className="text-text-secondary">Live preview slots</span>
               <span className="text-text-primary">
-                {isPro ? "Unlimited" : "2 included"}
+                {isPro ? `${ACTIVE_MAX_LIVE_PREVIEWS} slots` : "Pro only"}
               </span>
             </div>
           </div>

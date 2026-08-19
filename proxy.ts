@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 import {
   APP_ROUTE_PREFIXES,
   extractPortfolioSubdomain,
@@ -13,6 +14,13 @@ import {
   MAX_RESUME_UPLOAD_BODY_BYTES,
 } from "@/lib/content-policy";
 import { exceedsRequestBodyLimit } from "@/lib/request-body-limit";
+import { shouldUseSecureCookies } from "@/lib/auth-cookies";
+
+/** Safe internal path only — blocks open redirects. */
+function safeCallbackPath(value: string | null): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
 
 function redirectToPortfolioSubdomain(request: NextRequest, slug: string) {
   const rootDomain = getPortfolioRootDomain();
@@ -57,6 +65,20 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!subdomain) {
+    // Logged-in users shouldn't loop through sign-in / sign-up.
+    if (pathname === "/sign-in" || pathname === "/sign-up") {
+      const token = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET,
+        secureCookie: shouldUseSecureCookies(),
+      });
+      if (token) {
+        const callback =
+          safeCallbackPath(request.nextUrl.searchParams.get("callbackUrl")) ??
+          "/dashboard";
+        return NextResponse.redirect(new URL(callback, request.url));
+      }
+    }
     return NextResponse.next();
   }
 

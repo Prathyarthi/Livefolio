@@ -94,6 +94,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                         <div className="border border-[#2c2c2c] bg-white p-1">
                           <TemplateProjectPreview templateId="paper"
                             liveUrl={project.liveUrl ?? null}
+                            imageUrl={project.imageUrl ?? null}
                             projectId={project.id}
                             livePreviewProjectIds={livePreviewProjectIds}
                             alt={project.title}

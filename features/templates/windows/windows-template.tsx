@@ -99,6 +99,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                   <div className="group m-2">
                     <TemplateProjectPreview templateId="windows"
                       liveUrl={project.liveUrl ?? null}
+                      imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
                       alt={project.title}

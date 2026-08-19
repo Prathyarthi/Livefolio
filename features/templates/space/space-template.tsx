@@ -103,6 +103,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                         <div className="relative">
                           <TemplateProjectPreview templateId="space"
                             liveUrl={project.liveUrl ?? null}
+                            imageUrl={project.imageUrl ?? null}
                             projectId={project.id}
                             livePreviewProjectIds={livePreviewProjectIds}
                             alt={project.title}

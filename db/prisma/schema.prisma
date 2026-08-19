@@ -35,11 +35,19 @@ model User {
   unpublishedReminderSentAt    DateTime?
   publishedCongratsSentAt      DateTime?
 
-  portfolio            Portfolio?
-  billingSubscriptions BillingSubscription[]
-  billingCheckout      BillingCheckoutAttempt?
-  billingPayments      BillingPayment[]
+  portfolio               Portfolio?
+  billingSubscriptions    BillingSubscription[]
+  billingCheckout         BillingCheckoutAttempt?
+  orgBillingCheckouts     OrgBillingCheckoutAttempt[]
+  billingPayments         BillingPayment[]
+
+  organizationMembers OrganizationMember[]
+  workspaceMembers    WorkspaceMember[]
+  jobsCreated         Job[]
+  applications        Application[]
+  recruiterNotes      RecruiterNote[]
   emailSendLogs        EmailSendLog[]
+  storedFiles          StoredFile[]
 
   @@map("users")
 }
@@ -47,6 +55,8 @@ model User {
 model BillingSubscription {
   id                     String    @id @default(uuid())
   userId                 String
+  /// Set for organization (hiring) subscriptions; null for personal Pro.
+  organizationId         String?
   providerSubscriptionId String    @unique
   providerPlanId         String
   interval               String
@@ -58,11 +68,32 @@ model BillingSubscription {
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
-  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payments BillingPayment[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  payments     BillingPayment[]
 
   @@index([userId, status])
+  @@index([organizationId, status])
   @@map("billing_subscriptions")
+}
+
+/// Org checkout attempts (separate from personal BillingCheckoutAttempt).
+model OrgBillingCheckoutAttempt {
+  id                     String   @id @default(uuid())
+  organizationId         String   @unique
+  userId                 String
+  providerSubscriptionId String?  @unique
+  providerPlanId         String
+  interval               String
+  status                 String   @default("creating")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("org_billing_checkout_attempts")
 }
 
 model BillingCheckoutAttempt {
@@ -124,6 +155,8 @@ model Portfolio {
 
   templateId  String  @default("pulse")
   isPublished Boolean @default(false)
+  /// Opt-in for recruiter talent search. Never shown on the public Livefolio.
+  openToWork  Boolean @default(false)
 
   metaTitle       String?
   metaDescription String?
@@ -153,8 +186,10 @@ model Portfolio {
   customSections CustomSection[]
   views          PortfolioView[]
   clicks         PortfolioClick[]
+  storedFiles    StoredFile[]
 
   @@index([slug])
+  @@index([openToWork, isPublished])
   @@map("portfolios")
 }
 
@@ -261,7 +296,8 @@ model Project {
   githubForks Int?
   language    String?
 
-  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio   Portfolio    @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  storedFiles StoredFile[]
 
   @@map("projects")
 }
@@ -351,6 +387,246 @@ model Template {
   category    String @default("general")
 
   @@map("templates")
+}
+
+// ============================================================
+// HIRING — Organizations, Jobs, Applications
+// ============================================================
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  logoUrl     String?
+  brandColor  String?
+  websiteUrl  String?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  /// none | pending | active — Org Pro is `active`.
+  subscriptionStatus String @default("none")
+  razorpaySubscriptionId String?
+  subscriptionCancelAtPeriodEnd Boolean   @default(false)
+  subscriptionCurrentPeriodEnd  DateTime?
+
+  members              OrganizationMember[]
+  workspaces           Workspace[]
+  jobs                 Job[]
+  billingSubscriptions BillingSubscription[]
+  billingCheckout      OrgBillingCheckoutAttempt?
+  storedFiles          StoredFile[]
+
+  @@index([slug])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String
+  /// owner | admin | recruiter | hiring_manager
+  role           String   @default("recruiter")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+/// Hiring space inside an organization (e.g. Engineering vs Marketing).
+/// Org Pro is billed on Organization; workspaces share that plan.
+model Workspace {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  slug           String
+  description    String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      WorkspaceMember[]
+  jobs         Job[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@map("workspaces")
+}
+
+/// Assigns an org member to a workspace. Owners and admins can enter every
+/// workspace without a row here.
+model WorkspaceMember {
+  id          String   @id @default(uuid())
+  workspaceId String
+  userId      String
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@map("workspace_members")
+}
+
+model Job {
+  id             String @id @default(uuid())
+  organizationId String
+  workspaceId    String
+  createdById    String
+
+  title       String
+  slug        String  @unique
+  description String  @db.Text
+  department  String?
+  /// full_time | part_time | contract | internship
+  employmentType String?
+  location       String?
+  /// remote | hybrid | on_site
+  workplaceType String?
+
+  experienceMin Int?
+  experienceMax Int?
+  salaryMin     Int?
+  salaryMax     Int?
+  salaryCurrency String? @default("USD")
+
+  responsibilities String? @db.Text
+  qualifications   String? @db.Text
+  benefits         String? @db.Text
+
+  applicationDeadline DateTime?
+  /// draft | published | paused | closed
+  status      String    @default("draft")
+  publishedAt DateTime?
+
+  /// AI-extracted ranking profile from the job description. Null until first extract.
+  searchProfile Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy    User             @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  requirements JobRequirement[]
+  applications Application[]
+  storedFiles  StoredFile[]
+
+  @@index([organizationId, status])
+  @@index([workspaceId, status])
+  @@index([slug])
+  @@index([status, publishedAt])
+  @@map("jobs")
+}
+
+model JobRequirement {
+  id          String  @id @default(uuid())
+  jobId       String
+  /// required | preferred
+  type        String
+  /// skill | experience | education | other
+  category    String  @default("skill")
+  label       String
+  description String?
+  sortOrder   Int     @default(0)
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("job_requirements")
+}
+
+model Application {
+  id          String  @id @default(uuid())
+  jobId       String
+  userId      String
+  portfolioId String?
+
+  /// applied | under_review | shortlisted | interview | offer | hired | rejected
+  status String @default("applied")
+  /// new | reviewing | shortlisted | interview | offer | hired | rejected
+  stage  String @default("new")
+
+  /// Soft shortlist flag — independent of pipeline stage for compare views
+  shortlisted   Boolean   @default(false)
+  shortlistedAt DateTime?
+
+  coverNote   String?  @db.Text
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  job      Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshot ApplicationSnapshot?
+  notes    RecruiterNote[]
+
+  @@unique([jobId, userId])
+  @@index([userId, submittedAt])
+  @@index([jobId, stage])
+  @@index([jobId, status])
+  @@index([jobId, shortlisted])
+  @@map("applications")
+}
+
+model ApplicationSnapshot {
+  id            String   @id @default(uuid())
+  applicationId String   @unique
+  /// Immutable copy of the candidate Livefolio at submission time
+  data          Json
+  createdAt     DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("application_snapshots")
+}
+
+model StoredFile {
+  id             String   @id @default(uuid())
+  key            String   @unique
+  /// resume | project_thumb | job_source
+  kind           String
+  contentType    String
+  sizeBytes      Int
+  userId         String?
+  organizationId String?
+  portfolioId    String?
+  projectId      String?
+  jobId          String?
+  createdAt      DateTime @default(now())
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  portfolio    Portfolio?    @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  project      Project?      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  job          Job?          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind])
+  @@index([projectId, kind])
+  @@index([jobId, kind])
+  @@map("stored_files")
+}
+
+model RecruiterNote {
+  id            String   @id @default(uuid())
+  applicationId String
+  authorId      String
+  body          String   @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, createdAt])
+  @@index([authorId])
+  @@map("recruiter_notes")
 }
 
 // ============================================================

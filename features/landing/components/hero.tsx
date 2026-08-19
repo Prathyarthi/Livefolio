@@ -1,6 +1,5 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
+import { AuthAwareCtas } from "@/features/landing/components/auth-aware-ctas";
 import { IntegrationCycle } from "@/features/landing/components/integration-cycle";
 import { TransformRail } from "@/features/landing/components/transform-rail";
 import { integrations, siteConfig } from "@/lib/site";
@@ -86,20 +85,7 @@ export function Hero() {
             <IntegrationCycle />
           </p>
 
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild variant="accent" size="lg">
-              <Link href="/sign-up">
-                Get started — it&apos;s free
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="#showcase">
-                See examples
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </Button>
-          </div>
+          <AuthAwareCtas variant="candidate" className="mt-7 flex flex-wrap items-center justify-center gap-3" />
         </div>
 
         <div className="mx-auto mt-[var(--space-8)] flex max-w-md justify-center">

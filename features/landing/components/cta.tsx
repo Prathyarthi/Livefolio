@@ -1,6 +1,4 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { AuthAwareCtas } from "@/features/landing/components/auth-aware-ctas";
 
 export function CTA() {
   return (
@@ -15,17 +13,10 @@ export function CTA() {
             Upload your resume, go live in minutes — then connect integrations to
             keep it current.
           </p>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild variant="accent" size="lg">
-              <Link href="/sign-up">
-                Get started — it&apos;s free
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/sign-in">Sign in</Link>
-            </Button>
-          </div>
+          <AuthAwareCtas
+            variant="candidate"
+            className="mt-7 flex flex-wrap items-center justify-center gap-3"
+          />
         </div>
       </div>
     </section>

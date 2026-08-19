@@ -121,6 +121,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                       <TemplateProjectPreview
                         templateId="developer"
                         liveUrl={project.liveUrl ?? null}
+                        imageUrl={project.imageUrl ?? null}
                         projectId={project.id}
                         livePreviewProjectIds={livePreviewProjectIds}
                         alt={project.title}
