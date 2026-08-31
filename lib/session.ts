@@ -1,13 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/prisma";
 import { normalizeOAuthEmail } from "@/lib/oauth-users";
-
-function shouldUseSecureCookies() {
-  return (
-    process.env.NEXTAUTH_URL?.startsWith("https://") === true ||
-    process.env.VERCEL === "1"
-  );
-}
+import { shouldUseSecureCookies } from "@/lib/auth-cookies";
 
 async function resolveUserIdFromToken(token: {
   id?: unknown;

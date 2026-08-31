@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /**
- * Create Razorpay subscription plans for Livefolio Pro (monthly / quarterly / yearly).
+ * Create Razorpay subscription plans for Livefolio Pro and/or Org Pro.
  *
- * Matches lib/pricing.ts PRO_PRICING and a.md setup guide.
+ * Matches lib/pricing.ts PRO_PRICING / ORG_PRO_PRICING.
  *
  * Usage:
- *   node scripts/razorpay-setup-plans.mjs              # create INR plans (test/live keys from .env)
+ *   node scripts/razorpay-setup-plans.mjs                    # personal Pro (INR)
+ *   node scripts/razorpay-setup-plans.mjs --product=org      # Org Pro
+ *   node scripts/razorpay-setup-plans.mjs --product=all
  *   node scripts/razorpay-setup-plans.mjs --currency=usd
  *   node scripts/razorpay-setup-plans.mjs --dry-run
  *   node scripts/razorpay-setup-plans.mjs --list
- *   node scripts/razorpay-setup-plans.mjs --write-env   # append plan IDs to .env
+ *   node scripts/razorpay-setup-plans.mjs --write-env
  *
  * Requires in .env:
  *   RAZORPAY_KEY_ID
@@ -28,46 +30,89 @@ const ENV_PATH = join(ROOT, ".env");
 
 dotenv.config({ path: ENV_PATH });
 
-/** Keep in sync with lib/pricing.ts PRO_PRICING */
+/** Keep in sync with lib/pricing.ts */
 const PRO_PRICING = {
   monthly: { usd: 7, inr: 599 },
   quarterly: { usd: 19, inr: 1599 },
   yearly: { usd: 70, inr: 5999 },
 };
 
-const PLAN_NAME_PREFIX =
-  process.env.RAZORPAY_PLAN_NAME_PREFIX?.trim() || "Livefolio Pro";
+const ORG_PRO_PRICING = {
+  monthly: { usd: 29, inr: 2499 },
+  quarterly: { usd: 79, inr: 6799 },
+  yearly: { usd: 290, inr: 24999 },
+};
 
-const PLAN_DEFS = [
-  {
-    key: "monthly",
-    envVar: "RAZORPAY_PRO_PLAN_ID_MONTHLY",
-    legacyEnvVar: "RAZORPAY_PRO_PLAN_ID",
-    label: "Monthly",
-    period: "monthly",
-    interval: 1,
+const PRODUCTS = {
+  personal: {
+    id: "personal",
+    pricing: PRO_PRICING,
+    namePrefixEnv: "RAZORPAY_PLAN_NAME_PREFIX",
+    defaultNamePrefix: "Livefolio Pro",
+    notesProduct: "pro",
+    planDefs: [
+      {
+        key: "monthly",
+        envVar: "RAZORPAY_PRO_PLAN_ID_MONTHLY",
+        legacyEnvVar: "RAZORPAY_PRO_PLAN_ID",
+        label: "Monthly",
+        period: "monthly",
+        interval: 1,
+      },
+      {
+        key: "quarterly",
+        envVar: "RAZORPAY_PRO_PLAN_ID_QUARTERLY",
+        label: "Quarterly",
+        period: "monthly",
+        interval: 3,
+      },
+      {
+        key: "yearly",
+        envVar: "RAZORPAY_PRO_PLAN_ID_YEARLY",
+        label: "Yearly",
+        period: "yearly",
+        interval: 1,
+      },
+    ],
   },
-  {
-    key: "quarterly",
-    envVar: "RAZORPAY_PRO_PLAN_ID_QUARTERLY",
-    label: "Quarterly",
-    period: "monthly",
-    interval: 3,
+  org: {
+    id: "org",
+    pricing: ORG_PRO_PRICING,
+    namePrefixEnv: "RAZORPAY_ORG_PLAN_NAME_PREFIX",
+    defaultNamePrefix: "Livefolio Org Pro",
+    notesProduct: "org_pro",
+    planDefs: [
+      {
+        key: "monthly",
+        envVar: "RAZORPAY_ORG_PRO_PLAN_ID_MONTHLY",
+        label: "Monthly",
+        period: "monthly",
+        interval: 1,
+      },
+      {
+        key: "quarterly",
+        envVar: "RAZORPAY_ORG_PRO_PLAN_ID_QUARTERLY",
+        label: "Quarterly",
+        period: "monthly",
+        interval: 3,
+      },
+      {
+        key: "yearly",
+        envVar: "RAZORPAY_ORG_PRO_PLAN_ID_YEARLY",
+        label: "Yearly",
+        period: "yearly",
+        interval: 1,
+      },
+    ],
   },
-  {
-    key: "yearly",
-    envVar: "RAZORPAY_PRO_PLAN_ID_YEARLY",
-    label: "Yearly",
-    period: "yearly",
-    interval: 1,
-  },
-];
+};
 
 function parseArgs(argv) {
   const flags = {
     dryRun: false,
     list: false,
     writeEnv: false,
+    product: "personal",
     currency:
       process.env.NEXT_PUBLIC_BILLING_CURRENCY?.toLowerCase() === "usd"
         ? "usd"
@@ -78,7 +123,16 @@ function parseArgs(argv) {
     if (arg === "--dry-run") flags.dryRun = true;
     else if (arg === "--list") flags.list = true;
     else if (arg === "--write-env") flags.writeEnv = true;
-    else if (arg.startsWith("--currency=")) {
+    else if (arg.startsWith("--product=")) {
+      const value = arg.split("=")[1]?.toLowerCase();
+      if (value === "personal" || value === "org" || value === "all") {
+        flags.product = value;
+      } else {
+        throw new Error(
+          `Invalid product "${value}". Use personal, org, or all.`,
+        );
+      }
+    } else if (arg.startsWith("--currency=")) {
       const value = arg.split("=")[1]?.toLowerCase();
       if (value === "inr" || value === "usd") flags.currency = value;
       else throw new Error(`Invalid currency "${value}". Use inr or usd.`);
@@ -95,26 +149,20 @@ function parseArgs(argv) {
 
 function printHelp() {
   console.log(`
-Razorpay Pro plan setup (monthly / quarterly / yearly)
+Razorpay plan setup (personal Pro and/or Org Pro)
 
   node scripts/razorpay-setup-plans.mjs [options]
 
 Options:
-  --currency=inr|usd   Plan currency (default: inr)
-  --dry-run            Print payloads without calling Razorpay
-  --list               List existing plans in the account
-  --write-env          Write plan IDs into .env
-  -h, --help           Show this help
+  --product=personal|org|all   Which plans to create (default: personal)
+  --currency=inr|usd           Plan currency (default: NEXT_PUBLIC_BILLING_CURRENCY or inr)
+  --dry-run                    Print payloads without calling Razorpay
+  --list                       List existing plans in the account
+  --write-env                  Write plan IDs into .env
+  -h, --help                   Show this help
 
-INR amounts (from lib/pricing.ts):
-  Monthly   ₹599
-  Quarterly ₹1,599
-  Yearly    ₹5,999
-
-USD amounts:
-  Monthly   $7
-  Quarterly $19
-  Yearly    $70
+Personal Pro (INR): ₹599 / ₹1,599 / ₹5,999
+Org Pro (INR):      ₹2,499 / ₹6,799 / ₹24,999
 
 After creating plans, configure webhook in Razorpay Dashboard:
   POST https://your-domain.com/api/billing/webhook
@@ -130,7 +178,7 @@ function getCredentials() {
 
   if (!keyId || !keySecret) {
     throw new Error(
-      "Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET in .env"
+      "Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET in .env",
     );
   }
 
@@ -138,8 +186,7 @@ function getCredentials() {
 }
 
 function toSubunits(amount, currency) {
-  if (currency === "inr") return Math.round(amount * 100);
-  if (currency === "usd") return Math.round(amount * 100);
+  if (currency === "inr" || currency === "usd") return Math.round(amount * 100);
   throw new Error(`Unsupported currency: ${currency}`);
 }
 
@@ -148,9 +195,16 @@ function formatDisplayAmount(amount, currency) {
   return `$${amount}`;
 }
 
-function buildPlanPayload(def, currency) {
-  const displayAmount = PRO_PRICING[def.key][currency];
-  const name = `${PLAN_NAME_PREFIX} — ${def.label}`;
+function resolveProducts(productFlag) {
+  if (productFlag === "all") return [PRODUCTS.personal, PRODUCTS.org];
+  return [PRODUCTS[productFlag]];
+}
+
+function buildPlanPayload(product, def, currency) {
+  const namePrefix =
+    process.env[product.namePrefixEnv]?.trim() || product.defaultNamePrefix;
+  const displayAmount = product.pricing[def.key][currency];
+  const name = `${namePrefix} — ${def.label}`;
 
   return {
     period: def.period,
@@ -159,10 +213,10 @@ function buildPlanPayload(def, currency) {
       name,
       amount: toSubunits(displayAmount, currency),
       currency: currency.toUpperCase(),
-      description: `${PLAN_NAME_PREFIX} ${def.label.toLowerCase()} subscription`,
+      description: `${namePrefix} ${def.label.toLowerCase()} subscription`,
     },
     notes: {
-      product: "pro",
+      product: product.notesProduct,
       interval: def.key,
       app: "livefolio",
     },
@@ -198,7 +252,7 @@ async function listPlans(razorpay) {
     const currency = plan.item?.currency ?? "?";
     const major = amount / 100;
     console.log(
-      `- ${plan.id}  ${plan.item?.name ?? "Unnamed"}  ${currency} ${major}  (${plan.period} × ${plan.interval})`
+      `- ${plan.id}  ${plan.item?.name ?? "Unnamed"}  ${currency} ${major}  (${plan.period} × ${plan.interval})`,
     );
   }
 }
@@ -210,7 +264,7 @@ function findExistingPlan(plans, payload) {
       plan.item?.currency === payload.item.currency &&
       plan.item?.amount === payload.item.amount &&
       plan.period === payload.period &&
-      plan.interval === payload.interval
+      plan.interval === payload.interval,
   );
 }
 
@@ -247,36 +301,27 @@ function upsertEnvVars(results) {
   console.log(`\nUpdated ${ENV_PATH} with plan IDs.`);
 }
 
-async function main() {
-  const flags = parseArgs(process.argv.slice(2));
-  const { keyId, keySecret } = getCredentials();
-  const mode = keyId.includes("_live_") ? "LIVE" : "TEST";
-
-  const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
-
-  console.log(`Razorpay mode: ${mode}`);
-  console.log(`Currency: ${flags.currency.toUpperCase()}\n`);
-
-  if (flags.list) {
-    await listPlans(razorpay);
-    return;
-  }
-
-  const existingPlans = flags.dryRun ? [] : await fetchAllPlans(razorpay);
+async function createPlansForProduct(razorpay, product, flags, existingPlans) {
   const results = [];
 
-  for (const def of PLAN_DEFS) {
-    const payload = buildPlanPayload(def, flags.currency);
-    const displayAmount = PRO_PRICING[def.key][flags.currency];
+  console.log(`\n=== ${product.defaultNamePrefix} ===\n`);
+
+  for (const def of product.planDefs) {
+    const payload = buildPlanPayload(product, def, flags.currency);
+    const displayAmount = product.pricing[def.key][flags.currency];
 
     console.log(`→ ${def.label}`);
     console.log(
-      `  ${payload.item.name} — ${formatDisplayAmount(displayAmount, flags.currency)} (${payload.period}, interval ${payload.interval})`
+      `  ${payload.item.name} — ${formatDisplayAmount(displayAmount, flags.currency)} (${payload.period}, interval ${payload.interval})`,
     );
 
     if (flags.dryRun) {
       console.log(`  payload: ${JSON.stringify(payload, null, 2)}\n`);
-      results.push({ def, planId: `plan_DRY_RUN_${def.key}`, created: true });
+      results.push({
+        def,
+        planId: `plan_DRY_RUN_${product.id}_${def.key}`,
+        created: true,
+      });
       continue;
     }
 
@@ -292,16 +337,47 @@ async function main() {
     results.push({ def, planId: plan.id, created: true });
   }
 
+  return results;
+}
+
+async function main() {
+  const flags = parseArgs(process.argv.slice(2));
+  const { keyId, keySecret } = getCredentials();
+  const mode = keyId.includes("_live_") ? "LIVE" : "TEST";
+  const products = resolveProducts(flags.product);
+
+  const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+
+  console.log(`Razorpay mode: ${mode}`);
+  console.log(`Currency: ${flags.currency.toUpperCase()}`);
+  console.log(`Product: ${flags.product}`);
+
+  if (flags.list) {
+    await listPlans(razorpay);
+    return;
+  }
+
+  const existingPlans = flags.dryRun ? [] : await fetchAllPlans(razorpay);
+  const results = [];
+
+  for (const product of products) {
+    results.push(
+      ...(await createPlansForProduct(razorpay, product, flags, existingPlans)),
+    );
+  }
+
   printEnvBlock(results);
 
   if (flags.writeEnv && !flags.dryRun) {
     upsertEnvVars(results);
   } else if (!flags.dryRun) {
-    console.log("Tip: run with --write-env to save plan IDs to .env automatically.");
+    console.log(
+      "Tip: run with --write-env to save plan IDs to .env automatically.",
+    );
   }
 
   console.log(
-    "\nNext: set RAZORPAY_WEBHOOK_SECRET and configure webhook URL in Razorpay Dashboard."
+    "\nNext: set RAZORPAY_WEBHOOK_SECRET and configure webhook URL in Razorpay Dashboard.",
   );
 }
 

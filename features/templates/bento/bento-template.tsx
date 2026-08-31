@@ -165,6 +165,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                   >
                     <TemplateProjectPreview templateId="bento"
                       liveUrl={project.liveUrl ?? null}
+                      imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
                       alt={project.title}

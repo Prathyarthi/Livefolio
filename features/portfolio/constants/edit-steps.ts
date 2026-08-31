@@ -31,7 +31,8 @@ export const EDIT_STEPS = [
 export type EditStepValue = (typeof EDIT_STEPS)[number]["value"];
 
 export const EDIT_STEP_DESCRIPTIONS: Record<EditStepValue, string> = {
-  basic: "Your name, headline, summary, and how people can reach you.",
+  basic:
+    "Your name, headline, summary, how people can reach you, and whether recruiters can find you.",
   experience: "Roles, companies, and what you accomplished in each job.",
   education: "Degrees, institutions, and relevant academic details.",
   skills: "Technologies and strengths grouped by category.",

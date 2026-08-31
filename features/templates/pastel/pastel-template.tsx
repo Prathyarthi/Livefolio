@@ -104,6 +104,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                 <article key={project.id} className={cn(PROJECT_CARD, "group flex flex-col rounded-[2.5rem] bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.03)] transition-all duration-500 hover:shadow-[0_20px_40px_rgba(255,179,186,0.2)]")}>
                   <TemplateProjectPreview templateId="pastel"
                     liveUrl={project.liveUrl ?? null}
+                    imageUrl={project.imageUrl ?? null}
                     projectId={project.id}
                     livePreviewProjectIds={livePreviewProjectIds}
                     alt={project.title}

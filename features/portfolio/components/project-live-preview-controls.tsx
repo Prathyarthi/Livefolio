@@ -55,6 +55,25 @@ export function ProjectLivePreviewControls({
     );
   }
 
+  if (!isPro) {
+    return (
+      <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 px-4 py-3">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+          Live preview on portfolio
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Live screenshots of your project URL are a Pro feature. Upload a
+          thumbnail above, or{" "}
+          <Link href="/dashboard/billing" className="underline">
+            upgrade to Pro
+          </Link>
+          .
+        </p>
+      </div>
+    );
+  }
+
   if (mode === "add") {
     const blocked = atLimit && !enableOnSave;
 
@@ -71,7 +90,7 @@ export function ProjectLivePreviewControls({
             </Label>
             <p className="text-sm text-muted-foreground">
               Shows a live screenshot of your project on your portfolio.{" "}
-              {enabledCount}/{maxAllowed} used{!isPro ? " (free limit)" : ""}.
+              {enabledCount}/{maxAllowed} used.
             </p>
           </div>
           <Switch
@@ -82,18 +101,15 @@ export function ProjectLivePreviewControls({
             className="shrink-0"
           />
         </div>
-        {blocked && (
+        {blocked ? (
           <p className="text-xs text-destructive">
-            You have used all {maxAllowed} free live preview slots.{" "}
-            <Link href="/dashboard/billing" className="underline">
-              Upgrade to Pro
-            </Link>{" "}
-            for unlimited slots.
+            You have used all {maxAllowed} live preview slots.
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Pro — {maxAllowed} slots
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
-          {isPro ? "Pro — unlimited slots" : `Free — ${maxAllowed} slots included`}
-        </p>
       </div>
     );
   }
@@ -138,20 +154,15 @@ export function ProjectLivePreviewControls({
           className="shrink-0"
         />
       </div>
-      {!editEnabled && atLimit && !savedEnabled && (
+      {!editEnabled && atLimit && !savedEnabled ? (
         <p className="text-xs text-destructive">
-          You have used all {maxAllowed} free live preview slots.{" "}
-          <Link href="/dashboard/billing" className="underline">
-            Upgrade to Pro
-          </Link>{" "}
-          for unlimited slots.
+          You have used all {maxAllowed} live preview slots.
+        </p>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Pro — saves when you click Save
         </p>
       )}
-      <p className="text-xs text-muted-foreground">
-        {isPro
-          ? "Pro — unlimited slots · saves when you click Save"
-          : `Free — ${maxAllowed} slots included · saves when you click Save`}
-      </p>
     </div>
   );
 }

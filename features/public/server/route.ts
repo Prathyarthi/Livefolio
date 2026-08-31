@@ -1,6 +1,6 @@
 import Elysia from "elysia";
 import { prisma } from "@/lib/prisma";
-import { canUseTemplate, resolveAccessForUser } from "@/lib/entitlements";
+import { canUseTemplate, isProSubscription, resolveAccessForUser } from "@/lib/entitlements";
 
 export const publicPortfolio = new Elysia({ prefix: "/public" })
 
@@ -32,8 +32,15 @@ export const publicPortfolio = new Elysia({ prefix: "/public" })
       return { error: "Portfolio is not published" };
     }
 
-    // Strip sensitive fields
-    const { userId, user, ...publicData } = portfolio;
+    // Strip sensitive fields (openToWork is recruiter-search eligibility only)
+    const {
+      userId,
+      user,
+      resumeUrl: _resumeUrl,
+      livePreviewProjectIds,
+      openToWork: _openToWork,
+      ...publicData
+    } = portfolio;
     const access = resolveAccessForUser(user);
     const templateId = canUseTemplate(access, publicData.templateId)
       ? publicData.templateId
@@ -42,6 +49,9 @@ export const publicPortfolio = new Elysia({ prefix: "/public" })
     return {
       ...publicData,
       templateId,
+      livePreviewProjectIds: isProSubscription(user.subscriptionStatus)
+        ? livePreviewProjectIds ?? []
+        : [],
     };
   })
 

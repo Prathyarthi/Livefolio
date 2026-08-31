@@ -85,6 +85,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           <div className="border-2 border-[#2B2B2B] bg-white p-1">
                             <TemplateProjectPreview templateId="parchment"
                               liveUrl={project.liveUrl ?? null}
+                              imageUrl={project.imageUrl ?? null}
                               projectId={project.id}
                               livePreviewProjectIds={livePreviewProjectIds}
                               alt={project.title}

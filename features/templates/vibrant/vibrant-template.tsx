@@ -106,6 +106,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                     <div className="relative">
                       <TemplateProjectPreview templateId="vibrant"
                         liveUrl={project.liveUrl ?? null}
+                        imageUrl={project.imageUrl ?? null}
                         projectId={project.id}
                         livePreviewProjectIds={livePreviewProjectIds}
                         alt={project.title}

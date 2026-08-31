@@ -103,6 +103,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
             >
               <TemplateProjectPreview templateId="creative"
                 liveUrl={project.liveUrl ?? null}
+                imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
                 alt={project.title}

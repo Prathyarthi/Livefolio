@@ -1,10 +1,11 @@
 import {
   BILLING_CURRENCY,
   BILLING_INTERVALS,
+  ORG_PRO_PRICING,
   PRO_PRICING,
   type BillingInterval,
 } from "@/lib/pricing";
-import { getRazorpayPlanId } from "@/lib/billing";
+import { getOrgRazorpayPlanId, getRazorpayPlanId } from "@/lib/billing";
 
 export type ProviderSubscriptionStatus =
   | "created"
@@ -92,7 +93,9 @@ export function isTerminalProviderStatus(status: ProviderSubscriptionStatus) {
 export function getIntervalForPlanId(planId: string): BillingInterval | null {
   return (
     BILLING_INTERVALS.find(
-      (interval) => getRazorpayPlanId(interval) === planId
+      (interval) =>
+        getRazorpayPlanId(interval) === planId ||
+        getOrgRazorpayPlanId(interval) === planId
     ) ?? null
   );
 }
@@ -111,6 +114,16 @@ export function getSubscriptionTotalCount(interval: BillingInterval) {
 
 export function getExpectedPlanDefinition(interval: BillingInterval) {
   const amount = PRO_PRICING[interval][BILLING_CURRENCY];
+  return {
+    amount: Math.round(amount * 100),
+    currency: BILLING_CURRENCY.toUpperCase(),
+    period: interval === "yearly" ? "yearly" : "monthly",
+    interval: interval === "quarterly" ? 3 : 1,
+  };
+}
+
+export function getExpectedOrgPlanDefinition(interval: BillingInterval) {
+  const amount = ORG_PRO_PRICING[interval][BILLING_CURRENCY];
   return {
     amount: Math.round(amount * 100),
     currency: BILLING_CURRENCY.toUpperCase(),

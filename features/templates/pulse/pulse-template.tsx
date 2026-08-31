@@ -629,6 +629,7 @@ function ProjectsShowcase({
                 <TemplateProjectPreview
                   templateId="pulse"
                   liveUrl={project.liveUrl}
+                  imageUrl={project.imageUrl}
                   projectId={project.id}
                   livePreviewProjectIds={livePreviewProjectIds}
                   alt={project.title}

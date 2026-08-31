@@ -16,11 +16,13 @@ import {
   LogOut,
   User,
   PanelLeft,
+  FileCheck2,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Logo, LogoMark, BetaBadge } from "@/components/logo";
+import { Logo, LogoMark } from "@/components/logo";
 import { siteConfig } from "@/lib/site";
 import { Footer } from "@/features/landing/components/footer";
 import {
@@ -45,6 +47,7 @@ const NAV = [
   { title: "Templates", href: "/dashboard/templates", icon: Palette },
   { title: "Import", href: "/dashboard/import", icon: Download },
   { title: "Preview", href: "/dashboard/preview", icon: Eye },
+  { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { title: "Billing", href: "/dashboard/billing", icon: CreditCard },
   { title: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -83,11 +86,8 @@ function AppSidebar() {
             aria-label={`${siteConfig.name} home`}
           >
             <LogoMark className="h-8 w-8 shrink-0 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8" />
-            <span className="flex min-w-0 items-center gap-2 group-data-[collapsible=icon]:hidden">
-              <span className="font-display text-lg font-bold text-brand-primary">
-                {siteConfig.name}
-              </span>
-              <BetaBadge />
+            <span className="font-display text-lg font-bold text-brand-primary group-data-[collapsible=icon]:hidden">
+              {siteConfig.name}
             </span>
           </Link>
         )}
@@ -130,6 +130,26 @@ function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border group-data-[collapsible=icon]:p-1">
+        <SidebarMenu className="mb-1 group-data-[collapsible=icon]:items-center">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              tooltip="Hiring workspace"
+              className="gap-3 text-base [&_svg]:size-5 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:[&_span]:hidden group-data-[collapsible=icon]:[&_svg]:size-5"
+            >
+              <Link
+                href="/recruiters"
+                onClick={() => {
+                  if (isMobile) setOpenMobile(false);
+                }}
+              >
+                <Building2 aria-hidden />
+                <span>Hiring</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <div className="flex items-center gap-2 rounded-md p-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-1.5 group-data-[collapsible=icon]:p-1">
           <Avatar className="h-8 w-8 shrink-0 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8">
             <AvatarImage src={user?.avatar} alt="" />
@@ -189,7 +209,7 @@ function DashboardHeader() {
   return (
     <header className="glass-nav sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4">
       {(isMobile || !isCollapsed) && <SidebarTrigger className="size-9" />}
-      <Logo href="/dashboard" className="md:hidden" showBeta />
+      <Logo href="/dashboard" className="md:hidden" />
       <div className="ml-auto flex items-center gap-1 md:hidden">
         <ThemeToggle className="size-9" />
       </div>
