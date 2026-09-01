@@ -2,6 +2,8 @@ export const UPLOAD_KINDS = [
   "resume",
   "project_thumb",
   "job_source",
+  "org_logo",
+  "org_banner",
 ] as const;
 
 export type UploadKind = (typeof UPLOAD_KINDS)[number];
@@ -9,20 +11,32 @@ export type UploadKind = (typeof UPLOAD_KINDS)[number];
 export const MAX_RESUME_BYTES = 10 * 1024 * 1024;
 export const MAX_JOB_SOURCE_BYTES = 10 * 1024 * 1024;
 export const MAX_PROJECT_THUMB_BYTES = 2 * 1024 * 1024;
+export const MAX_ORG_LOGO_BYTES = 2 * 1024 * 1024;
+export const MAX_ORG_BANNER_BYTES = 5 * 1024 * 1024;
 
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const IMAGE_KINDS = new Set<UploadKind>([
+  "project_thumb",
+  "org_logo",
+  "org_banner",
+]);
 
 export function isUploadKind(value: string): value is UploadKind {
   return (UPLOAD_KINDS as readonly string[]).includes(value);
 }
 
+export function isImageUploadKind(kind: UploadKind): boolean {
+  return IMAGE_KINDS.has(kind);
+}
+
 export function allowedContentTypes(kind: UploadKind): readonly string[] {
-  if (kind === "project_thumb") return ["image/jpeg", "image/png", "image/webp"];
+  if (isImageUploadKind(kind)) return ["image/jpeg", "image/png", "image/webp"];
   return ["application/pdf"];
 }
 
 export function maxBytesForKind(kind: UploadKind): number {
-  if (kind === "project_thumb") return MAX_PROJECT_THUMB_BYTES;
+  if (kind === "project_thumb" || kind === "org_logo") return MAX_PROJECT_THUMB_BYTES;
+  if (kind === "org_banner") return MAX_ORG_BANNER_BYTES;
   if (kind === "job_source") return MAX_JOB_SOURCE_BYTES;
   return MAX_RESUME_BYTES;
 }
@@ -102,6 +116,10 @@ export function objectKey(options: {
       throw new Error("userId and projectId are required for thumbnail keys");
     }
     return `users/${options.userId}/projects/${options.projectId}/${options.fileId}.${ext}`;
+  }
+  if (options.kind === "org_logo" || options.kind === "org_banner") {
+    if (!options.orgId) throw new Error("orgId is required for branding keys");
+    return `orgs/${options.orgId}/branding/${options.kind}/${options.fileId}.${ext}`;
   }
   if (!options.orgId || !options.jobId) {
     throw new Error("orgId and jobId are required for job source keys");

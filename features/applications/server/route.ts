@@ -53,6 +53,7 @@ const candidateApplicationInclude = {
           name: true,
           slug: true,
           logoUrl: true,
+          bannerUrl: true,
           brandColor: true,
         },
       },
@@ -225,6 +226,7 @@ export const applications = new Elysia({ prefix: "/applications" })
             name: true,
             slug: true,
             logoUrl: true,
+            bannerUrl: true,
           },
         },
       },
@@ -279,7 +281,13 @@ export const applications = new Elysia({ prefix: "/applications" })
           status: true,
           applicationDeadline: true,
           organization: {
-            select: { id: true, name: true, slug: true, logoUrl: true },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logoUrl: true,
+              bannerUrl: true,
+            },
           },
         },
       });

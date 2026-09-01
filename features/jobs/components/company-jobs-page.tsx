@@ -12,7 +12,6 @@ import {
   JOB_STATUS_LABELS,
   WORKPLACE_TYPE_LABELS,
   formatJobMeta,
-  formatSalaryRange,
 } from "@/features/jobs/constants/labels";
 import { getAppOrigin } from "@/lib/domain";
 
@@ -25,25 +24,18 @@ const FILTERS = [
 ] as const;
 
 export default function CompanyJobsPage() {
-  const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
+  const params = useParams<{ orgSlug: string }>();
   const orgSlug = params.orgSlug;
-  const workspaceSlug = params.workspaceSlug;
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
   const { data: jobs, isLoading } = useOrgJobs(
     orgSlug,
-    {
-      status: filter === "all" ? undefined : filter,
-      workspaceSlug,
-    },
+    filter === "all" ? undefined : { status: filter },
   );
 
   const origin = useMemo(() => getAppOrigin(), []);
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
-      <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
-      </Button>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <p className="eyebrow uppercase">Jobs</p>
@@ -54,7 +46,7 @@ export default function CompanyJobsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/new`}>
+          <Link href={`/company/${orgSlug}/jobs/new`}>
             <Plus className="h-4 w-4" />
             Create job
           </Link>
@@ -77,14 +69,14 @@ export default function CompanyJobsPage() {
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading jobs…</p>
       ) : !jobs || jobs.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-12 text-center shadow-[var(--shadow-card)] md:p-8">
+        <div className="rounded-[var(--radius-lg)] border border-dashed border-border-default px-6 py-12 text-center">
           <h2 className="text-h3 text-text-primary">No jobs in this view</h2>
           <p className="mt-1 text-body-sm text-text-secondary">
             Create a job draft, then publish when you&apos;re ready.
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
           {jobs.map((job) => (
             <li
               key={job.id}
@@ -93,7 +85,7 @@ export default function CompanyJobsPage() {
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
-                    href={`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}`}
+                    href={`/company/${orgSlug}/jobs/${job.id}`}
                     className="truncate font-medium text-text-primary hover:underline"
                   >
                     {job.title}
@@ -115,18 +107,13 @@ export default function CompanyJobsPage() {
                     job.workplaceType
                       ? WORKPLACE_TYPE_LABELS[job.workplaceType]
                       : null,
-                    formatSalaryRange({
-                      min: job.salaryMin,
-                      max: job.salaryMax,
-                      currency: job.salaryCurrency,
-                    }),
                     `${job._count?.applications ?? 0} applicants`,
                   ])}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" asChild>
-                  <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}/applicants`}>
+                  <Link href={`/company/${orgSlug}/jobs/${job.id}/applicants`}>
                     Applicants ({job._count?.applications ?? 0})
                   </Link>
                 </Button>
@@ -139,7 +126,7 @@ export default function CompanyJobsPage() {
                   </Button>
                 )}
                 <Button variant="outline" size="sm" asChild>
-                  <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}`}>
+                  <Link href={`/company/${orgSlug}/jobs/${job.id}`}>
                     Manage
                   </Link>
                 </Button>

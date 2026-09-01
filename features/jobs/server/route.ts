@@ -63,6 +63,27 @@ const EMPLOYMENT_TYPES = [
   "internship",
 ] as const;
 const WORKPLACE_TYPES = ["remote", "hybrid", "on_site"] as const;
+const SENIORITY_LEVELS = [
+  "intern",
+  "entry",
+  "junior",
+  "mid",
+  "senior",
+  "staff",
+  "lead",
+  "principal",
+  "director",
+  "executive",
+] as const;
+const SALARY_PERIODS = ["year", "month", "hour"] as const;
+const EDUCATION_LEVELS = [
+  "none",
+  "high_school",
+  "associate",
+  "bachelor",
+  "master",
+  "phd",
+] as const;
 const REQUIREMENT_TYPES = ["required", "preferred"] as const;
 const REQUIREMENT_CATEGORIES = [
   "skill",
@@ -78,6 +99,7 @@ const jobPublicInclude = {
       name: true,
       slug: true,
       logoUrl: true,
+      bannerUrl: true,
       brandColor: true,
       description: true,
       websiteUrl: true,
@@ -362,6 +384,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
           responsibilities: optionalTrim(ctx.body.responsibilities),
           qualifications: optionalTrim(ctx.body.qualifications),
           benefits: optionalTrim(ctx.body.benefits),
+          customFields: ctx.body.customFields ?? [],
           applicationDeadline: toOptionalDate(ctx.body.applicationDeadline),
           status: resolvedStatus,
           publishedAt: resolvedStatus === "published" ? new Date() : null,
@@ -382,22 +405,23 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         workspaceSlug: t.String({ minLength: 2, maxLength: 60 }),
         title: t.String({ minLength: 1, maxLength: 200 }),
         description: t.String({ minLength: 1, maxLength: 50000 }),
-        department: t.Optional(t.String({ maxLength: 120 })),
+        department: t.Optional(t.Nullable(t.String({ maxLength: 120 }))),
         employmentType: t.Optional(
-          t.Union(EMPLOYMENT_TYPES.map((v) => t.Literal(v))),
+          t.Nullable(t.Union(EMPLOYMENT_TYPES.map((v) => t.Literal(v)))),
         ),
-        location: t.Optional(t.String({ maxLength: 200 })),
+        location: t.Optional(t.Nullable(t.String({ maxLength: 200 }))),
         workplaceType: t.Optional(
-          t.Union(WORKPLACE_TYPES.map((v) => t.Literal(v))),
+          t.Nullable(t.Union(WORKPLACE_TYPES.map((v) => t.Literal(v)))),
         ),
         experienceMin: t.Optional(t.Nullable(t.Number())),
         experienceMax: t.Optional(t.Nullable(t.Number())),
         salaryMin: t.Optional(t.Nullable(t.Number())),
         salaryMax: t.Optional(t.Nullable(t.Number())),
         salaryCurrency: t.Optional(t.String({ maxLength: 8 })),
-        responsibilities: t.Optional(t.String({ maxLength: 20000 })),
-        qualifications: t.Optional(t.String({ maxLength: 20000 })),
-        benefits: t.Optional(t.String({ maxLength: 10000 })),
+        responsibilities: t.Optional(t.Nullable(t.String({ maxLength: 20000 }))),
+        qualifications: t.Optional(t.Nullable(t.String({ maxLength: 20000 }))),
+        benefits: t.Optional(t.Nullable(t.String({ maxLength: 10000 }))),
+        customFields: t.Optional(t.Any()),
         applicationDeadline: t.Optional(t.Nullable(t.String())),
         status: t.Optional(t.Union(JOB_STATUSES.map((v) => t.Literal(v)))),
         requirements: t.Optional(
@@ -529,6 +553,9 @@ export const jobs = new Elysia({ prefix: "/jobs" })
           ...(ctx.body.benefits !== undefined
             ? { benefits: optionalTrim(ctx.body.benefits) }
             : {}),
+          ...(ctx.body.customFields !== undefined
+            ? { customFields: ctx.body.customFields }
+            : {}),
           ...(ctx.body.applicationDeadline !== undefined
             ? {
                 applicationDeadline: toOptionalDate(
@@ -583,6 +610,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         ),
         qualifications: t.Optional(t.Nullable(t.String({ maxLength: 20000 }))),
         benefits: t.Optional(t.Nullable(t.String({ maxLength: 10000 }))),
+        customFields: t.Optional(t.Any()),
         applicationDeadline: t.Optional(t.Nullable(t.String())),
         status: t.Optional(t.Union(JOB_STATUSES.map((v) => t.Literal(v)))),
         requirements: t.Optional(

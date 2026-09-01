@@ -14,6 +14,7 @@ import {
   useUpdateOrganization,
 } from "@/features/organization/api/use-organization";
 import { CompanyTeamSection } from "@/features/organization/components/company-team-section";
+import { OrgBrandingImageField } from "@/features/organization/components/org-branding-field";
 import { useOrgJobs } from "@/features/jobs/api/use-jobs";
 
 export default function CompanySettingsPage() {
@@ -36,6 +37,7 @@ export default function CompanySettingsPage() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [location, setLocation] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
   const [brandColor, setBrandColor] = useState("");
 
   useEffect(() => {
@@ -45,6 +47,7 @@ export default function CompanySettingsPage() {
     setWebsiteUrl(org.websiteUrl ?? "");
     setLocation(org.location ?? "");
     setLogoUrl(org.logoUrl ?? "");
+    setBannerUrl(org.bannerUrl ?? "");
     setBrandColor(org.brandColor ?? "");
   }, [org]);
 
@@ -62,6 +65,7 @@ export default function CompanySettingsPage() {
         websiteUrl: websiteUrl.trim() || null,
         location: location.trim() || null,
         logoUrl: logoUrl.trim() || null,
+        bannerUrl: bannerUrl.trim() || null,
         brandColor: brandColor.trim() || null,
       });
       toast.success("Company settings saved");
@@ -114,68 +118,85 @@ export default function CompanySettingsPage() {
       ) : (
         <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
           <div className="space-y-5">
-            <div className="space-y-2">
-            <Label htmlFor="name">Company name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">About the company</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={5}
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                value={websiteUrl}
-                onChange={(e) => setWebsiteUrl(e.target.value)}
-                placeholder="https://"
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-text-primary">
+                  Banner and logo
+                </p>
+                <p className="text-xs text-text-muted">
+                  Uploads save immediately. Placeholders stay until you add
+                  assets.
+                </p>
+              </div>
+              <OrgBrandingImageField
+                orgSlug={orgSlug}
+                orgId={org.id}
+                kind="org_banner"
+                imageUrl={bannerUrl}
+                onImageUrlChange={setBannerUrl}
+              />
+              <OrgBrandingImageField
+                orgSlug={orgSlug}
+                orgId={org.id}
+                kind="org_logo"
+                imageUrl={logoUrl}
+                onImageUrlChange={setLogoUrl}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="name">Company name</Label>
               <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="logo">Logo URL</Label>
-              <Input
-                id="logo"
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
+              <Label htmlFor="description">About the company</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="brand">Brand color</Label>
-              <div className="flex items-center gap-2">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="website">Website</Label>
                 <Input
-                  id="brand"
-                  value={brandColor}
-                  onChange={(e) => setBrandColor(e.target.value)}
-                  placeholder="#1a1a1a"
-                />
-                <span
-                  aria-hidden
-                  className="h-10 w-10 shrink-0 rounded-[var(--radius-md)] border border-border-default"
-                  style={{
-                    background: brandColor.trim() || "var(--brand-primary)",
-                  }}
+                  id="website"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="https://"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="location">HQ / location</Label>
+                <Input
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="brand">Brand color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="brand"
+                    value={brandColor}
+                    onChange={(e) => setBrandColor(e.target.value)}
+                    placeholder="#1a1a1a"
+                  />
+                  <span
+                    aria-hidden
+                    className="h-10 w-10 shrink-0 rounded-[var(--radius-md)] border border-border-default"
+                    style={{
+                      background: brandColor.trim() || "var(--brand-primary)",
+                    }}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 border-t border-border-default pt-6">
             <Button onClick={handleSave} disabled={updateOrg.isPending}>

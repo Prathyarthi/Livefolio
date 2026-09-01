@@ -37,6 +37,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useOrganization } from "@/features/organization/api/use-organization";
+import { OrgLogo } from "@/features/organization/components/org-logo";
 
 function CompanySidebar({
   orgSlug,
@@ -80,10 +81,16 @@ function CompanySidebar({
             icon: Users,
             exact: false,
           },
+          {
+            title: "Workspace Settings",
+            href: `${workspaceBase}/settings`,
+            icon: Settings,
+            exact: false,
+          },
         ]
       : []),
     {
-      title: "Settings",
+      title: "Org Settings",
       href: `/company/${orgSlug}/settings`,
       icon: Settings,
       exact: false,
@@ -125,7 +132,17 @@ function CompanySidebar({
               }}
               className="flex min-w-0 items-center gap-2 overflow-hidden"
             >
-              <LogoMark className="h-8 w-8 shrink-0" />
+              {org?.logoUrl ? (
+                <OrgLogo
+                  name={org.name}
+                  logoUrl={org.logoUrl}
+                  brandColor={org.brandColor}
+                  size="sm"
+                  className="ring-0"
+                />
+              ) : (
+                <LogoMark className="h-8 w-8 shrink-0" />
+              )}
               <span className="min-w-0 group-data-[collapsible=icon]:hidden">
                 <span className="block truncate font-display text-sm font-bold text-brand-primary">
                   {org?.name ?? "Company"}

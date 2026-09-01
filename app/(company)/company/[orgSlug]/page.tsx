@@ -13,6 +13,7 @@ import {
   useCreateWorkspace,
   useOrganization,
 } from "@/features/organization/api/use-organization";
+import { OrgLogo, OrgBanner } from "@/features/organization/components/org-logo";
 import { sanitizeHiringSlug } from "@/features/jobs/lib/slug";
 
 export default function OrganizationHomePage() {
@@ -87,22 +88,35 @@ export default function OrganizationHomePage() {
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href="/company">← Back to companies</Link>
       </Button>
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1">
-          <p className="eyebrow uppercase">Organization</p>
-          <h1 className="text-h2 text-text-primary">{org.name}</h1>
-          <p className="max-w-xl text-body-sm text-text-secondary">
-            {org.description ||
-              "Workspaces keep hiring for different roles separate. Billing stays on this organization."}
-          </p>
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+        <div className="relative h-36 md:h-44">
+          <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
         </div>
-        {org.permissions.manageOrganization ? (
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus className="h-4 w-4" />
-            New workspace
-          </Button>
-        ) : null}
-      </header>
+        <header className="flex flex-wrap items-start justify-between gap-4 px-5 py-5 md:px-6">
+          <div className="-mt-12 flex min-w-0 items-end gap-4">
+            <OrgLogo
+              name={org.name}
+              logoUrl={org.logoUrl}
+              brandColor={org.brandColor}
+              size="lg"
+            />
+            <div className="min-w-0 pb-1">
+              <p className="eyebrow uppercase">Organization</p>
+              <h1 className="text-h2 text-text-primary">{org.name}</h1>
+              <p className="max-w-xl text-body-sm text-text-secondary">
+                {org.description ||
+                  "Workspaces keep hiring for different roles separate. Billing stays on this organization."}
+              </p>
+            </div>
+          </div>
+          {org.permissions.manageOrganization ? (
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="h-4 w-4" />
+              New workspace
+            </Button>
+          ) : null}
+        </header>
+      </div>
 
       {workspaces.length === 0 ? (
         <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">

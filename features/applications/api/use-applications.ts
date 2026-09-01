@@ -48,6 +48,7 @@ export type CandidateApplication = {
       name: string;
       slug: string;
       logoUrl: string | null;
+      bannerUrl?: string | null;
       brandColor: string | null;
     };
   };
@@ -69,6 +70,7 @@ export type ApplicationPreview = {
       name: string;
       slug: string;
       logoUrl: string | null;
+      bannerUrl?: string | null;
     };
   };
   alreadyApplied: boolean;

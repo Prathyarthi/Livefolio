@@ -24,6 +24,7 @@ import {
   resolveOrgAccess,
 } from "@/lib/org-entitlements";
 import { normalizeOAuthEmail } from "@/lib/oauth-users";
+import { deleteOrgBrandFiles } from "@/features/uploads/server/stored-files";
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -119,6 +120,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
             name: true,
             slug: true,
             logoUrl: true,
+            bannerUrl: true,
             brandColor: true,
             description: true,
             _count: { select: { jobs: true, members: true, workspaces: true } },
@@ -320,6 +322,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
         name: ws.name,
         slug: ws.slug,
         description: ws.description,
+        customJobFields: ws.customJobFields,
       })),
     };
   })
@@ -349,6 +352,19 @@ export const organization = new Elysia({ prefix: "/organizations" })
         return { error: "Forbidden" };
       }
 
+      if (
+        ctx.body.logoUrl !== undefined &&
+        optionalTrim(ctx.body.logoUrl) == null
+      ) {
+        await deleteOrgBrandFiles(org.id, "org_logo");
+      }
+      if (
+        ctx.body.bannerUrl !== undefined &&
+        optionalTrim(ctx.body.bannerUrl) == null
+      ) {
+        await deleteOrgBrandFiles(org.id, "org_banner");
+      }
+
       const updated = await prisma.organization.update({
         where: { id: org.id },
         data: {
@@ -367,6 +383,9 @@ export const organization = new Elysia({ prefix: "/organizations" })
           ...(ctx.body.logoUrl !== undefined
             ? { logoUrl: optionalTrim(ctx.body.logoUrl) }
             : {}),
+          ...(ctx.body.bannerUrl !== undefined
+            ? { bannerUrl: optionalTrim(ctx.body.bannerUrl) }
+            : {}),
           ...(ctx.body.brandColor !== undefined
             ? { brandColor: optionalTrim(ctx.body.brandColor) }
             : {}),
@@ -382,6 +401,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
         websiteUrl: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
         location: t.Optional(t.Nullable(t.String({ maxLength: 200 }))),
         logoUrl: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
+        bannerUrl: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
         brandColor: t.Optional(t.Nullable(t.String({ maxLength: 32 }))),
       }),
     },
@@ -438,6 +458,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
       name: access.workspace.name,
       slug: access.workspace.slug,
       description: access.workspace.description,
+      customJobFields: access.workspace.customJobFields,
       organization: org,
       role: access.role,
       permissions: {
@@ -627,6 +648,9 @@ export const organization = new Elysia({ prefix: "/organizations" })
             ...(nextSlug && nextSlug !== workspace.slug
               ? { slug: nextSlug }
               : {}),
+            ...(ctx.body.customJobFields !== undefined
+              ? { customJobFields: ctx.body.customJobFields }
+              : {}),
           },
         });
 
@@ -644,6 +668,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
         name: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
         slug: t.Optional(t.String({ maxLength: 60 })),
         description: t.Optional(t.Nullable(t.String({ maxLength: 5000 }))),
+        customJobFields: t.Optional(t.Any()),
       }),
     },
   )
