@@ -46,7 +46,7 @@ import {
   validateField,
   validationMessage,
 } from "@/features/portfolio/lib/client-validation";
-
+import { DescriptionBlock } from "@/features/templates/shared";
 interface ExperienceEntry {
   id?: string;
   company: string;
@@ -586,9 +586,12 @@ export function ExperienceForm() {
                     {exp.description && (
                       <>
                         <Separator className="my-3" />
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                          {exp.description}
-                        </p>
+                        <DescriptionBlock
+                          text={exp.description}
+                          paragraphClassName="text-sm text-muted-foreground"
+                          listClassName="list-disc space-y-1 pl-4 text-sm text-muted-foreground"
+                          headingClassName="text-sm font-semibold text-foreground"
+                        />
                       </>
                     )}
                   </div>

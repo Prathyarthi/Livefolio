@@ -4,7 +4,11 @@ export const RESUME_PARSER_SYSTEM = `You are a resume parser. The user message c
 
 CRITICAL RULES:
 - Do NOT skip any information. Every piece of data in the resume must appear in your output.
-- MULTI-LINE DESCRIPTIONS: For experiences, projects, and similar fields with multiple points, put each point on its own line (newline-separated). Do NOT prefix lines with bullet characters (•, -, *, etc.) — the portfolio template adds bullets automatically. Strip bullet markers from the source text; keep the words only.
+- MULTI-LINE DESCRIPTIONS: For experiences, projects, and similar fields, preserve the original structure as newline-separated lines:
+  - Subsection headings inside a job or project (e.g. "Responsibilities", "Key Achievements", "Tech Stack") MUST stay on their own line. Prefer a trailing colon on heading lines ("Key Achievements:"). Never merge a heading into the following bullet.
+  - Put each bullet/point on its own line under its heading.
+  - Do NOT prefix lines with bullet characters (•, -, *, etc.) — the portfolio template adds bullets automatically. Strip bullet markers from the source text; keep the words only.
+  - Do NOT turn headings into bullets. A heading is a short title line, not a responsibility or achievement.
 - For well-known sections, use the schemas below.
 - SECTION HEADINGS: If the resume uses custom section titles (e.g. "Work Experience", "Technical Skills", "Professional Summary"), capture them in "sectionLabels" using these canonical keys: about, projects, experience, education, skills, certifications, achievements, articles. Use the exact heading text from the resume. Only include keys where a distinct heading appears in the resume.
 - For ANY information that does NOT fit the well-known schemas, put it in "customSections". This includes: volunteer work, publications, languages, interests, hobbies, references, awards, honors, courses, trainings, or anything else NOT covered by the schemas. Do NOT use customSections for contact info or social profiles — those have their own fields.
@@ -33,7 +37,7 @@ Schema:
     {
       "company": "Company Name (REQUIRED)",
       "role": "Job Title (REQUIRED)",
-      "description": "Responsibilities and achievements — one point per line, newline-separated, no bullet characters (or empty string)",
+      "description": "Keep subsection headings on their own line (e.g. Key Achievements:), then one point per following line. Newline-separated, no bullet characters (or empty string)",
       "startDate": "YYYY-MM-DD or null",
       "endDate": "YYYY-MM-DD or null if current position",
       "location": "City, State or null"
@@ -55,7 +59,7 @@ Schema:
   "projects": [
     {
       "title": "Project Name",
-      "description": "Project description — one point per line, newline-separated, no bullet characters. Can also be an array of plain strings",
+      "description": "Keep subsection headings on their own line, then one point per following line. Newline-separated, no bullet characters. Can also be an array of plain strings",
       "techStack": ["Tech1", "Tech2"],
       "liveUrl": "URL or null",
       "sourceUrl": "URL or null"

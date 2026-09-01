@@ -1,5 +1,8 @@
 import { cn } from "@/lib/utils";
-import { stripBulletPrefix } from "@/lib/text";
+import {
+  groupDescriptionParts,
+  parseDescriptionParts,
+} from "@/lib/text";
 import ExpandableText from "@/components/expandable-text";
 import { PlatformIcon } from "@/components/icons";
 import type {
@@ -172,10 +175,7 @@ export function TemplateNavbar({
 }
 
 export function splitDescription(text: string): string[] {
-  return text
-    .split(/\n+/)
-    .map(stripBulletPrefix)
-    .filter(Boolean);
+  return parseDescriptionParts(text).map((part) => part.text);
 }
 
 function stripLineClamp(className?: string) {
@@ -187,34 +187,71 @@ export function DescriptionBlock({
   text,
   paragraphClassName,
   listClassName,
+  headingClassName,
 }: {
   text: string;
   paragraphClassName?: string;
   listClassName?: string;
+  headingClassName?: string;
 }) {
-  const lines = splitDescription(text);
+  const parts = parseDescriptionParts(text);
+  const groups = groupDescriptionParts(parts);
+  const hasHeadings = groups.some((group) => group.type === "heading");
+  const resolvedHeadingClassName = cn(
+    stripLineClamp(headingClassName ?? paragraphClassName),
+    !headingClassName && "mt-3 first:mt-0 font-semibold tracking-tight",
+  );
+  const resolvedListClassName = cn(
+    "list-disc pl-5",
+    stripLineClamp(listClassName),
+  );
 
-  if (lines.length <= 1) {
+  if (parts.length === 0) return null;
+
+  if (parts.length === 1 && parts[0].type === "item") {
     return (
       <ExpandableText
         as="p"
         className={stripLineClamp(paragraphClassName)}
         initialLines={3}
       >
-        {text}
+        {parts[0].text}
+      </ExpandableText>
+    );
+  }
+
+  if (!hasHeadings) {
+    const items = groups.flatMap((group) =>
+      group.type === "list" ? group.items : [],
+    );
+    return (
+      <ExpandableText
+        as="ul"
+        className={resolvedListClassName}
+        initialLines={3}
+      >
+        {items.map((line, index) => (
+          <li key={`${index}-${line}`}>{line}</li>
+        ))}
       </ExpandableText>
     );
   }
 
   return (
-    <ExpandableText
-      as="ul"
-      className={stripLineClamp(listClassName)}
-      initialLines={3}
-    >
-      {lines.map((line, index) => (
-        <li key={`${index}-${line}`}>{line}</li>
-      ))}
+    <ExpandableText as="div" className="space-y-2" initialLines={6}>
+      {groups.map((group, index) =>
+        group.type === "heading" ? (
+          <p key={`heading-${index}-${group.text}`} className={resolvedHeadingClassName}>
+            {group.text}
+          </p>
+        ) : (
+          <ul key={`list-${index}`} className={resolvedListClassName}>
+            {group.items.map((line, itemIndex) => (
+              <li key={`${itemIndex}-${line}`}>{line}</li>
+            ))}
+          </ul>
+        ),
+      )}
     </ExpandableText>
   );
 }

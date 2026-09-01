@@ -45,6 +45,7 @@ import {
   getSectionLabels,
 } from "@/features/templates/shared";
 import { CollapsibleList } from "@/features/templates/collapsible-list";
+import { parseDescriptionParts } from "@/lib/text";
 import { getTemplateSectionLayout } from "@/features/templates/section-layouts";
 import {
   renderSections,
@@ -367,9 +368,9 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                   buttonClassName="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-mono text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
                 >
                   {orderedExperiences.map((exp) => {
-                    const bulletPoints = (exp.description ?? "")
-                      .split("\n")
-                      .filter((p) => p.trim().length > 0);
+                    const descriptionParts = parseDescriptionParts(
+                      exp.description ?? "",
+                    );
                     const duration = getDuration(exp.startDate, exp.endDate);
                     return (
                       <div key={exp.id} className="relative group" id={`experience-card-${exp.id}`}>
@@ -422,18 +423,27 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                           )}
 
                           {/* Decoded Bullet Points */}
-                          {bulletPoints.length > 0 && (
+                          {descriptionParts.length > 0 && (
                             <CollapsibleList
                               initial={3}
                               wrapperClassName="space-y-3 pt-1"
                               buttonClassName="mt-1 text-xs font-mono text-slate-400 hover:text-white transition-colors"
                             >
-                              {bulletPoints.map((point, pIdx) => (
-                                <div key={pIdx} className="flex gap-3 text-sm text-slate-400 leading-relaxed">
-                                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-700 group-hover:bg-slate-400 transition-colors" />
-                                  <span>{point}</span>
-                                </div>
-                              ))}
+                              {descriptionParts.map((part, pIdx) =>
+                                part.type === "heading" ? (
+                                  <p
+                                    key={pIdx}
+                                    className="pt-2 first:pt-0 font-display text-sm font-semibold tracking-tight text-slate-200"
+                                  >
+                                    {part.text}
+                                  </p>
+                                ) : (
+                                  <div key={pIdx} className="flex gap-3 text-sm text-slate-400 leading-relaxed">
+                                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-700 group-hover:bg-slate-400 transition-colors" />
+                                    <span>{part.text}</span>
+                                  </div>
+                                ),
+                              )}
                             </CollapsibleList>
                           )}
                         </div>
