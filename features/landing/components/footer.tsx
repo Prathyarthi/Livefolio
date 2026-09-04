@@ -9,7 +9,8 @@ const NAV = {
     { label: "How it works", href: "/#features" },
     { label: "Examples", href: "/#showcase" },
     { label: "Pricing", href: "/#pricing" },
-    { label: "Hiring", href: "/recruiters" },
+    // Hiring entry point hidden until the recruiter product is rolled out.
+    // { label: "Hiring", href: "/recruiters" },
     { label: "FAQ", href: "/#faq" },
   ],
   Account: [

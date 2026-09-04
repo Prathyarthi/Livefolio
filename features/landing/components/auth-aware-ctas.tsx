@@ -60,9 +60,11 @@ export function AuthAwareCtas({
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </Button>
+        {/* Hiring entry point hidden until the recruiter product is rolled out.
         <Button asChild variant="outline" size={size}>
           <Link href="/recruiters">Hiring</Link>
         </Button>
+        */}
       </div>
     );
   }
