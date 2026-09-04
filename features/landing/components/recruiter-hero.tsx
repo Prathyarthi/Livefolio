@@ -3,7 +3,7 @@ import { AuthAwareCtas } from "@/features/landing/components/auth-aware-ctas";
 
 export function RecruiterHero() {
   return (
-    <section className="relative overflow-hidden px-6 pt-[var(--space-9)] pb-[var(--space-10)]">
+    <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden px-6 py-[var(--space-9)]">
       <div className="hero-blob" aria-hidden />
 
       <div className="relative mx-auto max-w-[1200px]">

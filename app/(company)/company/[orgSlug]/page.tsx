@@ -89,17 +89,25 @@ export default function OrganizationHomePage() {
         <Link href="/company">← Back to companies</Link>
       </Button>
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
-        <div className="relative h-36 md:h-44">
-          <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
-        </div>
+        {org.bannerUrl ? (
+          <div className="relative h-36 md:h-44">
+            <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
+          </div>
+        ) : null}
         <header className="flex flex-wrap items-start justify-between gap-4 px-5 py-5 md:px-6">
-          <div className="-mt-12 flex min-w-0 items-end gap-4">
-            <OrgLogo
-              name={org.name}
-              logoUrl={org.logoUrl}
-              brandColor={org.brandColor}
-              size="lg"
-            />
+          <div
+            className={`flex min-w-0 items-end gap-4 ${
+              org.bannerUrl && org.logoUrl ? "-mt-12" : ""
+            }`}
+          >
+            {org.logoUrl ? (
+              <OrgLogo
+                name={org.name}
+                logoUrl={org.logoUrl}
+                brandColor={org.brandColor}
+                size="lg"
+              />
+            ) : null}
             <div className="min-w-0 pb-1">
               <p className="eyebrow uppercase">Organization</p>
               <h1 className="text-h2 text-text-primary">{org.name}</h1>

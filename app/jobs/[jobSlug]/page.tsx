@@ -69,22 +69,30 @@ export default function PublicJobPage() {
         </div>
       </header>
 
-      <div className="relative h-44 overflow-hidden md:h-64">
-        <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/20 to-transparent" />
-      </div>
+      {org.bannerUrl ? (
+        <div className="relative h-44 overflow-hidden md:h-64">
+          <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/20 to-transparent" />
+        </div>
+      ) : null}
 
       <main className="mx-auto w-full max-w-5xl px-6 pb-16">
-        <div className="-mt-10 flex flex-col gap-10 md:-mt-12 lg:flex-row lg:items-start">
+        <div
+          className={`flex flex-col gap-10 lg:flex-row lg:items-start ${
+            org.bannerUrl ? "-mt-10 md:-mt-12" : "pt-10 md:pt-12"
+          }`}
+        >
           <div className="min-w-0 flex-1 space-y-8">
             <section className="space-y-5">
               <div className="flex flex-wrap items-end gap-4">
-                <OrgLogo
-                  name={org.name}
-                  logoUrl={org.logoUrl}
-                  brandColor={org.brandColor}
-                  size="lg"
-                />
+                {org.logoUrl ? (
+                  <OrgLogo
+                    name={org.name}
+                    logoUrl={org.logoUrl}
+                    brandColor={org.brandColor}
+                    size="lg"
+                  />
+                ) : null}
                 <div className="min-w-0 pb-1">
                   <p className="font-medium text-text-primary">{org.name}</p>
                   {org.location ? (

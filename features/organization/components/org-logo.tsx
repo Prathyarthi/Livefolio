@@ -1,9 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export function OrgLogo({
-  name,
   logoUrl,
-  brandColor,
   size = "md",
   className,
 }: {
@@ -31,31 +29,17 @@ export function OrgLogo({
     );
   }
 
-  return (
-    <div
-      className={cn(
-        dim,
-        "flex items-center justify-center rounded-[var(--radius-md)] font-semibold text-white ring-2 ring-surface-raised",
-        className,
-      )}
-      style={{ background: brandColor || "var(--brand-primary)" }}
-      aria-hidden
-    >
-      {name.slice(0, 1).toUpperCase()}
-    </div>
-  );
+  return null;
 }
 
 export function OrgBanner({
   bannerUrl,
-  brandColor,
   className,
 }: {
   bannerUrl?: string | null;
   brandColor?: string | null;
   className?: string;
 }) {
-  const brand = brandColor || "var(--brand-primary)";
   if (bannerUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -66,12 +50,5 @@ export function OrgBanner({
       />
     );
   }
-  return (
-    <div
-      className={cn("h-full w-full", className)}
-      style={{
-        background: `linear-gradient(135deg, ${brand} 0%, color-mix(in srgb, ${brand} 55%, #111827) 100%)`,
-      }}
-    />
-  );
+  return null;
 }
