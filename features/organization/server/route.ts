@@ -205,31 +205,34 @@ export const organization = new Elysia({ prefix: "/organizations" })
       }
 
       try {
-        const org = await prisma.organization.create({
-          data: {
-            name,
-            slug: requestedSlug,
-            description: optionalTrim(ctx.body.description),
-            websiteUrl: optionalTrim(ctx.body.websiteUrl),
-            location: optionalTrim(ctx.body.location),
-            logoUrl: optionalTrim(ctx.body.logoUrl),
-            brandColor: optionalTrim(ctx.body.brandColor),
-            members: {
-              create: {
-                userId: session.userId,
-                role: "owner",
-              },
+        const organizationId = await prisma.$transaction(async (tx) => {
+          const created = await tx.organization.create({
+            data: {
+              name,
+              slug: requestedSlug,
+              description: optionalTrim(ctx.body.description),
+              websiteUrl: optionalTrim(ctx.body.websiteUrl),
+              location: optionalTrim(ctx.body.location),
+              logoUrl: optionalTrim(ctx.body.logoUrl),
+              brandColor: optionalTrim(ctx.body.brandColor),
             },
-            workspaces: {
-              create: {
-                name: "Hiring",
-                slug: "general",
-                members: {
-                  create: { userId: session.userId },
-                },
-              },
+            select: { id: true },
+          });
+
+          await tx.organizationMember.create({
+            data: {
+              organizationId: created.id,
+              userId: session.userId,
+              role: "owner",
             },
-          },
+          });
+
+          return created.id;
+        });
+
+        // Relation reads run through the pool after the transaction is released.
+        const org = await prisma.organization.findUniqueOrThrow({
+          where: { id: organizationId },
           include: {
             _count: { select: { jobs: true, members: true, workspaces: true } },
             workspaces: {
