@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePublicJob } from "@/features/jobs/api/use-jobs";
 import {
-  EMPLOYMENT_TYPE_LABELS,
-  WORKPLACE_TYPE_LABELS,
-  formatJobMeta,
-} from "@/features/jobs/constants/labels";
+  JobHighlights,
+  JobPerkPills,
+} from "@/features/jobs/components/job-highlights";
+import { splitRichLines } from "@/features/jobs/constants/labels";
+import { OrgBanner, OrgLogo } from "@/features/organization/components/org-logo";
 import { LogoMark } from "@/components/logo";
 import { siteConfig } from "@/lib/site";
 
@@ -43,7 +45,6 @@ export default function PublicJobPage() {
   }
 
   const org = job.organization;
-  const brand = org.brandColor || undefined;
   const required = job.requirements.filter((r) => r.type === "required");
   const preferred = job.requirements.filter((r) => r.type === "preferred");
   const applyHref =
@@ -54,8 +55,8 @@ export default function PublicJobPage() {
 
   return (
     <div className="min-h-screen bg-surface-base">
-      <header className="border-b border-border-default bg-surface-raised">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-6 py-4">
+      <header className="sticky top-0 z-20 border-b border-border-default bg-surface-raised/90 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
           <Link href="/" className="flex items-center gap-2">
             <LogoMark className="h-7 w-7" />
             <span className="font-display text-sm font-bold text-brand-primary">
@@ -68,146 +69,154 @@ export default function PublicJobPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl space-y-10 px-6 py-10 md:py-14">
-        <section className="space-y-5">
-          <div className="flex flex-wrap items-center gap-3">
-            {org.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={org.logoUrl}
-                alt=""
-                className="h-12 w-12 rounded-[var(--radius-md)] object-cover"
-              />
-            ) : (
-              <div
-                className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-md)] text-sm font-semibold text-white"
-                style={{ background: brand || "var(--brand-primary)" }}
-              >
-                {org.name.slice(0, 1).toUpperCase()}
+      {org.bannerUrl ? (
+        <div className="relative h-44 overflow-hidden md:h-64">
+          <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/20 to-transparent" />
+        </div>
+      ) : null}
+
+      <main className="mx-auto w-full max-w-5xl px-6 pb-16">
+        <div
+          className={`flex flex-col gap-10 lg:flex-row lg:items-start ${
+            org.bannerUrl ? "-mt-10 md:-mt-12" : "pt-10 md:pt-12"
+          }`}
+        >
+          <div className="min-w-0 flex-1 space-y-8">
+            <section className="space-y-5">
+              <div className="flex flex-wrap items-end gap-4">
+                {org.logoUrl ? (
+                  <OrgLogo
+                    name={org.name}
+                    logoUrl={org.logoUrl}
+                    brandColor={org.brandColor}
+                    size="lg"
+                  />
+                ) : null}
+                <div className="min-w-0 pb-1">
+                  <p className="font-medium text-text-primary">{org.name}</p>
+                  {org.location ? (
+                    <p className="text-body-sm text-text-secondary">{org.location}</p>
+                  ) : null}
+                </div>
               </div>
+
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-h1 text-text-primary">{job.title}</h1>
+                  {isPaused ? (
+                    <Badge variant="neutral">Applications paused</Badge>
+                  ) : null}
+                </div>
+                <JobPerkPills job={job} />
+              </div>
+            </section>
+
+            <JobHighlights job={job} />
+
+            <JobTextSection title="About the role" body={job.description} />
+            <JobTextSection title="Responsibilities" body={job.responsibilities} />
+            {(required.length > 0 || preferred.length > 0) && (
+              <section className="grid gap-4 sm:grid-cols-2">
+                <RequirementCard title="Required" items={required.map((r) => r.label)} />
+                <RequirementCard title="Preferred" items={preferred.map((r) => r.label)} />
+              </section>
             )}
-            <div>
-              <p className="font-medium text-text-primary">{org.name}</p>
-              {org.location ? (
-                <p className="text-body-sm text-text-secondary">{org.location}</p>
+            <JobTextSection title="Qualifications" body={job.qualifications} />
+            <JobTextSection title="Benefits" body={job.benefits} />
+
+            {org.description ? (
+              <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+                <h2 className="text-h3 text-text-primary">About {org.name}</h2>
+                <p className="mt-4 whitespace-pre-wrap text-body text-text-secondary">
+                  {org.description}
+                </p>
+                {org.websiteUrl ? (
+                  <a
+                    href={org.websiteUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-flex items-center gap-1 text-body-sm text-brand-primary"
+                  >
+                    Company website
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </a>
+                ) : null}
+              </section>
+            ) : null}
+          </div>
+
+          <aside className="w-full shrink-0 lg:sticky lg:top-24 lg:w-80">
+            <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+              <h2 className="text-h3 text-text-primary">Apply with your Livefolio</h2>
+              <p className="mt-2 text-body-sm text-text-secondary">
+                Share a living professional profile — experience, work, and
+                evidence — instead of a static resume.
+              </p>
+              <Button asChild size="lg" className="mt-5 w-full" disabled={isPaused}>
+                <Link href={applyHref}>Apply with Livefolio</Link>
+              </Button>
+              {isPaused ? (
+                <p className="mt-3 text-body-sm text-text-muted">
+                  This company has temporarily paused applications.
+                </p>
               ) : null}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-h1 text-text-primary">{job.title}</h1>
-              {isPaused ? <Badge variant="neutral">Applications paused</Badge> : null}
-            </div>
-            <p className="text-body text-text-secondary">
-              {formatJobMeta([
-                job.location,
-                job.employmentType
-                  ? EMPLOYMENT_TYPE_LABELS[job.employmentType]
-                  : null,
-                job.workplaceType
-                  ? WORKPLACE_TYPE_LABELS[job.workplaceType]
-                  : null,
-                job.department,
-              ])}
-            </p>
-          </div>
-
-          <Button asChild size="lg" disabled={isPaused}>
-            <Link href={applyHref}>Apply with Livefolio</Link>
-          </Button>
-          {isPaused ? (
-            <p className="text-body-sm text-text-muted">
-              This company has temporarily paused applications.
-            </p>
-          ) : null}
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-h3 text-text-primary">About the role</h2>
-          <p className="whitespace-pre-wrap text-body text-text-secondary">
-            {job.description}
-          </p>
-        </section>
-
-        {job.responsibilities ? (
-          <section className="space-y-3">
-            <h2 className="text-h3 text-text-primary">Responsibilities</h2>
-            <p className="whitespace-pre-wrap text-body text-text-secondary">
-              {job.responsibilities}
-            </p>
-          </section>
-        ) : null}
-
-        {(required.length > 0 || preferred.length > 0) && (
-          <section className="grid gap-8 sm:grid-cols-2">
-            <div className="space-y-3">
-              <h2 className="text-h3 text-text-primary">Required</h2>
-              <ul className="list-disc space-y-2 pl-5 text-body text-text-secondary">
-                {required.map((r) => (
-                  <li key={r.id ?? r.label}>{r.label}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <h2 className="text-h3 text-text-primary">Preferred</h2>
-              <ul className="list-disc space-y-2 pl-5 text-body text-text-secondary">
-                {preferred.map((r) => (
-                  <li key={r.id ?? r.label}>{r.label}</li>
-                ))}
-              </ul>
-            </div>
-          </section>
-        )}
-
-        {job.qualifications ? (
-          <section className="space-y-3">
-            <h2 className="text-h3 text-text-primary">Qualifications</h2>
-            <p className="whitespace-pre-wrap text-body text-text-secondary">
-              {job.qualifications}
-            </p>
-          </section>
-        ) : null}
-
-        {job.benefits ? (
-          <section className="space-y-3">
-            <h2 className="text-h3 text-text-primary">Benefits</h2>
-            <p className="whitespace-pre-wrap text-body text-text-secondary">
-              {job.benefits}
-            </p>
-          </section>
-        ) : null}
-
-        {org.description ? (
-          <section className="space-y-3 border-t border-border-default pt-8">
-            <h2 className="text-h3 text-text-primary">About {org.name}</h2>
-            <p className="whitespace-pre-wrap text-body text-text-secondary">
-              {org.description}
-            </p>
-            {org.websiteUrl ? (
-              <a
-                href={org.websiteUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-body-sm text-brand-primary underline"
-              >
-                Company website
-              </a>
-            ) : null}
-          </section>
-        ) : null}
-
-        <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 text-center">
-          <h2 className="text-h3 text-text-primary">Apply with your Livefolio</h2>
-          <p className="mx-auto mt-2 max-w-md text-body-sm text-text-secondary">
-            Share a living professional profile — experience, work, and evidence
-            — instead of a static resume.
-          </p>
-          <Button asChild size="lg" className="mt-4" disabled={isPaused}>
-            <Link href={applyHref}>Apply with Livefolio</Link>
-          </Button>
-        </section>
+          </aside>
+        </div>
       </main>
+    </div>
+  );
+}
+
+function JobTextSection({
+  title,
+  body,
+}: {
+  title: string;
+  body: string | null;
+}) {
+  if (!body?.trim()) return null;
+  const lines = splitRichLines(body);
+  return (
+    <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+      <h2 className="text-h3 text-text-primary">{title}</h2>
+      {lines.length > 1 ? (
+        <ul className="mt-4 space-y-2.5 text-body text-text-secondary">
+          {lines.map((line) => (
+            <li key={line} className="flex gap-3">
+              <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary" />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-4 whitespace-pre-wrap text-body text-text-secondary">
+          {body}
+        </p>
+      )}
+    </section>
+  );
+}
+
+function RequirementCard({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+      <h2 className="text-h3 text-text-primary">{title}</h2>
+      {items.length === 0 ? (
+        <p className="mt-3 text-body-sm text-text-muted">None listed</p>
+      ) : (
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {items.map((item) => (
+            <li
+              key={item}
+              className="rounded-full border border-border-default bg-surface-base px-3 py-1.5 text-body-sm text-text-primary"
+            >
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

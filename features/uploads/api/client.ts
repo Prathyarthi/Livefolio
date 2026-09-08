@@ -1,4 +1,9 @@
-import { MAX_PROJECT_THUMB_BYTES, MAX_RESUME_BYTES } from "@/lib/uploads";
+import {
+  isImageUploadKind,
+  maxBytesForKind,
+  MAX_RESUME_BYTES,
+  type UploadKind,
+} from "@/lib/uploads";
 
 export class UploadRequestError extends Error {
   status: number;
@@ -74,27 +79,33 @@ export async function extractPdfText(file: File): Promise<string> {
 }
 
 export async function uploadStoredFile(options: {
-  kind: "resume" | "project_thumb" | "job_source";
+  kind: UploadKind;
   file: File;
   projectId?: string;
   jobId?: string;
+  orgId?: string;
 }): Promise<CompletedUpload> {
-  if (options.kind === "project_thumb" && options.file.size > MAX_PROJECT_THUMB_BYTES) {
-    throw new UploadRequestError("Thumbnail must be under 2MB");
+  const maxBytes = maxBytesForKind(options.kind);
+  if (options.file.size > maxBytes) {
+    const mb = Math.round(maxBytes / (1024 * 1024));
+    throw new UploadRequestError(`File must be under ${mb}MB`);
   }
-  if (options.kind !== "project_thumb" && options.file.size > MAX_RESUME_BYTES) {
-    throw new UploadRequestError("File size must be less than 10MB");
-  }
+
+  const fallbackType = isImageUploadKind(options.kind)
+    ? "image/jpeg"
+    : "application/pdf";
+  const contentType = options.file.type || fallbackType;
 
   const signRes = await fetch("/api/uploads/sign", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       kind: options.kind,
-      contentType: options.file.type || (options.kind === "project_thumb" ? "image/jpeg" : "application/pdf"),
+      contentType,
       sizeBytes: options.file.size,
       projectId: options.projectId,
       jobId: options.jobId,
+      orgId: options.orgId,
     }),
   });
   if (!signRes.ok) await readError(signRes, "Could not start upload");
@@ -102,11 +113,7 @@ export async function uploadStoredFile(options: {
 
   const putRes = await fetch(signed.uploadUrl, {
     method: "PUT",
-    headers: {
-      "Content-Type":
-        options.file.type ||
-        (options.kind === "project_thumb" ? "image/jpeg" : "application/pdf"),
-    },
+    headers: { "Content-Type": contentType },
     body: options.file,
   });
   if (!putRes.ok) {
@@ -119,9 +126,10 @@ export async function uploadStoredFile(options: {
     body: JSON.stringify({
       kind: options.kind,
       key: signed.key,
-      contentType: options.file.type,
+      contentType,
       projectId: options.projectId,
       jobId: options.jobId,
+      orgId: options.orgId,
     }),
   });
   if (!completeRes.ok) await readError(completeRes, "Could not save upload");

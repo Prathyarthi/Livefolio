@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { OrgLogo } from "@/features/organization/components/org-logo";
 import {
   useApplicationPreview,
   useSubmitApplication,
@@ -121,12 +122,24 @@ export default function ApplyJobPage() {
   return (
     <div className="min-h-screen bg-surface-base">
       <div className="mx-auto w-full max-w-2xl space-y-8 px-6 py-10 md:py-14">
-        <header className="space-y-2">
-          <p className="eyebrow uppercase">Review your application</p>
+        <header className="space-y-4">
+          <div className="flex items-center gap-3">
+            <OrgLogo
+              name={data.job.organization.name}
+              logoUrl={data.job.organization.logoUrl}
+              size="md"
+            />
+            <div>
+              <p className="eyebrow uppercase">Review your application</p>
+              <p className="text-body-sm text-text-secondary">
+                {data.job.organization.name}
+              </p>
+            </div>
+          </div>
           <h1 className="text-h2 text-text-primary">{data.job.title}</h1>
           <p className="text-body-sm text-text-secondary">
-            Applying to {data.job.organization.name}. We&apos;ll create an
-            immutable snapshot of your Livefolio at submit time.
+            We&apos;ll create an immutable snapshot of your Livefolio at submit
+            time.
           </p>
         </header>
 

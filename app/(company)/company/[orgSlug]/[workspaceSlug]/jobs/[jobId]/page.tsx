@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ExternalLink, Copy } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useWorkspace } from "@/features/organization/api/use-organization";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,11 +14,16 @@ import {
   useJob,
   useUpdateJob,
 } from "@/features/jobs/api/use-jobs";
+import { JobHighlights, JobPerkPills } from "@/features/jobs/components/job-highlights";
+import { JobRoleFields } from "@/features/jobs/components/job-role-fields";
 import {
-  EMPLOYMENT_TYPE_LABELS,
+  formStateToJobInput,
+  jobToFormState,
+  type JobRoleFormState,
+} from "@/features/jobs/lib/role-fields";
+import {
   JOB_STATUS_LABELS,
-  WORKPLACE_TYPE_LABELS,
-  formatJobMeta,
+  splitRichLines,
 } from "@/features/jobs/constants/labels";
 import { getAppOrigin } from "@/lib/domain";
 import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field";
@@ -29,9 +36,33 @@ export default function ManageJobPage() {
   const jobId = params.jobId;
   const router = useRouter();
   const { data: job, isLoading, error } = useJob(jobId);
+  const { data: workspace } = useWorkspace(orgSlug, workspaceSlug);
   const updateJob = useUpdateJob(orgSlug);
   const deleteJob = useDeleteJob(orgSlug);
   const queryClient = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState<JobRoleFormState | null>(null);
+
+  useEffect(() => {
+    if (job) {
+      const state = jobToFormState(job);
+      if (workspace && Array.isArray(workspace.customJobFields)) {
+        const existingLabels = new Set(
+          state.customFields.map((f) => f.label.toLowerCase()),
+        );
+        for (const def of workspace.customJobFields as any[]) {
+          if (def.label && !existingLabels.has(def.label.toLowerCase())) {
+            state.customFields.push({
+              id: crypto.randomUUID(),
+              label: def.label,
+              value: "",
+            });
+          }
+        }
+      }
+      setForm(state);
+    }
+  }, [job, workspace]);
 
   if (isLoading) {
     return (
@@ -91,12 +122,30 @@ export default function ManageJobPage() {
     }
   }
 
+  async function handleSaveEdits() {
+    if (!form) return;
+    if (!form.title.trim() || !form.description.trim()) {
+      toast.error("Title and description are required");
+      return;
+    }
+    try {
+      await updateJob.mutateAsync({
+        id: jobId,
+        data: formStateToJobInput(form),
+      });
+      toast.success("Job details saved");
+      setEditing(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save job");
+    }
+  }
+
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>← Back to jobs</Link>
       </Button>
-      <header className="space-y-3">
+      <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={job.status === "published" ? "success" : "neutral"}>
             {JOB_STATUS_LABELS[job.status] ?? job.status}
@@ -106,19 +155,10 @@ export default function ManageJobPage() {
           </span>
         </div>
         <h1 className="text-h2 text-text-primary">{job.title}</h1>
-        <p className="text-body-sm text-text-secondary">
-          {formatJobMeta([
-            job.department,
-            job.location,
-            job.employmentType
-              ? EMPLOYMENT_TYPE_LABELS[job.employmentType]
-              : null,
-            job.workplaceType
-              ? WORKPLACE_TYPE_LABELS[job.workplaceType]
-              : null,
-          ])}
-        </p>
+        <JobPerkPills job={job} />
       </header>
+
+      <JobHighlights job={job} />
 
       <div className="flex flex-wrap gap-2">
         <Button asChild>
@@ -162,6 +202,15 @@ export default function ManageJobPage() {
             </Link>
           </Button>
         )}
+        <Button
+          variant="outline"
+          onClick={() => {
+            setForm(jobToFormState(job));
+            setEditing((open) => !open);
+          }}
+        >
+          {editing ? "Cancel edit" : "Edit details"}
+        </Button>
         {job.status === "draft" && (
           <Button
             variant="destructive"
@@ -197,75 +246,108 @@ export default function ManageJobPage() {
         </div>
       )}
 
-      <div className="space-y-8 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
-        <section className="space-y-3">
-          <h2 className="text-h3 text-text-primary">Description</h2>
-        <PdfExtractField
-          hint="Replace the description from a PDF. You can still edit the text afterward."
-          onExtracted={async (text, file) => {
-            await updateJob.mutateAsync({
-              id: jobId,
-              data: { description: text },
-            });
-            await uploadStoredFile({
-              kind: "job_source",
-              file,
-              jobId,
-            });
-            await queryClient.invalidateQueries({
-              queryKey: ["jobs", "id", jobId],
-            });
-          }}
-        />
-        <p className="whitespace-pre-wrap text-body-sm text-text-secondary">
-          {job.description}
-        </p>
-      </section>
-
-      {job.responsibilities ? (
-        <section className="space-y-3">
-          <h2 className="text-h3 text-text-primary">Responsibilities</h2>
-          <p className="whitespace-pre-wrap text-body-sm text-text-secondary">
-            {job.responsibilities}
-          </p>
-        </section>
-      ) : null}
-
-      {job.qualifications ? (
-        <section className="space-y-3">
-          <h2 className="text-h3 text-text-primary">Qualifications</h2>
-          <p className="whitespace-pre-wrap text-body-sm text-text-secondary">
-            {job.qualifications}
-          </p>
-        </section>
-      ) : null}
-
-      {(required.length > 0 || preferred.length > 0) && (
-        <section className="grid gap-6 sm:grid-cols-2">
-          <div className="space-y-2">
-            <h2 className="text-h3 text-text-primary">Required</h2>
-            <ul className="list-disc space-y-1 pl-5 text-body-sm text-text-secondary">
-              {required.map((r) => (
-                <li key={r.id ?? r.label}>{r.label}</li>
-              ))}
-            </ul>
+      {editing && form ? (
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+          <JobRoleFields
+            values={form}
+            onChange={(patch) => setForm((prev) => (prev ? { ...prev, ...patch } : prev))}
+            descriptionExtra={
+              <PdfExtractField
+                hint="Replace the description from a PDF. You can still edit the text afterward."
+                onExtracted={async (text, file) => {
+                  setForm((prev) => (prev ? { ...prev, description: text } : prev));
+                  await uploadStoredFile({
+                    kind: "job_source",
+                    file,
+                    jobId,
+                  });
+                  await queryClient.invalidateQueries({
+                    queryKey: ["jobs", "id", jobId],
+                  });
+                }}
+              />
+            }
+          />
+          <div className="flex flex-wrap gap-2 border-t border-border-default pt-6">
+            <Button onClick={() => void handleSaveEdits()} disabled={updateJob.isPending}>
+              Save details
+            </Button>
+            <Button variant="ghost" onClick={() => setEditing(false)}>
+              Cancel
+            </Button>
           </div>
-          <div className="space-y-2">
-            <h2 className="text-h3 text-text-primary">Preferred</h2>
-            <ul className="list-disc space-y-1 pl-5 text-body-sm text-text-secondary">
-              {preferred.map((r) => (
-                <li key={r.id ?? r.label}>{r.label}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <JobTextSection title="Description" body={job.description} />
+          <JobTextSection title="Responsibilities" body={job.responsibilities} />
+          <JobTextSection title="Qualifications" body={job.qualifications} />
+          <JobTextSection title="Benefits" body={job.benefits} />
+          {(required.length > 0 || preferred.length > 0) && (
+            <section className="grid gap-6 sm:grid-cols-2">
+              <RequirementCard title="Required" items={required.map((r) => r.label)} />
+              <RequirementCard title="Preferred" items={preferred.map((r) => r.label)} />
+            </section>
+          )}
+        </div>
       )}
-      </div>
 
       <p className="text-body-sm text-text-muted">
         Open the applicant pool to move candidates through the pipeline, shortlist,
         and add private notes.
       </p>
+    </div>
+  );
+}
+
+function JobTextSection({
+  title,
+  body,
+}: {
+  title: string;
+  body: string | null;
+}) {
+  if (!body?.trim()) return null;
+  const lines = splitRichLines(body);
+  return (
+    <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+      <h2 className="text-h3 text-text-primary">{title}</h2>
+      {lines.length > 1 ? (
+        <ul className="mt-4 space-y-2 text-body-sm text-text-secondary">
+          {lines.map((line) => (
+            <li key={line} className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary" />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-4 whitespace-pre-wrap text-body-sm text-text-secondary">
+          {body}
+        </p>
+      )}
+    </section>
+  );
+}
+
+function RequirementCard({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+      <h2 className="text-h3 text-text-primary">{title}</h2>
+      {items.length === 0 ? (
+        <p className="mt-3 text-body-sm text-text-muted">None listed</p>
+      ) : (
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {items.map((item) => (
+            <li
+              key={item}
+              className="rounded-full border border-border-default bg-surface-base px-3 py-1 text-body-sm text-text-primary"
+            >
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

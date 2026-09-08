@@ -17,7 +17,6 @@ import {
   User,
   PanelLeft,
   FileCheck2,
-  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -130,6 +129,7 @@ function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border group-data-[collapsible=icon]:p-1">
+        {/* Hiring entry point hidden until the recruiter product is rolled out.
         <SidebarMenu className="mb-1 group-data-[collapsible=icon]:items-center">
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -150,6 +150,7 @@ function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        */}
         <div className="flex items-center gap-2 rounded-md p-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-1.5 group-data-[collapsible=icon]:p-1">
           <Avatar className="h-8 w-8 shrink-0 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8">
             <AvatarImage src={user?.avatar} alt="" />

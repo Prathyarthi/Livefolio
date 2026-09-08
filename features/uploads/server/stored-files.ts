@@ -25,20 +25,33 @@ export async function replaceKindFiles(options: {
   userId?: string;
   projectId?: string;
   jobId?: string;
+  organizationId?: string;
 }) {
   const old = await prisma.storedFile.findMany({
     where: {
       kind: options.kind,
       id: { not: options.keepId },
-      ...(options.userId && !options.projectId && !options.jobId
+      ...(options.userId && !options.projectId && !options.jobId && !options.organizationId
         ? { userId: options.userId }
         : {}),
       ...(options.projectId ? { projectId: options.projectId } : {}),
       ...(options.jobId ? { jobId: options.jobId } : {}),
+      ...(options.organizationId ? { organizationId: options.organizationId } : {}),
     },
     select: { id: true, key: true },
   });
   await deleteStoredFileRows(old);
+}
+
+export async function deleteOrgBrandFiles(
+  organizationId: string,
+  kind: "org_logo" | "org_banner",
+) {
+  const files = await prisma.storedFile.findMany({
+    where: { organizationId, kind },
+    select: { id: true, key: true },
+  });
+  await deleteStoredFileRows(files);
 }
 
 export async function persistResumePdf(userId: string, buffer: Buffer) {

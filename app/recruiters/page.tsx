@@ -36,7 +36,7 @@ export default function RecruitersLandingPage() {
             <RecruiterHero />
             <CompanyShowcase
               eyebrow="Talent already on Livefolio"
-              title="Professionals from Accenture, Deloitte, Infosys, and more are already here"
+              title="Professionals building real work are already here"
               description="Hire people who are building in public across global enterprises, technology leaders, and growing startups."
             />
             <RecruiterHowItWorks />

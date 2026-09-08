@@ -15,6 +15,7 @@ import {
   useOrganizations,
 } from "@/features/organization/api/use-organization";
 import { sanitizeHiringSlug } from "@/features/jobs/lib/slug";
+import { OrgLogo } from "@/features/organization/components/org-logo";
 
 export default function CompanyIndexPage() {
   const { status } = useSession();
@@ -104,9 +105,12 @@ export default function CompanyIndexPage() {
                   className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-base"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] bg-brand-light">
-                      <Building2 className="h-5 w-5 text-brand-primary" />
-                    </span>
+                    <OrgLogo
+                      name={organization.name}
+                      logoUrl={organization.logoUrl}
+                      brandColor={organization.brandColor}
+                      size="sm"
+                    />
                     <div className="min-w-0">
                       <p className="truncate font-medium text-text-primary">
                         {organization.name}

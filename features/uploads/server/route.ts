@@ -6,7 +6,7 @@ import {
   PRO_PROJECT_THUMBNAILS,
   resolveAccessForUser,
 } from "@/lib/entitlements";
-import { requireJobManager, requireOrgMember, requireApplicantViewer } from "@/features/organization/lib/org-access";
+import { requireJobManager, requireOrgMember, requireApplicantViewer, requireOrgAdmin } from "@/features/organization/lib/org-access";
 import {
   extractTextAndQualityFromPdf,
   PdfLimitError,
@@ -55,6 +55,8 @@ const KIND_SCHEMA = t.Union([
   t.Literal("resume"),
   t.Literal("project_thumb"),
   t.Literal("job_source"),
+  t.Literal("org_logo"),
+  t.Literal("org_banner"),
 ]);
 
 function thumbnailCapMessage(max: number, tier: string) {
@@ -189,6 +191,28 @@ export const uploads = new Elysia({ prefix: "/uploads" })
           contentType,
         });
         publicUrl = publicObjectUrl(key);
+      } else if (kind === "org_logo" || kind === "org_banner") {
+        const orgId = ctx.body.orgId?.trim();
+        if (!orgId) {
+          ctx.set.status = 400;
+          return { error: "orgId is required" };
+        }
+        const membership = await requireOrgAdmin(orgId, session.userId);
+        if (!membership) {
+          ctx.set.status = 403;
+          return { error: "Forbidden" };
+        }
+        if (!getR2PublicBaseUrl()) {
+          ctx.set.status = 503;
+          return { error: "Public file URLs are not configured" };
+        }
+        key = objectKey({
+          kind,
+          fileId,
+          orgId,
+          contentType,
+        });
+        publicUrl = publicObjectUrl(key);
       } else {
         const jobId = ctx.body.jobId?.trim();
         if (!jobId) {
@@ -236,6 +260,7 @@ export const uploads = new Elysia({ prefix: "/uploads" })
         sizeBytes: t.Number({ minimum: 1 }),
         projectId: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
         jobId: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
+        orgId: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
       }),
     },
   )
@@ -379,6 +404,53 @@ export const uploads = new Elysia({ prefix: "/uploads" })
         };
       }
 
+      if (kind === "org_logo" || kind === "org_banner") {
+        const orgId = ctx.body.orgId?.trim();
+        if (!orgId) {
+          ctx.set.status = 400;
+          return { error: "orgId is required" };
+        }
+        const membership = await requireOrgAdmin(orgId, session.userId);
+        if (!membership) {
+          ctx.set.status = 403;
+          return { error: "Forbidden" };
+        }
+        const expectedPrefix = `orgs/${orgId}/branding/${kind}/`;
+        if (!key.startsWith(expectedPrefix)) {
+          ctx.set.status = 400;
+          return { error: "Invalid object key" };
+        }
+        const publicUrl = publicObjectUrl(key);
+        if (!publicUrl) {
+          ctx.set.status = 503;
+          return { error: "Public file URLs are not configured" };
+        }
+        const created = await prisma.storedFile.create({
+          data: {
+            key,
+            kind,
+            contentType,
+            sizeBytes,
+            userId: session.userId,
+            organizationId: orgId,
+          },
+        });
+        await prisma.organization.update({
+          where: { id: orgId },
+          data: kind === "org_logo" ? { logoUrl: publicUrl } : { bannerUrl: publicUrl },
+        });
+        await replaceKindFiles({
+          kind,
+          keepId: created.id,
+          organizationId: orgId,
+        });
+        return {
+          id: created.id,
+          kind,
+          publicUrl,
+        };
+      }
+
       const jobId = ctx.body.jobId?.trim();
       if (!jobId) {
         ctx.set.status = 400;
@@ -431,6 +503,7 @@ export const uploads = new Elysia({ prefix: "/uploads" })
         contentType: t.Optional(t.String({ maxLength: 120 })),
         projectId: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
         jobId: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
+        orgId: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
       }),
     },
   )
@@ -573,6 +646,19 @@ export const uploads = new Elysia({ prefix: "/uploads" })
         ctx.set.status = 403;
         return { error: "Forbidden" };
       }
+    } else if (file.kind === "org_logo" || file.kind === "org_banner") {
+      if (!file.organizationId) {
+        ctx.set.status = 404;
+        return { error: "File not found" };
+      }
+      const membership = await requireOrgAdmin(
+        file.organizationId,
+        session.userId,
+      );
+      if (!membership) {
+        ctx.set.status = 403;
+        return { error: "Forbidden" };
+      }
     } else if (file.userId !== session.userId) {
       ctx.set.status = 403;
       return { error: "Forbidden" };
@@ -596,6 +682,30 @@ export const uploads = new Elysia({ prefix: "/uploads" })
         where: { id: file.portfolioId },
         data: { resumeUrl: null },
       });
+    }
+    if (
+      (file.kind === "org_logo" || file.kind === "org_banner") &&
+      file.organizationId
+    ) {
+      const publicUrl = publicObjectUrl(file.key);
+      const org = await prisma.organization.findUnique({
+        where: { id: file.organizationId },
+        select: { logoUrl: true, bannerUrl: true },
+      });
+      if (org && publicUrl) {
+        if (file.kind === "org_logo" && org.logoUrl === publicUrl) {
+          await prisma.organization.update({
+            where: { id: file.organizationId },
+            data: { logoUrl: null },
+          });
+        }
+        if (file.kind === "org_banner" && org.bannerUrl === publicUrl) {
+          await prisma.organization.update({
+            where: { id: file.organizationId },
+            data: { bannerUrl: null },
+          });
+        }
+      }
     }
 
     await deleteStoredFileRows([file]);

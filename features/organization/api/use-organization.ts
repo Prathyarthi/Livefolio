@@ -50,6 +50,7 @@ export type OrganizationSummary = {
   name: string;
   slug: string;
   logoUrl: string | null;
+  bannerUrl: string | null;
   brandColor: string | null;
   description: string | null;
   _count?: { jobs: number; members: number; workspaces?: number };
@@ -86,6 +87,7 @@ export type OrganizationDetail = OrganizationSummary & {
     name: string;
     slug: string;
     description: string | null;
+    customJobFields?: any;
   }>;
 };
 
@@ -94,6 +96,7 @@ export type WorkspaceDetail = {
   name: string;
   slug: string;
   description: string | null;
+  customJobFields?: any;
   organization: { id: string; slug: string; name: string };
   role: string;
   permissions: {
@@ -181,6 +184,29 @@ export function useCreateWorkspace(orgSlug: string) {
   });
 }
 
+export function useUpdateWorkspace(orgSlug: string, workspaceSlug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Record<string, unknown>) => {
+      const res = await fetch(
+        `/api/organizations/${orgSlug}/workspaces/${workspaceSlug}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to update workspace");
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["organizations"] });
+      qc.invalidateQueries({ queryKey: ["organizations", orgSlug] });
+      qc.invalidateQueries({ queryKey: ["organizations", orgSlug, "workspaces", workspaceSlug] });
+    },
+  });
+}
+
 export function useCreateOrganization() {
   const qc = useQueryClient();
   return useMutation({
@@ -218,6 +244,7 @@ export function useUpdateOrganization(slug: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["organizations"] });
       qc.invalidateQueries({ queryKey: ["organizations", slug] });
+      qc.invalidateQueries({ queryKey: ["jobs"] });
     },
   });
 }

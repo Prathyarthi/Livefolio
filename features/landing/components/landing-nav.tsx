@@ -14,7 +14,7 @@ const CANDIDATE_LINKS = [
   { label: "Integrations", href: "/#integrations" },
   { label: "Templates", href: "/#showcase" },
   { label: "Pricing", href: "/#pricing" },
-  { label: "Hiring", href: "/recruiters" },
+  // { label: "Hiring", href: "/recruiters" },
   { label: "FAQ", href: "/#faq" },
   { label: "Contact", href: "/contact" },
 ];
@@ -99,16 +99,7 @@ export function LandingNav({ variant = "candidate" }: LandingNavProps) {
             >
               <Link href="/dashboard">Dashboard</Link>
             </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="hidden shrink-0 sm:inline-flex"
-            >
-              <Link href="/recruiters">Hiring</Link>
-            </Button>
-          )}
+          ) : null}
           <Button
             size="sm"
             asChild
@@ -161,6 +152,7 @@ export function LandingNav({ variant = "candidate" }: LandingNavProps) {
             </Link>
           ))}
           <div className="mt-2 flex flex-col gap-2">
+            {/* Candidate hiring shortcut hidden until recruiter rollout. */}
             {!authenticated ? (
               <Button variant="outline" asChild className="w-full">
                 <Link href="/sign-in" onClick={() => setOpen(false)}>
@@ -173,13 +165,7 @@ export function LandingNav({ variant = "candidate" }: LandingNavProps) {
                   Dashboard
                 </Link>
               </Button>
-            ) : (
-              <Button variant="outline" asChild className="w-full">
-                <Link href="/recruiters" onClick={() => setOpen(false)}>
-                  Hiring
-                </Link>
-              </Button>
-            )}
+            ) : null}
             <Button asChild className="w-full" variant="accent">
               <Link href={primaryHref} onClick={() => setOpen(false)}>
                 {primaryLabel}
