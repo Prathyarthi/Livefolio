@@ -1,5 +1,34 @@
 -- Resolve partial state from prior recruiter MVP leftovers + failed apply.
--- Extend existing organizations / organization_members, then create hiring tables.
+-- Create organizations / organization_members if they were never in a migration
+-- (they previously existed only via db push), then add branding fields and hiring tables.
+
+CREATE TABLE IF NOT EXISTS "organizations" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "description" TEXT,
+    "logoUrl" TEXT,
+    "brandColor" TEXT,
+    "websiteUrl" TEXT,
+    "location" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "organizations_slug_key" ON "organizations"("slug");
+
+CREATE TABLE IF NOT EXISTS "organization_members" (
+    "id" TEXT NOT NULL,
+    "organizationId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'recruiter',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "organization_members_pkey" PRIMARY KEY ("id")
+);
 
 -- Organizations: add branding fields
 ALTER TABLE "organizations" ADD COLUMN IF NOT EXISTS "description" TEXT;
@@ -52,6 +81,26 @@ END $$;
 
 CREATE INDEX IF NOT EXISTS "organization_members_userId_idx" ON "organization_members"("userId");
 CREATE INDEX IF NOT EXISTS "organizations_slug_idx" ON "organizations"("slug");
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'organization_members_organizationId_fkey'
+  ) THEN
+    ALTER TABLE "organization_members"
+      ADD CONSTRAINT "organization_members_organizationId_fkey"
+      FOREIGN KEY ("organizationId") REFERENCES "organizations"("id")
+      ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'organization_members_userId_fkey'
+  ) THEN
+    ALTER TABLE "organization_members"
+      ADD CONSTRAINT "organization_members_userId_fkey"
+      FOREIGN KEY ("userId") REFERENCES "users"("id")
+      ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- Jobs
 CREATE TABLE IF NOT EXISTS "jobs" (
