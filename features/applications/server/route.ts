@@ -784,7 +784,7 @@ export const applications = new Elysia({ prefix: "/applications" })
     },
   )
 
-  // Company: delete own note (or any note if manager — keep simple: author or manager)
+  // Company: author or workspace hiring manager can delete a note
   .delete("/job/:jobId/:applicationId/notes/:noteId", async (ctx) => {
     const session = await getSession(ctx.request);
     if (!session) {

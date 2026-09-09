@@ -6,7 +6,7 @@ import {
   PRO_PROJECT_THUMBNAILS,
   resolveAccessForUser,
 } from "@/lib/entitlements";
-import { requireJobManager, requireOrgMember, requireApplicantViewer, requireOrgAdmin } from "@/features/organization/lib/org-access";
+import { requireOrgAdmin, requireWorkspaceApplicantViewer, requireWorkspaceJobManagerForJob } from "@/features/organization/lib/org-access";
 import {
   extractTextAndQualityFromPdf,
   PdfLimitError,
@@ -34,7 +34,7 @@ async function recruiterCanOpenApplicantResume(
   viewerId: string,
 ) {
   if (!applicantUserId) return false;
-  const application = await prisma.application.findFirst({
+  const applications = await prisma.application.findMany({
     where: {
       userId: applicantUserId,
       job: {
@@ -43,11 +43,38 @@ async function recruiterCanOpenApplicantResume(
         },
       },
     },
-    select: { job: { select: { organizationId: true } } },
+    select: {
+      job: { select: { organizationId: true, workspaceId: true } },
+    },
   });
-  if (!application) return false;
+  for (const application of applications) {
+    const allowed = await requireWorkspaceApplicantViewer(
+      application.job.organizationId,
+      application.job.workspaceId,
+      viewerId,
+    );
+    if (allowed) return true;
+  }
+  return false;
+}
+
+async function recruiterCanOpenJobSource(
+  organizationId: string | null,
+  jobId: string | null,
+  viewerId: string,
+) {
+  if (!organizationId || !jobId) return false;
+  const job = await prisma.job.findUnique({
+    where: { id: jobId },
+    select: { organizationId: true, workspaceId: true },
+  });
+  if (!job || job.organizationId !== organizationId) return false;
   return Boolean(
-    await requireApplicantViewer(application.job.organizationId, viewerId),
+    await requireWorkspaceApplicantViewer(
+      job.organizationId,
+      job.workspaceId,
+      viewerId,
+    ),
   );
 }
 
@@ -219,24 +246,19 @@ export const uploads = new Elysia({ prefix: "/uploads" })
           ctx.set.status = 400;
           return { error: "jobId is required" };
         }
-        const job = await prisma.job.findUnique({
-          where: { id: jobId },
-          select: { id: true, organizationId: true },
-        });
-        if (!job) {
-          ctx.set.status = 404;
-          return { error: "Job not found" };
-        }
-        const membership = await requireJobManager(job.organizationId, session.userId);
-        if (!membership) {
+        const access = await requireWorkspaceJobManagerForJob(
+          jobId,
+          session.userId,
+        );
+        if (!access) {
           ctx.set.status = 403;
           return { error: "Forbidden" };
         }
         key = objectKey({
           kind,
           fileId,
-          orgId: job.organizationId,
-          jobId: job.id,
+          orgId: access.job.organizationId,
+          jobId: access.job.id,
           contentType,
         });
       }
@@ -456,20 +478,15 @@ export const uploads = new Elysia({ prefix: "/uploads" })
         ctx.set.status = 400;
         return { error: "jobId is required" };
       }
-      const job = await prisma.job.findUnique({
-        where: { id: jobId },
-        select: { id: true, organizationId: true },
-      });
-      if (!job) {
-        ctx.set.status = 404;
-        return { error: "Job not found" };
-      }
-      const membership = await requireJobManager(job.organizationId, session.userId);
-      if (!membership) {
+      const access = await requireWorkspaceJobManagerForJob(
+        jobId,
+        session.userId,
+      );
+      if (!access) {
         ctx.set.status = 403;
         return { error: "Forbidden" };
       }
-      const expectedPrefix = `orgs/${job.organizationId}/jobs/${job.id}/`;
+      const expectedPrefix = `orgs/${access.job.organizationId}/jobs/${access.job.id}/`;
       if (!key.startsWith(expectedPrefix) || !key.endsWith(".pdf")) {
         ctx.set.status = 400;
         return { error: "Invalid object key" };
@@ -481,14 +498,14 @@ export const uploads = new Elysia({ prefix: "/uploads" })
           contentType,
           sizeBytes,
           userId: session.userId,
-          organizationId: job.organizationId,
-          jobId: job.id,
+          organizationId: access.job.organizationId,
+          jobId: access.job.id,
         },
       });
       await replaceKindFiles({
         kind: "job_source",
         keepId: created.id,
-        jobId: job.id,
+        jobId: access.job.id,
       });
       return {
         id: created.id,
@@ -582,15 +599,12 @@ export const uploads = new Elysia({ prefix: "/uploads" })
     }
 
     if (file.kind === "job_source") {
-      if (!file.organizationId) {
-        ctx.set.status = 404;
-        return { error: "File not found" };
-      }
-      const membership = await requireOrgMember(
+      const canOpen = await recruiterCanOpenJobSource(
         file.organizationId,
+        file.jobId,
         session.userId,
       );
-      if (!membership) {
+      if (!canOpen) {
         ctx.set.status = 403;
         return { error: "Forbidden" };
       }
@@ -634,15 +648,15 @@ export const uploads = new Elysia({ prefix: "/uploads" })
     }
 
     if (file.kind === "job_source") {
-      if (!file.organizationId) {
+      if (!file.jobId) {
         ctx.set.status = 404;
         return { error: "File not found" };
       }
-      const membership = await requireJobManager(
-        file.organizationId,
+      const access = await requireWorkspaceJobManagerForJob(
+        file.jobId,
         session.userId,
       );
-      if (!membership) {
+      if (!access) {
         ctx.set.status = 403;
         return { error: "Forbidden" };
       }

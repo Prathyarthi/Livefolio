@@ -32,7 +32,7 @@ export default function CompanyTalentPage() {
     setPage(1);
   }, [q, location, skill]);
 
-  const talentQuery = useTalentSearch(orgSlug, {
+  const talentQuery = useTalentSearch(orgSlug, workspaceSlug, {
     q: q || undefined,
     location: location.trim() || undefined,
     skill: skill.trim() || undefined,

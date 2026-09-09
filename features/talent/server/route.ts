@@ -1,7 +1,7 @@
 import Elysia, { t } from "elysia";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
-import { requireApplicantViewer } from "@/features/organization/lib/org-access";
+import { requireWorkspaceAccess } from "@/features/organization/lib/org-access";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 import {
   talentIdsMatchingJsonAndArrays,
@@ -22,7 +22,7 @@ function contains(value: string) {
 }
 
 export const talent = new Elysia({ prefix: "/talent" }).get(
-  "/org/:orgSlug",
+  "/org/:orgSlug/workspace/:workspaceSlug",
   async (ctx) => {
     const session = await getSession(ctx.request);
     if (!session) {
@@ -39,8 +39,12 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       return { error: "Organization not found" };
     }
 
-    const membership = await requireApplicantViewer(org.id, session.userId);
-    if (!membership) {
+    const workspaceAccess = await requireWorkspaceAccess(
+      org.id,
+      ctx.params.workspaceSlug,
+      session.userId,
+    );
+    if (!workspaceAccess) {
       ctx.set.status = 403;
       return { error: "Forbidden" };
     }

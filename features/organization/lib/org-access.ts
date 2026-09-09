@@ -166,6 +166,28 @@ export async function requireWorkspaceJobManager(
   return access;
 }
 
+export async function requireWorkspaceJobManagerForJob(
+  jobId: string,
+  userId: string,
+) {
+  const job = await prisma.job.findUnique({
+    where: { id: jobId },
+    select: {
+      id: true,
+      organizationId: true,
+      workspace: { select: { slug: true } },
+    },
+  });
+  if (!job) return null;
+  const access = await requireWorkspaceJobManager(
+    job.organizationId,
+    job.workspace.slug,
+    userId,
+  );
+  if (!access) return null;
+  return { job, ...access };
+}
+
 export async function requireWorkspaceApplicantViewer(
   organizationId: string,
   workspaceId: string,

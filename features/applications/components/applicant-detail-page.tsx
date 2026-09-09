@@ -237,7 +237,9 @@ export default function ApplicantDetailPage() {
                         toast.success("Note deleted");
                       } catch (err) {
                         toast.error(
-                          err instanceof Error ? err.message : "Delete failed",
+                          err instanceof Error
+                            ? err.message
+                            : "Delete failed",
                         );
                       }
                     }}

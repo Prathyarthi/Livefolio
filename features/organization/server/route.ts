@@ -20,8 +20,12 @@ import {
 } from "@/features/organization/lib/permissions";
 import {
   canUserCreateOrganization,
+  isOrgPlanLimitError,
   orgUpgradeMessage,
+  OrgPlanLimitError,
   resolveOrgAccess,
+  withOrganizationLock,
+  withUserLock,
 } from "@/lib/org-entitlements";
 import { normalizeOAuthEmail } from "@/lib/oauth-users";
 import { deleteOrgBrandFiles } from "@/features/uploads/server/stored-files";
@@ -205,7 +209,18 @@ export const organization = new Elysia({ prefix: "/organizations" })
       }
 
       try {
-        const organizationId = await prisma.$transaction(async (tx) => {
+        const organizationId = await withUserLock(session.userId, async (tx) => {
+          const lockedAccess = await canUserCreateOrganization(
+            session.userId,
+            tx,
+          );
+          if (!lockedAccess.allowed) {
+            throw new OrgPlanLimitError(
+              "organization",
+              lockedAccess.upgradeOrgSlug ?? "",
+            );
+          }
+
           const created = await tx.organization.create({
             data: {
               name,
@@ -244,6 +259,10 @@ export const organization = new Elysia({ prefix: "/organizations" })
 
         return { role: "owner", organization: org };
       } catch (error) {
+        if (isOrgPlanLimitError(error)) {
+          ctx.set.status = error.status;
+          return error.toBody();
+        }
         if (isUniqueConstraintError(error)) {
           ctx.set.status = 409;
           return { error: "This organization slug is already in use" };
@@ -508,33 +527,12 @@ export const organization = new Elysia({ prefix: "/organizations" })
         return { error: "Workspace name is required" };
       }
 
-      const entitlement = await resolveOrgAccess(org);
-      if (!entitlement.canCreateMoreWorkspaces) {
-        ctx.set.status = 402;
-        return {
-          error: orgUpgradeMessage("workspace"),
-          upgradeRequired: true,
-          upgradeOrgSlug: org.slug,
-        };
-      }
-
       const requestedSlug = ctx.body.slug
         ? sanitizeHiringSlug(ctx.body.slug)
         : sanitizeHiringSlug(name);
       if (!isValidWorkspaceSlug(requestedSlug)) {
         ctx.set.status = 400;
         return { error: "Invalid workspace slug" };
-      }
-
-      const slugTaken = await prisma.workspace.findUnique({
-        where: {
-          organizationId_slug: { organizationId: org.id, slug: requestedSlug },
-        },
-        select: { id: true },
-      });
-      if (slugTaken) {
-        ctx.set.status = 409;
-        return { error: "This workspace slug is already in use" };
       }
 
       const ownersAndAdmins = await prisma.organizationMember.findMany({
@@ -546,21 +544,51 @@ export const organization = new Elysia({ prefix: "/organizations" })
       });
 
       try {
-        const workspace = await prisma.workspace.create({
-          data: {
-            organizationId: org.id,
-            name,
-            slug: requestedSlug,
-            description: optionalTrim(ctx.body.description),
-            members: {
-              create: ownersAndAdmins.map((row) => ({ userId: row.userId })),
-            },
-          },
-        });
+        return await withOrganizationLock(org.id, async (tx) => {
+          const workspaceCount = await tx.workspace.count({
+            where: { organizationId: org.id },
+          });
+          const entitlement = await resolveOrgAccess(org, { workspaceCount });
+          if (!entitlement.canCreateMoreWorkspaces) {
+            throw new OrgPlanLimitError("workspace", org.slug);
+          }
 
-        return workspace;
+          const slugTaken = await tx.workspace.findUnique({
+            where: {
+              organizationId_slug: {
+                organizationId: org.id,
+                slug: requestedSlug,
+              },
+            },
+            select: { id: true },
+          });
+          if (slugTaken) {
+            const error = new Error("WORKSPACE_SLUG_TAKEN");
+            error.name = "WORKSPACE_SLUG_TAKEN";
+            throw error;
+          }
+
+          return tx.workspace.create({
+            data: {
+              organizationId: org.id,
+              name,
+              slug: requestedSlug,
+              description: optionalTrim(ctx.body.description),
+              members: {
+                create: ownersAndAdmins.map((row) => ({ userId: row.userId })),
+              },
+            },
+          });
+        });
       } catch (error) {
-        if (isUniqueConstraintError(error)) {
+        if (isOrgPlanLimitError(error)) {
+          ctx.set.status = error.status;
+          return error.toBody();
+        }
+        if (
+          isUniqueConstraintError(error) ||
+          (error instanceof Error && error.name === "WORKSPACE_SLUG_TAKEN")
+        ) {
           ctx.set.status = 409;
           return { error: "This workspace slug is already in use" };
         }

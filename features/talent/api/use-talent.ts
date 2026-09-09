@@ -39,6 +39,7 @@ export type TalentSearchResult = {
 
 export function useTalentSearch(
   orgSlug: string | undefined,
+  workspaceSlug: string | undefined,
   options?: {
     q?: string;
     location?: string;
@@ -57,13 +58,14 @@ export function useTalentSearch(
     queryKey: [
       "talent",
       orgSlug,
+      workspaceSlug,
       q ?? "",
       location ?? "",
       skill ?? "",
       page,
       pageSize,
     ],
-    enabled: Boolean(orgSlug),
+    enabled: Boolean(orgSlug && workspaceSlug),
     queryFn: async () => {
       const params = new URLSearchParams();
       if (q) params.set("q", q);
@@ -73,7 +75,7 @@ export function useTalentSearch(
       params.set("pageSize", String(pageSize));
       const qs = params.toString();
       const res = await fetch(
-        `/api/talent/org/${orgSlug}${qs ? `?${qs}` : ""}`,
+        `/api/talent/org/${orgSlug}/workspace/${workspaceSlug}${qs ? `?${qs}` : ""}`,
         { cache: "no-store" },
       );
       if (!res.ok) await throwApiError(res, "Failed to load talent");

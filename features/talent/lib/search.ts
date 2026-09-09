@@ -101,6 +101,7 @@ export function talentTextSearchOr(
  */
 export async function talentIdsMatchingJsonAndArrays(
   q: string,
+  workspaceId: string,
 ): Promise<string[]> {
   const pattern = `%${q.replace(/[\\%_]/g, "\\$&")}%`;
   const rows = await prisma.$queryRaw<{ id: string }[]>`
@@ -109,6 +110,13 @@ export async function talentIdsMatchingJsonAndArrays(
     WHERE p."openToWork" = true
       AND p."isPublished" = true
       AND p.slug IS NOT NULL
+      AND EXISTS (
+        SELECT 1
+        FROM applications a
+        JOIN jobs j ON j.id = a."jobId"
+        WHERE a."userId" = p."userId"
+          AND j."workspaceId" = ${workspaceId}
+      )
       AND (
         EXISTS (
           SELECT 1
@@ -124,9 +132,9 @@ export async function talentIdsMatchingJsonAndArrays(
         )
         OR EXISTS (
           SELECT 1
-          FROM articles a
-          WHERE a."portfolioId" = p.id
-            AND array_to_string(a.tags, ' ') ILIKE ${pattern}
+          FROM articles art
+          WHERE art."portfolioId" = p.id
+            AND array_to_string(art.tags, ' ') ILIKE ${pattern}
         )
       )
   `;

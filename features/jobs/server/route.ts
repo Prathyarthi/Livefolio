@@ -1,3 +1,4 @@
+import type { Prisma } from "@/db/generated/prisma/client";
 import Elysia, { t } from "elysia";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
@@ -9,8 +10,10 @@ import {
   requireWorkspaceJobManager,
 } from "@/features/organization/lib/org-access";
 import {
-  orgUpgradeMessage,
+  OrgPlanLimitError,
+  isOrgPlanLimitError,
   resolveOrgAccess,
+  withOrganizationLock,
 } from "@/lib/org-entitlements";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import { deleteObjectQuiet, isR2Configured } from "@/lib/r2";
@@ -19,9 +22,13 @@ const OPEN_JOB_STATUSES = new Set(["published", "paused"]);
 
 async function assertCanOpenJob(
   organizationId: string,
-  opts?: { excludeJobId?: string },
+  opts?: {
+    excludeJobId?: string;
+    client?: Prisma.TransactionClient | typeof prisma;
+  },
 ) {
-  const org = await prisma.organization.findUnique({
+  const client = opts?.client ?? prisma;
+  const org = await client.organization.findUnique({
     where: { id: organizationId },
     select: {
       id: true,
@@ -31,9 +38,15 @@ async function assertCanOpenJob(
       subscriptionCurrentPeriodEnd: true,
     },
   });
-  if (!org) return { ok: false as const, status: 404 as const, body: { error: "Organization not found" } };
+  if (!org) {
+    return {
+      ok: false as const,
+      status: 404 as const,
+      body: { error: "Organization not found" },
+    };
+  }
 
-  const openJobCount = await prisma.job.count({
+  const openJobCount = await client.job.count({
     where: {
       organizationId,
       status: { in: ["published", "paused"] },
@@ -42,15 +55,7 @@ async function assertCanOpenJob(
   });
   const access = await resolveOrgAccess(org, { openJobCount });
   if (!access.canPublishMoreJobs) {
-    return {
-      ok: false as const,
-      status: 402 as const,
-      body: {
-        error: orgUpgradeMessage("job"),
-        upgradeRequired: true,
-        upgradeOrgSlug: org.slug,
-      },
-    };
+    throw new OrgPlanLimitError("job", org.slug);
   }
   return { ok: true as const };
 }
@@ -356,16 +361,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         return { error: "Invalid status" };
       }
 
-      if (OPEN_JOB_STATUSES.has(resolvedStatus)) {
-        const gate = await assertCanOpenJob(org.id);
-        if (!gate.ok) {
-          ctx.set.status = gate.status;
-          return gate.body;
-        }
-      }
-
-      const job = await prisma.job.create({
-        data: {
+      const jobCreateData = {
           organizationId: org.id,
           workspaceId: access.workspace.id,
           createdById: session.userId,
@@ -388,9 +384,31 @@ export const jobs = new Elysia({ prefix: "/jobs" })
           applicationDeadline: toOptionalDate(ctx.body.applicationDeadline),
           status: resolvedStatus,
           publishedAt: resolvedStatus === "published" ? new Date() : null,
-        },
-        include: jobCompanyInclude,
-      });
+      };
+
+      let job;
+      try {
+        if (OPEN_JOB_STATUSES.has(resolvedStatus)) {
+          job = await withOrganizationLock(org.id, async (tx) => {
+            await assertCanOpenJob(org.id, { client: tx });
+            return tx.job.create({
+              data: jobCreateData,
+              include: jobCompanyInclude,
+            });
+          });
+        } else {
+          job = await prisma.job.create({
+            data: jobCreateData,
+            include: jobCompanyInclude,
+          });
+        }
+      } catch (error) {
+        if (isOrgPlanLimitError(error)) {
+          ctx.set.status = error.status;
+          return error.toBody();
+        }
+        throw error;
+      }
 
       await replaceRequirements(job.id, ctx.body.requirements);
       await refreshJobSearchProfile(job.id);
@@ -495,19 +513,8 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         nextStatus !== undefined &&
         OPEN_JOB_STATUSES.has(nextStatus) &&
         !OPEN_JOB_STATUSES.has(existing.status);
-      if (becomingOpen) {
-        const gate = await assertCanOpenJob(existing.organizationId, {
-          excludeJobId: existing.id,
-        });
-        if (!gate.ok) {
-          ctx.set.status = gate.status;
-          return gate.body;
-        }
-      }
 
-      await prisma.job.update({
-        where: { id: existing.id },
-        data: {
+      const jobUpdateData = {
           ...(ctx.body.title !== undefined
             ? { title: ctx.body.title.trim() }
             : {}),
@@ -566,8 +573,33 @@ export const jobs = new Elysia({ prefix: "/jobs" })
           ...(nextStatus !== undefined
             ? { status: nextStatus, publishedAt }
             : {}),
-        },
-      });
+      };
+
+      try {
+        if (becomingOpen) {
+          await withOrganizationLock(existing.organizationId, async (tx) => {
+            await assertCanOpenJob(existing.organizationId, {
+              excludeJobId: existing.id,
+              client: tx,
+            });
+            await tx.job.update({
+              where: { id: existing.id },
+              data: jobUpdateData,
+            });
+          });
+        } else {
+          await prisma.job.update({
+            where: { id: existing.id },
+            data: jobUpdateData,
+          });
+        }
+      } catch (error) {
+        if (isOrgPlanLimitError(error)) {
+          ctx.set.status = error.status;
+          return error.toBody();
+        }
+        throw error;
+      }
 
       await replaceRequirements(existing.id, ctx.body.requirements);
 
