@@ -1,34 +1,29 @@
-"use client";
-
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { CompanyShell } from "@/features/organization/components/company-shell";
+import { getMembershipByOrgSlug } from "@/features/organization/lib/org-access";
 
-export default function CompanyLayout({
+export default async function CompanyOrgLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ orgSlug: string }>;
 }) {
-  const { status } = useSession();
-  const router = useRouter();
+  const { orgSlug } = await params;
+  const session = await getServerSession(authOptions);
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/sign-in");
-    }
-  }, [status, router]);
-
-  if (status === "loading") {
-    return (
-      <div className="flex h-screen items-center justify-center bg-surface-base">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
-      </div>
+  if (!session?.user?.id) {
+    redirect(
+      `/sign-in?callbackUrl=${encodeURIComponent(`/company/${orgSlug}`)}`,
     );
   }
 
-  if (status === "unauthenticated") return null;
+  const access = await getMembershipByOrgSlug(orgSlug, session.user.id);
+  if (!access) {
+    notFound();
+  }
 
   return <CompanyShell>{children}</CompanyShell>;
 }
