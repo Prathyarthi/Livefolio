@@ -404,6 +404,7 @@ export function LedgerTemplate({ data }: AppProps) {
                       <TemplateProjectPreview
                         templateId="ledger"
                         liveUrl={project.liveUrl}
+                        imageUrl={project.imageUrl}
                         projectId={project.id}
                         livePreviewProjectIds={livePreviewProjectIds}
                         alt={project.title}

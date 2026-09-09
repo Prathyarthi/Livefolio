@@ -113,6 +113,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
             >
               <TemplateProjectPreview templateId="corporate"
                 liveUrl={project.liveUrl ?? null}
+                imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
                 alt={project.title}

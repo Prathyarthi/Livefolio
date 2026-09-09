@@ -6,6 +6,7 @@ import { AchievementForm } from "@/features/portfolio/components/achievement-for
 import { CustomSectionEditor } from "@/features/portfolio/components/custom-section-editor";
 import { EducationForm } from "@/features/portfolio/components/education-form";
 import { ExperienceForm } from "@/features/portfolio/components/experience-form";
+import { OpenToWorkToggle } from "@/features/portfolio/components/open-to-work-toggle";
 import { PortfolioForm } from "@/features/portfolio/components/portfolio-form";
 import { ProjectForm } from "@/features/portfolio/components/project-form";
 import { PublishButton } from "@/features/portfolio/components/publish-button";
@@ -17,6 +18,7 @@ export function EditStepContent({ step }: { step: EditStepValue }) {
     case "basic":
       return (
         <div className={`${EDIT_FORM_STACK_CLASS} [&_h3]:text-base`}>
+          <OpenToWorkToggle />
           <PortfolioForm />
         </div>
       );

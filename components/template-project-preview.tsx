@@ -6,6 +6,7 @@ import { getTemplateProjectPreviewConfig } from "@/features/templates/project-pr
 export type TemplateProjectPreviewProps = {
   templateId: string;
   liveUrl?: string | null;
+  imageUrl?: string | null;
   alt: string;
   projectId?: string;
   livePreviewProjectIds?: string[] | null;
@@ -20,8 +21,8 @@ export type TemplateProjectPreviewProps = {
 
 /**
  * Shared project preview for all portfolio templates.
- * Shows a Microlink screenshot when available; otherwise a themed placeholder
- * whose colors match the template via `project-preview-palettes`.
+ * Shows a live screenshot when enabled, then a stored thumbnail, then a
+ * themed placeholder whose colors match the template via `project-preview-palettes`.
  */
 export function TemplateProjectPreview({
   templateId,

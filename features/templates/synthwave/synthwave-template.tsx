@@ -102,6 +102,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                   <div className="relative border-b-2 border-[var(--lf-accent)]">
                     <TemplateProjectPreview templateId="synthwave"
                       liveUrl={project.liveUrl ?? null}
+                      imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
                       alt={project.title}

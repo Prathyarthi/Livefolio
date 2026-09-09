@@ -103,6 +103,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                   <div className="relative border-b border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)]">
                     <TemplateProjectPreview templateId="cyberpunk"
                       liveUrl={project.liveUrl ?? null}
+                      imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
                       alt={project.title}

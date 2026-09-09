@@ -78,6 +78,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                         <div className="relative flex flex-col overflow-hidden rounded-2xl border-4 border-[#264653] bg-white h-full">
                           <TemplateProjectPreview templateId="citrus"
                             liveUrl={project.liveUrl ?? null}
+                            imageUrl={project.imageUrl ?? null}
                             projectId={project.id}
                             livePreviewProjectIds={livePreviewProjectIds}
                             alt={project.title}

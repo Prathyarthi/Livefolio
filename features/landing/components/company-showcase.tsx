@@ -57,7 +57,17 @@ function CompanyRow({
   );
 }
 
-export function CompanyShowcase() {
+type CompanyShowcaseProps = {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+};
+
+export function CompanyShowcase({
+  eyebrow = "Our community",
+  title = "Where Livefolio talent makes an impact",
+  description = "Our community is part of teams across global enterprises, technology leaders, and growing startups.",
+}: CompanyShowcaseProps = {}) {
   return (
     <section
       aria-labelledby="company-showcase-heading"
@@ -66,17 +76,16 @@ export function CompanyShowcase() {
       <div className="mx-auto max-w-[1200px] px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="eyebrow uppercase">Our community</p>
+            <p className="eyebrow uppercase">{eyebrow}</p>
             <h2
               id="company-showcase-heading"
               className="mt-2 max-w-xl text-h2 text-text-primary"
             >
-              Where Livefolio talent makes an impact
+              {title}
             </h2>
           </div>
           <p className="max-w-sm text-body-sm text-text-secondary sm:text-right">
-            Our community is part of teams across global enterprises,
-            technology leaders, and growing startups.
+            {description}
           </p>
         </div>
       </div>

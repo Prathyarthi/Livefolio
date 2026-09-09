@@ -77,6 +77,19 @@ mock.module("@/lib/gemini", () => ({
   structureResumeWithAi,
 }));
 
+mock.module("@/lib/r2", () => ({
+  isR2Configured: () => false,
+  putObject: async () => {},
+  deleteObjectQuiet: async () => {},
+  deleteObject: async () => {},
+}));
+
+mock.module("@/features/uploads/server/stored-files", () => ({
+  persistResumePdf: async () => ({ id: "file-1" }),
+  resumeDownloadUrl: (id: string) => `http://localhost/api/uploads/${id}`,
+  attachLatestResumeToPortfolio: async () => {},
+}));
+
 const { resume } = await import("./route");
 
 function parseRequest(

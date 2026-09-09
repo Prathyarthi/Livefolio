@@ -113,6 +113,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
             >
               <TemplateProjectPreview templateId="minimal"
                 liveUrl={project.liveUrl ?? null}
+                imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
                 alt={project.title}

@@ -49,6 +49,15 @@ export const PRO_PRICING: Record<BillingInterval, PlanAmount> = {
   yearly: { usd: 70, inr: 5999 },
 };
 
+/** Company hiring (Org Pro) — separate from personal Livefolio Pro. */
+export const ORG_PRO_PRICING: Record<BillingInterval, PlanAmount> = {
+  monthly: { usd: 29, inr: 2499 },
+  quarterly: { usd: 79, inr: 6799 },
+  yearly: { usd: 290, inr: 24999 },
+};
+
+export const ORG_PAID_PLAN_SLUG = "org_pro" as const;
+
 export function getBillingPeriodSuffix(interval: BillingInterval): string {
   switch (interval) {
     case "monthly":
@@ -98,6 +107,15 @@ export function formatProPriceLabel(interval: BillingInterval): string {
   return `${price}${getBillingPeriodSuffix(interval)}`;
 }
 
+export function formatOrgProPriceLabel(interval: BillingInterval): string {
+  const amount = ORG_PRO_PRICING[interval];
+  const price =
+    BILLING_CURRENCY === "usd"
+      ? formatUsd(amount.usd)
+      : formatInr(amount.inr);
+  return `${price}${getBillingPeriodSuffix(interval)}`;
+}
+
 const yearlySavings = getProSavingsPercent("yearly") ?? 0;
 
 export const pricingPlans: PricingPlan[] = [
@@ -115,7 +133,8 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       { label: "Public portfolio at your Livefolio link", included: true },
       { label: "Resume, GitHub, and LeetCode imports during free month", included: true },
-      { label: "Editor, live preview, and publish", included: true },
+      { label: "Editor and publish", included: true },
+      { label: "Opt in so recruiters can find you — not shown on your Livefolio", included: true },
       { label: "All templates during free month", included: true },
     ],
   },
@@ -137,6 +156,7 @@ export const pricingPlans: PricingPlan[] = [
       { label: "Everything in Starter", included: true },
       { label: "Premium portfolio templates", included: true },
       { label: "Portfolio visit analytics", included: true },
+      { label: "Live project screenshots", included: true },
       { label: "Priority email support", included: true },
       { label: "Early access to more integrations and features", included: true },
     ],

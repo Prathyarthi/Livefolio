@@ -11,6 +11,7 @@ import {
 
 interface LivePreviewImageProps {
   liveUrl?: string | null;
+  imageUrl?: string | null;
   alt: string;
   projectId?: string;
   livePreviewProjectIds?: string[] | null;
@@ -27,6 +28,7 @@ interface LivePreviewImageProps {
 
 export function LivePreviewImage({
   liveUrl,
+  imageUrl,
   alt,
   projectId,
   livePreviewProjectIds,
@@ -40,6 +42,7 @@ export function LivePreviewImage({
   loading = "lazy",
 }: LivePreviewImageProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [liveFailed, setLiveFailed] = useState(false);
 
   const enabled =
     enabledProp ??
@@ -47,8 +50,13 @@ export function LivePreviewImage({
       ? isLivePreviewEnabledForProject(projectId, livePreviewProjectIds)
       : false);
 
-  const showPreview = enabled && Boolean(liveUrl?.trim()) && !imageFailed;
-  const src = showPreview ? getPreviewImage(liveUrl!) : undefined;
+  const liveSrc =
+    enabled && Boolean(liveUrl?.trim()) && !liveFailed
+      ? getPreviewImage(liveUrl!)
+      : undefined;
+  const customSrc =
+    !liveSrc && imageUrl?.trim() && !imageFailed ? imageUrl.trim() : undefined;
+  const src = liveSrc ?? customSrc;
 
   return (
     <div
@@ -64,7 +72,10 @@ export function LivePreviewImage({
           alt={alt}
           loading={loading}
           className={cn("block h-full w-full object-cover object-top", className)}
-          onError={() => setImageFailed(true)}
+          onError={() => {
+            if (liveSrc) setLiveFailed(true);
+            else setImageFailed(true);
+          }}
         />
       ) : (
         <ProjectPreviewPlaceholderGraphic

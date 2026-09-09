@@ -102,6 +102,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
             <article key={project.id} className={cn(PROJECT_CARD, "group flex flex-col")}>
               <TemplateProjectPreview templateId="monochrome"
                 liveUrl={project.liveUrl ?? null}
+                imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
                 alt={project.title}

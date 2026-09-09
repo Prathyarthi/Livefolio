@@ -20,6 +20,9 @@ export interface UserBillingProfile {
   subscriptionCurrentPeriodEnd?: Date | null;
 }
 
+export const FREE_PROJECT_THUMBNAILS = 3;
+export const PRO_PROJECT_THUMBNAILS = 12;
+
 export interface AccessSnapshot {
   tier: AccessTier;
   trialEndsAt: string;
@@ -28,6 +31,7 @@ export interface AccessSnapshot {
   canUseImports: boolean;
   canUseAnalytics: boolean;
   allowedTemplateIds: string[];
+  maxProjectThumbnails: number;
 }
 
 export function isProSubscription(
@@ -74,6 +78,10 @@ export function resolveAccessForUser(
   const allowedTemplateIds = canUsePremiumTemplates
     ? [...FREE_TEMPLATE_IDS, ...PREMIUM_TEMPLATE_IDS]
     : [...FREE_TEMPLATE_IDS];
+  const maxProjectThumbnails =
+    paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess)
+      ? PRO_PROJECT_THUMBNAILS
+      : FREE_PROJECT_THUMBNAILS;
 
   return {
     tier,
@@ -83,6 +91,7 @@ export function resolveAccessForUser(
     canUseImports,
     canUseAnalytics,
     allowedTemplateIds,
+    maxProjectThumbnails,
   };
 }
 

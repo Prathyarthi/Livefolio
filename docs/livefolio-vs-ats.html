@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Livefolio vs Greenhouse, Ashby, Lever — Recruiter positioning</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --surface: #171a21;
+      --raised: #1e232c;
+      --line: #2a3140;
+      --text: #f2f0ea;
+      --muted: #9aa3b2;
+      --accent: #5ee0c0;
+      --accent-dim: #5ee0c033;
+      --warn: #e8b86d;
+      --danger: #f07178;
+      --ok: #5ee0c0;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 48px 24px 80px; }
+    .eyebrow {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 8px;
+    }
+    h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.15; font-weight: 600; margin: 0 0 16px; }
+    h2 { font-size: 26px; margin: 56px 0 16px; font-weight: 600; }
+    h3 { font-size: 18px; margin: 0 0 8px; font-weight: 600; }
+    p, li { color: var(--muted); font-size: 16px; }
+    .lede { font-size: 20px; color: var(--text); max-width: 720px; }
+    .thesis {
+      margin-top: 28px;
+      padding: 20px 24px;
+      background: var(--accent-dim);
+      border: 1px solid #5ee0c055;
+      border-radius: 14px;
+    }
+    .thesis strong { color: var(--text); }
+    .grid { display: grid; gap: 16px; }
+    .flows { grid-template-columns: 1fr; }
+    @media (min-width: 900px) {
+      .flows { grid-template-columns: 1fr 1fr; }
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 22px 22px 8px;
+    }
+    .card.live { border-color: #5ee0c055; background: #15201c; }
+    ol.steps { margin: 0; padding: 0 0 12px 22px; }
+    ol.steps li { margin: 0 0 14px; }
+    ol.steps strong { color: var(--text); }
+    .note { font-size: 13px; color: var(--muted); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 13.5px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      background: var(--raised);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    th.lf { color: var(--accent); }
+    td { color: var(--muted); }
+    td.lf { color: var(--text); background: #15201c; }
+    .yes { color: var(--ok); }
+    .no { color: var(--danger); }
+    .partial { color: var(--warn); }
+    .scroll { overflow-x: auto; }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+    .pill {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+    .pill.on { border-color: #5ee0c055; color: var(--accent); }
+    footer { margin-top: 48px; font-size: 13px; color: #6b7380; }
+    .two { display: grid; gap: 16px; }
+    @media (min-width: 800px) { .two { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Internal positioning brief</p>
+    <h1>Livefolio vs Greenhouse, Ashby, Lever, and LinkedIn Recruiter</h1>
+    <p class="lede">
+      Those products run hiring as a process system. Livefolio runs hiring as
+      <em>proof of work</em> for one job. The unique factor is not another pipeline.
+      It is evidence, pulled from real integrations, so the work is actually looked at.
+    </p>
+    <div class="thesis">
+      <p style="margin:0;color:var(--text)">
+        <strong>Positioning:</strong> Greenhouse tells you whether the team followed a process.
+        LinkedIn tells you whether a profile contains keywords.
+        Livefolio tells you whether this applicant can <em>show the work</em> for this role —
+        GitHub, live projects, writing, tenure.
+      </p>
+    </div>
+
+    <h2>1. What each product actually is</h2>
+    <div class="grid two">
+      <div class="card">
+        <h3>Greenhouse</h3>
+        <p>Structured hiring ATS. Scorecards, interview kits, approvals, a huge HR integration marketplace. Built so every interviewer grades the same attributes. Candidate input is usually a parsed resume plus a long form.</p>
+      </div>
+      <div class="card">
+        <h3>Ashby</h3>
+        <p>All-in-one ATS + CRM + scheduling + analytics for growth teams. Fast apply, AI matching against the JD, visual pipelines. Still resume-in, score-out. Strong at recruiter ops, not at verifying shipped work.</p>
+      </div>
+      <div class="card">
+        <h3>Lever</h3>
+        <p>ATS + CRM. Relationship and nurture first. Recruiters source, drip, and convert a talent pool. The record is a person timeline. Proof of work is whatever is pasted into the resume or LinkedIn.</p>
+      </div>
+      <div class="card">
+        <h3>LinkedIn Recruiter / Wellfound</h3>
+        <p>Marketplaces. Search everyone, InMail, Easy Apply. Optimized for reach and keywords, not for a job-scoped evidence packet. Livefolio deliberately does the opposite: only people who applied to this job.</p>
+      </div>
+    </div>
+
+    <h2>2. Flow of execution</h2>
+    <p>Same seven beats exist everywhere. What moves through them is different.</p>
+    <div class="grid flows">
+      <div class="card">
+        <h3>Them — resume operating system</h3>
+        <ol class="steps">
+          <li><strong>Open a req.</strong> Job + scorecard attributes live in the ATS.</li>
+          <li><strong>Attract.</strong> Career page, job boards, LinkedIn Easy Apply, agency upload.</li>
+          <li><strong>Apply.</strong> PDF resume is parsed into fields. Maybe knockout questions. Maybe a cover letter.</li>
+          <li><strong>Screen.</strong> Keyword search, AI JD match, years in a text box. Recruiter opens a resume viewer.</li>
+          <li><strong>Interview.</strong> Structured kits (Greenhouse) or flexible stages (Ashby/Lever). Scorecards on opinions.</li>
+          <li><strong>Decide.</strong> Debrief, offer, HRIS. Work samples are optional attachments.</li>
+          <li><strong>System of record.</strong> The resume PDF + notes. If the GitHub or live site dies later, nobody knows.</li>
+        </ol>
+        <p class="note">Integrations here are plumbing: Calendar, Slack, Workday, Checkr, Zoom. They move the candidate. They do not inspect the work.</p>
+      </div>
+      <div class="card live">
+        <h3>Livefolio — evidence operating system</h3>
+        <ol class="steps">
+          <li><strong>Open a req.</strong> Job + structured requirements (skills, tenure, projects).</li>
+          <li><strong>Attract.</strong> Public job link. Apply with Livefolio — not Easy Apply emptiness.</li>
+          <li><strong>Apply.</strong> One click shares their Livefolio: experience, projects, live URLs, GitHub / Medium / LeetCode where connected, plus resume if they have one.</li>
+          <li><strong>Screen.</strong> Search only that job’s pool. Each requirement maps to evidence in their work. Pool coverage shows what the inbound set cannot prove.</li>
+          <li><strong>Look at the work.</strong> Open Livefolio, open the resume, open the live project. Compare 2–4 people on the same requirement rows.</li>
+          <li><strong>Move pipeline.</strong> Stages, shortlist, notes — enough to run a loop, not a full enterprise ATS.</li>
+          <li><strong>Share with hiring managers.</strong> They review the same evidence and links, not a keyworded PDF.</li>
+        </ol>
+        <p class="note">Integrations here are proof: GitHub, live sites, writing, problem-solving. They make the work inspectable.</p>
+      </div>
+    </div>
+
+    <h2>3. Comparison chart</h2>
+    <p>Read the Livefolio column as the wedge. Do not claim we replace Greenhouse’s interview kit or Ashby’s scheduling. Claim we replace “resume as the unit of evaluation.”</p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>Greenhouse</th>
+            <th>Ashby</th>
+            <th>Lever</th>
+            <th>LinkedIn Recruiter</th>
+            <th class="lf">Livefolio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Unit of evaluation</td>
+            <td>Parsed resume + scorecard</td>
+            <td>Resume + AI JD score</td>
+            <td>Resume + relationship timeline</td>
+            <td>Public profile keywords</td>
+            <td class="lf"><span class="yes">Livefolio identity: projects, live URLs, and connected work</span></td>
+          </tr>
+          <tr>
+            <td>Who you search</td>
+            <td>Applicants in the ATS</td>
+            <td>Applicants + CRM pool</td>
+            <td>Applicants + nurtured pool</td>
+            <td>The whole network</td>
+            <td class="lf"><span class="yes">Only people who applied to this job</span></td>
+          </tr>
+          <tr>
+            <td>How a match is proven</td>
+            <td>Self-reported form fields, resume text</td>
+            <td>AI overlap with JD text</td>
+            <td>Recruiter judgment on resume</td>
+            <td>Headline / skills list</td>
+            <td class="lf"><span class="yes">Requirement → project, tenure, skill, publication evidence</span></td>
+          </tr>
+          <tr>
+            <td>Integrations for</td>
+            <td>HRIS, calendar, background check</td>
+            <td>Scheduling, analytics, sourcing</td>
+            <td>Nurture, LinkedIn import</td>
+            <td>InMail, Easy Apply</td>
+            <td class="lf"><span class="yes">GitHub, live URLs, Medium, LeetCode, resume PDF — to inspect work</span></td>
+          </tr>
+          <tr>
+            <td>Work still exists?</td>
+            <td class="no">No</td>
+            <td class="no">No</td>
+            <td class="no">No</td>
+            <td class="partial">Profile may link out; recruiter has to chase it</td>
+            <td class="lf"><span class="yes">Recruiter opens the live site, repo, and Livefolio from the application</span></td>
+          </tr>
+          <tr>
+            <td>Pool-level insight</td>
+            <td>Funnel metrics, source ROI</td>
+            <td>Deep recruiting analytics</td>
+            <td>Pipeline + nurture stats</td>
+            <td>Boolean search counts</td>
+            <td class="lf"><span class="yes">Pool coverage: which requirements nobody can prove</span></td>
+          </tr>
+          <tr>
+            <td>Compare candidates</td>
+            <td>Side-by-side resumes / scorecards</td>
+            <td>List + scores</td>
+            <td>Profiles in a stage</td>
+            <td>Open tabs of profiles</td>
+            <td class="lf"><span class="yes">Same requirement rows, evidence on / off, Livefolio + resume</span></td>
+          </tr>
+          <tr>
+            <td>Interview kits &amp; scorecards</td>
+            <td class="yes">Best in class</td>
+            <td class="partial">Strong, configurable</td>
+            <td class="partial">Lighter</td>
+            <td class="no">No</td>
+            <td class="lf"><span class="partial">Pipeline stages only — not the battleground</span></td>
+          </tr>
+          <tr>
+            <td>Scheduling / CRM nurture</td>
+            <td class="partial">Via partners</td>
+            <td class="yes">Native</td>
+            <td class="yes">Native CRM</td>
+            <td class="partial">InMail sequences</td>
+            <td class="lf"><span class="no">Out of scope on purpose</span></td>
+          </tr>
+          <tr>
+            <td>Enterprise HRIS depth</td>
+            <td class="yes">400+ integrations</td>
+            <td class="partial">Modern API</td>
+            <td class="partial">Solid</td>
+            <td class="no">Not an ATS</td>
+            <td class="lf"><span class="no">Not competing here</span></td>
+          </tr>
+          <tr>
+            <td>Candidate apply friction</td>
+            <td>Long forms, resume re-key</td>
+            <td>Short apply + resume</td>
+            <td>Resume + cover letter</td>
+            <td>Easy Apply, often empty</td>
+            <td class="lf"><span class="yes">One identity they already maintain</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>4. How we are unique (say this, not the ATS checklist)</h2>
+    <div class="grid two">
+      <div class="card live">
+        <h3>Evidence, not keywords</h3>
+        <p>A Greenhouse knockout question is “Do you have 5 years of Python?” Livefolio checks dated work history and project tech stacks, then shows the proof row. Ashby’s AI score is still JD-text overlap. We attach the work.</p>
+      </div>
+      <div class="card live">
+        <h3>Integrations that inspect work</h3>
+        <p>Their integrations connect tools recruiters already own. Ours connect artifacts candidates already shipped: GitHub, live product URLs, writing, LeetCode, original resume. That is why a recruiter can actually look at the work.</p>
+      </div>
+      <div class="card live">
+        <h3>Job-scoped, not a marketplace</h3>
+        <p>LinkedIn Recruiter’s power is browsing everyone. That is also the spam and the keyword theater. Livefolio only searches people who applied to this role. High signal, no “hunt the network.”</p>
+      </div>
+      <div class="card live">
+        <h3>Pool coverage</h3>
+        <p>ATS analytics count funnel stages. Livefolio counts proof: which requirements nobody in this inbound pool can show. Hiring managers change the JD or the sourcing channel, not another keyword boolean.</p>
+      </div>
+    </div>
+
+    <h2>5. What we should never pretend to be</h2>
+    <p>
+      Do not sell against Greenhouse on interview kits, Ashby on scheduling analytics, or Lever on nurture campaigns.
+      Those are mature process products. Selling “we are a lighter ATS” makes us a worse Ashby.
+      Selling “we make the work visible for this job” makes us a category they cannot clone without owning the candidate identity.
+    </p>
+    <div class="pills">
+      <span class="pill on">Apply with Livefolio</span>
+      <span class="pill on">Requirement evidence</span>
+      <span class="pill on">Work integrations</span>
+      <span class="pill on">Pool coverage gaps</span>
+      <span class="pill">Not: full ATS</span>
+      <span class="pill">Not: LinkedIn search</span>
+      <span class="pill">Not: generic AI resume score</span>
+    </div>
+
+    <footer>
+      Sources for competitor flows: public product positioning of
+      <a href="https://www.greenhouse.com/" style="color:#9aa3b2">Greenhouse</a> structured hiring,
+      <a href="https://www.ashbyhq.com/" style="color:#9aa3b2">Ashby</a> all-in-one ATS,
+      <a href="https://www.lever.co/" style="color:#9aa3b2">Lever</a> ATS+CRM,
+      and LinkedIn Recruiter as a network search product.
+      Livefolio column reflects the current recruiter product (job-scoped pool, evidence, compare, pool coverage, Livefolio + resume).
+    </footer>
+  </div>
+</body>
+</html>

@@ -170,6 +170,7 @@ export const rootMetadata: Metadata = {
 /** Public marketing routes included in sitemap.xml */
 export const PUBLIC_SITEMAP_ROUTES = [
   { path: "/", changeFrequency: "weekly" as const, priority: 1 },
+  { path: "/recruiters", changeFrequency: "weekly" as const, priority: 0.9 },
   { path: "/pricing", changeFrequency: "weekly" as const, priority: 0.9 },
   { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7 },
   { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3 },

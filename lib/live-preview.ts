@@ -1,19 +1,20 @@
-export const FREE_TRIAL_MAX_LIVE_PREVIEWS = 2;
+export const FREE_MAX_LIVE_PREVIEWS = 0;
 export const ACTIVE_MAX_LIVE_PREVIEWS = 50;
 
-export function getMaxLivePreviews(
-  subscriptionStatus: string | null | undefined
-): number {
-  if ((subscriptionStatus ?? "").toLowerCase() === "active") {
-    return ACTIVE_MAX_LIVE_PREVIEWS;
-  }
-  return FREE_TRIAL_MAX_LIVE_PREVIEWS;
-}
+export const FREE_TRIAL_MAX_LIVE_PREVIEWS = FREE_MAX_LIVE_PREVIEWS;
 
 export function isProSubscriptionStatus(
   subscriptionStatus: string | null | undefined
 ): boolean {
   return (subscriptionStatus ?? "").toLowerCase() === "active";
+}
+
+export function getMaxLivePreviews(
+  subscriptionStatus: string | null | undefined
+): number {
+  return isProSubscriptionStatus(subscriptionStatus)
+    ? ACTIVE_MAX_LIVE_PREVIEWS
+    : FREE_MAX_LIVE_PREVIEWS;
 }
 
 export function isLivePreviewEnabledForProject(
@@ -29,6 +30,8 @@ export function sanitizeLivePreviewProjectIds(
   projects: Array<{ id: string; liveUrl: string | null }>,
   maxAllowed: number
 ): string[] {
+  if (maxAllowed <= 0) return [];
+
   const eligible = new Set(
     projects
       .filter((project) => project.liveUrl?.trim())
