@@ -3,5 +3,8 @@
  * follows an https NEXTAUTH_URL.
  */
 export function shouldUseSecureCookies() {
-  return process.env.NEXTAUTH_URL?.startsWith("https://") === true;
+  return (
+    process.env.NEXTAUTH_URL?.startsWith("https://") === true ||
+    process.env.VERCEL === "1"
+  );
 }

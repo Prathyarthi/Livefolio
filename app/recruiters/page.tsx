@@ -7,7 +7,6 @@ import { RecruiterDifferentiation } from "@/features/landing/components/recruite
 import { RecruiterPricing } from "@/features/landing/components/recruiter-pricing";
 import { RecruiterFAQ } from "@/features/landing/components/recruiter-faq";
 import { RecruiterCTA } from "@/features/landing/components/recruiter-cta";
-import { Footer } from "@/features/landing/components/footer";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
@@ -45,8 +44,6 @@ export default function RecruitersLandingPage() {
             <RecruiterFAQ />
             <RecruiterCTA />
           </main>
-
-          <Footer />
         </div>
       </div>
     </>
