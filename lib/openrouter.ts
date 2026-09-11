@@ -36,14 +36,25 @@ type OpenRouterCachedMessage = {
 };
 
 function extractMessageText(
-  content: string | OpenRouterTextContentBlock[] | null | undefined,
+  content: string | ReadonlyArray<{ text?: string | null }> | null | undefined,
 ): string {
   if (!content) return "";
   if (typeof content === "string") return content.trim();
   return content
-    .map((block) => block.text)
+    .map((block) => block.text ?? "")
     .join("")
     .trim();
+}
+
+function isChatCompletion(
+  value: unknown,
+): value is { choices: Array<{ message?: { content?: string | ReadonlyArray<{ text?: string | null }> | null } }> } {
+  return (
+    typeof value === "object"
+    && value !== null
+    && "choices" in value
+    && Array.isArray((value as { choices: unknown }).choices)
+  );
 }
 
 export function getOpenRouterFallbackModels(): string[] {
@@ -85,6 +96,7 @@ export async function generateOpenRouterText({
 
   const completion = await client.chat.send({
     chatRequest: {
+      stream: false,
       models: fallbackModels,
       messages,
       temperature,
@@ -95,7 +107,11 @@ export async function generateOpenRouterText({
     },
   });
 
-  const text = completion.choices[0]?.message?.content?.trim() ?? "";
+  if (!isChatCompletion(completion)) {
+    throw new Error("OpenRouter returned a stream instead of a chat completion");
+  }
+
+  const text = extractMessageText(completion.choices[0]?.message?.content);
 
   if (!text) {
     throw new Error("OpenRouter returned an empty response");
@@ -106,7 +122,7 @@ export async function generateOpenRouterText({
 
 /**
  * Resume parsing via OpenRouter with a cacheable static system prompt.
- * Uses a single model, no provider ordering (sticky routing for cache hits).
+ * Tries OPENROUTER_CHAT_MODEL first, then OPENROUTER_FALLBACK_MODELS.
  */
 export async function generateOpenRouterResumeText(
   resumeText: string,
@@ -114,6 +130,9 @@ export async function generateOpenRouterResumeText(
   options?: { signal?: AbortSignal },
 ): Promise<string> {
   const model = getOpenRouterModel();
+  const fallbackModels = getOpenRouterFallbackModels().filter(
+    (fallback) => fallback !== model,
+  );
 
   const messages: OpenRouterCachedMessage[] = [
     {
@@ -147,6 +166,7 @@ export async function generateOpenRouterResumeText(
     },
     body: JSON.stringify({
       model,
+      ...(fallbackModels.length > 0 ? { models: fallbackModels } : {}),
       session_id: RESUME_PARSE_SESSION_ID,
       messages,
       temperature: 0.2,
