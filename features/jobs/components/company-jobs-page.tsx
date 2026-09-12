@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ExternalLink, Plus } from "lucide-react";
+import { Plus, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useOrgJobs } from "@/features/jobs/api/use-jobs";
@@ -118,11 +119,19 @@ export default function CompanyJobsPage() {
                   </Link>
                 </Button>
                 {(job.status === "published" || job.status === "paused") && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/jobs/${job.slug}`} target="_blank">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Public page
-                    </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(
+                        `${origin}/jobs/${job.slug}`,
+                      );
+                      toast.success("Link copied");
+                    }}
+                  >
+                    <Share2 className="h-3.5 w-3.5" />
+                    Share
                   </Button>
                 )}
                 <Button variant="outline" size="sm" asChild>
@@ -132,9 +141,14 @@ export default function CompanyJobsPage() {
                 </Button>
               </div>
               {(job.status === "published" || job.status === "paused") && (
-                <p className="w-full truncate text-mono text-xs text-text-muted">
+                <a
+                  href={`/jobs/${job.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full truncate text-mono text-xs text-text-muted hover:text-brand-secondary hover:underline"
+                >
                   {origin}/jobs/{job.slug}
-                </p>
+                </a>
               )}
             </li>
           ))}
