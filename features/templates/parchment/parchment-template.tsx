@@ -142,7 +142,9 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           <h3 className="text-2xl font-black uppercase">{exp.role}</h3>
                           <div className="flex justify-between items-baseline mt-2">
                             <p className="text-xl font-bold italic text-[var(--lf-accent)]">{exp.company}</p>
-                            <span className="font-bold tracking-widest uppercase text-sm">{formatDateRange(exp.startDate, exp.endDate)}</span>
+                            {formatDateRange(exp.startDate, exp.endDate) && (
+                              <span className="font-bold tracking-widest uppercase text-sm">{formatDateRange(exp.startDate, exp.endDate)}</span>
+                            )}
                           </div>
                         </div>
                         {exp.description && (

@@ -71,11 +71,11 @@ interface AppProps {
 
 // ---- helpers -------------------------------------------------------------
 
-function displayYear(date: string | null, fallback = "N/A"): string {
-  if (!date) return fallback;
+function displayYear(date: string | null): string {
+  if (!date) return "";
   const parsed = new Date(date);
   if (!Number.isNaN(parsed.getTime())) return String(parsed.getFullYear());
-  return date.slice(0, 4) || fallback;
+  return date.slice(0, 4) || "";
 }
 
 /** Initials from the first two words of a display name (e.g. "Akshai Kumar" → "AK"). */
@@ -271,17 +271,18 @@ export function LedgerTemplate({ data }: AppProps) {
                       id={`exp-content-${exp.id}`}
                     >
                       <div className="space-y-3 border-b border-slate-800 pb-4">
-                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start justify-between gap-3">
                           <h3 className="min-w-0 flex-1 text-base @sm:text-lg font-mono font-bold uppercase break-words">
                             <span style={{ color: primaryColor }}>{exp.role}</span>
                           </h3>
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-slate-900 border border-slate-800 text-xs text-slate-400 font-mono shrink-0">
-                            <Calendar className="w-3.5 h-3.5" style={{ color: primaryColor }} />
-                            <span className="whitespace-nowrap">
-                              {formatDateRange(exp.startDate, exp.endDate)?.toUpperCase() ||
-                                "N/A"}
-                            </span>
-                          </div>
+                          {formatDateRange(exp.startDate, exp.endDate) && (
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-slate-900 border border-slate-800 text-xs text-slate-400 font-mono shrink-0">
+                              <Calendar className="w-3.5 h-3.5" style={{ color: primaryColor }} />
+                              <span className="whitespace-nowrap">
+                                {formatDateRange(exp.startDate, exp.endDate)?.toUpperCase()}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 font-mono text-sm text-white uppercase tracking-wide w-full">
                           <span className="text-slate-500 font-normal shrink-0">@</span>
@@ -749,9 +750,13 @@ export function LedgerTemplate({ data }: AppProps) {
                       </div>
 
                       <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-800/60 text-xs font-mono text-slate-500 uppercase">
-                        <span>
-                          {displayYear(edu.endDate)}
-                        </span>
+                        {displayYear(edu.endDate || edu.startDate) ? (
+                          <span>
+                            {displayYear(edu.endDate || edu.startDate)}
+                          </span>
+                        ) : (
+                          <span />
+                        )}
                         {edu.gpa && (
                           <span className="px-2 py-0.5 rounded-none bg-slate-900 border border-slate-800 text-[var(--lf-accent)] font-bold">
                             GPA {edu.gpa}

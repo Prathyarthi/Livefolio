@@ -110,15 +110,15 @@ const jetBrainsMono = JetBrains_Mono({
   variable: "--font-pulse-mono",
 });
 
-function displayDate(dateStr: string | null, fallback = "N/A"): string {
-  return formatDate(dateStr) || fallback;
+function displayDate(dateStr: string | null): string {
+  return formatDate(dateStr);
 }
 
-function displayYear(dateStr: string | null, fallback = "N/A"): string {
-  if (!dateStr) return fallback;
+function displayYear(dateStr: string | null): string {
+  if (!dateStr) return "";
   const date = new Date(dateStr);
   if (!Number.isNaN(date.getTime())) return String(date.getFullYear());
-  return dateStr.split("-")[0] || fallback;
+  return dateStr.split("-")[0] || "";
 }
 
 /** experiences/educations duration calc — guards against a missing start date. */
@@ -367,10 +367,8 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                   buttonClassName="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-mono text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
                 >
                   {orderedExperiences.map((exp) => {
-                    const bulletPoints = (exp.description ?? "")
-                      .split("\n")
-                      .filter((p) => p.trim().length > 0);
                     const duration = getDuration(exp.startDate, exp.endDate);
+                    const dateRange = formatDateRange(exp.startDate, exp.endDate);
                     return (
                       <div key={exp.id} className="relative group" id={`experience-card-${exp.id}`}>
 
@@ -390,20 +388,23 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                               <h4 className="min-w-0 flex-1 font-display text-base @sm:text-lg font-bold text-white group-hover:text-slate-200 transition-colors break-words">
                                 {exp.role}
                               </h4>
-                              {/* Period Tag — sits beside title so company can use full width below */}
-                              <div className="inline-flex items-start gap-2 text-xs font-mono text-slate-500 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-md shrink-0">
-                                <Calendar className="h-3 w-3 shrink-0 mt-0.5" />
-                                <div className="flex flex-col gap-0.5">
-                                  <span className="whitespace-nowrap text-slate-400">
-                                    {formatDateRange(exp.startDate, exp.endDate) || "N/A"}
-                                  </span>
-                                  {duration && (
-                                    <span className="text-slate-400 whitespace-nowrap">
-                                      {duration}
-                                    </span>
-                                  )}
+                              {(dateRange || duration) && (
+                                <div className="inline-flex items-start gap-2 text-xs font-mono text-slate-500 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-md shrink-0">
+                                  <Calendar className="h-3 w-3 shrink-0 mt-0.5" />
+                                  <div className="flex flex-col gap-0.5">
+                                    {dateRange && (
+                                      <span className="whitespace-nowrap text-slate-400">
+                                        {dateRange}
+                                      </span>
+                                    )}
+                                    {duration && (
+                                      <span className="text-slate-400 whitespace-nowrap">
+                                        {duration}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
+                              )}
                             </div>
                             <span
                               className="block w-full font-sans text-sm font-semibold transition-colors"
@@ -421,20 +422,13 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                             </div>
                           )}
 
-                          {/* Decoded Bullet Points */}
-                          {bulletPoints.length > 0 && (
-                            <CollapsibleList
-                              initial={3}
-                              wrapperClassName="space-y-3 pt-1"
-                              buttonClassName="mt-1 text-xs font-mono text-slate-400 hover:text-white transition-colors"
-                            >
-                              {bulletPoints.map((point, pIdx) => (
-                                <div key={pIdx} className="flex gap-3 text-sm text-slate-400 leading-relaxed">
-                                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-700 group-hover:bg-slate-400 transition-colors" />
-                                  <span>{point}</span>
-                                </div>
-                              ))}
-                            </CollapsibleList>
+                          {exp.description && (
+                            <DescriptionBlock
+                              text={exp.description}
+                              paragraphClassName="font-sans text-sm text-slate-400 leading-relaxed"
+                              listClassName="space-y-2 pl-5 font-sans text-sm text-slate-400 leading-relaxed marker:text-slate-600"
+                              headingClassName="font-sans text-sm font-semibold text-slate-300"
+                            />
                           )}
                         </div>
                       </div>
@@ -481,12 +475,14 @@ function EducationSection({ educations, primaryColor, labels }: EducationSection
                     <h4 className="font-display text-base font-bold text-white">
                       {edu.degree}
                     </h4>
-                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-500 bg-[#0a0a0a]/80 px-2 py-0.5 rounded border border-white/10">
-                      <Calendar className="h-3 w-3" />
-                      <span>
-                        {displayYear(edu.endDate)}
-                      </span>
-                    </div>
+                    {displayYear(edu.endDate || edu.startDate) && (
+                      <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-500 bg-[#0a0a0a]/80 px-2 py-0.5 rounded border border-white/10">
+                        <Calendar className="h-3 w-3" />
+                        <span>
+                          {displayYear(edu.endDate || edu.startDate)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   {edu.field && (
                     <p className="font-sans text-sm text-slate-400 font-medium">

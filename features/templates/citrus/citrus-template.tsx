@@ -131,9 +131,11 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                             <h3 className="text-2xl font-black text-[#264653] uppercase">{exp.role}</h3>
                             <p className="text-xl font-bold text-[var(--lf-accent)] mt-1">{exp.company}</p>
                           </div>
-                          <span className="bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)] text-[#264653] px-4 py-2 font-bold uppercase tracking-widest border-2 border-[#264653] rounded">
-                            {formatDateRange(exp.startDate, exp.endDate)}
-                          </span>
+                          {formatDateRange(exp.startDate, exp.endDate) && (
+                            <span className="bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)] text-[#264653] px-4 py-2 font-bold uppercase tracking-widest border-2 border-[#264653] rounded">
+                              {formatDateRange(exp.startDate, exp.endDate)}
+                            </span>
+                          )}
                         </div>
                         {exp.description && (
                           <DescriptionBlock text={exp.description} paragraphClassName="text-[#264653]/90 text-lg leading-relaxed font-medium" />

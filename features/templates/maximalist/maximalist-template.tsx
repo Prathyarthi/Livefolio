@@ -74,8 +74,8 @@ function getInitials(title: string): string {
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 }
 
-function displayDate(dateStr: string | null, fallback = "N/A"): string {
-  return formatDate(dateStr) || fallback;
+function displayDate(dateStr: string | null): string {
+  return formatDate(dateStr);
 }
 
 
@@ -191,7 +191,8 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
               buttonClassName="mt-8 w-full py-3 bg-black border-4 border-white font-mono text-xs font-black uppercase text-white hover:bg-[var(--lf-accent)] hover:text-black transition-colors neo-shadow"
             >
               {experiences.map((exp, index) => {
-                const isCurrent = exp.endDate === null;
+                const isCurrent = Boolean(exp.startDate) && exp.endDate === null;
+                const dateRange = formatDateRange(exp.startDate, exp.endDate);
 
                 const cardStyle = index === 0
                   ? 'bg-white text-black sm:rotate-[-1deg] hover:rotate-0 transition-transform duration-300 border-4 border-black neo-shadow-white'
@@ -230,14 +231,16 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 font-mono text-xs">
-                          <div className="bg-black text-white px-3 py-1.5 font-bold flex items-center gap-2 border border-white">
-                            <Calendar className="w-3.5 h-3.5 text-[var(--lf-accent)]" />
-                            <span>
-                              {formatDateRange(exp.startDate, exp.endDate) || "N/A"}
-                            </span>
+                        {dateRange && (
+                          <div className="flex items-center gap-3 font-mono text-xs">
+                            <div className="bg-black text-white px-3 py-1.5 font-bold flex items-center gap-2 border border-white">
+                              <Calendar className="w-3.5 h-3.5 text-[var(--lf-accent)]" />
+                              <span>
+                                {dateRange}
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       {exp.description && (
@@ -1097,7 +1100,9 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
             {sortExperiencesNewestFirst(data.experiences).map((exp) => (
               <div key={exp.id} className="border-l-2 border-[var(--lf-accent)] pl-2">
                 <div className="font-bold text-[var(--lf-accent)]">{exp.company} — {exp.role}</div>
-                <div className="text-slate-400 text-[11px]">{formatDateRange(exp.startDate, exp.endDate) || "N/A"}</div>
+                {formatDateRange(exp.startDate, exp.endDate) && (
+                  <div className="text-slate-400 text-[11px]">{formatDateRange(exp.startDate, exp.endDate)}</div>
+                )}
                 <div className="text-slate-300 mt-1 text-[11px] whitespace-pre-line">{exp.description}</div>
               </div>
             ))}
@@ -1148,9 +1153,7 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
             <div className="text-[var(--lf-accent)] font-bold">CONTACT DIRECT:</div>
             {data.portfolio.contactEmail ? (
               <div>Email: <a href={`mailto:${data.portfolio.contactEmail}`} className="text-[var(--lf-accent)] underline">{data.portfolio.contactEmail}</a></div>
-            ) : (
-              <div>Email: N/A</div>
-            )}
+            ) : null}
             {data.portfolio.phone && <div>Phone: {data.portfolio.phone}</div>}
             {data.portfolio.location && <div>Location: {data.portfolio.location}</div>}
           </div>
