@@ -134,7 +134,7 @@ export function LeetCodeImporter() {
                     <span className="h-3 w-3 rounded-full bg-green-500" />
                     Easy
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-text-muted">
                     {stats.easySolved} / ~{TOTAL_EASY}
                   </span>
                 </div>
@@ -154,7 +154,7 @@ export function LeetCodeImporter() {
                     <span className="h-3 w-3 rounded-full bg-yellow-500" />
                     Medium
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-text-muted">
                     {stats.mediumSolved} / ~{TOTAL_MEDIUM}
                   </span>
                 </div>
@@ -174,7 +174,7 @@ export function LeetCodeImporter() {
                     <span className="h-3 w-3 rounded-full bg-red-500" />
                     Hard
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-text-muted">
                     {stats.hardSolved} / ~{TOTAL_HARD}
                   </span>
                 </div>

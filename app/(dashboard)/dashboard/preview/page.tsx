@@ -195,14 +195,14 @@ export default function PreviewPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-text-muted" />
       </div>
     );
   }
 
   if (!portfolio) {
     return (
-      <div className="mx-auto max-w-xl space-y-6">
+      <div className="w-full max-w-2xl space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-h3 text-text-primary">
@@ -361,7 +361,7 @@ export default function PreviewPage() {
             ) : null}
         </div>
 
-        <div className="-mx-[var(--space-5)] flex min-h-0 flex-1 flex-col overflow-hidden bg-surface-sunken sm:mx-0 sm:rounded-[var(--radius-lg)] sm:border sm:border-border-default sm:p-3 sm:shadow-[var(--shadow-modal)]">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-sunken p-3 shadow-[var(--shadow-modal)]">
           <div
             className={cn(
               "@container mx-auto min-h-0 min-w-0 w-full flex-1 overflow-x-clip overflow-y-auto bg-surface-base transition-[max-width] duration-200 ease-[var(--ease-out)] sm:rounded-[var(--radius-md)]",

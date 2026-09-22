@@ -38,7 +38,7 @@ export default async function AdminOverviewPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow uppercase">Snapshot</p>
-          <h1 className="mt-2 text-h1 text-text-primary">Overview</h1>
+          <h1 className="mt-2 text-h2 text-text-primary">Overview</h1>
           <p className="mt-1 text-body-sm text-text-secondary">
             Live counts from the database.
           </p>

@@ -22,13 +22,13 @@ export default function CompanyOverviewPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading workspace…</div>
+      <div className="text-body-sm text-text-muted">Loading workspace…</div>
     );
   }
 
   if (error || !org) {
     return (
-      <div className="p-8">
+      <div>
         <h1 className="text-h3 text-text-primary">Workspace not found</h1>
         <p className="mt-2 text-body-sm text-text-secondary">
           You may not have access to this company workspace.
@@ -43,7 +43,7 @@ export default function CompanyOverviewPage() {
   const recentJobs = (jobs ?? []).slice(0, 5);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-4xl space-y-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <p className="eyebrow uppercase">Overview</p>

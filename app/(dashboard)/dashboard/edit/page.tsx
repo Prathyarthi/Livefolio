@@ -74,7 +74,7 @@ function EditPortfolioPageContent() {
 
   if (!portfolio) {
     return (
-      <div className="mx-auto max-w-xl space-y-6">
+      <div className="w-full max-w-2xl space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-h3 text-text-primary">
@@ -101,7 +101,7 @@ function EditPortfolioPageContent() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-h2 text-text-primary">Edit portfolio</h1>
-            <p className="mt-1 max-w-2xl text-body-sm text-text-secondary lg:hidden">
+            <p className="mt-1 max-w-2xl text-body-sm text-text-secondary">
               Work through one section at a time. Use the progress tracker to jump
               between steps.
             </p>
@@ -138,25 +138,6 @@ function EditPortfolioPageContent() {
 
       <Separator className="mt-6" />
 
-      <div className="shrink-0 py-4">
-        <FlowFooter
-          className="border-0 p-0"
-          message={null}
-          previous={
-            activeIndex <= 0
-              ? { href: "/dashboard", label: "Back to Overview" }
-              : {
-                  label: `Previous: ${previousStep?.label ?? "section"}`,
-                  onClick: goPrevious,
-                }
-          }
-          next={{
-            label: nextStep ? `Next: ${nextStep.label}` : "Next: Templates",
-            onClick: goNext,
-          }}
-        />
-      </div>
-
       <div className="flex min-h-0 w-full flex-1 flex-col lg:flex-row lg:gap-0 lg:overflow-hidden">
         <aside className={DASHBOARD_TRACKER_ASIDE_CLASS}>
           <EditStepTracker
@@ -185,6 +166,25 @@ function EditPortfolioPageContent() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="shrink-0 pt-4">
+        <FlowFooter
+          className="border-0 p-0"
+          message={null}
+          previous={
+            activeIndex <= 0
+              ? { href: "/dashboard", label: "Back to Overview" }
+              : {
+                  label: `Previous: ${previousStep?.label ?? "section"}`,
+                  onClick: goPrevious,
+                }
+          }
+          next={{
+            label: nextStep ? `Next: ${nextStep.label}` : "Next: Templates",
+            onClick: goNext,
+          }}
+        />
       </div>
     </div>
   );

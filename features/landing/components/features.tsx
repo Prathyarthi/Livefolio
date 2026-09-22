@@ -49,8 +49,8 @@ export function Features() {
               key={title}
               className="gap-0 p-[var(--space-5)] transition-all duration-200 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:border-border-strong"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] bg-brand-light">
-                <Icon className="h-6 w-6 text-brand-primary" aria-hidden />
+              <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] bg-brand-fill/12">
+                <Icon className="h-6 w-6 text-brand-secondary" aria-hidden />
               </span>
               <h3 className="mt-5 text-h3 text-text-primary">{title}</h3>
               <p className="mt-2 text-body-sm text-text-secondary">{body}</p>

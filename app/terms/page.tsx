@@ -4,6 +4,10 @@ import { MarketingPageShell } from "@/features/landing/components/marketing-page
 import { LegalDocument } from "@/features/landing/components/legal-document";
 import { siteConfig } from "@/lib/site";
 import { createPageMetadata } from "@/lib/seo";
+import {
+  marketingVariantFrom,
+  withHiringFrom,
+} from "@/lib/auth-callback";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Terms & Conditions",
@@ -12,9 +16,16 @@ export const metadata: Metadata = createPageMetadata({
   openGraphType: "article",
 });
 
-export default function TermsPage() {
+export default async function TermsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const { from } = await searchParams;
+  const variant = marketingVariantFrom(from);
+
   return (
-    <MarketingPageShell>
+    <MarketingPageShell variant={variant}>
       <LegalDocument title="Terms & Conditions" lastUpdated="June 22, 2026">
         <p>
           These Terms &amp; Conditions (&quot;Terms&quot;) govern your access to and
@@ -132,7 +143,11 @@ export default function TermsPage() {
         <p>
           Questions about these Terms? Email{" "}
           <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>{" "}
-          or visit <Link href="/contact">Contact / Support</Link>.
+          or visit{" "}
+          <Link href={variant === "recruiter" ? withHiringFrom("/contact") : "/contact"}>
+            Contact / Support
+          </Link>
+          .
         </p>
       </LegalDocument>
     </MarketingPageShell>

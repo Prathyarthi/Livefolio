@@ -170,10 +170,10 @@ export function MediumImporter() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">{data.name}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-text-muted">
                     @{data.username}
                   </p>
-                  <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 mt-1 text-sm text-text-muted">
                     <span>{data.articles.length} articles</span>
                   </div>
                 </div>
@@ -238,19 +238,19 @@ export function MediumImporter() {
                               {article.title}
                             </p>
                             {article.description && (
-                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              <p className="text-xs text-text-muted mt-1 line-clamp-2">
                                 {article.description}
                               </p>
                             )}
                             <div className="flex items-center gap-3 mt-2 flex-wrap">
                               {article.publishedAt && (
-                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1 text-xs text-text-muted">
                                   <Calendar className="h-3 w-3" />
                                   {formatDate(article.publishedAt)}
                                 </span>
                               )}
                               {article.readTime && (
-                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1 text-xs text-text-muted">
                                   <Clock className="h-3 w-3" />
                                   {article.readTime} min read
                                 </span>
@@ -268,7 +268,7 @@ export function MediumImporter() {
                                   </Badge>
                                 ))}
                                 {article.tags.length > 3 && (
-                                  <span className="text-xs text-muted-foreground">
+                                  <span className="text-xs text-text-muted">
                                     +{article.tags.length - 3} more
                                   </span>
                                 )}

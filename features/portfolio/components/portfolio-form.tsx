@@ -181,7 +181,7 @@ export function PortfolioForm() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -251,7 +251,7 @@ export function PortfolioForm() {
                   htmlFor="contactEmail"
                   unsaved={isFieldUnsaved("contactEmail")}
                 >
-                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <Mail className="h-4 w-4 text-text-muted" />
                   Email
                 </FieldLabel>
                 <Input
@@ -267,7 +267,7 @@ export function PortfolioForm() {
               </FormField>
               <FormField error={fieldErrors.phone}>
                 <FieldLabel htmlFor="phone" unsaved={isFieldUnsaved("phone")}>
-                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <Phone className="h-4 w-4 text-text-muted" />
                   Phone
                 </FieldLabel>
                 <Input
@@ -288,7 +288,7 @@ export function PortfolioForm() {
             <div className={EDIT_FORM_GRID_CLASS}>
               <FormField error={fieldErrors.location}>
                 <FieldLabel htmlFor="location" unsaved={isFieldUnsaved("location")}>
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <MapPin className="h-4 w-4 text-text-muted" />
                   Location
                 </FieldLabel>
                 <Input
@@ -306,7 +306,7 @@ export function PortfolioForm() {
                   htmlFor="websiteUrl"
                   unsaved={isFieldUnsaved("websiteUrl")}
                 >
-                  <Link2 className="h-4 w-4 text-muted-foreground" />
+                  <Link2 className="h-4 w-4 text-text-muted" />
                   Website
                 </FieldLabel>
                 <Input

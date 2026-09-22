@@ -15,6 +15,7 @@ import {
 } from "@/features/jobs/lib/role-fields";
 import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field";
 import { uploadStoredFile } from "@/features/uploads/api/client";
+import { HiringLoadingState } from "@/features/organization/components/hiring-page-chrome";
 
 export default function NewJobPage() {
   const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
@@ -104,11 +105,17 @@ export default function NewJobPage() {
   }
 
   if (workspaceLoading || !form) {
-    return <div className="p-8 text-body-sm text-text-muted">Loading…</div>;
+    return (
+      <HiringLoadingState
+        backHref={`/company/${orgSlug}/${workspaceSlug}/jobs`}
+        backLabel="← Back to jobs"
+        message="Loading…"
+      />
+    );
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>← Back to jobs</Link>
       </Button>
@@ -121,7 +128,7 @@ export default function NewJobPage() {
         </p>
       </header>
 
-      <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+      <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
         <JobRoleFields
           values={form}
           onChange={patchForm}

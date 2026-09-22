@@ -12,7 +12,7 @@ export function FormField({ children, className, error }: FormFieldProps) {
     <div className={cn(EDIT_FORM_FIELD_CLASS, className)}>
       {children}
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-body-sm text-danger" role="alert">
           {error}
         </p>
       ) : null}

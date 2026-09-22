@@ -4,6 +4,10 @@ import { MarketingPageShell } from "@/features/landing/components/marketing-page
 import { LegalDocument } from "@/features/landing/components/legal-document";
 import { siteConfig } from "@/lib/site";
 import { createPageMetadata } from "@/lib/seo";
+import {
+  marketingVariantFrom,
+  withHiringFrom,
+} from "@/lib/auth-callback";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Privacy Policy",
@@ -12,9 +16,16 @@ export const metadata: Metadata = createPageMetadata({
   openGraphType: "article",
 });
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const { from } = await searchParams;
+  const variant = marketingVariantFrom(from);
+
   return (
-    <MarketingPageShell>
+    <MarketingPageShell variant={variant}>
       <LegalDocument title="Privacy Policy" lastUpdated="June 22, 2026">
         <p>
           This Privacy Policy explains how {siteConfig.legalEntity} (&quot;we,&quot;
@@ -27,26 +38,26 @@ export default function PrivacyPolicyPage() {
         <p>We collect information in the following ways:</p>
         <ul>
           <li>
-            <strong className="text-zinc-300">Account information</strong> — name,
+            <strong>Account information</strong> — name,
             email address, and authentication details when you sign up or sign in.
           </li>
           <li>
-            <strong className="text-zinc-300">Portfolio content</strong> — text,
+            <strong>Portfolio content</strong> — text,
             images, project details, work history, and other information you add or
             import into your portfolio.
           </li>
           <li>
-            <strong className="text-zinc-300">Imported data</strong> — when you
+            <strong>Imported data</strong> — when you
             upload a resume or connect external sources (such as GitHub or LeetCode),
             we process the data you choose to import to help build your portfolio.
           </li>
           <li>
-            <strong className="text-zinc-300">Payment information</strong> — billing
+            <strong>Payment information</strong> — billing
             and subscription details are handled by our payment processor (Razorpay).
             We do not store full card or bank details on our servers.
           </li>
           <li>
-            <strong className="text-zinc-300">Usage data</strong> — device type,
+            <strong>Usage data</strong> — device type,
             browser, pages visited, and interaction logs used to operate and improve
             the Service.
           </li>
@@ -69,17 +80,17 @@ export default function PrivacyPolicyPage() {
         </p>
         <ul>
           <li>
-            <strong className="text-zinc-300">Service providers</strong> — hosting,
+            <strong>Service providers</strong> — hosting,
             analytics, email, AI processing, and payment partners who help us operate
             the Service
           </li>
           <li>
-            <strong className="text-zinc-300">The public</strong> — content you
+            <strong>The public</strong> — content you
             choose to publish on your portfolio is visible to anyone with your public
             link
           </li>
           <li>
-            <strong className="text-zinc-300">Legal requirements</strong> — when
+            <strong>Legal requirements</strong> — when
             required by law or to protect rights, safety, and security
           </li>
         </ul>
@@ -126,7 +137,10 @@ export default function PrivacyPolicyPage() {
           Questions about this policy? Email us at{" "}
           <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>{" "}
           or visit our{" "}
-          <Link href="/contact">Contact / Support</Link> page.
+          <Link href={variant === "recruiter" ? withHiringFrom("/contact") : "/contact"}>
+            Contact / Support
+          </Link>{" "}
+          page.
         </p>
       </LegalDocument>
     </MarketingPageShell>

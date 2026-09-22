@@ -110,7 +110,7 @@ export default function TemplatesPage() {
 
   if (!portfolio) {
     return (
-      <div className="mx-auto max-w-xl space-y-6">
+      <div className="mx-auto w-full max-w-4xl space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-h3 text-text-primary">
@@ -141,10 +141,10 @@ export default function TemplatesPage() {
   }
 
   return (
-    <div className="space-y-8 pb-6">
+    <div className="mx-auto w-full max-w-4xl space-y-8 pb-6">
       <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
         <p className="eyebrow uppercase">Templates</p>
-        <h1 className="mt-3 text-h1 text-text-primary">
+        <h1 className="mt-3 text-h2 text-text-primary">
           Choose a presentation system
         </h1>
         <p className="mt-2 max-w-2xl text-body text-text-secondary">
@@ -162,7 +162,7 @@ export default function TemplatesPage() {
             Your free trial ended. Minimal stays available.{" "}
             <Link
               href="/dashboard/billing"
-              className="text-brand-primary underline underline-offset-4 hover:text-brand-dark"
+              className="text-brand-secondary underline underline-offset-4 hover:text-brand-primary"
             >
               Upgrade to Pro
             </Link>{" "}

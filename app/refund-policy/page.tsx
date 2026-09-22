@@ -4,6 +4,10 @@ import { MarketingPageShell } from "@/features/landing/components/marketing-page
 import { LegalDocument } from "@/features/landing/components/legal-document";
 import { siteConfig } from "@/lib/site";
 import { createPageMetadata } from "@/lib/seo";
+import {
+  marketingVariantFrom,
+  withHiringFrom,
+} from "@/lib/auth-callback";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Cancellation and No-Refund Policy",
@@ -12,9 +16,16 @@ export const metadata: Metadata = createPageMetadata({
   openGraphType: "article",
 });
 
-export default function RefundPolicyPage() {
+export default async function RefundPolicyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const { from } = await searchParams;
+  const variant = marketingVariantFrom(from);
+
   return (
-    <MarketingPageShell>
+    <MarketingPageShell variant={variant}>
       <LegalDocument
         title="Cancellation and No-Refund Policy"
         lastUpdated="July 18, 2026"
@@ -99,7 +110,11 @@ export default function RefundPolicyPage() {
 
         <h2>Contact</h2>
         <p>
-          Billing questions? Visit <Link href="/contact">Contact / Support</Link> or
+          Billing questions? Visit{" "}
+          <Link href={variant === "recruiter" ? withHiringFrom("/contact") : "/contact"}>
+            Contact / Support
+          </Link>{" "}
+          or
           email{" "}
           <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>.
         </p>

@@ -295,10 +295,10 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="mx-auto w-full max-w-4xl space-y-8 pb-10">
       <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
         <p className="eyebrow uppercase">AI generator</p>
-        <h1 className="mt-3 text-h1 text-text-primary">Generate your portfolio</h1>
+        <h1 className="mt-3 text-h2 text-text-primary">Generate your portfolio</h1>
         <p className="mt-2 max-w-2xl text-body text-text-secondary">
           Describe yourself or upload your resume — AI builds the portfolio JSON,
           Syntux renders it as a live UI.

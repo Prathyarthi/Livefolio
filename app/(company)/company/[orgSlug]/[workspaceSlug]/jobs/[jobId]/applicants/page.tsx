@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, FileText, Search, Star, X } from "lucide-react";
+import { ExternalLink, FileText, Search, Star, X, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import {
   MAX_COMPARE_CANDIDATES,
 } from "@/features/applications/components/applicant-compare-view";
 import { ApplicantPoolGapReport } from "@/features/applications/components/applicant-pool-gap-report";
+import { PipelineStageSelect } from "@/features/applications/components/pipeline-stage-select";
 import {
   PIPELINE_STAGE_LABELS,
   PIPELINE_STAGES,
@@ -161,8 +162,8 @@ export default function JobApplicantsPage() {
 
   return (
     <div
-      className={`mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8 ${
-        selectedIds.length > 0 ? "pb-28" : ""
+      className={`mx-auto w-full max-w-4xl space-y-8 ${
+        selectedIds.length > 0 ? "pb-24" : ""
       }`}
     >
       <Button variant="ghost" size="sm" asChild className="-ml-2">
@@ -184,7 +185,7 @@ export default function JobApplicantsPage() {
         </div>
       </header>
 
-      <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)] md:p-6">
+      <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <Input
@@ -284,14 +285,17 @@ export default function JobApplicantsPage() {
       {poolQuery.isLoading ? (
         <p className="text-body-sm text-text-muted">Loading applicants…</p>
       ) : poolQuery.error ? (
-        <p className="text-body-sm text-semantic-danger">
+        <p className="text-body-sm text-danger">
           {poolQuery.error instanceof Error
             ? poolQuery.error.message
             : "Failed to load applicants"}
         </p>
       ) : !data || data.applicants.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-12 text-center shadow-[var(--shadow-card)] md:p-8">
-          <h2 className="text-h3 text-text-primary">
+        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+          <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] bg-brand-fill/12">
+            <FileText className="h-6 w-6 text-brand-secondary" aria-hidden />
+          </span>
+          <h2 className="mt-4 text-h3 text-text-primary">
             {hasActiveFilters ? "No matching applicants" : "No applicants here"}
           </h2>
           <p className="mt-1 text-body-sm text-text-secondary">
@@ -302,28 +306,31 @@ export default function JobApplicantsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          <ul className="space-y-3">
+          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
           {data.applicants.map((applicant) => {
             const selected = selectedIds.includes(applicant.id);
             return (
               <li
                 key={applicant.id}
-                className={`rounded-[var(--radius-lg)] border bg-surface-raised p-4 transition-colors shadow-[var(--shadow-card)] md:p-6 ${
-                  selected
-                    ? "border-brand-secondary/50 ring-1 ring-brand-secondary/30"
-                    : "border-border-default"
+                className={`px-5 py-4 transition-colors ${
+                  selected ? "bg-brand-fill/6" : ""
                 }`}
               >
                 <div className="flex flex-wrap items-start gap-4">
-                  <label className="mt-1 flex cursor-pointer items-center">
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={() => toggleSelected(applicant)}
-                      className="h-4 w-4 rounded border-border-default accent-[var(--brand-secondary)]"
-                      aria-label={`Select ${applicant.summary.name} for comparison`}
-                    />
-                  </label>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={selected}
+                    onClick={() => toggleSelected(applicant)}
+                    className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-[var(--radius-sm)] border ${
+                      selected
+                        ? "border-brand-fill bg-brand-fill text-brand-on-fill"
+                        : "border-border-default bg-surface-base"
+                    }`}
+                    aria-label={`Select ${applicant.summary.name} for comparison`}
+                  >
+                    {selected ? <Check className="h-3 w-3" aria-hidden /> : null}
+                  </button>
 
                   <Avatar className="h-12 w-12">
                     <AvatarImage
@@ -449,12 +456,23 @@ export default function JobApplicantsPage() {
                   </div>
 
                   <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
-                    <Button size="sm" asChild>
-                      <Link
-                        href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants/${applicant.id}`}
-                      >
-                        Open
-                      </Link>
+                    <PipelineStageSelect
+                      value={applicant.stage}
+                      onValueChange={(stage) => handleStage(applicant.id, stage)}
+                      disabled={updateStage.isPending}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        handleShortlist(applicant.id, !applicant.shortlisted)
+                      }
+                      disabled={toggleShortlist.isPending}
+                    >
+                      <Star
+                        className={`h-3.5 w-3.5 ${applicant.shortlisted ? "fill-current" : ""}`}
+                      />
+                      {applicant.shortlisted ? "Unshortlist" : "Shortlist"}
                     </Button>
                     {applicant.summary.slug ? (
                       <Button size="sm" variant="outline" asChild>
@@ -480,34 +498,6 @@ export default function JobApplicantsPage() {
                         </a>
                       </Button>
                     ) : null}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        handleShortlist(applicant.id, !applicant.shortlisted)
-                      }
-                      disabled={toggleShortlist.isPending}
-                    >
-                      <Star
-                        className={`h-3.5 w-3.5 ${applicant.shortlisted ? "fill-current" : ""}`}
-                      />
-                      {applicant.shortlisted ? "Unshortlist" : "Shortlist"}
-                    </Button>
-                    <select
-                      className="h-9 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-2 text-sm text-text-primary"
-                      value={applicant.stage}
-                      onChange={(e) =>
-                        handleStage(applicant.id, e.target.value)
-                      }
-                      disabled={updateStage.isPending}
-                      aria-label="Move stage"
-                    >
-                      {PIPELINE_STAGES.map((stage) => (
-                        <option key={stage} value={stage}>
-                          {PIPELINE_STAGE_LABELS[stage]}
-                        </option>
-                      ))}
-                    </select>
                   </div>
                 </div>
               </li>

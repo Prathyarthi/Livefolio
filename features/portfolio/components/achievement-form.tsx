@@ -200,7 +200,7 @@ export function AchievementForm() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -218,7 +218,7 @@ export function AchievementForm() {
             <Trophy className="h-5 w-5" />
             Achievements
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-muted">
             Showcase your notable achievements, awards, and recognitions.
           </p>
         </div>
@@ -266,7 +266,7 @@ export function AchievementForm() {
               {(fieldErrors.title || validationErrors.title) && (
                 <p
                   id="achievement-title-error"
-                  className="text-sm text-destructive"
+                  className="text-sm text-danger"
                 >
                   {fieldErrors.title || validationErrors.title}
                 </p>
@@ -275,7 +275,7 @@ export function AchievementForm() {
 
             <div className="space-y-2">
               <FieldLabel htmlFor="date" unsaved={isFieldUnsaved("date")}>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="h-4 w-4 text-text-muted" />
                 Date (optional)
               </FieldLabel>
               <Input
@@ -313,8 +313,8 @@ export function AchievementForm() {
       {achievements.length === 0 && !isAdding ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Trophy className="h-10 w-10 text-muted-foreground/40 mb-3" />
-            <p className="text-muted-foreground">
+            <Trophy className="h-10 w-10 text-text-muted/40 mb-3" />
+            <p className="text-text-muted">
               No achievements added yet. Click &quot;Add Achievement&quot; to
               get started.
             </p>
@@ -334,7 +334,7 @@ export function AchievementForm() {
                       <h4 className="text-base font-semibold">
                         Edit Achievement
                       </h4>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-text-muted">
                         Update this achievement entry.
                       </p>
                     </div>
@@ -366,7 +366,7 @@ export function AchievementForm() {
                       {(fieldErrors.title || validationErrors.title) && (
                         <p
                           id={`achievement-title-${ach.id}-error`}
-                          className="text-sm text-destructive"
+                          className="text-sm text-danger"
                         >
                           {fieldErrors.title || validationErrors.title}
                         </p>
@@ -377,7 +377,7 @@ export function AchievementForm() {
                         htmlFor={`date-${ach.id}`}
                         unsaved={isFieldUnsaved("date")}
                       >
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <Calendar className="h-4 w-4 text-text-muted" />
                         Date (optional)
                       </FieldLabel>
                       <Input
@@ -414,7 +414,7 @@ export function AchievementForm() {
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-base">{ach.title}</h4>
                         {ach.date && (
-                          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                          <p className="text-xs text-text-muted mt-1 flex items-center gap-1.5">
                             <Calendar className="h-3 w-3" />
                             {ach.date.substring(0, 10)}
                           </p>
@@ -435,7 +435,7 @@ export function AchievementForm() {
                           onClick={() => handleDelete(ach.id)}
                           disabled={isMutating}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-4 w-4 text-danger" />
                         </Button>
                       </div>
                     </div>

@@ -29,12 +29,12 @@ export function PlanPrice({
   return (
     <div className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1", className)}>
       <span
-        className={cn("gradient-text font-bold tabular-nums", primarySize)}
+        className={cn("font-bold tabular-nums text-text-primary", primarySize)}
       >
         {formattedAmount}
       </span>
       {period ? (
-        <span className="text-sm text-zinc-500">{period}</span>
+        <span className="text-sm text-text-muted">{period}</span>
       ) : null}
     </div>
   );

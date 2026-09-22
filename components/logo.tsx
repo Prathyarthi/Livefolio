@@ -47,7 +47,7 @@ export function Logo({
           className={cn(
             "font-display text-[20px] font-bold tracking-[-0.01em]",
             wordmarkClassName ??
-              (isLight ? "text-white" : "text-brand-primary")
+              (isLight ? "text-white" : "text-text-primary")
           )}
         >
           {siteConfig.name}

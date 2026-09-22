@@ -49,7 +49,7 @@ export function ProjectLivePreviewControls({
 
   if (!hasLiveUrl) {
     return (
-      <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+      <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 px-4 py-3 text-sm text-text-muted">
         Add a live URL above to enable a screenshot preview for this project.
       </div>
     );
@@ -59,10 +59,10 @@ export function ProjectLivePreviewControls({
     return (
       <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 px-4 py-3">
         <div className="flex items-center gap-2 text-sm font-medium">
-          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+          <ImageIcon className="h-4 w-4 text-text-muted" />
           Live preview on portfolio
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-text-muted">
           Live screenshots of your project URL are a Pro feature. Upload a
           thumbnail above, or{" "}
           <Link href="/dashboard/billing" className="underline">
@@ -85,10 +85,10 @@ export function ProjectLivePreviewControls({
               htmlFor="enable-live-preview-on-save"
               className="flex items-center gap-2 text-foreground"
             >
-              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+              <ImageIcon className="h-4 w-4 text-text-muted" />
               Live preview on portfolio
             </Label>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-text-muted">
               Shows a live screenshot of your project on your portfolio.{" "}
               {enabledCount}/{maxAllowed} used.
             </p>
@@ -102,11 +102,11 @@ export function ProjectLivePreviewControls({
           />
         </div>
         {blocked ? (
-          <p className="text-xs text-destructive">
+          <p className="text-xs text-danger">
             You have used all {maxAllowed} live preview slots.
           </p>
         ) : (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-text-muted">
             Pro — {maxAllowed} slots
           </p>
         )}
@@ -123,7 +123,7 @@ export function ProjectLivePreviewControls({
               htmlFor="toggle-live-preview"
               className="flex items-center gap-2 text-foreground"
             >
-              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+              <ImageIcon className="h-4 w-4 text-text-muted" />
               Live preview on portfolio
             </Label>
             <Badge variant={savedEnabled ? "default" : "secondary"}>
@@ -135,7 +135,7 @@ export function ProjectLivePreviewControls({
               </Badge>
             )}
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-muted">
             {editEnabled
               ? "A live screenshot of this project will appear on your portfolio."
               : "Turn on to show a live screenshot of this project on your portfolio."}{" "}
@@ -155,11 +155,11 @@ export function ProjectLivePreviewControls({
         />
       </div>
       {!editEnabled && atLimit && !savedEnabled ? (
-        <p className="text-xs text-destructive">
+        <p className="text-xs text-danger">
           You have used all {maxAllowed} live preview slots.
         </p>
       ) : (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-text-muted">
           Pro — saves when you click Save
         </p>
       )}

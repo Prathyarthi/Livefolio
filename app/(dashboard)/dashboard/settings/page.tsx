@@ -205,7 +205,7 @@ export default function SettingsPage() {
                 );
               })}
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body-sm text-text-muted">
               Sections still only appear when the portfolio actually has data for
               them.
             </p>
@@ -224,9 +224,9 @@ export default function SettingsPage() {
 
       <Separator />
 
-      <Card className="border-destructive/50">
+      <Card className="border-danger/50">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          <CardTitle className="text-danger">Danger Zone</CardTitle>
           <CardDescription>
             Permanently delete your account and all associated data.
           </CardDescription>
