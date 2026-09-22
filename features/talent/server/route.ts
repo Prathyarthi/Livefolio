@@ -1,7 +1,11 @@
 import Elysia, { t } from "elysia";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
-import { requireWorkspaceAccess } from "@/features/organization/lib/org-access";
+import {
+  listAccessibleWorkspaces,
+  requireOrgMember,
+  requireWorkspaceAccess,
+} from "@/features/organization/lib/org-access";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 import {
   talentIdsMatchingJsonAndArrays,
@@ -22,7 +26,7 @@ function contains(value: string) {
 }
 
 export const talent = new Elysia({ prefix: "/talent" }).get(
-  "/org/:orgSlug/workspace/:workspaceSlug",
+  "/org/:orgSlug",
   async (ctx) => {
     const session = await getSession(ctx.request);
     if (!session) {
@@ -39,12 +43,8 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       return { error: "Organization not found" };
     }
 
-    const workspaceAccess = await requireWorkspaceAccess(
-      org.id,
-      ctx.params.workspaceSlug,
-      session.userId,
-    );
-    if (!workspaceAccess) {
+    const membership = await requireOrgMember(org.id, session.userId);
+    if (!membership) {
       ctx.set.status = 403;
       return { error: "Forbidden" };
     }
@@ -72,6 +72,7 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
     const rows = await prisma.portfolio.findMany({
       where,
       select: {
+        id: true,
         slug: true,
         title: true,
         headline: true,
@@ -94,6 +95,34 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       take: pageSize,
     });
 
+    const accessible = await listAccessibleWorkspaces(
+      org.id,
+      session.userId,
+      membership.role,
+    );
+    const savedRows =
+      rows.length > 0 && accessible.length > 0
+        ? await prisma.workspaceTalent.findMany({
+            where: {
+              portfolioId: { in: rows.map((row) => row.id) },
+              workspaceId: { in: accessible.map((workspace) => workspace.id) },
+            },
+            select: {
+              portfolioId: true,
+              workspace: { select: { id: true, slug: true, name: true } },
+            },
+          })
+        : [];
+    const savedByPortfolio = new Map<
+      string,
+      Array<{ id: string; slug: string; name: string }>
+    >();
+    for (const saved of savedRows) {
+      const list = savedByPortfolio.get(saved.portfolioId) ?? [];
+      list.push(saved.workspace);
+      savedByPortfolio.set(saved.portfolioId, list);
+    }
+
     return {
       total,
       page,
@@ -113,6 +142,7 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
             ? { role: recent.role, company: recent.company }
             : null,
           livefolioUrl: getPortfolioPublicUrl(slug),
+          savedWorkspaces: savedByPortfolio.get(row.id) ?? [],
         };
       }),
     };
@@ -126,4 +156,139 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       pageSize: t.Optional(t.String()),
     }),
   },
-);
+)
+  .get(
+    "/org/:orgSlug/workspaces/:workspaceSlug",
+    async (ctx) => {
+      const session = await getSession(ctx.request);
+      if (!session) {
+        ctx.set.status = 401;
+        return { error: "Unauthorized" };
+      }
+
+      const org = await prisma.organization.findUnique({
+        where: { slug: ctx.params.orgSlug },
+        select: { id: true },
+      });
+      if (!org) {
+        ctx.set.status = 404;
+        return { error: "Organization not found" };
+      }
+
+      const access = await requireWorkspaceAccess(
+        org.id,
+        ctx.params.workspaceSlug,
+        session.userId,
+      );
+      if (!access) {
+        ctx.set.status = 403;
+        return { error: "Forbidden" };
+      }
+
+      const rows = await prisma.workspaceTalent.findMany({
+        where: { workspaceId: access.workspace.id },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          portfolio: {
+            select: {
+              slug: true,
+              title: true,
+              headline: true,
+              avatarUrl: true,
+              isPublished: true,
+            },
+          },
+        },
+      });
+
+      return {
+        people: rows.flatMap((row) => {
+          const slug = row.portfolio.slug;
+          if (!slug) return [];
+          return [
+            {
+              slug,
+              title: row.portfolio.title,
+              headline: row.portfolio.headline,
+              avatarUrl: row.portfolio.avatarUrl,
+              livefolioUrl: getPortfolioPublicUrl(slug),
+            },
+          ];
+        }),
+      };
+    },
+  )
+  .post(
+    "/org/:orgSlug/workspaces/:workspaceSlug",
+    async (ctx) => {
+      const session = await getSession(ctx.request);
+      if (!session) {
+        ctx.set.status = 401;
+        return { error: "Unauthorized" };
+      }
+
+      const org = await prisma.organization.findUnique({
+        where: { slug: ctx.params.orgSlug },
+        select: { id: true },
+      });
+      if (!org) {
+        ctx.set.status = 404;
+        return { error: "Organization not found" };
+      }
+
+      const access = await requireWorkspaceAccess(
+        org.id,
+        ctx.params.workspaceSlug,
+        session.userId,
+      );
+      if (!access) {
+        ctx.set.status = 403;
+        return { error: "Forbidden" };
+      }
+
+      const slug = ctx.body.slug.trim();
+      const portfolio = await prisma.portfolio.findFirst({
+        where: {
+          slug,
+          openToWork: true,
+          isPublished: true,
+        },
+        select: { id: true, slug: true },
+      });
+      if (!portfolio?.slug) {
+        ctx.set.status = 404;
+        return { error: "Talent not found" };
+      }
+
+      await prisma.workspaceTalent.upsert({
+        where: {
+          workspaceId_portfolioId: {
+            workspaceId: access.workspace.id,
+            portfolioId: portfolio.id,
+          },
+        },
+        create: {
+          workspaceId: access.workspace.id,
+          portfolioId: portfolio.id,
+          addedById: session.userId,
+        },
+        update: {},
+      });
+
+      return {
+        ok: true,
+        slug: portfolio.slug,
+        workspace: {
+          id: access.workspace.id,
+          slug: access.workspace.slug,
+          name: access.workspace.name,
+        },
+      };
+    },
+    {
+      body: t.Object({
+        slug: t.String({ minLength: 1, maxLength: 80 }),
+      }),
+    },
+  );
