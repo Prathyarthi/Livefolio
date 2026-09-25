@@ -70,7 +70,7 @@ Return ONLY valid JSON matching this exact schema. No markdown, no code fences.
   "customSections": []
 }
 
-Generate realistic, detailed content. Include 2-4 experiences, 1-2 educations, 8-15 skills across categories, and 2-4 projects. Omit dates, locations, and other fields when they are unknown — use null, do not invent them or write N/A. Do not use bullet characters (•, -, *) in description fields — separate points with newlines only; the UI adds bullets.`;
+Generate realistic, detailed content. Include 2-4 experiences, 1-2 educations, 8-15 skills across categories, and 2-4 projects. Every project MUST include a non-empty techStack of 3-8 real technology names (for example React, Node.js, MongoDB) — never leave techStack as []. Omit dates, locations, and other fields when they are unknown — use null, do not invent them or write N/A. Do not use bullet characters (•, -, *) in description fields — separate points with newlines only; the UI adds bullets.`;
 
 export async function POST(request: Request) {
   try {

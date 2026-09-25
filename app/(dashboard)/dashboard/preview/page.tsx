@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,8 @@ import {
 import { PreviewToolbar } from "@/features/portfolio/components/preview-toolbar";
 import { PublishDialog } from "@/features/portfolio/components/publish-dialog";
 import { AccentSwatches } from "@/features/templates/components/accent-swatches";
-import { getTemplate, templateRegistry } from "@/features/templates/registry";
+import { getTemplate } from "@/features/templates/registry";
+import { templateCatalogList } from "@/features/templates/template-catalog";
 import { getStoredSectionLayout } from "@/features/templates/section-order";
 import type { SectionLayoutCustomization } from "@/features/templates/section-order";
 import {
@@ -179,14 +180,8 @@ export default function PreviewPage() {
     setPublishDialogOpen(true);
   };
 
-  const templateOptions = useMemo(
-    () =>
-      Object.values(templateRegistry).filter(
-        // Spotlight hidden from preview for now — accent/polish not ready.
-        (template) => template.id !== "spotlight",
-        // (template) => true, // restore: include spotlight
-      ),
-    [],
+  const templateOptions = templateCatalogList.filter(
+    (template) => template.id !== "spotlight",
   );
 
   const isTemplateLocked = (templateId: string) =>

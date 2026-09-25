@@ -28,6 +28,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -667,12 +668,11 @@ function ProjectsShowcase({
                 {project.techStack.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-2">
                     {project.techStack.map((tech) => (
-                      <span
+                      <TechChip
                         key={tech}
+                        name={tech}
                         className="px-2.5 py-1 rounded-lg bg-[#0a0a0a] border border-white/10 text-xs font-mono text-slate-300"
-                      >
-                        {tech}
-                      </span>
+                      />
                     ))}
                   </div>
                 )}

@@ -107,11 +107,14 @@ export interface PortfolioData {
   livePreviewProjectIds: string[];
 }
 
-export interface TemplateComponent {
+export interface TemplateMeta {
   id: string;
   name: string;
   description: string;
   previewImage: string;
   category: string;
+}
+
+export interface TemplateComponent extends TemplateMeta {
   component: React.ComponentType<{ data: PortfolioData }>;
 }

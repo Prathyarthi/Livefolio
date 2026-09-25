@@ -67,7 +67,7 @@ Schema:
         { "type": "paragraph", "text": "Optional prose blurb" },
         { "type": "list", "items": ["Point one", "Point two"] }
       ],
-      "techStack": ["Tech1", "Tech2"],
+      "techStack": ["Tech names used in this project — extract from the resume even if they appear inline in the description"],
       "liveUrl": "URL or null",
       "sourceUrl": "URL or null"
     }

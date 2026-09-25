@@ -11,6 +11,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -138,9 +139,11 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
 
                     <div className="flex flex-wrap gap-2 mb-6">
                       {project.techStack.map((tech) => (
-                        <span key={tech} className="text-[10px] font-bold uppercase tracking-widest border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] px-2 py-1 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)]">
-                          {tech}
-                        </span>
+                        <TechChip
+                          key={tech}
+                          name={tech}
+                          className="text-[10px] font-bold uppercase tracking-widest border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] px-2 py-1 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)]"
+                        />
                       ))}
                     </div>
 

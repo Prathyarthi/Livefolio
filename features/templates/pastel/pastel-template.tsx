@@ -12,6 +12,7 @@ import {
   getSectionLabels,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -135,9 +136,11 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
 
                     <div className="flex flex-wrap gap-2 mb-6">
                       {project.techStack.map((tech) => (
-                        <span key={tech} className="bg-[#f4f4f4] text-[#666] text-xs font-bold px-3 py-1.5 rounded-xl">
-                          {tech}
-                        </span>
+                        <TechChip
+                          key={tech}
+                          name={tech}
+                          className="bg-[#f4f4f4] text-[#666] text-xs font-bold px-3 py-1.5 rounded-xl"
+                        />
                       ))}
                     </div>
 
