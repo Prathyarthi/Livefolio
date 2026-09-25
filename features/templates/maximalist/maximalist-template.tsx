@@ -19,6 +19,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -74,8 +75,8 @@ function getInitials(title: string): string {
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 }
 
-function displayDate(dateStr: string | null, fallback = "N/A"): string {
-  return formatDate(dateStr) || fallback;
+function displayDate(dateStr: string | null): string {
+  return formatDate(dateStr);
 }
 
 
@@ -191,7 +192,8 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
               buttonClassName="mt-8 w-full py-3 bg-black border-4 border-white font-mono text-xs font-black uppercase text-white hover:bg-[var(--lf-accent)] hover:text-black transition-colors neo-shadow"
             >
               {experiences.map((exp, index) => {
-                const isCurrent = exp.endDate === null;
+                const isCurrent = Boolean(exp.startDate) && exp.endDate === null;
+                const dateRange = formatDateRange(exp.startDate, exp.endDate);
 
                 const cardStyle = index === 0
                   ? 'bg-white text-black sm:rotate-[-1deg] hover:rotate-0 transition-transform duration-300 border-4 border-black neo-shadow-white'
@@ -230,14 +232,16 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 font-mono text-xs">
-                          <div className="bg-black text-white px-3 py-1.5 font-bold flex items-center gap-2 border border-white">
-                            <Calendar className="w-3.5 h-3.5 text-[var(--lf-accent)]" />
-                            <span>
-                              {formatDateRange(exp.startDate, exp.endDate) || "N/A"}
-                            </span>
+                        {dateRange && (
+                          <div className="flex items-center gap-3 font-mono text-xs">
+                            <div className="bg-black text-white px-3 py-1.5 font-bold flex items-center gap-2 border border-white">
+                              <Calendar className="w-3.5 h-3.5 text-[var(--lf-accent)]" />
+                              <span>
+                                {dateRange}
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       {exp.description && (
@@ -358,12 +362,11 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
 
                       <div className="flex flex-wrap gap-2 pt-2">
                         {proj.techStack.map((tech) => (
-                          <span
+                          <TechChip
                             key={tech}
+                            name={tech}
                             className="px-2.5 py-1 bg-white/10 text-white border border-white/30 font-mono text-[10px] font-black uppercase"
-                          >
-                            {tech}
-                          </span>
+                          />
                         ))}
                       </div>
                     </div>
@@ -410,7 +413,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                 >
                   <h3 className="text-2xl font-black text-white uppercase tracking-tight">
                     {edu.degree}
-                    {edu.field && <span className="text-[var(--lf-accent)]"> in {edu.field}</span>}
+                    {edu.field ? ` in ${edu.field}` : ""}
                   </h3>
                   <p className="font-mono text-sm font-bold text-slate-300">{edu.institution}</p>
                   {(edu.startDate || edu.endDate) && (
@@ -1097,7 +1100,9 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
             {sortExperiencesNewestFirst(data.experiences).map((exp) => (
               <div key={exp.id} className="border-l-2 border-[var(--lf-accent)] pl-2">
                 <div className="font-bold text-[var(--lf-accent)]">{exp.company} — {exp.role}</div>
-                <div className="text-slate-400 text-[11px]">{formatDateRange(exp.startDate, exp.endDate) || "N/A"}</div>
+                {formatDateRange(exp.startDate, exp.endDate) && (
+                  <div className="text-slate-400 text-[11px]">{formatDateRange(exp.startDate, exp.endDate)}</div>
+                )}
                 <div className="text-slate-300 mt-1 text-[11px] whitespace-pre-line">{exp.description}</div>
               </div>
             ))}
@@ -1115,8 +1120,15 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
                   <div className="text-slate-300 text-[11px]">{p.description}</div>
                 )}
                 {p.techStack.length > 0 && (
-                  <div className="text-[var(--lf-accent)] text-[11px]">
-                    Stack: {p.techStack.join(', ')}
+                  <div className="flex flex-wrap gap-1.5 text-[11px]">
+                    {p.techStack.map((tech) => (
+                      <TechChip
+                        key={tech}
+                        name={tech}
+                        className="text-[var(--lf-accent)]"
+                        iconClassName="h-3 w-3"
+                      />
+                    ))}
                   </div>
                 )}
               </div>
@@ -1148,9 +1160,7 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
             <div className="text-[var(--lf-accent)] font-bold">CONTACT DIRECT:</div>
             {data.portfolio.contactEmail ? (
               <div>Email: <a href={`mailto:${data.portfolio.contactEmail}`} className="text-[var(--lf-accent)] underline">{data.portfolio.contactEmail}</a></div>
-            ) : (
-              <div>Email: N/A</div>
-            )}
+            ) : null}
             {data.portfolio.phone && <div>Phone: {data.portfolio.phone}</div>}
             {data.portfolio.location && <div>Location: {data.portfolio.location}</div>}
           </div>

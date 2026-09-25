@@ -1,10 +1,10 @@
-import { templateRegistry } from "@/features/templates/registry";
+import { templateCatalog } from "@/features/templates/template-catalog";
 import { isAnyBillingReady } from "@/lib/billing";
 
 const FREE_TRIAL_DAYS = 30;
 
 const FREE_TEMPLATE_IDS = ["minimal"] as const;
-const PREMIUM_TEMPLATE_IDS = Object.keys(templateRegistry).filter(
+const PREMIUM_TEMPLATE_IDS = Object.keys(templateCatalog).filter(
   (id) => id !== "minimal"
 );
 

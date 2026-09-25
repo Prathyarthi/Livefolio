@@ -11,6 +11,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -133,9 +134,11 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
 
                 <div className="flex flex-wrap gap-2 mb-8">
                   {project.techStack.map((tech) => (
-                    <span key={tech} className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                      {tech}
-                    </span>
+                    <TechChip
+                      key={tech}
+                      name={tech}
+                      className="text-xs font-bold uppercase tracking-widest text-gray-500"
+                    />
                   ))}
                 </div>
 

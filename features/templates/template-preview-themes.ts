@@ -271,6 +271,17 @@ const TEMPLATE_PREVIEW_THEMES: Record<string, TemplatePreviewTheme> = {
     chrome: "#faf6ef",
     urlBar: "#F1EEDC",
   },
+  synapse: {
+    canvas: "#f8fafc",
+    blobA: "rgba(37, 99, 235, 0.18)",
+    blobB: "rgba(168, 85, 247, 0.12)",
+    surface: "#ffffff",
+    hero: "#dbeafe",
+    cards: ["#bfdbfe", "#e0e7ff", "#f1f5f9"],
+    lines: "#cbd5e1",
+    chrome: "#f8fafc",
+    urlBar: "#eff6ff",
+  },
 };
 
 export function getTemplatePreviewTheme(templateId: string): TemplatePreviewTheme {

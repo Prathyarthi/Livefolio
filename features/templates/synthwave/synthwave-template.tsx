@@ -11,6 +11,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -138,9 +139,11 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
 
                       <div className="flex flex-wrap gap-2 mb-6">
                         {project.techStack.map((tech) => (
-                          <span key={tech} className="border border-[var(--lf-accent)] text-[var(--lf-accent)] text-[10px] font-bold px-2 py-1 uppercase tracking-widest bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)]">
-                            {tech}
-                          </span>
+                          <TechChip
+                            key={tech}
+                            name={tech}
+                            className="border border-[var(--lf-accent)] text-[var(--lf-accent)] text-[10px] font-bold px-2 py-1 uppercase tracking-widest bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)]"
+                          />
                         ))}
                       </div>
 

@@ -345,6 +345,19 @@ export const TEMPLATE_PROJECT_PREVIEW: Record<string, TemplateProjectPreviewConf
     },
     variant: "dark",
   },
+  synapse: {
+    palette: {
+      bg: "#ffffff",
+      bgAlt: "#f8fafc",
+      primary: "#2563eb",
+      secondary: "#6366f1",
+      accent: "#93c5fd",
+      surface: "#ffffff",
+      muted: "#e2e8f0",
+      stroke: "#e2e8f0",
+    },
+    variant: "default",
+  },
   bluish: {
     palette: {
       bg: "#0a0a0a",

@@ -3,8 +3,11 @@
 import Image from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { getTemplate } from "@/features/templates/registry";
-import { getTemplatePreviewImagePath } from "@/features/templates/template-preview-images";
+import { getTemplateMeta } from "@/features/templates/template-catalog";
+import {
+  getTemplatePreviewImagePath,
+  hasTemplatePreviewImage,
+} from "@/features/templates/template-preview-images";
 
 const TEMPLATE_PREVIEW_GRADIENTS: Record<string, string> = {
   minimal: "from-stone-100 to-stone-200",
@@ -29,6 +32,10 @@ const TEMPLATE_PREVIEW_GRADIENTS: Record<string, string> = {
   terracotta: "from-[#F4F1DE] to-[#E07A5F]/40",
   citrus: "from-[#FFE066]/60 to-[#264653]/30",
   parchment: "from-[#F4F1DE] to-[#8C2727]/20",
+  synapse: "from-blue-500/40 to-indigo-400/30",
+  pulse: "from-blue-500/40 to-slate-800",
+  ledger: "from-slate-900 to-blue-500/40",
+  maximalist: "from-black to-blue-500/50",
 };
 
 type TemplatePreviewThumbnailProps = {
@@ -103,10 +110,10 @@ export function TemplatePreviewThumbnail({
   compact = false,
 }: TemplatePreviewThumbnailProps) {
   const [imageFailed, setImageFailed] = useState(false);
-  const template = getTemplate(templateId);
+  const template = getTemplateMeta(templateId);
   const src = getTemplatePreviewImagePath(templateId);
 
-  if (imageFailed) {
+  if (imageFailed || !hasTemplatePreviewImage(templateId) || !src) {
     return (
       <GradientPlaceholder templateId={templateId} compact={compact} />
     );

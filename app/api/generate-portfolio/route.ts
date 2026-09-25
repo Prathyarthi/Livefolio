@@ -26,10 +26,10 @@ Return ONLY valid JSON matching this exact schema. No markdown, no code fences.
       "id": "exp_1",
       "company": "Company Name",
       "role": "Job Title",
-      "description": "Key responsibilities and achievements — one point per line, newline-separated, no bullet characters",
-      "startDate": "YYYY-MM-DD or null",
-      "endDate": "YYYY-MM-DD or null (null if current)",
-      "location": "City or null"
+      "description": "Key responsibilities and achievements — one point per line, newline-separated. A short label ending with a colon becomes a heading. No bullet characters",
+      "startDate": "YYYY-MM-DD or null if unknown",
+      "endDate": "YYYY-MM-DD or null if current or unknown",
+      "location": "City or null if unknown"
     }
   ],
   "educations": [
@@ -70,7 +70,7 @@ Return ONLY valid JSON matching this exact schema. No markdown, no code fences.
   "customSections": []
 }
 
-Generate realistic, detailed content. Include 2-4 experiences, 1-2 educations, 8-15 skills across categories, and 2-4 projects. Do not use bullet characters (•, -, *) in description fields — separate points with newlines only; the UI adds bullets.`;
+Generate realistic, detailed content. Include 2-4 experiences, 1-2 educations, 8-15 skills across categories, and 2-4 projects. Every project MUST include a non-empty techStack of 3-8 real technology names (for example React, Node.js, MongoDB) — never leave techStack as []. Omit dates, locations, and other fields when they are unknown — use null, do not invent them or write N/A. Do not use bullet characters (•, -, *) in description fields — separate points with newlines only; the UI adds bullets.`;
 
 export async function POST(request: Request) {
   try {

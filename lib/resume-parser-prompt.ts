@@ -4,7 +4,12 @@ export const RESUME_PARSER_SYSTEM = `You are a resume parser. The user message c
 
 CRITICAL RULES:
 - Do NOT skip any information. Every piece of data in the resume must appear in your output.
-- MULTI-LINE DESCRIPTIONS: For experiences, projects, and similar fields with multiple points, put each point on its own line (newline-separated). Do NOT prefix lines with bullet characters (•, -, *, etc.) — the portfolio template adds bullets automatically. Strip bullet markers from the source text; keep the words only.
+- DESCRIPTION BODY: company, role, dates, and location are their own fields — never repeat them inside description. Use an array of blocks:
+  { "type": "heading", "text": "Impact" }
+  { "type": "paragraph", "text": "One or two sentences of prose" }
+  { "type": "list", "items": ["Point one", "Point two"] }
+  Use a heading only when the resume itself has a subheading (e.g. "Responsibilities", "Achievements"). Do not invent headings, dates, locations, or other facts. Use a list when the resume has bullets or distinct points. Use a paragraph when it is a prose blurb with no bullets. A job may mix these (paragraph then list, or heading then list). Do not prefix list items with bullet characters (•, -, *). If there is no description, use [] .
+  A flat string or string array is also accepted for backward compatibility.
 - For well-known sections, use the schemas below.
 - SECTION HEADINGS: If the resume uses custom section titles (e.g. "Work Experience", "Technical Skills", "Professional Summary"), capture them in "sectionLabels" using these canonical keys: about, projects, experience, education, skills, certifications, achievements, articles. Use the exact heading text from the resume. Only include keys where a distinct heading appears in the resume.
 - For ANY information that does NOT fit the well-known schemas, put it in "customSections". This includes: volunteer work, publications, languages, interests, hobbies, references, awards, honors, courses, trainings, or anything else NOT covered by the schemas. Do NOT use customSections for contact info or social profiles — those have their own fields.
@@ -33,10 +38,13 @@ Schema:
     {
       "company": "Company Name (REQUIRED)",
       "role": "Job Title (REQUIRED)",
-      "description": "Responsibilities and achievements — one point per line, newline-separated, no bullet characters (or empty string)",
-      "startDate": "YYYY-MM-DD or null",
-      "endDate": "YYYY-MM-DD or null if current position",
-      "location": "City, State or null"
+      "description": [
+        { "type": "heading", "text": "Only if the resume has this subheading" },
+        { "type": "list", "items": ["Point one", "Point two"] }
+      ],
+      "startDate": "YYYY-MM-DD or null if the resume has no start date",
+      "endDate": "YYYY-MM-DD or null if current or the resume has no end date",
+      "location": "City, State or null if the resume has no location"
     }
   ],
   "education": [
@@ -55,8 +63,11 @@ Schema:
   "projects": [
     {
       "title": "Project Name",
-      "description": "Project description — one point per line, newline-separated, no bullet characters. Can also be an array of plain strings",
-      "techStack": ["Tech1", "Tech2"],
+      "description": [
+        { "type": "paragraph", "text": "Optional prose blurb" },
+        { "type": "list", "items": ["Point one", "Point two"] }
+      ],
+      "techStack": ["Tech names used in this project — extract from the resume even if they appear inline in the description"],
       "liveUrl": "URL or null",
       "sourceUrl": "URL or null"
     }

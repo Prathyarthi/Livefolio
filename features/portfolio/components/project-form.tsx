@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   usePortfolio,
@@ -66,6 +66,11 @@ import {
   MAX_TECH_STACK_ITEMS,
   normalizeStringList,
 } from "@/lib/content-policy";
+import {
+  suggestTechs,
+  techIconUrl,
+  type TechEntry,
+} from "@/features/templates/tech-catalog";
 
 interface ProjectEntry {
   id?: string;
@@ -138,6 +143,9 @@ export function ProjectForm() {
   const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState<ProjectEntry>(emptyEntry);
   const [techInput, setTechInput] = useState("");
+  const [techSuggestions, setTechSuggestions] = useState<TechEntry[]>([]);
+  const [highlightedTech, setHighlightedTech] = useState(0);
+  const techDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fieldErrors, setFieldErrors] = useState<
     FieldErrors<ProjectField>
   >({});
@@ -203,6 +211,39 @@ export function ProjectForm() {
     ? portfolio.livePreviewProjectIds
     : [];
 
+  const extraTechNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const skill of portfolio?.skills ?? []) {
+      if (typeof skill?.name === "string" && skill.name.trim()) {
+        names.add(skill.name.trim());
+      }
+    }
+    for (const project of portfolio?.projects ?? []) {
+      for (const tech of project?.techStack ?? []) {
+        if (typeof tech === "string" && tech.trim()) names.add(tech.trim());
+      }
+    }
+    return [...names];
+  }, [portfolio]);
+
+  useEffect(() => {
+    if (techDebounceRef.current) clearTimeout(techDebounceRef.current);
+    const query = techInput.trim();
+    if (!query) {
+      setTechSuggestions([]);
+      setHighlightedTech(0);
+      return;
+    }
+    techDebounceRef.current = setTimeout(() => {
+      const next = suggestTechs(query, form.techStack, extraTechNames);
+      setTechSuggestions(next);
+      setHighlightedTech(0);
+    }, 250);
+    return () => {
+      if (techDebounceRef.current) clearTimeout(techDebounceRef.current);
+    };
+  }, [techInput, form.techStack, extraTechNames]);
+
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
@@ -243,6 +284,7 @@ export function ProjectForm() {
     setIsAdding(false);
     setForm(emptyEntry);
     setTechInput("");
+    setTechSuggestions([]);
     setFieldErrors({});
     setEnableLivePreviewOnSave(false);
     setEditLivePreviewEnabled(false);
@@ -254,15 +296,16 @@ export function ProjectForm() {
     setEditingId(null);
     setForm(emptyEntry);
     setTechInput("");
+    setTechSuggestions([]);
     setFieldErrors({});
     setEnableLivePreviewOnSave(false);
     setPendingThumbFile(null);
   }
 
-  function addTechTag() {
-    const tag = techInput.trim();
+  function addTechTag(rawTag?: string) {
+    const tag = (rawTag ?? techInput).trim();
     if (!tag) return;
-    if (form.techStack.includes(tag)) {
+    if (form.techStack.some((item) => item.toLowerCase() === tag.toLowerCase())) {
       toast.error("Tech already added");
       return;
     }
@@ -281,6 +324,7 @@ export function ProjectForm() {
     }
     setForm((prev) => ({ ...prev, techStack: [...prev.techStack, tag] }));
     setTechInput("");
+    setTechSuggestions([]);
     setFieldErrors((prev) => ({ ...prev, techStack: undefined }));
   }
 
@@ -293,9 +337,26 @@ export function ProjectForm() {
   }
 
   function handleTechKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "ArrowDown" && techSuggestions.length > 0) {
+      e.preventDefault();
+      setHighlightedTech((prev) => (prev + 1) % techSuggestions.length);
+      return;
+    }
+    if (e.key === "ArrowUp" && techSuggestions.length > 0) {
+      e.preventDefault();
+      setHighlightedTech((prev) =>
+        prev <= 0 ? techSuggestions.length - 1 : prev - 1,
+      );
+      return;
+    }
+    if (e.key === "Escape") {
+      setTechSuggestions([]);
+      return;
+    }
     if (e.key === "Enter") {
       e.preventDefault();
-      addTechTag();
+      const picked = techSuggestions[highlightedTech];
+      addTechTag(picked?.label);
     }
   }
 
@@ -771,43 +832,77 @@ export function ProjectForm() {
         <div className="space-y-2">
           <FieldLabel unsaved={isTechUnsaved}>Tech Stack</FieldLabel>
           <div className="flex gap-2">
-            <Input
-              value={techInput}
-              onChange={(e) => {
-                setTechInput(e.target.value);
-                setFieldErrors((prev) => ({
-                  ...prev,
-                  techStack: undefined,
-                }));
-              }}
-              onBlur={() => {
-                if (!techInput.trim()) return;
-                const errors: FieldErrors<ProjectField> = {};
-                validateField(errors, "techStack", () =>
-                  normalizeStringList(
-                    [...form.techStack, techInput.trim()],
-                    "Tech stack",
-                    MAX_TECH_STACK_ITEMS,
-                    MAX_TECH_STACK_ITEM_CHARS
-                  )
-                );
-                setFieldErrors((prev) => ({
-                  ...prev,
-                  techStack: errors.techStack,
-                }));
-              }}
-              onKeyDown={handleTechKeyDown}
-              aria-invalid={Boolean(fieldErrors.techStack)}
-              aria-describedby={
-                fieldErrors.techStack ? `tech-stack-error${suffix}` : undefined
-              }
-              placeholder="Type a technology and press Enter..."
-              className="flex-1"
-            />
+            <div className="relative flex-1">
+              <Input
+                value={techInput}
+                onChange={(e) => {
+                  setTechInput(e.target.value);
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    techStack: undefined,
+                  }));
+                }}
+                onBlur={() => {
+                  window.setTimeout(() => setTechSuggestions([]), 120);
+                  if (!techInput.trim()) return;
+                  const errors: FieldErrors<ProjectField> = {};
+                  validateField(errors, "techStack", () =>
+                    normalizeStringList(
+                      [...form.techStack, techInput.trim()],
+                      "Tech stack",
+                      MAX_TECH_STACK_ITEMS,
+                      MAX_TECH_STACK_ITEM_CHARS
+                    )
+                  );
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    techStack: errors.techStack,
+                  }));
+                }}
+                onKeyDown={handleTechKeyDown}
+                aria-invalid={Boolean(fieldErrors.techStack)}
+                aria-autocomplete="list"
+                aria-expanded={techSuggestions.length > 0}
+                aria-describedby={
+                  fieldErrors.techStack ? `tech-stack-error${suffix}` : undefined
+                }
+                placeholder="Type a technology and press Enter..."
+                autoComplete="off"
+              />
+              {techSuggestions.length > 0 && (
+                <ul
+                  role="listbox"
+                  className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-[var(--radius-md)] border border-border-default bg-surface-raised p-1 shadow-md"
+                >
+                  {techSuggestions.map((suggestion, index) => (
+                    <li key={suggestion.label} role="option" aria-selected={index === highlightedTech}>
+                      <button
+                        type="button"
+                        className={`flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm ${
+                          index === highlightedTech
+                            ? "bg-brand-light text-brand-dark"
+                            : "text-text-primary hover:bg-surface-sunken"
+                        }`}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onMouseEnter={() => setHighlightedTech(index)}
+                        onClick={() => addTechTag(suggestion.label)}
+                      >
+                        <img
+                          src={techIconUrl(suggestion.slug!)}
+                          alt=""
+                          className="h-4 w-4 shrink-0"
+                        />
+                        <span className="min-w-0 truncate">{suggestion.label}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             <Button
               type="button"
               variant="outline"
-              onClick={addTechTag}
+              onClick={() => addTechTag()}
               disabled={!techInput.trim() || techInputInvalid}
             >
               <Plus className="h-4 w-4" />
