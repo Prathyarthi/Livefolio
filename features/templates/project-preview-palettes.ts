@@ -345,6 +345,19 @@ export const TEMPLATE_PROJECT_PREVIEW: Record<string, TemplateProjectPreviewConf
     },
     variant: "dark",
   },
+  veil: {
+    palette: {
+      bg: "#0c0b0f",
+      bgAlt: "#131218",
+      primary: "#ff5a36",
+      secondary: "#f2eee6",
+      accent: "#ff8a6b",
+      surface: "#131218",
+      muted: "#2a2830",
+      stroke: "rgba(242,238,230,0.12)",
+    },
+    variant: "dark",
+  },
   bluish: {
     palette: {
       bg: "#0a0a0a",

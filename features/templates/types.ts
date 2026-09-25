@@ -27,6 +27,7 @@ export interface PortfolioData {
     headline: string;
     summary: string;
     avatarUrl: string | null;
+    profileImageUrl: string | null;
     contactEmail: string | null;
     phone: string | null;
     location: string | null;
