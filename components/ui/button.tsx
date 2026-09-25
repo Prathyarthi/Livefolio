@@ -10,15 +10,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-brand-secondary text-white hover:opacity-90 dark:bg-brand-primary",
+          "bg-brand-fill text-brand-on-fill hover:opacity-90",
         accent:
-          "bg-brand-secondary text-white hover:opacity-90 dark:bg-brand-primary",
+          "bg-brand-fill text-brand-on-fill hover:opacity-90",
         destructive:
           "bg-danger text-white hover:opacity-90",
         outline:
           "border-[1.5px] border-brand-primary bg-transparent text-brand-primary hover:bg-brand-light",
         secondary:
-          "bg-brand-light text-brand-dark hover:bg-brand-secondary/40",
+          "bg-brand-light text-brand-dark hover:bg-brand-secondary/25",
         ghost:
           "bg-transparent text-text-secondary hover:bg-surface-raised hover:text-text-primary",
         link: "text-brand-primary underline-offset-4 hover:underline active:scale-100",

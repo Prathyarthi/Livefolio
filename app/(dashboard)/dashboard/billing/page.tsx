@@ -168,7 +168,7 @@ export default function BillingPage() {
   const intervalCheckoutReady = checkoutIntervals.includes(billingInterval);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 pb-6">
+    <div className="mx-auto max-w-2xl space-y-8 pb-6">
       <div>
         <h1 className="text-h2 text-text-primary">Billing</h1>
         <p className="mt-1 text-body-sm text-text-secondary">
@@ -177,9 +177,9 @@ export default function BillingPage() {
       </div>
 
       {returning && isPending && (
-        <div className="rounded-xl border border-blue-500/25 bg-blue-500/10 px-4 py-3 text-sm text-blue-300">
-          <p className="font-medium">Payment is being processed</p>
-          <p className="mt-1 text-xs text-blue-400/70">
+        <div className="rounded-[var(--radius-lg)] border border-border-default bg-warning-bg px-4 py-3 text-body-sm">
+          <p className="font-medium text-text-primary">Payment is being processed</p>
+          <p className="mt-1 text-text-secondary">
             Your subscription will be activated once payment is confirmed. Refresh
             this page in a few moments to see the updated status.
           </p>
@@ -187,8 +187,8 @@ export default function BillingPage() {
       )}
 
       {cancelled && cancelAtPeriodEnd && (
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
+        <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-border-default bg-success-bg px-4 py-3 text-body-sm text-text-primary">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
           Subscription cancelled. Your Pro access remains available
           {currentPeriodEnd ? ` through ${currentPeriodEnd}` : " through the current billing cycle"}.
         </div>
@@ -214,10 +214,10 @@ export default function BillingPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {isPro && (
-            <div className="flex items-start gap-3 rounded-xl border border-teal-500/20 bg-teal-500/8 px-4 py-3">
-              <Crown className="mt-0.5 h-4 w-4 shrink-0 text-teal-400" />
+            <div className="flex items-start gap-3 rounded-xl border border-success/25 bg-success-bg px-4 py-3">
+              <Crown className="mt-0.5 h-4 w-4 shrink-0 text-success" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-teal-200">
+                <p className="text-sm font-medium text-text-primary">
                   {cancelAtPeriodEnd
                     ? "Pro access remains active until the billing cycle ends"
                     : "Pro subscription is active"}
@@ -236,7 +236,7 @@ export default function BillingPage() {
           {isPro && !cancelAtPeriodEnd && (
             <Button
               variant="outline"
-              className="w-full rounded-full border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              className="w-full border-danger text-danger hover:bg-danger-bg hover:text-danger"
               disabled={cancelling}
               onClick={() => setShowCancelDialog(true)}
             >
@@ -303,12 +303,12 @@ export default function BillingPage() {
               </span>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-zinc-400">Portfolio visit analytics</span>
+              <span className="text-text-secondary">Portfolio visit analytics</span>
               <span
                 className={
                   billing?.access?.canUseAnalytics
-                    ? "text-teal-400"
-                    : "text-zinc-600"
+                    ? "font-medium text-success"
+                    : "text-text-muted"
                 }
               >
                 {billing?.access?.canUseAnalytics ? "Unlocked" : "Locked"}
@@ -330,12 +330,12 @@ export default function BillingPage() {
                 className="w-full justify-center"
               />
               {!intervalCheckoutReady && (
-                <p className="text-center text-xs text-zinc-500">
+                <p className="text-center text-xs text-text-muted">
                   {getIntervalCheckoutUnavailableMessage(billingInterval)}
                 </p>
               )}
               <Button
-                className="w-full rounded-full bg-teal-500 text-teal-950 hover:bg-teal-400"
+                className="w-full"
                 disabled={subscribing || isPending || !intervalCheckoutReady}
                 onClick={subscribe}
               >

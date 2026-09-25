@@ -130,7 +130,7 @@ export function PublishDialog({
             </DialogHeader>
 
             <div className="space-y-3 pt-2">
-              <p className="break-all font-mono text-xs text-muted-foreground">
+              <p className="break-all font-mono text-xs text-text-muted">
                 {publishedUrl}
               </p>
               <Button className="w-full" asChild>
@@ -180,12 +180,12 @@ export function PublishDialog({
                     className="font-mono"
                     autoFocus
                   />
-                  <span className="shrink-0 text-xs text-muted-foreground">
+                  <span className="shrink-0 text-xs text-text-muted">
                     .{rootDomain}
                   </span>
                 </div>
                 {checking && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-text-muted">
                     Checking availability...
                   </p>
                 )}
@@ -193,12 +193,12 @@ export function PublishDialog({
                   <p className="text-xs text-emerald-600">Available</p>
                 )}
                 {!checking && slugAvailable === false && (
-                  <p className="text-xs text-destructive">
+                  <p className="text-xs text-danger">
                     Already taken or invalid
                   </p>
                 )}
                 {previewUrl && (
-                  <p className="text-xs text-muted-foreground font-mono">
+                  <p className="text-xs text-text-muted font-mono">
                     {previewUrl}
                   </p>
                 )}

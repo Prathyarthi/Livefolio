@@ -43,6 +43,7 @@ model User {
 
   organizationMembers OrganizationMember[]
   workspaceMembers    WorkspaceMember[]
+  workspaceTalentsAdded WorkspaceTalent[]
   jobsCreated         Job[]
   applications        Application[]
   recruiterNotes      RecruiterNote[]
@@ -187,6 +188,7 @@ model Portfolio {
   views          PortfolioView[]
   clicks         PortfolioClick[]
   storedFiles    StoredFile[]
+  workspaceTalents WorkspaceTalent[]
 
   @@index([slug])
   @@index([openToWork, isPublished])
@@ -455,6 +457,7 @@ model Workspace {
   organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   members      WorkspaceMember[]
   jobs         Job[]
+  talents      WorkspaceTalent[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -475,6 +478,24 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([userId])
   @@map("workspace_members")
+}
+
+/// A discovered person saved into a workspace the member can access.
+model WorkspaceTalent {
+  id          String   @id @default(uuid())
+  workspaceId String
+  portfolioId String
+  addedById   String
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  addedBy   User      @relation(fields: [addedById], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, portfolioId])
+  @@index([portfolioId])
+  @@index([addedById])
+  @@map("workspace_talents")
 }
 
 model Job {

@@ -3,12 +3,7 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import {
-  CheckCircle2,
-  CreditCard,
-  Crown,
-  Loader2,
-} from "lucide-react";
+import { CheckCircle2, CreditCard, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -168,17 +163,24 @@ export default function CompanyBillingPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-primary" />
+      <div className="mx-auto w-full max-w-3xl space-y-8">
+        <Button variant="ghost" size="sm" asChild className="-ml-2">
+          <Link href={`/company/${orgSlug}`}>← Back to organization</Link>
+        </Button>
+        <header className="space-y-1">
+          <p className="eyebrow uppercase">Billing</p>
+          <h1 className="text-h2 text-text-primary">Organization plan</h1>
+        </header>
+        <p className="text-body-sm text-text-muted">Loading billing…</p>
       </div>
     );
   }
 
   if (!billing) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-6 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
-          <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
+          <Link href={`/company/${orgSlug}`}>← Back to organization</Link>
         </Button>
         <header className="space-y-1">
           <p className="eyebrow uppercase">Billing</p>
@@ -214,9 +216,9 @@ export default function CompanyBillingPage() {
   const intervalCheckoutReady = checkoutIntervals.includes(billingInterval);
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
+          <Link href={`/company/${orgSlug}`}>← Back to organization</Link>
       </Button>
 
       <header className="space-y-1">
@@ -252,7 +254,7 @@ export default function CompanyBillingPage() {
         </p>
       ) : null}
 
-      <section className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+      <section className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-text-secondary" />

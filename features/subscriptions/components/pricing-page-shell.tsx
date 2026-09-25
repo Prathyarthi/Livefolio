@@ -7,45 +7,63 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PricingPlansSection } from "./pricing-plans-section";
 import { Logo } from "@/components/logo";
+import { LandingNav } from "@/features/landing/components/landing-nav";
 
-export function PricingPageShell() {
+export function PricingPageShell({
+  audience = "candidate",
+}: {
+  audience?: "candidate" | "recruiter";
+}) {
   const { data: session } = useSession();
+  const hiring = audience === "recruiter";
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-surface-base">
-      <header
-        className="sticky top-0 z-[100] border-b border-border-default"
-        style={{
-          backgroundColor:
-            "color-mix(in srgb, var(--color-surface-base) 90%, transparent)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-        }}
-      >
-        <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
-          <Logo />
+    <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden bg-surface-base">
+      {hiring ? (
+        <LandingNav variant="recruiter" />
+      ) : (
+        <header className="glass-nav sticky top-0 z-[100]">
+          <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
+            <Logo />
 
-          <nav className="flex items-center gap-1.5">
-            <ThemeToggle />
-            {session?.user ? (
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-            ) : (
-              <>
+            <nav className="flex items-center gap-1.5">
+              <ThemeToggle />
+              {session?.user ? (
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/sign-in">Sign in</Link>
+                  <Link href="/dashboard">Dashboard</Link>
                 </Button>
-                <Button size="sm" asChild className="h-9 px-4">
-                  <Link href="/sign-up">Get started</Link>
-                </Button>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/sign-in">Sign in</Link>
+                  </Button>
+                  <Button size="sm" asChild className="h-9 px-4">
+                    <Link href="/sign-up">Get started</Link>
+                  </Button>
+                </>
+              )}
+            </nav>
+          </div>
+        </header>
+      )}
 
-      <div className="min-h-[calc(100vh-4rem)] px-6 py-[var(--space-9)]">
+      <div className="px-6 py-[var(--space-9)]">
+        {hiring ? (
+          <div className="mx-auto mb-10 max-w-4xl rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+            <p className="eyebrow uppercase">Hiring</p>
+            <h2 className="mt-2 text-h3 text-text-primary">
+              This page is personal Livefolio Pro
+            </h2>
+            <p className="mt-2 max-w-2xl text-body-sm text-text-secondary">
+              Org Pro for open jobs and workspaces lives on the recruiters page.
+              The plans below are for individual portfolios.
+            </p>
+            <Button asChild className="mt-4" variant="outline">
+              <Link href="/recruiters#pricing">View Org Pro</Link>
+            </Button>
+          </div>
+        ) : null}
+
         <PricingPlansSection />
 
         <div className="mx-auto mt-12 max-w-4xl">
@@ -62,8 +80,20 @@ export function PricingPageShell() {
                 </p>
               </div>
               <Button asChild variant="outline" className="shrink-0">
-                <Link href={session?.user ? "/dashboard" : "/sign-up"}>
-                  {session?.user ? "Go to dashboard" : "Start free"}
+                <Link
+                  href={
+                    hiring
+                      ? "/recruiters#pricing"
+                      : session?.user
+                        ? "/dashboard"
+                        : "/sign-up"
+                  }
+                >
+                  {hiring
+                    ? "View Org Pro"
+                    : session?.user
+                      ? "Go to dashboard"
+                      : "Start free"}
                 </Link>
               </Button>
             </CardContent>

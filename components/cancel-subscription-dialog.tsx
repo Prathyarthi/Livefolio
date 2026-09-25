@@ -26,26 +26,24 @@ export function CancelSubscriptionDialog({
 }: CancelSubscriptionDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/8 bg-zinc-900 sm:max-w-md">
+      <DialogContent className="sm:max-w-md [&_[data-slot=dialog-close]]:dark:text-text-primary [&_[data-slot=dialog-close]]:dark:opacity-90 [&_[data-slot=dialog-close]]:dark:hover:opacity-100">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
-              <AlertTriangle className="h-5 w-5 text-red-400" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-bg">
+              <AlertTriangle className="h-5 w-5 text-text-primary" aria-hidden />
             </div>
-            <DialogTitle className="text-zinc-100">
-              Cancel Pro Subscription
-            </DialogTitle>
+            <DialogTitle>Cancel Pro Subscription</DialogTitle>
           </div>
-          <DialogDescription className="text-zinc-400">
+          <DialogDescription>
             Are you sure you want to cancel your Pro subscription?
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-4">
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
-            <p className="text-sm font-medium text-amber-200">
+          <div className="rounded-xl border border-warning/25 bg-warning-bg px-4 py-3">
+            <p className="text-sm font-medium text-text-primary">
               Your subscription and AutoPay will be cancelled immediately.
             </p>
-            <p className="mt-2 text-xs text-amber-300/80">
+            <p className="mt-2 text-xs text-text-secondary">
               You will keep all Pro features until the end of your current paid
               billing cycle. After that, your account moves to the applicable
               free tier.
@@ -55,14 +53,14 @@ export function CancelSubscriptionDialog({
         <DialogFooter>
           <Button
             variant="outline"
-            className="rounded-full border-white/10 hover:bg-white/5"
+            className="dark:border-border-strong dark:text-text-primary dark:hover:bg-surface-sunken"
             onClick={() => onOpenChange(false)}
             disabled={cancelling}
           >
             Keep Subscription
           </Button>
           <Button
-            className="rounded-full bg-red-500 text-white hover:bg-red-600"
+            variant="destructive"
             onClick={onConfirm}
             disabled={cancelling}
           >

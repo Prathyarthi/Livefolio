@@ -604,7 +604,7 @@ export function ProjectForm() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -640,7 +640,7 @@ export function ProjectForm() {
             {fieldErrors.title && (
               <p
                 id={`proj-title-error${suffix}`}
-                className="text-sm text-destructive"
+                className="text-sm text-danger"
               >
                 {fieldErrors.title}
               </p>
@@ -683,7 +683,7 @@ export function ProjectForm() {
           {fieldErrors.description && (
             <p
               id={`proj-description-error${suffix}`}
-              className="text-sm text-destructive"
+              className="text-sm text-danger"
             >
               {fieldErrors.description}
             </p>
@@ -693,7 +693,7 @@ export function ProjectForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <FieldLabel htmlFor={`liveUrl${suffix}`} unsaved={isFieldUnsaved("liveUrl")}>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-4 w-4 text-text-muted" />
               Live URL
             </FieldLabel>
             <Input
@@ -712,7 +712,7 @@ export function ProjectForm() {
             {fieldErrors.liveUrl && (
               <p
                 id={`live-url-error${suffix}`}
-                className="text-sm text-destructive"
+                className="text-sm text-danger"
               >
                 {fieldErrors.liveUrl}
               </p>
@@ -720,7 +720,7 @@ export function ProjectForm() {
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor={`sourceUrl${suffix}`} unsaved={isFieldUnsaved("sourceUrl")}>
-              <Github className="h-4 w-4 text-muted-foreground" />
+              <Github className="h-4 w-4 text-text-muted" />
               Source URL
             </FieldLabel>
             <Input
@@ -739,7 +739,7 @@ export function ProjectForm() {
             {fieldErrors.sourceUrl && (
               <p
                 id={`source-url-error${suffix}`}
-                className="text-sm text-destructive"
+                className="text-sm text-danger"
               >
                 {fieldErrors.sourceUrl}
               </p>
@@ -765,7 +765,7 @@ export function ProjectForm() {
           onUsageChange={setThumbUsage}
         />
         {fieldErrors.imageUrl && (
-          <p className="text-sm text-destructive">{fieldErrors.imageUrl}</p>
+          <p className="text-sm text-danger">{fieldErrors.imageUrl}</p>
         )}
 
         <div className="space-y-2">
@@ -816,7 +816,7 @@ export function ProjectForm() {
           {fieldErrors.techStack && (
             <p
               id={`tech-stack-error${suffix}`}
-              className="text-sm text-destructive"
+              className="text-sm text-danger"
             >
               {fieldErrors.techStack}
             </p>
@@ -850,7 +850,7 @@ export function ProjectForm() {
             <FolderKanban className="h-5 w-5" />
             Projects
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-muted">
             Showcase your best projects with descriptions, tech stack, and links.
           </p>
         </div>
@@ -917,8 +917,8 @@ export function ProjectForm() {
       {projects.length === 0 && !isAdding ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <FolderKanban className="h-10 w-10 text-muted-foreground/40 mb-3" />
-            <p className="text-muted-foreground">
+            <FolderKanban className="h-10 w-10 text-text-muted/40 mb-3" />
+            <p className="text-text-muted">
               No projects added yet. Click &quot;Add Project&quot; to showcase your work.
             </p>
           </CardContent>
@@ -935,7 +935,7 @@ export function ProjectForm() {
                 <CardContent className="space-y-4 pt-6">
                   <div>
                     <h4 className="text-base font-semibold">Edit Project</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-text-muted">
                       Update this project&apos;s details.
                     </p>
                   </div>
@@ -1008,7 +1008,7 @@ export function ProjectForm() {
                             href={project.liveUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1"
+                            className="text-xs text-brand-secondary hover:underline flex items-center gap-1"
                           >
                             <ExternalLink className="h-3 w-3" />
                             Live
@@ -1019,7 +1019,7 @@ export function ProjectForm() {
                             href={project.sourceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1"
+                            className="text-xs text-brand-secondary hover:underline flex items-center gap-1"
                           >
                             <Github className="h-3 w-3" />
                             Source
@@ -1031,7 +1031,7 @@ export function ProjectForm() {
                     {project.description && (
                       <>
                         <Separator className="my-3" />
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        <p className="text-sm text-text-muted whitespace-pre-wrap">
                           {project.description}
                         </p>
                       </>
@@ -1066,7 +1066,7 @@ export function ProjectForm() {
                       onClick={() => handleDelete(project.id)}
                       disabled={isMutating}
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-4 w-4 text-danger" />
                     </Button>
                   </div>
                 </div>

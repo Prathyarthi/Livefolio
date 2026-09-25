@@ -18,7 +18,7 @@ export function ApplicantPoolGapReport({
 }) {
   if (report.rows.length === 0) {
     return (
-      <section className="rounded-[var(--radius-lg)] border border-dashed border-border-default px-5 py-4">
+      <section className="rounded-[var(--radius-lg)] border border-dashed border-border-default bg-surface-raised px-5 py-4 shadow-[var(--shadow-card)]">
         <h2 className="text-h3 text-text-primary">Pool coverage</h2>
         <p className="mt-1 text-body-sm text-text-secondary">
           Add structured requirements on this job to see which must-haves nobody
@@ -47,14 +47,14 @@ export function ApplicantPoolGapReport({
   );
 
   return (
-    <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5">
+    <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
       <div>
         <h2 className="text-h3 text-text-primary">Pool coverage</h2>
         <p className="mt-1 text-body-sm text-text-secondary">{caption}</p>
       </div>
 
       {uncoveredRequired.length > 0 ? (
-        <p className="text-body-sm text-semantic-danger">
+        <p className="text-body-sm text-danger">
           Nobody in this pool has evidence for{" "}
           {uncoveredRequired.map((row) => row.label).join(", ")}.
         </p>
@@ -88,7 +88,7 @@ export function ApplicantPoolGapReport({
               <div
                 className={`h-full rounded-full ${
                   row.matchedCount === 0
-                    ? "bg-semantic-danger"
+                    ? "bg-danger"
                     : row.coveragePercent < 25
                       ? "bg-warning"
                       : "bg-brand-secondary"

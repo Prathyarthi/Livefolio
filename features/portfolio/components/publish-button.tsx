@@ -78,7 +78,7 @@ export function PublishButton() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -163,7 +163,7 @@ export function PublishButton() {
             >
               {isPublished ? "Portfolio is live" : "Portfolio is hidden"}
             </Label>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-text-muted">
               {isPublished
                 ? "Visitors can view your portfolio at the public URL."
                 : slug
@@ -182,7 +182,7 @@ export function PublishButton() {
         <div className="space-y-3 rounded-lg border p-4">
           <div className="space-y-1">
             <FieldLabel unsaved={slugDirty}>Choose your subdomain</FieldLabel>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-text-muted">
               This becomes your public portfolio address when you publish.
             </p>
           </div>
@@ -198,17 +198,17 @@ export function PublishButton() {
               placeholder="your-name"
               className="font-mono"
             />
-            <span className="text-xs text-muted-foreground">.{rootDomain}</span>
+            <span className="text-xs text-text-muted">.{rootDomain}</span>
           </div>
 
           {checking && (
-            <p className="text-xs text-muted-foreground">Checking availability...</p>
+            <p className="text-xs text-text-muted">Checking availability...</p>
           )}
           {!checking && slugAvailable === true && (
             <p className="text-xs text-success">Available</p>
           )}
           {!checking && slugAvailable === false && (
-            <p className="text-xs text-destructive">Already taken or invalid</p>
+            <p className="text-xs text-danger">Already taken or invalid</p>
           )}
 
           <Button
@@ -230,7 +230,7 @@ export function PublishButton() {
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4">
             <div className="min-w-0 space-y-0.5">
               <p className="text-sm font-medium">Share your portfolio</p>
-              <p className="truncate text-xs text-muted-foreground font-mono">
+              <p className="truncate text-xs text-text-muted font-mono">
                 {getPortfolioPublicUrl(slug)}
               </p>
             </div>

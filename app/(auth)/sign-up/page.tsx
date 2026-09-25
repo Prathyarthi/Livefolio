@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { isGitHubAuthEnabled, isGoogleAuthEnabled } from "@/lib/auth-providers";
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
 import { createPageMetadata } from "@/lib/seo";
@@ -13,9 +14,11 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function SignUpPage() {
   return (
-    <SignUpForm
-      githubEnabled={isGitHubAuthEnabled()}
-      googleEnabled={isGoogleAuthEnabled()}
-    />
+    <Suspense fallback={null}>
+      <SignUpForm
+        githubEnabled={isGitHubAuthEnabled()}
+        googleEnabled={isGoogleAuthEnabled()}
+      />
+    </Suspense>
   );
 }

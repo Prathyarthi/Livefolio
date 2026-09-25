@@ -84,7 +84,7 @@ export function FAQ() {
                       "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
                       "bg-brand-secondary/12 text-lg font-light leading-none text-brand-secondary",
                       "transition-all duration-200",
-                      "group-open:rotate-45 group-open:bg-brand-secondary group-open:text-white"
+                      "group-open:rotate-45 group-open:bg-brand-fill group-open:text-brand-on-fill"
                     )}
                     aria-hidden
                   >

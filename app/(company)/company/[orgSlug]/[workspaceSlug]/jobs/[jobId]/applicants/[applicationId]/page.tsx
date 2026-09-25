@@ -18,11 +18,15 @@ import {
 } from "@/features/applications/api/use-applications";
 import {
   PIPELINE_STAGE_LABELS,
-  PIPELINE_STAGES,
   type PipelineStage,
 } from "@/features/jobs/constants/labels";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import { getPortfolioPublicUrl } from "@/lib/domain";
+import { PipelineStageSelect } from "@/features/applications/components/pipeline-stage-select";
+import {
+  HiringLoadingState,
+  HiringNotFoundState,
+} from "@/features/organization/components/hiring-page-chrome";
 
 export default function ApplicantDetailPage() {
   const params = useParams<{
@@ -44,20 +48,21 @@ export default function ApplicantDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading applicant…</div>
+      <HiringLoadingState
+        backHref={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}
+        backLabel="← Back to applicants"
+        message="Loading applicant…"
+      />
     );
   }
 
   if (error || !data) {
     return (
-      <div className="space-y-4 p-8">
-        <h1 className="text-h3 text-text-primary">Applicant not found</h1>
-        <Button asChild variant="outline">
-          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
-            Back to pool
-          </Link>
-        </Button>
-      </div>
+      <HiringNotFoundState
+        backHref={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}
+        backLabel="← Back to applicants"
+        title="Applicant not found"
+      />
     );
   }
 
@@ -104,11 +109,11 @@ export default function ApplicantDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-4xl space-y-8">
       <div className="flex flex-wrap gap-2">
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
-            ← Applicants
+            ← Back to applicants
           </Link>
         </Button>
       </div>
@@ -153,18 +158,12 @@ export default function ApplicantDetailPage() {
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          className="h-10 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-3 text-sm"
+        <PipelineStageSelect
           value={data.stage}
-          onChange={(e) => handleStage(e.target.value)}
+          onValueChange={handleStage}
           disabled={updateStage.isPending}
-        >
-          {PIPELINE_STAGES.map((stage) => (
-            <option key={stage} value={stage}>
-              {PIPELINE_STAGE_LABELS[stage]}
-            </option>
-          ))}
-        </select>
+          size="default"
+        />
         <Button
           variant="outline"
           onClick={handleShortlist}
@@ -201,7 +200,7 @@ export default function ApplicantDetailPage() {
       </div>
 
       {data.coverNote ? (
-        <section className="space-y-2 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 shadow-[var(--shadow-card)] md:p-6">
+        <section className="space-y-2 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
           <h2 className="text-h3 text-text-primary">Candidate note</h2>
           <p className="whitespace-pre-wrap text-body-sm text-text-secondary">
             {data.coverNote}
@@ -214,7 +213,7 @@ export default function ApplicantDetailPage() {
         data.evidence.highlights.length > 0 ||
         (data.evidence.rankReasons && data.evidence.rankReasons.length > 0) ||
         data.evidence.rankScore) ? (
-        <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 shadow-[var(--shadow-card)] md:p-6">
+        <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
           <div>
             <h2 className="text-h3 text-text-primary">
               Relevant evidence & requirements
@@ -291,7 +290,7 @@ export default function ApplicantDetailPage() {
 
       <SnapshotSections snapshot={snapshot} />
 
-      <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+      <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
         <div>
           <h2 className="text-h3 text-text-primary">Private recruiter notes</h2>
           <p className="text-body-sm text-text-muted">
@@ -317,12 +316,9 @@ export default function ApplicantDetailPage() {
         {data.notes.length === 0 ? (
           <p className="text-body-sm text-text-muted">No notes yet.</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className="divide-y divide-border-default border-t border-border-default">
             {data.notes.map((note) => (
-              <li
-                key={note.id}
-                className="rounded-[var(--radius-md)] border border-border-default bg-surface-raised p-4"
-              >
+              <li key={note.id} className="py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <p className="text-body-sm font-medium text-text-primary">
@@ -376,7 +372,7 @@ function SnapshotSections({
   }
 
   return (
-    <div className="space-y-8 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+    <div className="space-y-8 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
       {snapshot.profile.summary ? (
         <section className="space-y-2">
           <h2 className="text-h3 text-text-primary">About</h2>

@@ -42,13 +42,13 @@ export default function ApplicantDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading applicant…</div>
+      <div className="text-body-sm text-text-muted">Loading applicant…</div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="space-y-4 p-8">
+      <div className="space-y-4">
         <h1 className="text-h3 text-text-primary">Applicant not found</h1>
         <Button asChild variant="outline">
           <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>
@@ -99,7 +99,7 @@ export default function ApplicantDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <div className="flex flex-wrap gap-2">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/company/${orgSlug}/jobs/${jobId}/applicants`}>

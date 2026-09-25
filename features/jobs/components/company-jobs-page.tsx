@@ -35,7 +35,7 @@ export default function CompanyJobsPage() {
   const origin = useMemo(() => getAppOrigin(), []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <p className="eyebrow uppercase">Jobs</p>

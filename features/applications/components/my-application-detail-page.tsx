@@ -20,7 +20,7 @@ export default function ApplicationDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">
+      <div className="text-body-sm text-text-muted">
         Loading application…
       </div>
     );
@@ -28,7 +28,7 @@ export default function ApplicationDetailPage() {
 
   if (error || !data) {
     return (
-      <div className="space-y-4 p-8">
+      <div className="space-y-4">
         <h1 className="text-h3 text-text-primary">Application not found</h1>
         <Button asChild variant="outline">
           <Link href="/dashboard/applications">Back to applications</Link>
@@ -41,7 +41,7 @@ export default function ApplicationDetailPage() {
   const profile = snapshot?.profile;
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
       <header className="space-y-3">
         <Badge variant="neutral">
           {APPLICATION_STATUS_LABELS[data.status] ?? data.status}

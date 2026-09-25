@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 async function throwApiError(
   response: Response,
@@ -27,6 +27,7 @@ export type TalentPerson = {
   skills: string[];
   recentRole: { role: string; company: string } | null;
   livefolioUrl: string;
+  savedWorkspaces: Array<{ id: string; slug: string; name: string }>;
 };
 
 export type TalentSearchResult = {
@@ -39,7 +40,6 @@ export type TalentSearchResult = {
 
 export function useTalentSearch(
   orgSlug: string | undefined,
-  workspaceSlug: string | undefined,
   options?: {
     q?: string;
     location?: string;
@@ -58,14 +58,13 @@ export function useTalentSearch(
     queryKey: [
       "talent",
       orgSlug,
-      workspaceSlug,
       q ?? "",
       location ?? "",
       skill ?? "",
       page,
       pageSize,
     ],
-    enabled: Boolean(orgSlug && workspaceSlug),
+    enabled: Boolean(orgSlug),
     queryFn: async () => {
       const params = new URLSearchParams();
       if (q) params.set("q", q);
@@ -75,11 +74,66 @@ export function useTalentSearch(
       params.set("pageSize", String(pageSize));
       const qs = params.toString();
       const res = await fetch(
-        `/api/talent/org/${orgSlug}/workspace/${workspaceSlug}${qs ? `?${qs}` : ""}`,
+        `/api/talent/org/${orgSlug}${qs ? `?${qs}` : ""}`,
         { cache: "no-store" },
       );
       if (!res.ok) await throwApiError(res, "Failed to load talent");
       return res.json() as Promise<TalentSearchResult>;
+    },
+  });
+}
+
+export function useWorkspaceTalent(
+  orgSlug: string | undefined,
+  workspaceSlug: string | undefined,
+) {
+  return useQuery({
+    queryKey: ["talent", orgSlug, "workspace", workspaceSlug],
+    enabled: Boolean(orgSlug && workspaceSlug),
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/talent/org/${orgSlug}/workspaces/${workspaceSlug}`,
+        { cache: "no-store" },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to load saved talent");
+      return res.json() as Promise<{
+        people: Array<{
+          slug: string;
+          title: string;
+          headline: string;
+          avatarUrl: string | null;
+          livefolioUrl: string;
+        }>;
+      }>;
+    },
+  });
+}
+
+export function useAddTalentToWorkspace(orgSlug: string | undefined) {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { workspaceSlug: string; slug: string }) => {
+      const res = await fetch(
+        `/api/talent/org/${orgSlug}/workspaces/${input.workspaceSlug}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug: input.slug }),
+        },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to add talent");
+      return res.json() as Promise<{
+        ok: true;
+        slug: string;
+        workspace: { id: string; slug: string; name: string };
+      }>;
+    },
+    onSuccess: (_data, input) => {
+      void qc.invalidateQueries({ queryKey: ["talent", orgSlug] });
+      void qc.invalidateQueries({
+        queryKey: ["talent", orgSlug, "workspace", input.workspaceSlug],
+      });
     },
   });
 }

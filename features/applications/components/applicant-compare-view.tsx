@@ -92,7 +92,7 @@ export function ApplicantCompareView({
   const colCount = applicants.length;
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
           ← Back to applicants
@@ -267,7 +267,7 @@ export function ApplicantCompareView({
           {/* Requirement rows */}
           {rows.length === 0 ? (
             <>
-              <div className="sticky left-0 z-10 col-span-full p-8 text-center text-body-sm text-text-secondary">
+              <div className="col-span-full p-6 text-body-sm text-text-secondary">
                 This job has no structured requirements yet. Add required /
                 preferred criteria to compare evidence by requirement.
               </div>
@@ -286,19 +286,16 @@ export function ApplicantCompareView({
       </div>
 
       {/* Highlights strip */}
-      <section className="space-y-3">
+      <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
         <h2 className="text-h3 text-text-primary">Top evidence highlights</h2>
         <div
-          className="grid gap-4"
+          className="grid gap-6"
           style={{
             gridTemplateColumns: `repeat(${Math.min(colCount, 4)}, minmax(0, 1fr))`,
           }}
         >
           {applicants.map((applicant) => (
-            <div
-              key={`${applicant.id}-highlights`}
-              className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4"
-            >
+            <div key={`${applicant.id}-highlights`} className="min-w-0">
               <p className="font-medium text-text-primary">
                 {applicant.summary.name}
               </p>

@@ -117,7 +117,7 @@ export function ProjectThumbnailField({
     <div className="space-y-2">
       {hideLabel ? null : (
         <FieldLabel htmlFor={inputId} unsaved={unsaved}>
-          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+          <ImageIcon className="h-4 w-4 text-text-muted" />
           Thumbnail
         </FieldLabel>
       )}
@@ -152,13 +152,13 @@ export function ProjectThumbnailField({
         ) : null}
       </div>
       {livePreviewEnabled ? (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-text-muted">
           Live preview is on, so this project uses a screenshot of the live URL.
           Turn live preview off to upload a thumbnail instead.
         </p>
       ) : null}
       {usage && !livePreviewEnabled && !hideLabel ? (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-text-muted">
           {usage.used} of {usage.max} uploaded thumbnails used
           {usage.used >= usage.max ? (
             <>
