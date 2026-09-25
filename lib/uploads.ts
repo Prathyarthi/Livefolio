@@ -1,6 +1,7 @@
 export const UPLOAD_KINDS = [
   "resume",
   "project_thumb",
+  "profile_photo",
   "job_source",
   "org_logo",
   "org_banner",
@@ -11,12 +12,14 @@ export type UploadKind = (typeof UPLOAD_KINDS)[number];
 export const MAX_RESUME_BYTES = 10 * 1024 * 1024;
 export const MAX_JOB_SOURCE_BYTES = 10 * 1024 * 1024;
 export const MAX_PROJECT_THUMB_BYTES = 2 * 1024 * 1024;
+export const MAX_PROFILE_PHOTO_BYTES = 5 * 1024 * 1024;
 export const MAX_ORG_LOGO_BYTES = 2 * 1024 * 1024;
 export const MAX_ORG_BANNER_BYTES = 5 * 1024 * 1024;
 
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const IMAGE_KINDS = new Set<UploadKind>([
   "project_thumb",
+  "profile_photo",
   "org_logo",
   "org_banner",
 ]);
@@ -36,6 +39,7 @@ export function allowedContentTypes(kind: UploadKind): readonly string[] {
 
 export function maxBytesForKind(kind: UploadKind): number {
   if (kind === "project_thumb" || kind === "org_logo") return MAX_PROJECT_THUMB_BYTES;
+  if (kind === "profile_photo") return MAX_PROFILE_PHOTO_BYTES;
   if (kind === "org_banner") return MAX_ORG_BANNER_BYTES;
   if (kind === "job_source") return MAX_JOB_SOURCE_BYTES;
   return MAX_RESUME_BYTES;
@@ -116,6 +120,10 @@ export function objectKey(options: {
       throw new Error("userId and projectId are required for thumbnail keys");
     }
     return `users/${options.userId}/projects/${options.projectId}/${options.fileId}.${ext}`;
+  }
+  if (options.kind === "profile_photo") {
+    if (!options.userId) throw new Error("userId is required for profile photo keys");
+    return `users/${options.userId}/profile/${options.fileId}.${ext}`;
   }
   if (options.kind === "org_logo" || options.kind === "org_banner") {
     if (!options.orgId) throw new Error("orgId is required for branding keys");

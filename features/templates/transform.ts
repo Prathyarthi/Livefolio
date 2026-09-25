@@ -8,6 +8,7 @@ export function portfolioToTemplateData(portfolio: any): PortfolioData {
       headline: portfolio.headline ?? "",
       summary: portfolio.summary ?? "",
       avatarUrl: portfolio.avatarUrl ?? null,
+      profileImageUrl: portfolio.profileImageUrl ?? null,
       contactEmail: portfolio.contactEmail ?? null,
       phone: portfolio.phone ?? null,
       location: portfolio.location ?? null,

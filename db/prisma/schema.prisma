@@ -151,6 +151,7 @@ model Portfolio {
   headline  String  @default("")
   summary   String  @default("") @db.Text
   avatarUrl String?
+  profileImageUrl String?
   resumeUrl String?
 
   templateId  String  @default("pulse")
@@ -594,7 +595,7 @@ model ApplicationSnapshot {
 model StoredFile {
   id             String   @id @default(uuid())
   key            String   @unique
-  /// resume | project_thumb | job_source | org_logo | org_banner
+  /// resume | project_thumb | profile_photo | job_source | org_logo | org_banner
   kind           String
   contentType    String
   sizeBytes      Int

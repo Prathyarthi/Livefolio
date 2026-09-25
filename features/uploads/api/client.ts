@@ -78,6 +78,11 @@ export async function extractPdfText(file: File): Promise<string> {
   return json.text;
 }
 
+export async function removeProfilePhoto(): Promise<void> {
+  const res = await fetch("/api/uploads/profile-photo", { method: "DELETE" });
+  if (!res.ok) await readError(res, "Could not remove photo");
+}
+
 export async function uploadStoredFile(options: {
   kind: UploadKind;
   file: File;
