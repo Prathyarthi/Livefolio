@@ -16,7 +16,7 @@ import { getLandingPageStructuredData } from "@/lib/structured-data";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Build & Publish Your Developer Portfolio",
+  title: "Build & Publish Your Professional Portfolio",
   description: siteConfig.description,
   path: "/",
 });

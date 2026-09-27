@@ -41,6 +41,14 @@ export const SEO_KEYWORDS = [
   "live portfolio link",
   "portfolio subdomain",
   "Livefolio",
+  "portfolio builder",
+  "professional portfolio",
+  "personal portfolio",
+  "resume to portfolio",
+  "portfolio website",
+  "publish portfolio",
+  "portfolio templates",
+  "personal website builder",
 ] as const;
 
 const DEFAULT_OG_IMAGE = "/logo.svg";
@@ -111,7 +119,7 @@ export const rootMetadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   applicationName: siteConfig.name,
   title: {
-    default: `${siteConfig.name} — Build & Publish Your Developer Portfolio`,
+    default: `${siteConfig.name} — Build & Publish Your Professional Portfolio`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -144,7 +152,7 @@ export const rootMetadata: Metadata = {
     locale: "en_US",
     url: getSiteUrl(),
     siteName: siteConfig.name,
-    title: `${siteConfig.name} — Build & Publish Your Developer Portfolio`,
+    title: `${siteConfig.name} — Build & Publish Your Professional Portfolio`,
     description: siteConfig.description,
     images: [
       {
@@ -157,7 +165,7 @@ export const rootMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} — Build & Publish Your Developer Portfolio`,
+    title: `${siteConfig.name} — Build & Publish Your Professional Portfolio`,
     description: siteConfig.description,
     images: [DEFAULT_OG_IMAGE],
   },
