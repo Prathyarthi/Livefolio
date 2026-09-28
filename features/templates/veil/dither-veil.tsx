@@ -4,6 +4,7 @@
 import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { Renderer, Program, Mesh, Triangle, Texture, RenderTarget } from 'ogl';
+import { webglTextureUrl } from '@/lib/public-image';
 import { cn } from '@/lib/utils';
 
 type Pattern = 'bayer' | 'noise' | 'atkinson' | 'floyd' | 'lines';
@@ -13,7 +14,11 @@ type Kernel = [number, number, number][];
 type Rgb = [number, number, number];
 
 export interface DitherVeilProps {
-  /** Must be served with CORS headers — the image is uploaded as a WebGL texture. */
+  /**
+   * Uploaded as a WebGL texture. Cross-origin photos (published portfolios load
+   * R2 from `{slug}.domain`) are fetched through `/api/media/texture` first so
+   * the canvas is not blocked by bucket CORS.
+   */
   src: string;
   fit?: Fit;
   pattern?: Pattern;
@@ -779,26 +784,43 @@ export function DitherVeil({
     };
     wakeRef.current = wake;
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.decoding = 'async';
-    img.onload = () => {
-      image = img;
-      imageTexture.image = img;
-      try {
-        if (samplerContext) {
-          const edge = measureEdge(samplerContext, img);
-          viewUniforms.uMatte.value = edge.matte;
-          viewUniforms.uKey.value = edge.plain ? 1 : 0;
+    let cancelled = false;
+    let currentImage: HTMLImageElement | null = null;
+
+    const loadImage = (url: string) => {
+      const img = new Image();
+      currentImage = img;
+      img.crossOrigin = 'anonymous';
+      img.decoding = 'async';
+      img.onload = () => {
+        if (cancelled) return;
+        image = img;
+        imageTexture.image = img;
+        try {
+          if (samplerContext) {
+            const edge = measureEdge(samplerContext, img);
+            viewUniforms.uMatte.value = edge.matte;
+            viewUniforms.uKey.value = edge.plain ? 1 : 0;
+          }
+        } catch {
+
         }
-      } catch {
-        // Tainted canvas (no CORS): keep the default black matte.
-      }
-      introStart = performance.now();
-      wake();
+        introStart = performance.now();
+        wake();
+      };
+      img.onerror = () => {
+        if (cancelled) return;
+        if (url !== src) {
+          loadImage(src);
+          return;
+        }
+        onErrorRef.current?.();
+      };
+      img.src = url;
     };
-    img.onerror = () => onErrorRef.current?.();
-    img.src = src;
+
+    const proxied = webglTextureUrl(src, window.location.href);
+    loadImage(proxied);
 
     const locate = (e: PointerEvent) => {
       const rect = container.getBoundingClientRect();
@@ -845,12 +867,15 @@ export function DitherVeil({
     wake();
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(raf);
       wakeRef.current = () => {};
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
-      img.onload = null;
-      img.onerror = null;
+      if (currentImage) {
+        currentImage.onload = null;
+        currentImage.onerror = null;
+      }
       container.removeEventListener('pointermove', onMove);
       container.removeEventListener('pointerenter', onMove);
       container.removeEventListener('pointerdown', onDown);

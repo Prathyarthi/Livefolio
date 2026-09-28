@@ -1,7 +1,7 @@
 /**
  * Cloudflare R2 via the S3-compatible API.
  *
- * Bucket CORS (required for browser PUTs):
+ * Bucket CORS (required for browser PUTs from the app origin):
  * {
  *   "AllowedOrigins": ["https://your-app-origin", "http://localhost:3000"],
  *   "AllowedMethods": ["GET", "PUT", "HEAD"],
@@ -9,6 +9,11 @@
  *   "ExposeHeaders": ["ETag"],
  *   "MaxAgeSeconds": 3600
  * }
+ *
+ * Published portfolios are served on `{slug}.{rootDomain}`, a different origin
+ * from the dashboard. WebGL cannot sample those public images unless this
+ * bucket also allows that origin, or the page loads them through the
+ * same-origin texture proxy at `/api/media/texture`.
  */
 import {
   DeleteObjectCommand,
@@ -108,6 +113,28 @@ export async function putObject(options: {
       Body: options.body,
     }),
   );
+}
+
+export async function readObject(key: string): Promise<{
+  body: Uint8Array;
+  contentType: string;
+} | null> {
+  try {
+    const result = await getClient().send(
+      new GetObjectCommand({
+        Bucket: bucket(),
+        Key: key,
+      }),
+    );
+    if (!result.Body) return null;
+    const body = await result.Body.transformToByteArray();
+    const contentType =
+      result.ContentType?.split(";")[0]?.trim().toLowerCase() ||
+      "application/octet-stream";
+    return { body, contentType };
+  } catch {
+    return null;
+  }
 }
 
 export async function headObject(key: string): Promise<{
