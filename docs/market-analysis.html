@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Livefolio — Market analysis, TAM and go-to-market</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --surface: #171a21;
+      --raised: #1e232c;
+      --line: #2a3140;
+      --text: #f2f0ea;
+      --muted: #9aa3b2;
+      --accent: #5ee0c0;
+      --accent-dim: #5ee0c033;
+      --warn: #e8b86d;
+      --warn-dim: #e8b86d22;
+      --danger: #f07178;
+      --ok: #5ee0c0;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      line-height: 1.5;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 48px 24px 80px; }
+    .eyebrow {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 8px;
+    }
+    h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.15; font-weight: 600; margin: 0 0 16px; }
+    h2 { font-size: 26px; margin: 56px 0 16px; font-weight: 600; }
+    h3 { font-size: 18px; margin: 0 0 8px; font-weight: 600; color: var(--text); }
+    p, li { color: var(--muted); font-size: 16px; }
+    strong { color: var(--text); }
+    .lede { font-size: 20px; color: var(--text); max-width: 760px; }
+    .thesis {
+      margin-top: 28px;
+      padding: 20px 24px;
+      background: var(--accent-dim);
+      border: 1px solid #5ee0c055;
+      border-radius: 14px;
+    }
+    .thesis.warn { background: var(--warn-dim); border-color: #e8b86d55; }
+    .thesis p { margin: 0 0 8px; color: var(--text); }
+    .thesis ol { margin: 0; padding-left: 20px; }
+    .thesis li { color: var(--text); margin-bottom: 6px; }
+    .grid { display: grid; gap: 16px; }
+    .two { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    @media (min-width: 800px) {
+      .two { grid-template-columns: 1fr 1fr; }
+      .stats { grid-template-columns: repeat(4, 1fr); }
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 22px 22px 8px;
+    }
+    .card.live { border-color: #5ee0c055; background: #15201c; }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 18px 14px;
+    }
+    .stat .num {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 28px;
+      color: var(--accent);
+      margin: 0 0 4px;
+    }
+    .stat .label { font-size: 14px; margin: 0; }
+    .stat .src { font-size: 12px; margin: 8px 0 0; color: #6b7380; }
+    ul, ol { padding-left: 22px; }
+    li { margin-bottom: 8px; }
+    .note { font-size: 13px; color: var(--muted); }
+    .scroll { overflow-x: auto; margin: 8px 0 12px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 13.5px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      background: var(--raised);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    td { color: var(--muted); }
+    td strong { color: var(--text); }
+    tr.hl td { background: #15201c; color: var(--text); }
+    .tag {
+      display: inline-block;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #e8b86d55;
+      color: var(--warn);
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .phases { grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .phases { grid-template-columns: repeat(3, 1fr); } }
+    .phase .when {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 6px;
+    }
+    .phase li { font-size: 15px; }
+    footer { margin-top: 56px; font-size: 13px; color: #6b7380; border-top: 1px solid var(--line); padding-top: 20px; }
+    footer li { font-size: 13px; color: #6b7380; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Market analysis · September 2026</p>
+    <h1>Livefolio: market size, competition and go-to-market</h1>
+    <p class="lede">
+      The market is real and growing, and the timing is good. Resumes stopped carrying signal
+      once AI made them free to write. Proof of work is the replacement signal, and it already
+      exists on GitHub and elsewhere.
+    </p>
+
+    <div class="thesis warn">
+      <p><strong>Two things need attention before the numbers work:</strong></p>
+      <ol>
+        <li><strong>Company pricing is about 10x too low for the value delivered.</strong> Org Pro costs $29/month ($290/year), while the average non-executive hire costs a company $5,475.</li>
+        <li><strong>Candidate subscriptions alone won't sustain the business.</strong> Portfolio-only products with this model have shut down recently. Companies have to be where most of the revenue comes from.</li>
+      </ol>
+    </div>
+    <p class="note">Figures tagged <span class="tag">assumption</span> should be validated in customer conversations.</p>
+
+    <!-- 1. Why now -->
+    <h2>1. Why now: the problem is measurable and getting worse</h2>
+    <div class="grid stats">
+      <div class="stat">
+        <p class="num">9×</p>
+        <p class="label">Rise in median applications per role, 2022 → 2026 (5 → 45)</p>
+        <p class="src">Metaview, 128M applications</p>
+      </div>
+      <div class="stat">
+        <p class="num">369</p>
+        <p class="label">Applications per hire in software and technology roles</p>
+        <p class="src">HRBench / Ashby</p>
+      </div>
+      <div class="stat">
+        <p class="num">74%</p>
+        <p class="label">Hiring managers who have seen AI-generated content in applications</p>
+        <p class="src">JobScore</p>
+      </div>
+      <div class="stat">
+        <p class="num">$5,475</p>
+        <p class="label">Average non-executive cost per hire, excluding interviewer time</p>
+        <p class="src">SHRM 2025</p>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Application volume exploded.</strong> Across 128M applications in public applicant-tracking data, the median number of applications per role went from 5 (roles opened in 2022) to 45 (2026). Applications per hire tripled from 2021 to 2024.</li>
+      <li><strong>AI broke the resume.</strong> LinkedIn processes about 11,000 applications per minute, up 45% in a year, and recruiters say it's "increasingly hard to tell who is genuinely qualified." Gartner projects that by 2028, 1 in 4 candidate profiles could be fake.</li>
+      <li><strong>India has the problem at its most extreme.</strong> There are 39.6 lakh active engineering candidates for 6.68 lakh jobs, 5.9 per opening. For 0–3 years of experience it's 9.5 per opening.</li>
+      <li><strong>Screening is expensive.</strong> Engineering hires cost $6,200–8,000. A senior engineering hire can take 24 interviews, or about 36 engineer-hours.</li>
+    </ul>
+
+    <!-- 2. Market size -->
+    <h2>2. Market size</h2>
+    <h3>Top-down: the categories Livefolio sits between</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Category</th><th>2025 size</th><th>Growth per year</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Applicant tracking systems (narrow definition)</td><td>$3.0–3.3B</td><td>7–8%</td></tr>
+          <tr><td>Pre-employment assessment and screening</td><td>$3.1–6.4B</td><td>9–13%</td></tr>
+          <tr><td>LinkedIn Talent Solutions (a single incumbent)</td><td>~$8–9B (analyst estimate)</td><td>~9% (all of LinkedIn)</td></tr>
+          <tr><td>Naukri recruitment (India incumbent)</td><td>₹1,983 cr (~$230M)</td><td>10%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Analyst reports on these markets disagree by up to 6.9x, depending on what they count.
+      Use the conservative figures, since investors discount inflated ones.
+      <strong>Top-down TAM: about $6–10B</strong>, the spend on screening, assessment and tracking
+      applicants. Livefolio replaces or improves the part that screens and verifies.
+    </p>
+
+    <h3 style="margin-top:32px">Bottom-up: more credible, and investors prefer it</h3>
+    <ul>
+      <li><strong>Candidate supply:</strong> 48.4M professional developers worldwide, 180M GitHub accounts, and 21.9M GitHub users in India, adding 5.2M a year.</li>
+      <li><strong>Hiring events:</strong> about 15% of developers change jobs each year, so roughly 7M tech hires a year worldwide. <span class="tag">assumption</span></li>
+      <li><strong>Value per hire:</strong> $150–300. For comparison, AI technical-interview tools charge $100–300 per interview. <span class="tag">assumption</span></li>
+    </ul>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Calculation</th><th>Size</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>TAM</strong> — global tech hiring, verification layer</td><td>~7M hires × ~$200</td><td><strong>~$1.4B / year</strong></td></tr>
+          <tr><td><strong>TAM</strong> — all proof-of-work roles (design, writing, content once integrations exist)</td><td>~2–3× engineering</td><td><strong>~$3–4B / year</strong></td></tr>
+          <tr class="hl"><td><strong>SAM</strong> — India tech-hiring companies (beachhead)</td><td>~40,000 companies <span class="tag">assumption</span> × $2,500 / year</td><td><strong>~$100M / year</strong></td></tr>
+          <tr><td><strong>SOM</strong> — 3-year target</td><td>1,500 paying companies × $2,500 + candidate Pro revenue</td><td><strong>~$4–5M ARR</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      The 40,000 figure is a subset of India's 2.4 lakh DPIIT-recognized startups plus IT and services firms that actively hire engineers.
+    </p>
+    <div class="thesis">
+      <p style="margin:0"><strong>Why pricing decides whether this works:</strong> at today's Org Pro price (₹24,999/year), the same India SAM is only about $11M. Pricing has a bigger effect on the business than market size does.</p>
+    </div>
+
+    <!-- 3. Competition -->
+    <h2>3. Competitive landscape</h2>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Player</th><th>What they do</th><th>Where Livefolio wins</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>LinkedIn</strong> (1.3B members)</td><td>Self-reported profiles, keyword search</td><td>They can't verify claims, and verifying would undercut profiles they sell to recruiters.</td></tr>
+          <tr><td><strong>Naukri</strong> (128,000 corporate customers)</td><td>India job board with keyword search</td><td>Same problem, with even noisier volume.</td></tr>
+          <tr><td><strong>Applicant tracking systems</strong> (Greenhouse, Lever, Ashby, Zoho Recruit)</td><td>Workflow: stages, scheduling</td><td>They organize applicants; they don't judge quality. Integrate with them rather than compete.</td></tr>
+          <tr><td><strong>Assessments</strong> (HackerRank ~$221M revenue, HackerEarth, Codility, TestGorilla)</td><td>Tests candidates take</td><td>Tests add friction candidates hate and are now easy to cheat with AI. Livefolio reads work candidates have already done.</td></tr>
+          <tr><td><strong>AI interviewers</strong> (HireVue, Metaview; Mercor at a $10B valuation)</td><td>Automated interviews</td><td>Expensive per candidate and used late in the funnel. Livefolio works at the top of the funnel, before any interview.</td></tr>
+          <tr><td><strong>Portfolio builders</strong> (Read.cv shut down May 2025, Polywork shut down)</td><td>Pretty profiles</td><td><strong>The key lesson:</strong> a portfolio alone isn't a business. Those products had no buyer on the company side.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid two">
+      <div class="card live">
+        <h3>Positioning</h3>
+        <p>Assessments test candidates, and Livefolio verifies them. It's the only option that proves skill without making the candidate do extra work.</p>
+      </div>
+      <div class="card">
+        <h3>Biggest threat: LinkedIn or GitHub adding verification</h3>
+        <ul>
+          <li><strong>Cross-platform evidence.</strong> GitHub won't verify Medium, LeetCode or Dribbble.</li>
+          <li><strong>Anti-gaming depth.</strong> Detecting borrowed code, scripted activity and fake live projects is Livefolio's core product.</li>
+          <li><strong>Hiring-outcome data.</strong> Every hire teaches the ranking what predicts success.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4. GTM -->
+    <h2>4. Go-to-market plan</h2>
+    <div class="grid two">
+      <div class="card live">
+        <h3>Beachhead customer</h3>
+        <p><strong>Indian startups from Seed to Series B (10–200 employees) hiring software engineers, with no dedicated recruiter.</strong></p>
+        <ul>
+          <li>The founder or engineering manager screens applicants personally, so they feel the pain directly.</li>
+          <li>They get 300+ applications per role from Naukri and LinkedIn, most of them noise.</li>
+          <li>They can't justify an $8k/year LinkedIn Recruiter seat or a HackerRank contract.</li>
+          <li>They decide in days, and they're reachable through founder networks, LinkedIn and startup communities.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Candidate side: supply is the wedge</h3>
+        <ul>
+          <li><strong>Target:</strong> final-year CS students and developers with 0–3 years of experience. About 2.6 lakh computer-engineering graduates a year, and the most oversupplied group at 9.5 candidates per job.</li>
+          <li><strong>Channels:</strong> college placement cells and coding clubs, hackathons, a "Verified by Livefolio" badge in GitHub READMEs, developer communities on Discord, Reddit and X.</li>
+          <li><strong>Hook:</strong> "Your portfolio in 2 minutes from your GitHub, plus a verified badge recruiters trust."</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px">Company side: product-led, then sales-assisted</h3>
+    <div class="grid phases">
+      <div class="card phase">
+        <p class="when">Months 0–6</p>
+        <h3>Founder-led sales</h3>
+        <ul>
+          <li>First 30–50 customers through customer discovery outreach.</li>
+          <li>Design partners get free Org Pro in exchange for weekly feedback and permission to measure time saved.</li>
+          <li>Goal: a real before-and-after number for the deck.</li>
+        </ul>
+      </div>
+      <div class="card phase">
+        <p class="when">Months 6–18</p>
+        <h3>Product-led growth</h3>
+        <ul>
+          <li>Free workspace → post a job → see applicants ranked → upgrade.</li>
+          <li><strong>Instant shortlist:</strong> show matching open-to-work candidates as soon as a job is posted.</li>
+          <li><strong>"Apply with Livefolio"</strong> link candidates attach to any application, bringing in inbound leads at no cost.</li>
+        </ul>
+      </div>
+      <div class="card phase">
+        <p class="when">Months 18–36</p>
+        <h3>Expand</h3>
+        <ul>
+          <li>Integrations with Greenhouse, Lever, Ashby and Zoho Recruit.</li>
+          <li>Design integrations (Dribbble, Behance, Figma) for non-engineering roles.</li>
+          <li>Verification API for recruiting agencies and staffing firms.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px">Pricing: the most important GTM change</h3>
+    <p>
+      Current Org Pro is <strong>$29/month ($290/year)</strong>. For comparison: LinkedIn Recruiter Lite is about $170/month per seat,
+      AI technical interviews cost $100–300 each, and SHRM's cost per hire is $5,475. Price on value delivered, not on costs.
+      Options to test with design partners:
+    </p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Example price</th><th>Best for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Per active job</strong></td><td>$79–149 per job per month (ranking plus verification)</td><td>Startups that hire occasionally (easy to justify)</td></tr>
+          <tr><td><strong>Platform subscription</strong></td><td>$199–499/month, includes talent search</td><td>Companies that hire continuously</td></tr>
+          <tr><td><strong>Per hire</strong></td><td>$300–800 per hire through Livefolio</td><td>Aligns price with outcomes; hardest to track</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      <strong>Candidate side:</strong> keep a generous free tier, since candidates are the supply. Pro at $7/month is fine,
+      but job seekers stop paying once they're hired, so expect high churn. Treat candidate revenue as a bonus, not the core.
+    </p>
+
+    <!-- 5. Unit economics -->
+    <h2>5. Unit economics to prove (targets, not claims)</h2>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Metric</th><th>Target by Series A</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Company CAC (founder-led, then product-led)</td><td>&lt; $500</td></tr>
+          <tr><td>Annual contract value</td><td>$2,000–5,000</td></tr>
+          <tr><td>Payback period</td><td>&lt; 6 months</td></tr>
+          <tr><td>Net revenue retention (companies)</td><td>&gt; 110%, via more jobs and seats</td></tr>
+          <tr><td>Verified profiles (at least one integration connected)</td><td>50,000+</td></tr>
+          <tr class="hl"><td>Minutes to shortlist (versus before Livefolio)</td><td>70%+ reduction — this becomes the pitch number</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 6. Risks -->
+    <h2>6. Risks investors will raise, and the answers</h2>
+    <div class="grid two">
+      <div class="card">
+        <h3>"Portfolio platforms failed."</h3>
+        <p>Read.cv and Polywork had no company-side buyer. Livefolio makes its money from companies; the portfolio is how candidates arrive.</p>
+      </div>
+      <div class="card">
+        <h3>"You depend on GitHub's API."</h3>
+        <p>The analysis uses public data within documented rate limits. Every new integration reduces dependence on one platform, and the anti-gaming analysis is Livefolio's own work.</p>
+      </div>
+      <div class="card">
+        <h3>"Only for developers."</h3>
+        <p>True today. Say it plainly and show the roadmap into design, writing and content. Engineering hiring alone is a market of about $1.4B.</p>
+      </div>
+      <div class="card">
+        <h3>Regulation</h3>
+        <p>The EU AI Act classifies AI used in hiring as high-risk, and India's DPDP Act governs personal data. The ranking explains every score and candidates opt in. Present that as a compliance advantage, and start documenting fairness checks now.</p>
+      </div>
+      <div class="card">
+        <h3>Two-sided cold start</h3>
+        <p>Lead with candidates, because a free portfolio has value on its own. Then create demand on the company side with instant shortlists from the existing pool.</p>
+      </div>
+    </div>
+
+    <!-- 7. Next 90 days -->
+    <h2>7. Next 90 days</h2>
+    <ol>
+      <li><strong>Talk to 30 hiring founders and managers</strong> to validate the pain and their willingness to pay $100+/month.</li>
+      <li><strong>Sign 10 design partners</strong> and measure time-to-shortlist before and after.</li>
+      <li><strong>Test new pricing</strong> with those partners before changing public pricing.</li>
+      <li><strong>Run one campus pilot</strong> (2–3 colleges) to test how cheaply candidates can be acquired.</li>
+      <li><strong>Build the instant shortlist.</strong> It's the feature that turns a free workspace into a paid one.</li>
+    </ol>
+
+    <footer>
+      <p><strong>Sources</strong></p>
+      <ul>
+        <li><a href="https://www.metaview.ai/resources/blog/application-volume-recruiting-agentic-ai">Metaview — application volume per role</a></li>
+        <li><a href="https://www.hrbench.com/resource/learn/application-count">HRBench — applications per hire (Ashby data)</a></li>
+        <li><a href="https://www.semafor.com/article/06/24/2025/recruiters-swamped-with-ai-generated-job-applications">Semafor — recruiters swamped with AI-generated applications</a></li>
+        <li><a href="https://www.jobscore.com/articles/applicants-per-job/">JobScore — applicants per job benchmarks</a></li>
+        <li><a href="https://www.peoplematters.in/news/business/india-has-396-lakh-engineers-chasing-67-lakh-jobs-report-reveals-52108">People Matters / foundit — India engineering candidates vs jobs</a></li>
+        <li><a href="https://www.shrm.org/about/press-room/shrm-releases-2025-benchmarking-reports--how-does-your-organizat">SHRM 2025 benchmarking — cost per hire</a></li>
+        <li><a href="https://www.pin.com/blog/cost-per-hire-benchmarks/">Pin — cost per hire by role level</a></li>
+        <li><a href="https://blog.dobr.ai/2025/06/01/the-roi-of-ai-technical-interviewers-cost-analysis-and-business-impact-2/">Dobr.AI — interviewer hours per engineering hire</a></li>
+        <li><a href="https://www.pin.com/blog/ats-market-share-report/">Pin — ATS market-size disagreement across analysts</a></li>
+        <li><a href="https://www.marketsandmarkets.com/Market-Reports/applicant-tracking-system-market-27004100.html">MarketsandMarkets — ATS market</a></li>
+        <li><a href="https://www.polarismarketresearch.com/industry-analysis/applicant-tracking-system-market/request-for-discount-pricing">Polaris — ATS market</a></li>
+        <li><a href="https://www.marketresearchfuture.com/reports/pre-employment-testing-software-market-38305">Market Research Future — pre-employment testing</a></li>
+        <li><a href="https://pmarketresearch.com/worldwide-pre-hire-assessment-service-market-research/">PW Consulting — pre-hire assessment services</a></li>
+        <li><a href="https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/R45.htm">Microsoft FY25 10-K — LinkedIn revenue</a></li>
+        <li><a href="https://www.infoedge.in/pdfs/financial_pdfs/f_Earnings/investor-concall-transcript-03Jun2025.pdf">Info Edge Q4 FY25 call — Naukri recruitment revenue</a></li>
+        <li><a href="https://www.slashdata.co/research/developer-population">SlashData — global developer population</a></li>
+        <li><a href="https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/">GitHub Octoverse 2025</a></li>
+        <li><a href="https://sansad.in/getFile/lsapps/loksabhaquestions/annex/188/AU1446_N4i3CT.pdf">Lok Sabha — DPIIT-recognized startups (June 2026)</a></li>
+        <li><a href="https://newsdive.net/2026/07/10/computer-engineering-surges-to-the-forefront-as-india-s-most-favored-discipline-according-to-aishe-findings/">AISHE 2023–24 — engineering graduates</a></li>
+        <li><a href="https://techcrunch.com/2025/01/17/perplexity-acquires-read-cv-a-social-media-platform-for-professionals/">TechCrunch — Read.cv acquisition and shutdown</a></li>
+        <li><a href="https://sacra.com/c/mercor/">Sacra — Mercor revenue and valuation</a></li>
+      </ul>
+    </footer>
+  </div>
+</body>
+</html>
