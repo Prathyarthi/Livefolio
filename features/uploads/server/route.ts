@@ -81,6 +81,7 @@ async function recruiterCanOpenJobSource(
 const KIND_SCHEMA = t.Union([
   t.Literal("resume"),
   t.Literal("project_thumb"),
+  t.Literal("profile_photo"),
   t.Literal("job_source"),
   t.Literal("org_logo"),
   t.Literal("org_banner"),
@@ -215,6 +216,26 @@ export const uploads = new Elysia({ prefix: "/uploads" })
           fileId,
           userId: session.userId,
           projectId,
+          contentType,
+        });
+        publicUrl = publicObjectUrl(key);
+      } else if (kind === "profile_photo") {
+        const portfolio = await prisma.portfolio.findUnique({
+          where: { userId: session.userId },
+          select: { id: true },
+        });
+        if (!portfolio) {
+          ctx.set.status = 404;
+          return { error: "Portfolio not found" };
+        }
+        if (!getR2PublicBaseUrl()) {
+          ctx.set.status = 503;
+          return { error: "Public file URLs are not configured" };
+        }
+        key = objectKey({
+          kind,
+          fileId,
+          userId: session.userId,
           contentType,
         });
         publicUrl = publicObjectUrl(key);
@@ -426,6 +447,51 @@ export const uploads = new Elysia({ prefix: "/uploads" })
         };
       }
 
+      if (kind === "profile_photo") {
+        const expectedPrefix = `users/${session.userId}/profile/`;
+        if (!key.startsWith(expectedPrefix)) {
+          ctx.set.status = 400;
+          return { error: "Invalid object key" };
+        }
+        const portfolio = await prisma.portfolio.findUnique({
+          where: { userId: session.userId },
+          select: { id: true },
+        });
+        if (!portfolio) {
+          ctx.set.status = 404;
+          return { error: "Portfolio not found" };
+        }
+        const publicUrl = publicObjectUrl(key);
+        if (!publicUrl) {
+          ctx.set.status = 503;
+          return { error: "Public file URLs are not configured" };
+        }
+        const created = await prisma.storedFile.create({
+          data: {
+            key,
+            kind,
+            contentType,
+            sizeBytes,
+            userId: session.userId,
+            portfolioId: portfolio.id,
+          },
+        });
+        await prisma.portfolio.update({
+          where: { id: portfolio.id },
+          data: { profileImageUrl: publicUrl },
+        });
+        await replaceKindFiles({
+          kind: "profile_photo",
+          keepId: created.id,
+          userId: session.userId,
+        });
+        return {
+          id: created.id,
+          kind,
+          publicUrl,
+        };
+      }
+
       if (kind === "org_logo" || kind === "org_banner") {
         const orgId = ctx.body.orgId?.trim();
         if (!orgId) {
@@ -579,6 +645,25 @@ export const uploads = new Elysia({ prefix: "/uploads" })
     }
   })
 
+  .delete("/profile-photo", async (ctx) => {
+    const session = await getSession(ctx.request);
+    if (!session) {
+      ctx.set.status = 401;
+      return { error: "Unauthorized" };
+    }
+
+    const files = await prisma.storedFile.findMany({
+      where: { userId: session.userId, kind: "profile_photo" },
+      select: { id: true, key: true },
+    });
+    await prisma.portfolio.updateMany({
+      where: { userId: session.userId },
+      data: { profileImageUrl: null },
+    });
+    await deleteStoredFileRows(files);
+    return { ok: true };
+  })
+
   .get("/:id", async (ctx) => {
     const session = await getSession(ctx.request);
     if (!session) {
@@ -695,6 +780,13 @@ export const uploads = new Elysia({ prefix: "/uploads" })
       await prisma.portfolio.update({
         where: { id: file.portfolioId },
         data: { resumeUrl: null },
+      });
+    }
+    if (file.kind === "profile_photo" && file.portfolioId) {
+      const publicUrl = publicObjectUrl(file.key);
+      await prisma.portfolio.updateMany({
+        where: { id: file.portfolioId, profileImageUrl: publicUrl },
+        data: { profileImageUrl: null },
       });
     }
     if (

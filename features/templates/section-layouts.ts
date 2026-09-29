@@ -153,6 +153,19 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "profiles",
   ]),
 
+  veil: singleColumn([
+    "about",
+    "projects",
+    "experience",
+    "skills",
+    "education",
+    "articles",
+    "certifications",
+    "achievements",
+    "github",
+    "profiles",
+  ]),
+
   ledger: singleColumn([
     "about",
     "experience",

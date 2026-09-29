@@ -23,6 +23,7 @@ import { ParchmentTemplate } from "./parchment/parchment-template";
 import { LedgerTemplate } from "./ledger/ledger-template";
 import { PulseTemplate } from "./pulse/pulse-template";
 import { MaximalistTemplate } from "./maximalist/maximalist-template";
+import { VeilTemplate } from "./veil/veil-template";
 import type { TemplateComponent } from "./types";
 import { getTemplatePreviewImagePath } from "./template-preview-images";
 
@@ -247,6 +248,15 @@ export const templateRegistry: Record<string, TemplateComponent> = {
     previewImage: getTemplatePreviewImagePath("maximalist"),
     category: "developer",
     component: MaximalistTemplate,
+  },
+  veil: {
+    id: "veil",
+    name: "Veil",
+    description:
+      "Editorial dark portfolio with a 1-bit dithered portrait that develops into full colour under the cursor.",
+    previewImage: getTemplatePreviewImagePath("veil"),
+    category: "designer",
+    component: VeilTemplate,
   },
 };
 

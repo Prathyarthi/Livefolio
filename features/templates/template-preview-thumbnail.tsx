@@ -29,6 +29,7 @@ const TEMPLATE_PREVIEW_GRADIENTS: Record<string, string> = {
   terracotta: "from-[#F4F1DE] to-[#E07A5F]/40",
   citrus: "from-[#FFE066]/60 to-[#264653]/30",
   parchment: "from-[#F4F1DE] to-[#8C2727]/20",
+  veil: "from-[#0c0b0f] to-[#ff5a36]/30",
 };
 
 type TemplatePreviewThumbnailProps = {

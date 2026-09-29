@@ -25,6 +25,7 @@ const TEMPLATE_PREVIEW_FILES: Record<string, string> = {
   ledger: "ledger.webp",
   pulse: "pulse.webp",
   maximalist: "maximalist.webp",
+  veil: "veil.webp",
 };
 
 export function getTemplatePreviewImagePath(templateId: string): string {
