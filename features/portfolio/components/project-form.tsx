@@ -15,6 +15,12 @@ import { FieldLabel } from "@/features/portfolio/components/field-label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
   Popover,
   PopoverAnchor,
   PopoverContent,
@@ -163,9 +169,7 @@ export function ProjectForm() {
   const [form, setForm] = useState<ProjectEntry>(emptyEntry);
   const [techInput, setTechInput] = useState("");
   const [techSuggestions, setTechSuggestions] = useState<TechEntry[]>([]);
-  const [highlightedTech, setHighlightedTech] = useState(0);
   const techDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const techBlurRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fieldErrors, setFieldErrors] = useState<
     FieldErrors<ProjectField>
   >({});
@@ -251,13 +255,11 @@ export function ProjectForm() {
     const query = techInput.trim();
     if (!query) {
       setTechSuggestions([]);
-      setHighlightedTech(0);
       return;
     }
     techDebounceRef.current = setTimeout(() => {
       const next = suggestTechs(query, form.techStack, extraTechNames);
       setTechSuggestions(next);
-      setHighlightedTech(0);
     }, 250);
     return () => {
       if (techDebounceRef.current) clearTimeout(techDebounceRef.current);
@@ -354,30 +356,6 @@ export function ProjectForm() {
       techStack: prev.techStack.filter((t) => t !== tag),
     }));
     setFieldErrors((prev) => ({ ...prev, techStack: undefined }));
-  }
-
-  function handleTechKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "ArrowDown" && techSuggestions.length > 0) {
-      e.preventDefault();
-      setHighlightedTech((prev) => (prev + 1) % techSuggestions.length);
-      return;
-    }
-    if (e.key === "ArrowUp" && techSuggestions.length > 0) {
-      e.preventDefault();
-      setHighlightedTech((prev) =>
-        prev <= 0 ? techSuggestions.length - 1 : prev - 1,
-      );
-      return;
-    }
-    if (e.key === "Escape") {
-      setTechSuggestions([]);
-      return;
-    }
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const picked = techSuggestions[highlightedTech];
-      addTechTag(picked?.label);
-    }
   }
 
   async function syncLivePreviewIds(nextIds: string[]) {
@@ -851,7 +829,12 @@ export function ProjectForm() {
 
         <div className="space-y-2">
           <FieldLabel unsaved={isTechUnsaved}>Tech Stack</FieldLabel>
-          <div className="flex gap-2">
+          <Command
+            shouldFilter={false}
+            loop
+            className="overflow-visible bg-transparent"
+          >
+            <div className="flex gap-2">
             <Popover
               open={techSuggestions.length > 0}
               onOpenChange={(next) => {
@@ -860,26 +843,23 @@ export function ProjectForm() {
             >
               <PopoverAnchor asChild>
                 <div className="relative min-w-0 flex-1">
-                  <Input
+                  <CommandInput
                     value={techInput}
-                    onChange={(e) => {
-                      setTechInput(e.target.value);
+                    onValueChange={(value) => {
+                      setTechInput(value);
                       setFieldErrors((prev) => ({
                         ...prev,
                         techStack: undefined,
                       }));
                     }}
                     onFocus={() => {
-                      if (techBlurRef.current) clearTimeout(techBlurRef.current);
                       const query = techInput.trim();
                       if (!query) return;
                       setTechSuggestions(
                         suggestTechs(query, form.techStack, extraTechNames),
                       );
-                      setHighlightedTech(0);
                     }}
                     onBlur={() => {
-                      techBlurRef.current = setTimeout(() => setTechSuggestions([]), 120);
                       if (!techInput.trim()) return;
                       const errors: FieldErrors<ProjectField> = {};
                       validateField(errors, "techStack", () =>
@@ -895,9 +875,13 @@ export function ProjectForm() {
                         techStack: errors.techStack,
                       }));
                     }}
-                    onKeyDown={handleTechKeyDown}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && techSuggestions.length === 0) {
+                        event.preventDefault();
+                        addTechTag();
+                      }
+                    }}
                     aria-invalid={Boolean(fieldErrors.techStack)}
-                    aria-autocomplete="list"
                     aria-expanded={techSuggestions.length > 0}
                     aria-controls={`tech-stack-options${suffix}`}
                     aria-describedby={
@@ -911,32 +895,24 @@ export function ProjectForm() {
               <PopoverContent
                 align="start"
                 sideOffset={4}
-                className="max-h-56 w-(--radix-popover-anchor-width) overflow-auto p-1"
+                className="w-(--radix-popover-anchor-width) overflow-hidden p-1"
                 onOpenAutoFocus={(event) => event.preventDefault()}
                 onCloseAutoFocus={(event) => event.preventDefault()}
               >
-                <ul id={`tech-stack-options${suffix}`} role="listbox" className="space-y-0.5">
-                  {techSuggestions.map((suggestion, index) => (
-                    <li key={suggestion.label} role="option" aria-selected={index === highlightedTech}>
-                      <button
-                        type="button"
-                        className={`flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden select-none ${
-                          index === highlightedTech
-                            ? "bg-accent text-accent-foreground"
-                            : "hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onMouseEnter={() => setHighlightedTech(index)}
-                        onClick={() => addTechTag(suggestion.label)}
-                      >
-                        {suggestion.slug ? (
-                          <SuggestionIcon slug={suggestion.slug} />
-                        ) : null}
-                        <span className="min-w-0 truncate">{suggestion.label}</span>
-                      </button>
-                    </li>
+                <CommandList id={`tech-stack-options${suffix}`}>
+                  {techSuggestions.map((suggestion) => (
+                    <CommandItem
+                      key={suggestion.label}
+                      value={suggestion.label}
+                      onSelect={() => addTechTag(suggestion.label)}
+                    >
+                      {suggestion.slug ? (
+                        <SuggestionIcon slug={suggestion.slug} />
+                      ) : null}
+                      <span className="min-w-0 truncate">{suggestion.label}</span>
+                    </CommandItem>
                   ))}
-                </ul>
+                </CommandList>
               </PopoverContent>
             </Popover>
             <Button
@@ -947,7 +923,8 @@ export function ProjectForm() {
             >
               <Plus className="h-4 w-4" />
             </Button>
-          </div>
+            </div>
+          </Command>
           {fieldErrors.techStack && (
             <p
               id={`tech-stack-error${suffix}`}

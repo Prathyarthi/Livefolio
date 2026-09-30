@@ -25,6 +25,7 @@
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "dotenv": "^17.3.1",
     "elysia": "^1.4.25",
     "getsyntux": "^1.0.0",
