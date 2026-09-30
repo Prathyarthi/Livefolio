@@ -33,6 +33,7 @@ import {
   PROJECTS_GRID_3,
   TEMPLATE_CONTAINER,
   TechChip,
+  TechIcon,
   getSectionLabels,
 } from "@/features/templates/shared";
 import { CollapsibleList } from "@/features/templates/collapsible-list";
@@ -233,11 +234,12 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     key={`${category}-${name}`}
                     className={cn(
                       CARD,
-                      "px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium",
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium",
                       INK,
                       "hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] hover:shadow-md hover:shadow-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)] hover:-translate-y-0.5 transition-all duration-300 cursor-default",
                     )}
                   >
+                    <TechIcon name={name} className="h-3.5 w-3.5" />
                     {name}
                   </span>
                 ))}
