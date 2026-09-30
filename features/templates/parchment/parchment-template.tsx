@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
 import {
   DescriptionBlock,
+  TechChip,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
@@ -106,9 +107,11 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           )}
                           <div className="flex flex-wrap gap-2 mb-8">
                             {project.techStack.map((tech) => (
-                              <span key={tech} className="border border-[#2B2B2B] px-3 py-1 text-sm font-bold uppercase tracking-widest">
-                                {tech}
-                              </span>
+                              <TechChip
+                                key={tech}
+                                name={tech}
+                                className="border border-[#2B2B2B] px-3 py-1 text-sm font-bold uppercase tracking-widest"
+                              />
                             ))}
                           </div>
                           <div className="flex gap-6 mt-auto">

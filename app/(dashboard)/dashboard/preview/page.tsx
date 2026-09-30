@@ -21,7 +21,8 @@ import {
 import { PreviewToolbar } from "@/features/portfolio/components/preview-toolbar";
 import { PublishDialog } from "@/features/portfolio/components/publish-dialog";
 import { AccentSwatches } from "@/features/templates/components/accent-swatches";
-import { getTemplate, templateRegistry } from "@/features/templates/registry";
+import { getTemplate } from "@/features/templates/registry";
+import { templateCatalogList } from "@/features/templates/template-catalog";
 import { getStoredSectionLayout } from "@/features/templates/section-order";
 import type { SectionLayoutCustomization } from "@/features/templates/section-order";
 import {
@@ -180,12 +181,7 @@ export default function PreviewPage() {
   };
 
   const templateOptions = useMemo(
-    () =>
-      Object.values(templateRegistry).filter(
-        // Spotlight hidden from preview for now — accent/polish not ready.
-        (template) => template.id !== "spotlight",
-        // (template) => true, // restore: include spotlight
-      ),
+    () => templateCatalogList.filter((template) => template.id !== "spotlight"),
     [],
   );
 

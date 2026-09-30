@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
 import {
   DescriptionBlock,
+  TechChip,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
@@ -99,9 +100,11 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                           )}
                           <div className="flex flex-wrap gap-2 mb-6">
                             {project.techStack.map((tech) => (
-                              <span key={tech} className="text-xs uppercase tracking-widest font-semibold text-[var(--lf-accent)]">
-                                {tech}
-                              </span>
+                              <TechChip
+                                key={tech}
+                                name={tech}
+                                className="text-xs uppercase tracking-widest font-semibold text-[var(--lf-accent)]"
+                              />
                             ))}
                           </div>
                           <div className="flex gap-6">

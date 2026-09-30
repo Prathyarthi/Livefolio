@@ -16,6 +16,8 @@ import { getStoredSectionLayout, normalizeHidden, type ReorderableSectionKey } f
 import { getPlatformIcon } from "./utils";
 import { CollapsibleList } from "./collapsible-list";
 
+export { TechChip, TechIcon } from "./tech-chip";
+
 export { getSectionLabel, getSectionLabels, STANDARD_SECTION_LABELS } from "./section-labels";
 export type { SectionKey } from "./section-labels";
 

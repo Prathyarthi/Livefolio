@@ -23,6 +23,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -188,12 +189,11 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                         {project.techStack.length > 0 && (
                           <div className="mt-4 flex flex-wrap gap-2">
                             {project.techStack.map((tech) => (
-                              <span
+                              <TechChip
                                 key={tech}
+                                name={tech}
                                 className="rounded bg-[var(--lf-g-900-20)] px-2 py-0.5 text-[11px] text-[var(--lf-g-500-80)] border border-[var(--lf-g-900-30)]"
-                              >
-                                {tech}
-                              </span>
+                              />
                             ))}
                           </div>
                         )}

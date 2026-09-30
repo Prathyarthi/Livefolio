@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
 import {
   DescriptionBlock,
+  TechChip,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
@@ -96,9 +97,11 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                             )}
                             <div className="flex flex-wrap gap-2 mb-8">
                               {project.techStack.map((tech) => (
-                                <span key={tech} className="bg-[#FFFCF2] border-2 border-[#264653] px-3 py-1 text-xs font-bold text-[#264653] uppercase tracking-wider">
-                                  {tech}
-                                </span>
+                                <TechChip
+                                  key={tech}
+                                  name={tech}
+                                  className="bg-[#FFFCF2] border-2 border-[#264653] px-3 py-1 text-xs font-bold text-[#264653] uppercase tracking-wider"
+                                />
                               ))}
                             </div>
                             <div className="mt-auto flex gap-4">

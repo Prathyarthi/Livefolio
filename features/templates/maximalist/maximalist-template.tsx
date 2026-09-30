@@ -19,6 +19,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -361,12 +362,11 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
 
                       <div className="flex flex-wrap gap-2 pt-2">
                         {proj.techStack.map((tech) => (
-                          <span
+                          <TechChip
                             key={tech}
+                            name={tech}
                             className="px-2.5 py-1 bg-white/10 text-white border border-white/30 font-mono text-[10px] font-black uppercase"
-                          >
-                            {tech}
-                          </span>
+                          />
                         ))}
                       </div>
                     </div>
@@ -413,7 +413,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                 >
                   <h3 className="text-2xl font-black text-white uppercase tracking-tight">
                     {edu.degree}
-                    {edu.field && <span className="text-[var(--lf-accent)]"> in {edu.field}</span>}
+                    {edu.field ? ` in ${edu.field}` : ""}
                   </h3>
                   <p className="font-mono text-sm font-bold text-slate-300">{edu.institution}</p>
                   {(edu.startDate || edu.endDate) && (
@@ -1120,8 +1120,15 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
                   <div className="text-slate-300 text-[11px]">{p.description}</div>
                 )}
                 {p.techStack.length > 0 && (
-                  <div className="text-[var(--lf-accent)] text-[11px]">
-                    Stack: {p.techStack.join(', ')}
+                  <div className="flex flex-wrap gap-1.5 text-[11px]">
+                    {p.techStack.map((tech) => (
+                      <TechChip
+                        key={tech}
+                        name={tech}
+                        className="text-[var(--lf-accent)]"
+                        iconClassName="h-3 w-3"
+                      />
+                    ))}
                   </div>
                 )}
               </div>

@@ -20,6 +20,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechIcon,
   ProfileLinksSection,
   ProjectActions,
   PROJECT_CARD,
@@ -370,13 +371,14 @@ export function LedgerTemplate({ data }: AppProps) {
                     <button
                       key={tech}
                       onClick={() => setSelectedTech(tech === selectedTech ? null : tech)}
-                      className={`px-2.5 py-1 rounded-none text-[10px] font-mono uppercase tracking-wider transition-colors whitespace-nowrap ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none text-[10px] font-mono uppercase tracking-wider transition-colors whitespace-nowrap ${
                         selectedTech === tech
                           ? 'bg-[var(--lf-accent)] text-white'
                           : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
                       }`}
                       id={`filter-tech-${tech}`}
                     >
+                      <TechIcon name={tech} className="h-3 w-3" />
                       {tech}
                     </button>
                   ))}
@@ -456,13 +458,14 @@ export function LedgerTemplate({ data }: AppProps) {
                             <button
                               key={tag}
                               onClick={() => setSelectedTech(tag === selectedTech ? null : tag)}
-                              className={`px-2 py-0.5 rounded-none text-[9px] font-mono uppercase tracking-wider transition-colors ${
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-none text-[9px] font-mono uppercase tracking-wider transition-colors ${
                                 selectedTech === tag
                                   ? 'bg-[var(--lf-accent)] text-white'
                                   : 'bg-slate-950 border border-slate-800 text-slate-500 hover:text-white hover:border-slate-600'
                               }`}
                             >
-                              {tag}
+                              <TechIcon name={tag} className="h-3 w-3" />
+                              <span className="min-w-0 truncate">{tag}</span>
                             </button>
                           ))}
                         </div>

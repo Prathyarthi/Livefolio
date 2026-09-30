@@ -12,6 +12,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -97,16 +98,18 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
               {visibleProjects.map((project) => (
                 <div key={project.id} className={cn(PROJECT_CARD, "win95-outset bg-[#c0c0c0] flex flex-col")}>
                   <div className="group m-2">
-                    <TemplateProjectPreview templateId="windows"
+                    <TemplateProjectPreview
+                      templateId="windows"
                       liveUrl={project.liveUrl ?? null}
                       imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
                       alt={project.title}
                       loading="lazy"
-                      containerClassName="win95-inset bg-black"
-                      className="h-full w-full object-cover object-top filter transition-all"
-                     accentColor={primaryColor} />
+                      containerClassName="win95-inset aspect-[16/10] min-h-[140px] bg-[#c0c0c0]"
+                      className="h-full w-full object-cover object-top"
+                      accentColor={primaryColor}
+                    />
                   </div>
                   <div className="p-3 flex flex-col grow text-black">
                     <div className={cn(PROJECT_CARD_HEADER, "mb-2")}>
@@ -122,13 +125,18 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                         listClassName="mb-4 grow space-y-1 pl-4 text-xs"
                       />
                     )}
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {project.techStack.slice(0, 4).map((tech) => (
-                        <span key={tech} className="bg-white win95-inset px-1 text-[10px]">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
+                    {project.techStack.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {project.techStack.map((tech) => (
+                          <TechChip
+                            key={tech}
+                            name={tech}
+                            className="bg-white win95-inset px-1 text-[10px]"
+                            iconClassName="h-3 w-3"
+                          />
+                        ))}
+                      </div>
+                    )}
                     <div className="mt-auto">
                       <ProjectActions
                         liveUrl={project.liveUrl}

@@ -21,7 +21,7 @@ import {
   useUpdateTemplate,
 } from "@/features/portfolio/api/use-portfolio";
 import { CreatePortfolioPrompt, PORTFOLIO_ACTION_BUTTON_CLASS } from "@/features/portfolio/components/create-portfolio-prompt";
-import { templateRegistry } from "@/features/templates/registry";
+import { templateCatalogList } from "@/features/templates/template-catalog";
 import {
   getTemplateDefaultAccent,
 } from "@/features/templates/template-accent-palettes";
@@ -172,7 +172,7 @@ export default function TemplatesPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {Object.values(templateRegistry).map((template) => {
+        {templateCatalogList.map((template) => {
           const isActive = currentTemplate === template.id;
           const isLocked = allowedTemplateIds
             ? !allowedTemplateIds.includes(template.id)

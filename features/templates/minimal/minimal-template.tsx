@@ -11,6 +11,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -163,12 +164,11 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                   project.githubForks !== null) && (
                     <div className="mt-5 flex flex-wrap items-center gap-2">
                       {project.techStack.map((tech) => (
-                        <span
+                        <TechChip
                           key={tech}
+                          name={tech}
                           className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs text-stone-500"
-                        >
-                          {tech}
-                        </span>
+                        />
                       ))}
                       {project.githubStars !== null && (
                         <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-500">

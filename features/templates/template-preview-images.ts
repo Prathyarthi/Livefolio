@@ -25,11 +25,16 @@ const TEMPLATE_PREVIEW_FILES: Record<string, string> = {
   ledger: "ledger.webp",
   pulse: "pulse.webp",
   maximalist: "maximalist.webp",
+  synapse: "synapse.webp",
   veil: "veil.webp",
 };
 
+export function hasTemplatePreviewImage(templateId: string): boolean {
+  return Boolean(TEMPLATE_PREVIEW_FILES[templateId]);
+}
+
 export function getTemplatePreviewImagePath(templateId: string): string {
-  const file =
-    TEMPLATE_PREVIEW_FILES[templateId] ?? TEMPLATE_PREVIEW_FILES.minimal;
+  const file = TEMPLATE_PREVIEW_FILES[templateId];
+  if (!file) return "";
   return `/templates/${file}`;
 }

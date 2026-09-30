@@ -17,6 +17,7 @@ import {
   getSectionLabels,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -122,9 +123,11 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                         )}
                         <div className="flex flex-wrap gap-2 pt-2">
                           {project.techStack.map((tech) => (
-                            <span key={tech} className="text-xs font-sans uppercase tracking-wider text-[#666] bg-[#e8e4db] px-2 py-1">
-                              {tech}
-                            </span>
+                            <TechChip
+                              key={tech}
+                              name={tech}
+                              className="text-xs font-sans uppercase tracking-wider text-[#666] bg-[#e8e4db] px-2 py-1"
+                            />
                           ))}
                         </div>
                         <div className="pt-4">

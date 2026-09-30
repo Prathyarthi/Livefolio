@@ -8,6 +8,7 @@ import {
   ContactChips,
   getSectionLabels,
   DescriptionBlock,
+  TechChip,
   CustomSectionItems,
   HeroProfileButtons,
   ProfileLinksSection,
@@ -153,12 +154,11 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                   project.githubForks !== null) && (
                     <div className="mt-5 flex flex-wrap items-center gap-2">
                       {project.techStack.map((tech) => (
-                        <span
+                        <TechChip
                           key={tech}
+                          name={tech}
                           className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-white px-3 py-1 text-xs text-stone-500"
-                        >
-                          {tech}
-                        </span>
+                        />
                       ))}
                       {project.githubStars !== null && (
                         <span className="rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] px-3 py-1 text-xs text-stone-500">
