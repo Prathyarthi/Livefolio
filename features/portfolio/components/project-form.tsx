@@ -14,6 +14,11 @@ import { Input } from "@/components/ui/input";
 import { FieldLabel } from "@/features/portfolio/components/field-label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import {
   Card,
@@ -66,6 +71,7 @@ import {
   MAX_TECH_STACK_ITEMS,
   normalizeStringList,
 } from "@/lib/content-policy";
+import { TechIcon } from "@/features/templates/tech-chip";
 import {
   suggestTechs,
   techIconUrl,
@@ -90,6 +96,19 @@ type ProjectField =
   | "sourceUrl"
   | "imageUrl"
   | "techStack";
+
+function SuggestionIcon({ slug }: { slug: string }) {
+  const [hidden, setHidden] = useState(false);
+  if (hidden) return null;
+  return (
+    <img
+      src={techIconUrl(slug)}
+      alt=""
+      className="size-4 shrink-0"
+      onError={() => setHidden(true)}
+    />
+  );
+}
 
 const emptyEntry: ProjectEntry = {
   title: "",
@@ -146,6 +165,7 @@ export function ProjectForm() {
   const [techSuggestions, setTechSuggestions] = useState<TechEntry[]>([]);
   const [highlightedTech, setHighlightedTech] = useState(0);
   const techDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const techBlurRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fieldErrors, setFieldErrors] = useState<
     FieldErrors<ProjectField>
   >({});
@@ -832,73 +852,93 @@ export function ProjectForm() {
         <div className="space-y-2">
           <FieldLabel unsaved={isTechUnsaved}>Tech Stack</FieldLabel>
           <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Input
-                value={techInput}
-                onChange={(e) => {
-                  setTechInput(e.target.value);
-                  setFieldErrors((prev) => ({
-                    ...prev,
-                    techStack: undefined,
-                  }));
-                }}
-                onBlur={() => {
-                  window.setTimeout(() => setTechSuggestions([]), 120);
-                  if (!techInput.trim()) return;
-                  const errors: FieldErrors<ProjectField> = {};
-                  validateField(errors, "techStack", () =>
-                    normalizeStringList(
-                      [...form.techStack, techInput.trim()],
-                      "Tech stack",
-                      MAX_TECH_STACK_ITEMS,
-                      MAX_TECH_STACK_ITEM_CHARS
-                    )
-                  );
-                  setFieldErrors((prev) => ({
-                    ...prev,
-                    techStack: errors.techStack,
-                  }));
-                }}
-                onKeyDown={handleTechKeyDown}
-                aria-invalid={Boolean(fieldErrors.techStack)}
-                aria-autocomplete="list"
-                aria-expanded={techSuggestions.length > 0}
-                aria-describedby={
-                  fieldErrors.techStack ? `tech-stack-error${suffix}` : undefined
-                }
-                placeholder="Type a technology and press Enter..."
-                autoComplete="off"
-              />
-              {techSuggestions.length > 0 && (
-                <ul
-                  role="listbox"
-                  className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-[var(--radius-md)] border border-border-default bg-surface-raised p-1 shadow-md"
-                >
+            <Popover
+              open={techSuggestions.length > 0}
+              onOpenChange={(next) => {
+                if (!next) setTechSuggestions([]);
+              }}
+            >
+              <PopoverAnchor asChild>
+                <div className="relative min-w-0 flex-1">
+                  <Input
+                    value={techInput}
+                    onChange={(e) => {
+                      setTechInput(e.target.value);
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        techStack: undefined,
+                      }));
+                    }}
+                    onFocus={() => {
+                      if (techBlurRef.current) clearTimeout(techBlurRef.current);
+                      const query = techInput.trim();
+                      if (!query) return;
+                      setTechSuggestions(
+                        suggestTechs(query, form.techStack, extraTechNames),
+                      );
+                      setHighlightedTech(0);
+                    }}
+                    onBlur={() => {
+                      techBlurRef.current = setTimeout(() => setTechSuggestions([]), 120);
+                      if (!techInput.trim()) return;
+                      const errors: FieldErrors<ProjectField> = {};
+                      validateField(errors, "techStack", () =>
+                        normalizeStringList(
+                          [...form.techStack, techInput.trim()],
+                          "Tech stack",
+                          MAX_TECH_STACK_ITEMS,
+                          MAX_TECH_STACK_ITEM_CHARS
+                        )
+                      );
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        techStack: errors.techStack,
+                      }));
+                    }}
+                    onKeyDown={handleTechKeyDown}
+                    aria-invalid={Boolean(fieldErrors.techStack)}
+                    aria-autocomplete="list"
+                    aria-expanded={techSuggestions.length > 0}
+                    aria-controls={`tech-stack-options${suffix}`}
+                    aria-describedby={
+                      fieldErrors.techStack ? `tech-stack-error${suffix}` : undefined
+                    }
+                    placeholder="Type a technology and press Enter..."
+                    autoComplete="off"
+                  />
+                </div>
+              </PopoverAnchor>
+              <PopoverContent
+                align="start"
+                sideOffset={4}
+                className="max-h-56 w-(--radix-popover-anchor-width) overflow-auto p-1"
+                onOpenAutoFocus={(event) => event.preventDefault()}
+                onCloseAutoFocus={(event) => event.preventDefault()}
+              >
+                <ul id={`tech-stack-options${suffix}`} role="listbox" className="space-y-0.5">
                   {techSuggestions.map((suggestion, index) => (
                     <li key={suggestion.label} role="option" aria-selected={index === highlightedTech}>
                       <button
                         type="button"
-                        className={`flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm ${
+                        className={`flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden select-none ${
                           index === highlightedTech
-                            ? "bg-brand-light text-brand-dark"
-                            : "text-text-primary hover:bg-surface-sunken"
+                            ? "bg-accent text-accent-foreground"
+                            : "hover:bg-accent hover:text-accent-foreground"
                         }`}
                         onMouseDown={(event) => event.preventDefault()}
                         onMouseEnter={() => setHighlightedTech(index)}
                         onClick={() => addTechTag(suggestion.label)}
                       >
-                        <img
-                          src={techIconUrl(suggestion.slug!)}
-                          alt=""
-                          className="h-4 w-4 shrink-0"
-                        />
+                        {suggestion.slug ? (
+                          <SuggestionIcon slug={suggestion.slug} />
+                        ) : null}
                         <span className="min-w-0 truncate">{suggestion.label}</span>
                       </button>
                     </li>
                   ))}
                 </ul>
-              )}
-            </div>
+              </PopoverContent>
+            </Popover>
             <Button
               type="button"
               variant="outline"
@@ -919,7 +959,8 @@ export function ProjectForm() {
           {form.techStack.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {form.techStack.map((tech) => (
-                <Badge key={tech} variant="secondary" className="gap-1 px-2.5 py-1">
+                <Badge key={tech} variant="secondary" className="h-auto gap-1 px-2.5 py-1">
+                  <TechIcon name={tech} className="size-3.5" />
                   {tech}
                   <button
                     type="button"

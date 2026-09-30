@@ -132,6 +132,7 @@ export function TemplatePreviewThumbnail({
         src={src}
         alt={`${template.name} template preview`}
         fill
+        unoptimized
         className="object-cover object-top"
         sizes={compact ? "120px" : "(max-width: 768px) 100vw, 320px"}
         onError={() => setImageFailed(true)}
