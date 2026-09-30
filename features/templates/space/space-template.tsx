@@ -18,6 +18,7 @@ import {
   getSectionLabels,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -137,12 +138,11 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
 
                           <div className="mt-auto pt-6 border-t border-[color-mix(in_srgb,var(--lf-accent)_22%,transparent)] flex flex-wrap items-center gap-2">
                             {project.techStack.map((tech) => (
-                              <span
+                              <TechChip
                                 key={tech}
+                                name={tech}
                                 className="rounded-full bg-[#030014] px-3 py-1 text-xs font-medium text-[color-mix(in_srgb,var(--lf-accent)_85%,white)] border border-[color-mix(in_srgb,var(--lf-accent)_35%,transparent)]"
-                              >
-                                {tech}
-                              </span>
+                              />
                             ))}
                           </div>
                         </div>

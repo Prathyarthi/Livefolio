@@ -13,6 +13,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -205,12 +206,11 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                         project.githubForks !== null) && (
                           <div className="mb-4 flex flex-wrap gap-2">
                             {project.techStack.map((tech) => (
-                              <span
+                              <TechChip
                                 key={tech}
+                                name={tech}
                                 className="rounded-md bg-zinc-100 px-2 py-1 text-[10px] font-medium text-zinc-600"
-                              >
-                                {tech}
-                              </span>
+                              />
                             ))}
                             {project.githubStars !== null && (
                               <span className="rounded-md bg-zinc-100 px-2 py-1 text-[10px] font-medium text-zinc-600">

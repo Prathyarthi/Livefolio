@@ -12,6 +12,7 @@ import {
   getSectionLabels,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -141,12 +142,11 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
 
                       <div className="mt-auto pt-6 border-t border-white/10 flex flex-wrap items-center gap-2">
                         {project.techStack.map((tech) => (
-                          <span
+                          <TechChip
                             key={tech}
+                            name={tech}
                             className="rounded-full bg-slate-800 px-3 py-1 text-xs font-medium text-[color-mix(in_srgb,var(--lf-accent)_80%,white)] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)]"
-                          >
-                            {tech}
-                          </span>
+                          />
                         ))}
                       </div>
                     </div>

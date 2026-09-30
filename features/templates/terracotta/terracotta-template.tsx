@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
 import {
   DescriptionBlock,
+  TechChip,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
@@ -99,9 +100,11 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                           )}
                           <div className="flex flex-wrap gap-2 mb-6">
                             {project.techStack.map((tech) => (
-                              <span key={tech} className="text-xs uppercase tracking-widest font-semibold text-[var(--lf-accent)]">
-                                {tech}
-                              </span>
+                              <TechChip
+                                key={tech}
+                                name={tech}
+                                className="text-xs uppercase tracking-widest font-semibold text-[var(--lf-accent)]"
+                              />
                             ))}
                           </div>
                           <div className="flex gap-6">
@@ -133,16 +136,18 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                         <div className="absolute left-0 top-2 h-full w-px bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] md:hidden" />
                         <div className="absolute left-[-4px] top-2 h-2 w-2 rounded-full bg-[var(--lf-accent)] md:hidden" />
                         <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-8 mb-4">
-                          <span className="text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)] md:w-1/4 shrink-0">
-                            {formatDateRange(exp.startDate, exp.endDate)}
-                          </span>
-                          <div className="md:w-3/4">
+                          {formatDateRange(exp.startDate, exp.endDate) ? (
+                            <span className="text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)] md:w-1/4 shrink-0">
+                              {formatDateRange(exp.startDate, exp.endDate)}
+                            </span>
+                          ) : null}
+                          <div className={formatDateRange(exp.startDate, exp.endDate) ? "md:w-3/4" : undefined}>
                             <h3 className="text-2xl font-medium text-[#3D405B]">{exp.role}</h3>
                             <p className="text-xl font-light italic text-[#3D405B]/60 mt-1">{exp.company}</p>
                           </div>
                         </div>
                         {exp.description && (
-                          <div className="md:pl-[calc(25%+2rem)]">
+                          <div className={formatDateRange(exp.startDate, exp.endDate) ? "md:pl-[calc(25%+2rem)]" : undefined}>
                             <DescriptionBlock text={exp.description} paragraphClassName="text-[#3D405B]/80 font-light leading-relaxed text-lg" />
                           </div>
                         )}

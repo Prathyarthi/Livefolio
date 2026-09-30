@@ -11,6 +11,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -142,9 +143,11 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
 
                     <div className="flex flex-wrap gap-2 mb-6">
                       {project.techStack.map((tech) => (
-                        <span key={tech} className="bg-white/10 text-[10px] uppercase tracking-widest px-2 py-1">
-                          {tech}
-                        </span>
+                        <TechChip
+                          key={tech}
+                          name={tech}
+                          className="bg-white/10 text-[10px] uppercase tracking-widest px-2 py-1"
+                        />
                       ))}
                     </div>
 

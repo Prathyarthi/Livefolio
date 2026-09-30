@@ -24,6 +24,7 @@ function parsedResumeToPortfolioData(r: ParsedResume): PortfolioData {
       headline: r.headline,
       summary: r.summary,
       avatarUrl: null,
+      profileImageUrl: null,
       contactEmail: r.contact?.email ?? null,
       phone: r.contact?.phone ?? null,
       location: r.contact?.location ?? null,

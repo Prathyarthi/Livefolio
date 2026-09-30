@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   usePortfolio,
@@ -14,6 +14,17 @@ import { Input } from "@/components/ui/input";
 import { FieldLabel } from "@/features/portfolio/components/field-label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
 import { Switch } from "@/components/ui/switch";
 import {
   Card,
@@ -66,6 +77,12 @@ import {
   MAX_TECH_STACK_ITEMS,
   normalizeStringList,
 } from "@/lib/content-policy";
+import { TechIcon } from "@/features/templates/tech-chip";
+import {
+  suggestTechs,
+  techIconUrl,
+  type TechEntry,
+} from "@/features/templates/tech-catalog";
 
 interface ProjectEntry {
   id?: string;
@@ -85,6 +102,19 @@ type ProjectField =
   | "sourceUrl"
   | "imageUrl"
   | "techStack";
+
+function SuggestionIcon({ slug }: { slug: string }) {
+  const [hidden, setHidden] = useState(false);
+  if (hidden) return null;
+  return (
+    <img
+      src={techIconUrl(slug)}
+      alt=""
+      className="size-4 shrink-0"
+      onError={() => setHidden(true)}
+    />
+  );
+}
 
 const emptyEntry: ProjectEntry = {
   title: "",
@@ -138,6 +168,9 @@ export function ProjectForm() {
   const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState<ProjectEntry>(emptyEntry);
   const [techInput, setTechInput] = useState("");
+  const [techSuggestions, setTechSuggestions] = useState<TechEntry[]>([]);
+  const techDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const techAnchor = useComboboxAnchor();
   const [fieldErrors, setFieldErrors] = useState<
     FieldErrors<ProjectField>
   >({});
@@ -203,6 +236,37 @@ export function ProjectForm() {
     ? portfolio.livePreviewProjectIds
     : [];
 
+  const extraTechNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const skill of portfolio?.skills ?? []) {
+      if (typeof skill?.name === "string" && skill.name.trim()) {
+        names.add(skill.name.trim());
+      }
+    }
+    for (const project of portfolio?.projects ?? []) {
+      for (const tech of project?.techStack ?? []) {
+        if (typeof tech === "string" && tech.trim()) names.add(tech.trim());
+      }
+    }
+    return [...names];
+  }, [portfolio]);
+
+  useEffect(() => {
+    if (techDebounceRef.current) clearTimeout(techDebounceRef.current);
+    const query = techInput.trim();
+    if (!query) {
+      setTechSuggestions([]);
+      return;
+    }
+    techDebounceRef.current = setTimeout(() => {
+      const next = suggestTechs(query, form.techStack, extraTechNames);
+      setTechSuggestions(next);
+    }, 250);
+    return () => {
+      if (techDebounceRef.current) clearTimeout(techDebounceRef.current);
+    };
+  }, [techInput, form.techStack, extraTechNames]);
+
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
@@ -243,6 +307,7 @@ export function ProjectForm() {
     setIsAdding(false);
     setForm(emptyEntry);
     setTechInput("");
+    setTechSuggestions([]);
     setFieldErrors({});
     setEnableLivePreviewOnSave(false);
     setEditLivePreviewEnabled(false);
@@ -254,15 +319,16 @@ export function ProjectForm() {
     setEditingId(null);
     setForm(emptyEntry);
     setTechInput("");
+    setTechSuggestions([]);
     setFieldErrors({});
     setEnableLivePreviewOnSave(false);
     setPendingThumbFile(null);
   }
 
-  function addTechTag() {
-    const tag = techInput.trim();
+  function addTechTag(rawTag?: string) {
+    const tag = (rawTag ?? techInput).trim();
     if (!tag) return;
-    if (form.techStack.includes(tag)) {
+    if (form.techStack.some((item) => item.toLowerCase() === tag.toLowerCase())) {
       toast.error("Tech already added");
       return;
     }
@@ -281,22 +347,8 @@ export function ProjectForm() {
     }
     setForm((prev) => ({ ...prev, techStack: [...prev.techStack, tag] }));
     setTechInput("");
+    setTechSuggestions([]);
     setFieldErrors((prev) => ({ ...prev, techStack: undefined }));
-  }
-
-  function removeTechTag(tag: string) {
-    setForm((prev) => ({
-      ...prev,
-      techStack: prev.techStack.filter((t) => t !== tag),
-    }));
-    setFieldErrors((prev) => ({ ...prev, techStack: undefined }));
-  }
-
-  function handleTechKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addTechTag();
-    }
   }
 
   async function syncLivePreviewIds(nextIds: string[]) {
@@ -770,49 +822,115 @@ export function ProjectForm() {
 
         <div className="space-y-2">
           <FieldLabel unsaved={isTechUnsaved}>Tech Stack</FieldLabel>
-          <div className="flex gap-2">
-            <Input
-              value={techInput}
-              onChange={(e) => {
-                setTechInput(e.target.value);
-                setFieldErrors((prev) => ({
-                  ...prev,
-                  techStack: undefined,
-                }));
-              }}
-              onBlur={() => {
-                if (!techInput.trim()) return;
-                const errors: FieldErrors<ProjectField> = {};
-                validateField(errors, "techStack", () =>
-                  normalizeStringList(
-                    [...form.techStack, techInput.trim()],
-                    "Tech stack",
-                    MAX_TECH_STACK_ITEMS,
-                    MAX_TECH_STACK_ITEM_CHARS
-                  )
-                );
-                setFieldErrors((prev) => ({
-                  ...prev,
-                  techStack: errors.techStack,
-                }));
-              }}
-              onKeyDown={handleTechKeyDown}
-              aria-invalid={Boolean(fieldErrors.techStack)}
-              aria-describedby={
-                fieldErrors.techStack ? `tech-stack-error${suffix}` : undefined
+          <Combobox
+            autoHighlight
+            filter={null}
+            inputValue={techInput}
+            items={techSuggestions.map((entry) => entry.label)}
+            filteredItems={techSuggestions.map((entry) => entry.label)}
+            multiple
+            value={form.techStack}
+            onInputValueChange={(value) => {
+              setTechInput(value);
+              setFieldErrors((prev) => ({
+                ...prev,
+                techStack: undefined,
+              }));
+            }}
+            onValueChange={(next) => {
+              const errors: FieldErrors<ProjectField> = {};
+              validateField(errors, "techStack", () =>
+                normalizeStringList(
+                  next,
+                  "Tech stack",
+                  MAX_TECH_STACK_ITEMS,
+                  MAX_TECH_STACK_ITEM_CHARS
+                )
+              );
+              if (errors.techStack) {
+                setFieldErrors((prev) => ({ ...prev, techStack: errors.techStack }));
+                return;
               }
-              placeholder="Type a technology and press Enter..."
-              className="flex-1"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addTechTag}
-              disabled={!techInput.trim() || techInputInvalid}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+              setForm((prev) => ({ ...prev, techStack: next }));
+              setTechInput("");
+              setFieldErrors((prev) => ({ ...prev, techStack: undefined }));
+            }}
+          >
+            <div className="flex gap-2">
+              <div className="min-w-0 flex-1">
+                <ComboboxChips
+                  ref={techAnchor}
+                  aria-invalid={Boolean(fieldErrors.techStack)}
+                  className="min-h-11 border-border-default bg-surface-sunken shadow-none"
+                >
+                  {form.techStack.map((tech) => (
+                    <ComboboxChip key={tech}>
+                      <TechIcon name={tech} className="size-3" />
+                      {tech}
+                    </ComboboxChip>
+                  ))}
+                  <ComboboxChipsInput
+                    aria-describedby={
+                      fieldErrors.techStack ? `tech-stack-error${suffix}` : undefined
+                    }
+                    autoComplete="off"
+                    placeholder={
+                      form.techStack.length > 0
+                        ? "Add another..."
+                        : "Type a technology and press Enter..."
+                    }
+                    onBlur={() => {
+                      if (!techInput.trim()) return;
+                      const errors: FieldErrors<ProjectField> = {};
+                      validateField(errors, "techStack", () =>
+                        normalizeStringList(
+                          [...form.techStack, techInput.trim()],
+                          "Tech stack",
+                          MAX_TECH_STACK_ITEMS,
+                          MAX_TECH_STACK_ITEM_CHARS
+                        )
+                      );
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        techStack: errors.techStack,
+                      }));
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter" || techSuggestions.length > 0) return;
+                      event.preventDefault();
+                      addTechTag();
+                    }}
+                  />
+                </ComboboxChips>
+                <ComboboxContent anchor={techAnchor}>
+                  <ComboboxEmpty>No matching technologies. Press Enter to add.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(label: string) => {
+                      const suggestion = techSuggestions.find(
+                        (entry) => entry.label === label,
+                      );
+                      return (
+                        <ComboboxItem key={label} value={label}>
+                          {suggestion?.slug ? (
+                            <SuggestionIcon slug={suggestion.slug} />
+                          ) : null}
+                          <span className="min-w-0 truncate">{label}</span>
+                        </ComboboxItem>
+                      );
+                    }}
+                  </ComboboxList>
+                </ComboboxContent>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => addTechTag()}
+                disabled={!techInput.trim() || techInputInvalid}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </Combobox>
           {fieldErrors.techStack && (
             <p
               id={`tech-stack-error${suffix}`}
@@ -820,22 +938,6 @@ export function ProjectForm() {
             >
               {fieldErrors.techStack}
             </p>
-          )}
-          {form.techStack.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {form.techStack.map((tech) => (
-                <Badge key={tech} variant="secondary" className="gap-1 px-2.5 py-1">
-                  {tech}
-                  <button
-                    type="button"
-                    onClick={() => removeTechTag(tech)}
-                    className="ml-0.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
           )}
         </div>
       </>

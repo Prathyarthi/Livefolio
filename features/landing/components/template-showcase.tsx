@@ -65,6 +65,7 @@ function TemplatePreview({
         src={src}
         alt={template.alt}
         fill
+        unoptimized
         className="object-cover object-top"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 280px"
         onError={() => setImageFailed(true)}

@@ -11,6 +11,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -151,12 +152,11 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                 {project.techStack.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {project.techStack.map((tech) => (
-                      <span
+                      <TechChip
                         key={tech}
+                        name={tech}
                         className="rounded-full bg-white px-3 py-1 text-xs text-slate-500 ring-1 ring-slate-200"
-                      >
-                        {tech}
-                      </span>
+                      />
                     ))}
                   </div>
                 )}

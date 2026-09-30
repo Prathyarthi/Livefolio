@@ -4,7 +4,8 @@ import {
   RESUME_PARSER_SYSTEM,
   buildResumeUserMessage,
 } from "@/lib/resume-parser-prompt";
-import { normalizeMultilineText, stripBulletPrefix } from "@/lib/text";
+import { normalizeDescription } from "@/lib/description";
+import { stripBulletPrefix } from "@/lib/text";
 import { normalizeSocialProfiles } from "@/lib/social-profile";
 import type { SectionKey } from "@/features/templates/section-labels";
 
@@ -78,18 +79,6 @@ function normalizeString(v: unknown, fallback = ""): string {
   if (v == null) return fallback;
   if (typeof v === "string") return v;
   return String(v);
-}
-
-function normalizeDescription(v: unknown): string {
-  if (v == null) return "";
-  if (typeof v === "string") return normalizeMultilineText(v);
-  if (Array.isArray(v)) {
-    return v
-      .map((x) => (typeof x === "string" ? stripBulletPrefix(x) : String(x)))
-      .filter(Boolean)
-      .join("\n");
-  }
-  return normalizeMultilineText(String(v));
 }
 
 function normalizeEndDateField(v: unknown): string | null {

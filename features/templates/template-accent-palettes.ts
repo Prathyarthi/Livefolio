@@ -51,6 +51,8 @@ const TEMPLATE_DEFAULT_ACCENTS: Record<string, string> = {
   ledger: "#3b82f6",
   pulse: "#3b82f6",
   maximalist: "#3b82f6",
+  synapse: "#2563eb",
+  veil: "#ff5a36",
 };
 
 const FALLBACK_ACCENT = "#3b82f6";

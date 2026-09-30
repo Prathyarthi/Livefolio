@@ -11,6 +11,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -166,12 +167,11 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                   project.githubForks !== null) && (
                     <div className="mt-5 flex flex-wrap items-center gap-2">
                       {project.techStack.map((tech) => (
-                        <span
+                        <TechChip
                           key={tech}
+                          name={tech}
                           className="border-2 border-black bg-[#90bcff] px-3 py-1 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                        >
-                          {tech}
-                        </span>
+                        />
                       ))}
                       {project.githubStars !== null && (
                         <span className="border-2 border-black bg-white px-3 py-1 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">

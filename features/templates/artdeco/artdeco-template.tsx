@@ -12,6 +12,7 @@ import {
   getSectionLabels,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -138,10 +139,11 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
 
                     <div className="flex flex-wrap gap-3 mb-8 justify-center">
                       {project.techStack.map((tech) => (
-                        <span key={tech} className="text-[#888] text-[10px] font-bold uppercase tracking-[0.15em] flex items-center gap-2">
-                          <span className="w-1 h-1 bg-[var(--lf-accent)] rotate-45" />
-                          {tech}
-                        </span>
+                        <TechChip
+                          key={tech}
+                          name={tech}
+                          className="text-[#888] text-[10px] font-bold uppercase tracking-[0.15em]"
+                        />
                       ))}
                     </div>
 

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { stripBulletPrefix } from "@/lib/text";
+import { parseDescription, normalizeDescription } from "@/lib/description";
 import ExpandableText from "@/components/expandable-text";
 import { PlatformIcon } from "@/components/icons";
 import type {
@@ -15,6 +15,8 @@ import {
 import { getStoredSectionLayout, normalizeHidden, type ReorderableSectionKey } from "./section-order";
 import { getPlatformIcon } from "./utils";
 import { CollapsibleList } from "./collapsible-list";
+
+export { TechChip, TechIcon } from "./tech-chip";
 
 export { getSectionLabel, getSectionLabels, STANDARD_SECTION_LABELS } from "./section-labels";
 export type { SectionKey } from "./section-labels";
@@ -172,10 +174,11 @@ export function TemplateNavbar({
 }
 
 export function splitDescription(text: string): string[] {
-  return text
-    .split(/\n+/)
-    .map(stripBulletPrefix)
-    .filter(Boolean);
+  return parseDescription(text).flatMap((node) => {
+    if (node.type === "list") return node.items;
+    if (node.type === "paragraph") return [node.text];
+    return [];
+  });
 }
 
 function stripLineClamp(className?: string) {
@@ -183,38 +186,92 @@ function stripLineClamp(className?: string) {
   return className.replace(/\bline-clamp-\d+\b/g, "").replace(/\s+/g, " ").trim();
 }
 
+function stripTopMargin(className?: string) {
+  if (!className) return undefined;
+  return className.replace(/\bmt-\S+/g, "").replace(/\s+/g, " ").trim() || undefined;
+}
+
 export function DescriptionBlock({
   text,
   paragraphClassName,
   listClassName,
+  headingClassName,
 }: {
   text: string;
   paragraphClassName?: string;
   listClassName?: string;
+  headingClassName?: string;
 }) {
-  const lines = splitDescription(text);
+  const nodes = parseDescription(text);
+  if (nodes.length === 0) return null;
 
-  if (lines.length <= 1) {
+  const paragraphClass = stripLineClamp(paragraphClassName);
+  const listClass = stripLineClamp(listClassName);
+  const headingClass = cn(
+    "font-semibold",
+    stripLineClamp(headingClassName) ?? paragraphClass,
+  );
+
+  const onlyParagraph =
+    nodes.length === 1 && nodes[0]?.type === "paragraph";
+  const onlyList = nodes.length === 1 && nodes[0]?.type === "list";
+
+  if (onlyParagraph && nodes[0]?.type === "paragraph") {
     return (
-      <ExpandableText
-        as="p"
-        className={stripLineClamp(paragraphClassName)}
-        initialLines={3}
-      >
-        {text}
+      <ExpandableText as="p" className={paragraphClass} initialLines={3}>
+        {nodes[0].text}
       </ExpandableText>
     );
   }
 
+  if (onlyList && nodes[0]?.type === "list") {
+    return (
+      <ExpandableText as="ul" className={listClass} initialLines={3}>
+        {nodes[0].items.map((line, index) => (
+          <li key={`${index}-${line}`}>{line}</li>
+        ))}
+      </ExpandableText>
+    );
+  }
+
+  const mixedSpacing = paragraphClassName?.match(/\bmt-\S+/)?.[0]
+    ?? listClassName?.match(/\bmt-\S+/)?.[0];
+
   return (
     <ExpandableText
-      as="ul"
-      className={stripLineClamp(listClassName)}
-      initialLines={3}
+      as="div"
+      className={cn("space-y-2", mixedSpacing)}
+      initialLines={8}
     >
-      {lines.map((line, index) => (
-        <li key={`${index}-${line}`}>{line}</li>
-      ))}
+      {nodes.map((node, index) => {
+        if (node.type === "heading") {
+          return (
+            <p
+              key={`heading-${index}-${node.text}`}
+              className={stripTopMargin(headingClass)}
+            >
+              {node.text}
+            </p>
+          );
+        }
+        if (node.type === "paragraph") {
+          return (
+            <p
+              key={`paragraph-${index}-${node.text}`}
+              className={stripTopMargin(paragraphClass)}
+            >
+              {node.text}
+            </p>
+          );
+        }
+        return (
+          <ul key={`list-${index}`} className={stripTopMargin(listClass)}>
+            {node.items.map((line, itemIndex) => (
+              <li key={`${itemIndex}-${line}`}>{line}</li>
+            ))}
+          </ul>
+        );
+      })}
     </ExpandableText>
   );
 }
@@ -419,6 +476,12 @@ export function CustomSectionItems({
       {items.map((item, i) => {
         const title = item.title ?? item.name ?? item.label;
         const description = item.description ?? item.details ?? item.summary;
+        const descriptionText =
+          description == null || description === ""
+            ? ""
+            : typeof description === "string"
+              ? description
+              : normalizeDescription(description);
         const date = item.date ?? item.startDate ?? item.year;
         const url = item.url ?? item.link;
         const otherKeys = Object.keys(item).filter(
@@ -450,8 +513,12 @@ export function CustomSectionItems({
                 )}
               </p>
             )}
-            {description != null && String(description).trim() !== "" && (
-              <p className={textClassName}><CustomSectionItemValue value={description} /></p>
+            {descriptionText !== "" && (
+              <DescriptionBlock
+                text={descriptionText}
+                paragraphClassName={textClassName}
+                listClassName={cn(textClassName, "list-disc pl-4 space-y-1")}
+              />
             )}
             {otherKeys.length > 0 && (
               <div className="flex flex-wrap gap-1.5">

@@ -37,6 +37,15 @@ function bucketKey(scope: "user" | "ip", identifier: string, windowStart: number
   return `ai:${scope}:${digest}:${windowStart}`;
 }
 
+async function upsertBucket(key: string, expiresAt: Date) {
+  return prisma.rateLimitBucket.upsert({
+    where: { key },
+    create: { key, count: 1, expiresAt },
+    update: { count: { increment: 1 }, expiresAt },
+    select: { count: true },
+  });
+}
+
 async function consumeAiQuota(
   userId: string,
   ip: string | null,
@@ -46,51 +55,23 @@ async function consumeAiQuota(
     * AI_RATE_LIMIT_WINDOW_MS;
   const expiresAt = new Date(windowStart + AI_RATE_LIMIT_WINDOW_MS);
 
-  return prisma.$transaction(async (tx) => {
-    await tx.rateLimitBucket.deleteMany({
-      where: { expiresAt: { lte: now } },
-    });
+  const userBucket = await upsertBucket(
+    bucketKey("user", userId, windowStart),
+    expiresAt,
+  );
+  const ipBucket = ip
+    ? await upsertBucket(bucketKey("ip", ip, windowStart), expiresAt)
+    : null;
 
-    const userBucket = await tx.rateLimitBucket.upsert({
-      where: { key: bucketKey("user", userId, windowStart) },
-      create: {
-        key: bucketKey("user", userId, windowStart),
-        count: 1,
-        expiresAt,
-      },
-      update: {
-        count: { increment: 1 },
-        expiresAt,
-      },
-      select: { count: true },
-    });
-
-    const ipBucket = ip
-      ? await tx.rateLimitBucket.upsert({
-          where: { key: bucketKey("ip", ip, windowStart) },
-          create: {
-            key: bucketKey("ip", ip, windowStart),
-            count: 1,
-            expiresAt,
-          },
-          update: {
-            count: { increment: 1 },
-            expiresAt,
-          },
-          select: { count: true },
-        })
-      : null;
-
-    return {
-      allowed:
-        userBucket.count <= AI_USER_REQUESTS_PER_HOUR
-        && (ipBucket?.count ?? 0) <= AI_IP_REQUESTS_PER_HOUR,
-      retryAfterSeconds: Math.max(
-        1,
-        Math.ceil((expiresAt.getTime() - now.getTime()) / 1000),
-      ),
-    };
-  });
+  return {
+    allowed:
+      userBucket.count <= AI_USER_REQUESTS_PER_HOUR
+      && (ipBucket?.count ?? 0) <= AI_IP_REQUESTS_PER_HOUR,
+    retryAfterSeconds: Math.max(
+      1,
+      Math.ceil((expiresAt.getTime() - now.getTime()) / 1000),
+    ),
+  };
 }
 
 export async function enforceAiRateLimit(

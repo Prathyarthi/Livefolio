@@ -124,7 +124,7 @@ export const profile = new Elysia({ prefix: "/profile" })
             `Repositories[${index}].url`,
           ),
           techStack: sanitizeImportedStringList(
-            repo.topics,
+            [repo.language, ...repo.topics].filter(Boolean),
             MAX_TECH_STACK_ITEMS,
             MAX_TECH_STACK_ITEM_CHARS,
           ),

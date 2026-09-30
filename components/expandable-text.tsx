@@ -23,7 +23,7 @@ export default function ExpandableText({
   initialLines?: number;
   buttonClassName?: string;
   className?: string;
-  as?: "p" | "ul";
+  as?: "p" | "ul" | "div";
 }) {
   const [expanded, setExpanded] = useState(false);
   const [canExpand, setCanExpand] = useState(false);

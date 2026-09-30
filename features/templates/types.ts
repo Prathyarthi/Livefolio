@@ -27,6 +27,7 @@ export interface PortfolioData {
     headline: string;
     summary: string;
     avatarUrl: string | null;
+    profileImageUrl: string | null;
     contactEmail: string | null;
     phone: string | null;
     location: string | null;
@@ -107,11 +108,14 @@ export interface PortfolioData {
   livePreviewProjectIds: string[];
 }
 
-export interface TemplateComponent {
+export interface TemplateMeta {
   id: string;
   name: string;
   description: string;
   previewImage: string;
   category: string;
+}
+
+export interface TemplateComponent extends TemplateMeta {
   component: React.ComponentType<{ data: PortfolioData }>;
 }

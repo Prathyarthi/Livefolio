@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
 import {
   DescriptionBlock,
+  TechChip,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
@@ -99,9 +100,11 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                           )}
                           <div className="flex flex-wrap gap-2 mb-6">
                             {project.techStack.map((tech) => (
-                              <span key={tech} className="rounded-lg bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] px-2.5 py-1 text-xs font-semibold text-[color-mix(in_srgb,var(--lf-accent)_80%,black)]">
-                                {tech}
-                              </span>
+                              <TechChip
+                                key={tech}
+                                name={tech}
+                                className="rounded-lg bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] px-2.5 py-1 text-xs font-semibold text-[color-mix(in_srgb,var(--lf-accent)_80%,black)]"
+                              />
                             ))}
                           </div>
                           <div className="flex gap-3">
@@ -133,9 +136,11 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                             <h3 className="text-xl font-bold text-slate-800">{exp.role}</h3>
                             <p className="text-lg text-[var(--lf-accent)] font-medium mt-1">{exp.company}</p>
                           </div>
-                          <span className="rounded-full bg-slate-50 border border-slate-100 px-3 py-1 text-sm font-medium text-slate-500">
-                            {formatDateRange(exp.startDate, exp.endDate)}
-                          </span>
+                          {formatDateRange(exp.startDate, exp.endDate) && (
+                            <span className="rounded-full bg-slate-50 border border-slate-100 px-3 py-1 text-sm font-medium text-slate-500">
+                              {formatDateRange(exp.startDate, exp.endDate)}
+                            </span>
+                          )}
                         </div>
                         {exp.description && (
                           <DescriptionBlock text={exp.description} paragraphClassName="text-slate-600 leading-relaxed" />

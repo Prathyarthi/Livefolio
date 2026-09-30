@@ -140,6 +140,18 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "github",
   ]),
 
+  synapse: singleColumn([
+    "skills",
+    "experience",
+    "projects",
+    "achievements",
+    "articles",
+    "education",
+    "certifications",
+    "profiles",
+    "github",
+  ]),
+
   pulse: singleColumn([
     "about",
     "experience",
@@ -150,6 +162,19 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "certifications",
     "articles",
     "achievements",
+    "profiles",
+  ]),
+
+  veil: singleColumn([
+    "about",
+    "projects",
+    "experience",
+    "skills",
+    "education",
+    "articles",
+    "certifications",
+    "achievements",
+    "github",
     "profiles",
   ]),
 

@@ -18,6 +18,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   ProfileLinksSection,
   PROJECT_CARD,
   PROJECT_CARD_HEADER,
@@ -688,12 +689,11 @@ function ProjectCard({
         {project.techStack.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {project.techStack.map((tech) => (
-              <span
+              <TechChip
                 key={tech}
+                name={tech}
                 className="rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs font-medium capitalize text-gray-700"
-              >
-                {tech}
-              </span>
+              />
             ))}
           </div>
         ) : null}
