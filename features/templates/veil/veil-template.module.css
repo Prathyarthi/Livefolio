@@ -1,0 +1,128 @@
+.root {
+  --font-sans: var(--font-veil-sans), ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+  --font-serif: var(--font-veil-serif), "Times New Roman", Georgia, serif;
+  --font-mono: var(--font-veil-mono), ui-monospace, monospace;
+
+  --veil-ink: #0c0b0f;
+  --veil-ink-raised: #131218;
+  --veil-paper: #f2eee6;
+  --veil-muted: #928d9a;
+  --veil-faint: #5d5965;
+  --veil-line: rgba(242, 238, 230, 0.09);
+  --veil-line-strong: rgba(242, 238, 230, 0.18);
+
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background: var(--veil-ink);
+  color: var(--veil-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-color: #26242c var(--veil-ink);
+  scrollbar-width: thin;
+}
+
+/* Ordered-dither dot field that echoes the portrait treatment. */
+.root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    rgba(242, 238, 230, 0.07) 0.7px,
+    transparent 0.8px
+  );
+  background-size: 6px 6px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 70vh);
+}
+
+.root ::selection {
+  background: var(--lf-accent);
+  color: var(--veil-ink);
+}
+
+.root ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.root ::-webkit-scrollbar-track {
+  background: var(--veil-ink);
+}
+
+.root ::-webkit-scrollbar-thumb {
+  background: #26242c;
+  border-radius: 4px;
+}
+
+.grain {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.outlineText {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--veil-line-strong);
+}
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: veil-marquee 48s linear infinite;
+}
+
+.marqueeTrack:hover .marquee {
+  animation-play-state: paused;
+}
+
+.marqueeTrack {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+
+.pulseDot {
+  position: relative;
+}
+
+.pulseDot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  animation: veil-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes veil-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes veil-ping {
+  75%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee,
+  .pulseDot::after {
+    animation: none;
+  }
+}

@@ -205,6 +205,14 @@ export const templateCatalog: Record<string, TemplateMeta> = {
     previewImage: getTemplatePreviewImagePath("maximalist"),
     category: "developer",
   },
+  veil: {
+    id: "veil",
+    name: "Veil",
+    description:
+      "Editorial dark portfolio with a 1-bit dithered portrait that develops into full colour under the cursor.",
+    previewImage: getTemplatePreviewImagePath("veil"),
+    category: "designer",
+  },
 };
 
 export const templateCatalogList: TemplateMeta[] = Object.values(templateCatalog);

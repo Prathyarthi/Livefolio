@@ -20,6 +20,7 @@ import {
   EDIT_FORM_STACK_CLASS,
 } from "@/features/dashboard/constants/form-layout";
 import { EditFormActions } from "@/features/portfolio/components/edit-form-actions";
+import { ProfilePhotoField } from "@/features/uploads/components/profile-photo-field";
 import { useEditStepDirty } from "@/features/portfolio/context/edit-dirty-context";
 import { fieldsDiffer, fieldDiffers } from "@/features/portfolio/lib/edit-step-dirty";
 import {
@@ -194,6 +195,7 @@ export function PortfolioForm() {
             title="Basic Information"
             description="Your name, headline, and a short summary about yourself."
           >
+            <ProfilePhotoField imageUrl={portfolio?.profileImageUrl ?? null} />
             <FormField error={fieldErrors.title}>
               <FieldLabel htmlFor="title" unsaved={isFieldUnsaved("title")}>
                 Full Name / Title
