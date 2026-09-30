@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -180,8 +180,9 @@ export default function PreviewPage() {
     setPublishDialogOpen(true);
   };
 
-  const templateOptions = templateCatalogList.filter(
-    (template) => template.id !== "spotlight",
+  const templateOptions = useMemo(
+    () => templateCatalogList.filter((template) => template.id !== "spotlight"),
+    [],
   );
 
   const isTemplateLocked = (templateId: string) =>

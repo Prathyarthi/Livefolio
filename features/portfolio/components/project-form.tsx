@@ -15,16 +15,16 @@ import { FieldLabel } from "@/features/portfolio/components/field-label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
-  Command,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from "@/components/ui/popover";
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
 import { Switch } from "@/components/ui/switch";
 import {
   Card,
@@ -170,6 +170,7 @@ export function ProjectForm() {
   const [techInput, setTechInput] = useState("");
   const [techSuggestions, setTechSuggestions] = useState<TechEntry[]>([]);
   const techDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const techAnchor = useComboboxAnchor();
   const [fieldErrors, setFieldErrors] = useState<
     FieldErrors<ProjectField>
   >({});
@@ -347,14 +348,6 @@ export function ProjectForm() {
     setForm((prev) => ({ ...prev, techStack: [...prev.techStack, tag] }));
     setTechInput("");
     setTechSuggestions([]);
-    setFieldErrors((prev) => ({ ...prev, techStack: undefined }));
-  }
-
-  function removeTechTag(tag: string) {
-    setForm((prev) => ({
-      ...prev,
-      techStack: prev.techStack.filter((t) => t !== tag),
-    }));
     setFieldErrors((prev) => ({ ...prev, techStack: undefined }));
   }
 
@@ -829,36 +822,63 @@ export function ProjectForm() {
 
         <div className="space-y-2">
           <FieldLabel unsaved={isTechUnsaved}>Tech Stack</FieldLabel>
-          <Command
-            shouldFilter={false}
-            loop
-            className="overflow-visible bg-transparent"
+          <Combobox
+            autoHighlight
+            filter={null}
+            inputValue={techInput}
+            items={techSuggestions.map((entry) => entry.label)}
+            filteredItems={techSuggestions.map((entry) => entry.label)}
+            multiple
+            value={form.techStack}
+            onInputValueChange={(value) => {
+              setTechInput(value);
+              setFieldErrors((prev) => ({
+                ...prev,
+                techStack: undefined,
+              }));
+            }}
+            onValueChange={(next) => {
+              const errors: FieldErrors<ProjectField> = {};
+              validateField(errors, "techStack", () =>
+                normalizeStringList(
+                  next,
+                  "Tech stack",
+                  MAX_TECH_STACK_ITEMS,
+                  MAX_TECH_STACK_ITEM_CHARS
+                )
+              );
+              if (errors.techStack) {
+                setFieldErrors((prev) => ({ ...prev, techStack: errors.techStack }));
+                return;
+              }
+              setForm((prev) => ({ ...prev, techStack: next }));
+              setTechInput("");
+              setFieldErrors((prev) => ({ ...prev, techStack: undefined }));
+            }}
           >
             <div className="flex gap-2">
-            <Popover
-              open={techSuggestions.length > 0}
-              onOpenChange={(next) => {
-                if (!next) setTechSuggestions([]);
-              }}
-            >
-              <PopoverAnchor asChild>
-                <div className="relative min-w-0 flex-1">
-                  <CommandInput
-                    value={techInput}
-                    onValueChange={(value) => {
-                      setTechInput(value);
-                      setFieldErrors((prev) => ({
-                        ...prev,
-                        techStack: undefined,
-                      }));
-                    }}
-                    onFocus={() => {
-                      const query = techInput.trim();
-                      if (!query) return;
-                      setTechSuggestions(
-                        suggestTechs(query, form.techStack, extraTechNames),
-                      );
-                    }}
+              <div className="min-w-0 flex-1">
+                <ComboboxChips
+                  ref={techAnchor}
+                  aria-invalid={Boolean(fieldErrors.techStack)}
+                  className="min-h-11 border-border-default bg-surface-sunken shadow-none"
+                >
+                  {form.techStack.map((tech) => (
+                    <ComboboxChip key={tech}>
+                      <TechIcon name={tech} className="size-3" />
+                      {tech}
+                    </ComboboxChip>
+                  ))}
+                  <ComboboxChipsInput
+                    aria-describedby={
+                      fieldErrors.techStack ? `tech-stack-error${suffix}` : undefined
+                    }
+                    autoComplete="off"
+                    placeholder={
+                      form.techStack.length > 0
+                        ? "Add another..."
+                        : "Type a technology and press Enter..."
+                    }
                     onBlur={() => {
                       if (!techInput.trim()) return;
                       const errors: FieldErrors<ProjectField> = {};
@@ -876,55 +896,41 @@ export function ProjectForm() {
                       }));
                     }}
                     onKeyDown={(event) => {
-                      if (event.key === "Enter" && techSuggestions.length === 0) {
-                        event.preventDefault();
-                        addTechTag();
-                      }
+                      if (event.key !== "Enter" || techSuggestions.length > 0) return;
+                      event.preventDefault();
+                      addTechTag();
                     }}
-                    aria-invalid={Boolean(fieldErrors.techStack)}
-                    aria-expanded={techSuggestions.length > 0}
-                    aria-controls={`tech-stack-options${suffix}`}
-                    aria-describedby={
-                      fieldErrors.techStack ? `tech-stack-error${suffix}` : undefined
-                    }
-                    placeholder="Type a technology and press Enter..."
-                    autoComplete="off"
                   />
-                </div>
-              </PopoverAnchor>
-              <PopoverContent
-                align="start"
-                sideOffset={4}
-                className="w-(--radix-popover-anchor-width) overflow-hidden p-1"
-                onOpenAutoFocus={(event) => event.preventDefault()}
-                onCloseAutoFocus={(event) => event.preventDefault()}
+                </ComboboxChips>
+                <ComboboxContent anchor={techAnchor}>
+                  <ComboboxEmpty>No matching technologies. Press Enter to add.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(label: string) => {
+                      const suggestion = techSuggestions.find(
+                        (entry) => entry.label === label,
+                      );
+                      return (
+                        <ComboboxItem key={label} value={label}>
+                          {suggestion?.slug ? (
+                            <SuggestionIcon slug={suggestion.slug} />
+                          ) : null}
+                          <span className="min-w-0 truncate">{label}</span>
+                        </ComboboxItem>
+                      );
+                    }}
+                  </ComboboxList>
+                </ComboboxContent>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => addTechTag()}
+                disabled={!techInput.trim() || techInputInvalid}
               >
-                <CommandList id={`tech-stack-options${suffix}`}>
-                  {techSuggestions.map((suggestion) => (
-                    <CommandItem
-                      key={suggestion.label}
-                      value={suggestion.label}
-                      onSelect={() => addTechTag(suggestion.label)}
-                    >
-                      {suggestion.slug ? (
-                        <SuggestionIcon slug={suggestion.slug} />
-                      ) : null}
-                      <span className="min-w-0 truncate">{suggestion.label}</span>
-                    </CommandItem>
-                  ))}
-                </CommandList>
-              </PopoverContent>
-            </Popover>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => addTechTag()}
-              disabled={!techInput.trim() || techInputInvalid}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
-          </Command>
+          </Combobox>
           {fieldErrors.techStack && (
             <p
               id={`tech-stack-error${suffix}`}
@@ -932,23 +938,6 @@ export function ProjectForm() {
             >
               {fieldErrors.techStack}
             </p>
-          )}
-          {form.techStack.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {form.techStack.map((tech) => (
-                <Badge key={tech} variant="secondary" className="h-auto gap-1 px-2.5 py-1">
-                  <TechIcon name={tech} className="size-3.5" />
-                  {tech}
-                  <button
-                    type="button"
-                    onClick={() => removeTechTag(tech)}
-                    className="ml-0.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
           )}
         </div>
       </>
