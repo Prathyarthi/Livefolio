@@ -16,7 +16,6 @@ import {
   LogOut,
   User,
   PanelLeft,
-  FileCheck2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,7 +45,8 @@ const NAV = [
   { title: "Templates", href: "/dashboard/templates", icon: Palette },
   { title: "Import", href: "/dashboard/import", icon: Download },
   { title: "Preview", href: "/dashboard/preview", icon: Eye },
-  { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
+  // Applications hidden until the job applications product is ready.
+  // { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { title: "Billing", href: "/dashboard/billing", icon: CreditCard },
   { title: "Settings", href: "/dashboard/settings", icon: Settings },

@@ -71,12 +71,12 @@ function EditPortfolioPageContent() {
 
   return (
     <div className={DASHBOARD_PANEL_PAGE_CLASS}>
-      <div className="shrink-0 space-y-4">
+      <div className="shrink-0">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-h2 text-text-primary">Edit portfolio</h1>
-            <p className="mt-1 max-w-2xl text-body-sm text-text-secondary lg:hidden">
-              Jump between any section. Nothing here is required in order.
+            <p className="mt-1 max-w-2xl text-body-sm text-text-secondary">
+              Import a resume to fill sections fast, or edit any section below.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -85,10 +85,10 @@ function EditPortfolioPageContent() {
             ) : (
               <Badge variant="neutral">Draft</Badge>
             )}
-            <Button variant="outline" size="sm" asChild>
+            <Button size="sm" asChild>
               <Link href="/dashboard/import">
                 <FileText className="mr-2 h-4 w-4" />
-                Import resume (PDF)
+                Import resume
               </Link>
             </Button>
             {portfolio.slug && (
@@ -109,7 +109,7 @@ function EditPortfolioPageContent() {
         </div>
       </div>
 
-      <Separator className="mt-6 mb-4" />
+      <Separator className="mt-4 mb-4" />
 
       <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden lg:flex-row lg:gap-0">
         <aside className={DASHBOARD_TRACKER_ASIDE_CLASS}>
