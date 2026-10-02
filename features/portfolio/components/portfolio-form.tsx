@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, type ReactNode } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   usePortfolio,
   useUpdatePortfolio,
@@ -67,7 +67,7 @@ function validatePortfolioForm(form: PortfolioFormState) {
   return errors;
 }
 
-export function PortfolioForm({ leading }: { leading?: ReactNode }) {
+export function PortfolioForm() {
   const { data: portfolio, isLoading } = usePortfolio();
   const updatePortfolio = useUpdatePortfolio();
 
@@ -191,7 +191,6 @@ export function PortfolioForm({ leading }: { leading?: ReactNode }) {
     <div className="flex min-h-0 flex-1 flex-col [&_h3]:text-base">
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className={EDIT_FORM_STACK_CLASS}>
-          {leading}
           <Card>
         <CardContent className="flex flex-col gap-4">
           <FormSection

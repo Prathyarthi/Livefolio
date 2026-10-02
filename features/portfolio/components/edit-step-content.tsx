@@ -1,5 +1,6 @@
 "use client";
 
+import { EDIT_FORM_STACK_CLASS } from "@/features/dashboard/constants/form-layout";
 import { EDIT_STEPS, type EditStepValue } from "@/features/portfolio/constants/edit-steps";
 import { AchievementForm } from "@/features/portfolio/components/achievement-form";
 import { CustomSectionEditor } from "@/features/portfolio/components/custom-section-editor";
@@ -15,7 +16,7 @@ import { SocialLinksEditor } from "@/features/portfolio/components/social-links-
 export function EditStepContent({ step }: { step: EditStepValue }) {
   switch (step) {
     case "basic":
-      return <PortfolioForm leading={<OpenToWorkToggle />} />;
+      return <PortfolioForm />;
     case "experience":
       return <ExperienceForm />;
     case "education":
@@ -31,7 +32,12 @@ export function EditStepContent({ step }: { step: EditStepValue }) {
     case "social":
       return <SocialLinksEditor />;
     case "publish":
-      return <PublishButton />;
+      return (
+        <div className={EDIT_FORM_STACK_CLASS}>
+          <OpenToWorkToggle />
+          <PublishButton />
+        </div>
+      );
     default: {
       const _exhaustive: never = step;
       return _exhaustive;
