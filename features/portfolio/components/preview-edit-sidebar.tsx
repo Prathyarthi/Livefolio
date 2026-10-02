@@ -205,9 +205,18 @@ function EditTabContent({
         </Button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col overscroll-contain p-4 pb-6 sm:p-5 sm:pb-8",
+          activeStep === "basic" ? "overflow-hidden pb-0 sm:pb-0" : "overflow-y-auto"
+        )}
+      >
         <div
-          className={`preview-edit-form [&_button]:text-sm [&_input]:text-sm [&_textarea]:min-h-24 [&_textarea]:text-sm ${DASHBOARD_FORM_COMPACT_CLASS}`}
+          className={cn(
+            "preview-edit-form [&_button]:text-sm [&_input]:text-sm [&_textarea]:min-h-24 [&_textarea]:text-sm",
+            DASHBOARD_FORM_COMPACT_CLASS,
+            activeStep === "basic" && "flex min-h-0 flex-1 flex-col"
+          )}
         >
           <EditStepContent step={activeStep} />
         </div>

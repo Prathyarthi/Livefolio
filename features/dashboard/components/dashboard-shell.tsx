@@ -242,7 +242,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <SidebarInset
         className={
           fullHeightPanel
-            ? "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-surface-base lg:h-svh lg:max-h-svh lg:overflow-hidden"
+            ? "relative flex h-dvh max-h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface-base"
             : "relative min-w-0 overflow-x-hidden bg-surface-base"
         }
       >
@@ -250,7 +250,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <main
           className={
             fullHeightPanel
-              ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)] lg:overflow-hidden"
+              ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-[var(--space-5)]"
               : "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)]"
           }
         >

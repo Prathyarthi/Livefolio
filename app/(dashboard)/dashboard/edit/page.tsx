@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, Share2, FileText } from "lucide-react";
@@ -157,7 +158,7 @@ function EditPortfolioPageContent() {
         />
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col lg:flex-row lg:gap-0 lg:overflow-hidden">
+      <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden lg:flex-row lg:gap-0">
         <aside className={DASHBOARD_TRACKER_ASIDE_CLASS}>
           <EditStepTracker
             activeStep={activeStep}
@@ -180,7 +181,12 @@ function EditPortfolioPageContent() {
           </div>
 
           <div className={DASHBOARD_CONTENT_FRAME_CLASS}>
-            <div className={DASHBOARD_CONTENT_INNER_CLASS}>
+            <div
+              className={cn(
+                DASHBOARD_CONTENT_INNER_CLASS,
+                activeStep === "basic" && "overflow-hidden pb-0 sm:pb-0"
+              )}
+            >
               <EditStepContent step={activeStep} />
             </div>
           </div>

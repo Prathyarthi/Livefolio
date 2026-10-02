@@ -283,7 +283,7 @@ export default function PreviewPage() {
   const showAccentPicker = true;
 
   return (
-    <div className="flex min-h-0 w-full max-w-full flex-col gap-4 lg:h-[calc(100dvh-4rem)] lg:min-h-0 lg:flex-row lg:overflow-hidden">
+    <div className="flex min-h-0 w-full max-w-full flex-1 flex-col gap-4 overflow-hidden lg:flex-row">
       <PreviewEditSidebar
         open={editOpen}
         onOpenChange={setEditOpen}
