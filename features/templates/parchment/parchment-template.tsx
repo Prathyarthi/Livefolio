@@ -19,6 +19,7 @@ import {
   SocialPills,
   ContactChips,
   CustomSectionItems,
+  ProfileLinksSection,
   PROJECT_CARD,
   PROJECT_CARD_TITLE,
   TEMPLATE_CONTAINER,
@@ -46,7 +47,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("parchment", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  const { navbarEnabled, sections } = buildTemplateSections(data);
+  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const groupedSkills = groupSkillsByCategory(skills);
 
   const githubProfile = socialProfiles.find((p) => p.platform.toLowerCase() === "github");
@@ -260,6 +261,24 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                       </a>
                     ))}
                   </CollapsibleList>
+                </section>
+              ),
+    profiles: hasProfiles && (
+                <section key="profiles" id="profiles" className="scroll-mt-32">
+                  <div className="flex items-center gap-6 mb-12">
+                    <h2 className="text-3xl font-black uppercase tracking-widest whitespace-nowrap">{labels.profiles}</h2>
+                    <div className="h-px w-full bg-[#2B2B2B]" />
+                  </div>
+                  <div className="border-2 border-[#2B2B2B] p-8 bg-white">
+                    <ProfileLinksSection
+                      portfolio={portfolio}
+                      profiles={socialProfiles}
+                      chipClassName="border-2 border-[#2B2B2B] bg-[#F1EEDC] px-3 py-1.5 text-sm font-bold text-[#2B2B2B]"
+                      pillClassName="border-2 border-[#2B2B2B] bg-[var(--lf-accent)] px-3 py-1.5 text-sm font-bold text-[#2B2B2B] hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-colors"
+                      titleClassName="text-sm font-black uppercase tracking-widest text-[#2B2B2B]"
+                      textClassName="text-base font-normal text-[#2B2B2B]/80"
+                    />
+                  </div>
                 </section>
               ),
     github: contributionCalendar && (

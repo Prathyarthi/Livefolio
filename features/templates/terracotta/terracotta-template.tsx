@@ -19,6 +19,7 @@ import {
   SocialPills,
   ContactChips,
   CustomSectionItems,
+  ProfileLinksSection,
   PROJECT_CARD,
   PROJECT_CARD_TITLE,
   TEMPLATE_CONTAINER,
@@ -46,7 +47,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("terracotta", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  const { navbarEnabled, sections } = buildTemplateSections(data);
+  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const groupedSkills = groupSkillsByCategory(skills);
 
   const githubProfile = socialProfiles.find((p) => p.platform.toLowerCase() === "github");
@@ -253,6 +254,23 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                       </a>
                     ))}
                   </CollapsibleList>
+                </section>
+              ),
+    profiles: hasProfiles && (
+                <section key="profiles" id="profiles" className="scroll-mt-32 max-w-4xl">
+                  <h2 className="mb-12 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
+                    {labels.profiles} <span className="h-px flex-1 bg-[#3D405B]/10" />
+                  </h2>
+                  <div className="bg-white p-8 rounded-3xl shadow-xs border border-[#3D405B]/5">
+                    <ProfileLinksSection
+                      portfolio={portfolio}
+                      profiles={socialProfiles}
+                      chipClassName="rounded-full border border-[#3D405B]/10 bg-[#F4F1DE] px-3 py-1.5 text-sm font-medium text-[#3D405B]"
+                      pillClassName="rounded-full border border-[var(--lf-accent)]/20 bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-3 py-1.5 text-sm font-medium text-[var(--lf-accent)] hover:bg-[color-mix(in_srgb,var(--lf-accent)_20%,white)] transition-colors"
+                      titleClassName="text-sm font-semibold uppercase tracking-widest text-[var(--lf-accent)]"
+                      textClassName="text-base font-light text-[#3D405B]/80"
+                    />
+                  </div>
                 </section>
               ),
     github: contributionCalendar && (

@@ -19,6 +19,7 @@ import {
   SocialPills,
   ContactChips,
   CustomSectionItems,
+  ProfileLinksSection,
   PROJECT_CARD,
   PROJECT_CARD_TITLE,
   TEMPLATE_CONTAINER,
@@ -46,7 +47,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("citrus", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  const { navbarEnabled, sections } = buildTemplateSections(data);
+  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const groupedSkills = groupSkillsByCategory(skills);
 
   const githubProfile = socialProfiles.find((p) => p.platform.toLowerCase() === "github");
@@ -235,6 +236,21 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                       </a>
                     ))}
                   </CollapsibleList>
+                </section>
+              ),
+    profiles: hasProfiles && (
+                <section key="profiles" id="profiles" className="scroll-mt-32 max-w-4xl">
+                  <h2 className="mb-10 text-4xl font-black text-[#264653] uppercase tracking-tight">{labels.profiles}</h2>
+                  <div className="bg-white border-4 border-[#264653] p-8 rounded-xl shadow-[8px_8px_0_0_var(--lf-accent)]">
+                    <ProfileLinksSection
+                      portfolio={portfolio}
+                      profiles={socialProfiles}
+                      chipClassName="text-sm font-bold text-[#264653] bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)]/30 px-3 py-1.5 rounded"
+                      pillClassName="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded px-3 py-1.5 transition-colors"
+                      titleClassName="text-sm font-black uppercase tracking-widest text-[var(--lf-accent)]"
+                      textClassName="text-lg font-medium text-[#264653]/80"
+                    />
+                  </div>
                 </section>
               ),
     github: contributionCalendar && (

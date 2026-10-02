@@ -19,6 +19,7 @@ import {
   SocialPills,
   ContactChips,
   CustomSectionItems,
+  ProfileLinksSection,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
   PROJECT_CARD_TITLE,
@@ -48,7 +49,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("airy", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  const { navbarEnabled, sections } = buildTemplateSections(data);
+  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const groupedSkills = groupSkillsByCategory(skills);
 
   const githubProfile = socialProfiles.find((p) => p.platform.toLowerCase() === "github");
@@ -243,6 +244,21 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                       </a>
                     ))}
                   </CollapsibleList>
+                </section>
+              ),
+    profiles: hasProfiles && (
+                <section key="profiles" id="profiles" className="scroll-mt-32">
+                  <h2 className="mb-8 text-3xl font-bold text-slate-800 px-2">{labels.profiles}</h2>
+                  <div className="rounded-3xl bg-white border border-slate-100 p-8 shadow-xs">
+                    <ProfileLinksSection
+                      portfolio={portfolio}
+                      profiles={socialProfiles}
+                      chipClassName="rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-600"
+                      pillClassName="rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] text-[var(--lf-accent)] px-3 py-1.5 text-sm font-medium hover:bg-[color-mix(in_srgb,var(--lf-accent)_20%,white)] transition-colors"
+                      titleClassName="text-sm font-bold text-slate-800"
+                      textClassName="text-sm text-slate-600"
+                    />
+                  </div>
                 </section>
               ),
     github: contributionCalendar && (
