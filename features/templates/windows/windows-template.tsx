@@ -23,6 +23,7 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -369,11 +370,19 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 />
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col gap-2">
                 <HeroProfileButtons
                   profiles={socialProfiles}
                   className="win95-button px-3 py-1 text-xs font-bold"
                 />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="win95-button px-3 py-1 text-xs font-bold"
+                  />
+                )}
               </div>
             </div>
           </div>

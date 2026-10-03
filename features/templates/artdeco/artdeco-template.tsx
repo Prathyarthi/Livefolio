@@ -24,6 +24,7 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
 } from "../shared";
@@ -445,11 +446,12 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
             />
           </div>
 
-          {socialProfiles.length > 0 && (
+          {hasNonHeroSocialProfiles(socialProfiles) && (
             <div className="mt-4 border-t border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] pt-6 w-full max-w-md">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="text-xs font-bold text-[#888] hover:text-[var(--lf-accent)] transition-colors uppercase tracking-widest"
               />
             </div>

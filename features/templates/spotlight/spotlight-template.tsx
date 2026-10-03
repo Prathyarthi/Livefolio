@@ -20,7 +20,10 @@ import { RichText,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
+  HeroProfileButtons,
   ProfileLinksSection,
+  SocialPills,
+  hasNonHeroSocialProfiles,
   PROJECT_CARD,
   PROJECT_CARD_HEADER,
   PROJECT_CARD_TITLE,
@@ -28,6 +31,8 @@ import { RichText,
   TEMPLATE_CONTAINER,
   getSectionLabel,
   getSectionLabels,
+  hasContactOrSocialProfiles,
+  isHeroProfilePlatform,
 } from "../shared";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import {
@@ -65,14 +70,9 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
   const contributionCalendar = parseContributionCalendar(
     githubStats?.contributionCalendar
   );
-  const hasProfiles =
-    socialProfiles.length > 0 ||
-    Boolean(
-      portfolio.contactEmail ||
-      portfolio.phone ||
-      portfolio.websiteUrl ||
-      portfolio.location
-    );
+  const hasProfiles = hasContactOrSocialProfiles(portfolio, socialProfiles, {
+    excludeHeroPlatforms: true,
+  });
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -536,7 +536,20 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                 </p>
               </div>
 
-              <HeroSocialRow profiles={socialProfiles} />
+              <div className="space-y-3">
+                <HeroProfileButtons
+                  profiles={socialProfiles}
+                  className="text-gray-950 transition duration-300 hover:opacity-70"
+                />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="text-sm text-gray-700 transition duration-300 hover:opacity-70"
+                  />
+                )}
+              </div>
 
               <div className="mt-[150px] animate-bounce">
                 <a href="#projects" aria-label="Scroll to projects">
@@ -582,12 +595,15 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             </section>
           ))}
 
-          {showFloatSocial && socialProfiles.length > 0 && (
+          {showFloatSocial &&
+            socialProfiles.some((profile) => isHeroProfilePlatform(profile.platform)) && (
             <div className="absolute right-0 top-[290px] z-20 hidden lg:block">
               <div className="relative -z-10 mb-4 justify-center">
                 <div className="rounded-lg bg-[#fbfffe] px-3 py-6 shadow-2xl drop-shadow-2xl">
                   <div className="flex flex-col gap-3">
-                    {socialProfiles.map((p) => (
+                    {socialProfiles
+                      .filter((profile) => isHeroProfilePlatform(profile.platform))
+                      .map((p) => (
                       <a
                         key={`${p.platform}-${p.url}`}
                         href={p.url}
@@ -628,26 +644,6 @@ function SocialIcon({ platform }: { platform: string }) {
   if (p.includes("linkedin")) return <LinkedinIcon className={className} />;
   if (p.includes("instagram")) return <InstagramIcon className={className} />;
   return <ExternalLink className={className} />;
-}
-
-function HeroSocialRow({ profiles }: { profiles: PortfolioData["socialProfiles"] }) {
-  if (profiles.length === 0) return null;
-  return (
-    <div className="mb-3 mt-0 flex justify-center space-x-7 lg:justify-start">
-      {profiles.map((p) => (
-        <a
-          key={`${p.platform}-${p.url}`}
-          href={p.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-950 transition duration-300 hover:opacity-70"
-          aria-label={p.platform}
-        >
-          <SocialIcon platform={p.platform} />
-        </a>
-      ))}
-    </div>
-  );
 }
 
 function ProjectCard({

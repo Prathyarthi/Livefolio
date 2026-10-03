@@ -23,6 +23,7 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -451,11 +452,12 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
               />
             </div>
 
-            {socialProfiles.length > 0 && (
+            {hasNonHeroSocialProfiles(socialProfiles) && (
               <div className="mt-4">
                 <SocialPills
                   profiles={socialProfiles}
                   showUsername
+                  excludeHeroPlatforms
                   className="text-[10px] uppercase tracking-widest text-white/60 hover:text-white transition-colors"
                 />
               </div>

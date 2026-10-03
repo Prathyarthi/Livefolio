@@ -23,6 +23,7 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -437,11 +438,12 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
 
           </div>
 
-          {socialProfiles.length > 0 && (
+          {hasNonHeroSocialProfiles(socialProfiles) && (
             <div className="mt-8 pt-6 border-t border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)]">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="text-xs font-bold uppercase tracking-widest text-[#008800] hover:text-[var(--lf-accent)] transition-colors"
               />
             </div>

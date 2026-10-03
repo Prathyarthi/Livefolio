@@ -18,6 +18,8 @@ import { RichText,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
+  HeroProfileButtons,
+  hasNonHeroSocialProfiles,
   ContactChips,
   CustomSectionItems,
   ProfileLinksSection,
@@ -312,7 +314,18 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
 
           <div className="mt-6 flex flex-col items-center gap-3 sm:mt-8">
             <ContactChips portfolio={portfolio} chipClassName="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full shadow-xs border border-slate-100" />
-            <SocialPills profiles={socialProfiles} className="bg-white hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] text-[var(--lf-accent)] border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] rounded-full px-4 py-2 shadow-xs transition-all" />
+            <HeroProfileButtons
+              profiles={socialProfiles}
+              className="bg-white hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] text-[var(--lf-accent)] border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] rounded-full px-4 py-2 shadow-xs transition-all"
+            />
+            {hasNonHeroSocialProfiles(socialProfiles) && (
+              <SocialPills
+                profiles={socialProfiles}
+                showUsername
+                excludeHeroPlatforms
+                className="bg-white hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] text-[var(--lf-accent)] border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] rounded-full px-4 py-2 shadow-xs transition-all"
+              />
+            )}
           </div>
         </header>
 

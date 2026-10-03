@@ -27,7 +27,49 @@ function RichInline({ text }: { text: string }) {
   return <RichText text={text} />;
 }
 
-const HERO_PROFILE_PLATFORMS = ["github", "linkedin", "medium", "leetcode"] as const;
+export const HERO_PROFILE_PLATFORMS = ["github", "linkedin", "medium", "leetcode"] as const;
+
+const HERO_PROFILE_PLATFORM_SET = new Set<string>(HERO_PROFILE_PLATFORMS);
+
+export function isHeroProfilePlatform(platform: string) {
+  return HERO_PROFILE_PLATFORM_SET.has(platform.toLowerCase());
+}
+
+export function visibleSocialProfiles(
+  profiles: PortfolioData["socialProfiles"],
+  options?: { excludeHeroPlatforms?: boolean },
+) {
+  return profiles.filter((profile) => {
+    const platform = profile.platform.toLowerCase();
+    if (platform === "unknown") return false;
+    if (options?.excludeHeroPlatforms && isHeroProfilePlatform(platform)) {
+      return false;
+    }
+    return true;
+  });
+}
+
+export function hasNonHeroSocialProfiles(
+  profiles: PortfolioData["socialProfiles"],
+) {
+  return visibleSocialProfiles(profiles, { excludeHeroPlatforms: true }).length > 0;
+}
+
+export function hasContactOrSocialProfiles(
+  portfolio: PortfolioData["portfolio"],
+  profiles: PortfolioData["socialProfiles"],
+  options?: { excludeHeroPlatforms?: boolean },
+) {
+  return (
+    visibleSocialProfiles(profiles, options).length > 0 ||
+    Boolean(
+      portfolio.contactEmail ||
+      portfolio.phone ||
+      portfolio.websiteUrl ||
+      portfolio.location
+    )
+  );
+}
 
 /** Enables container-query breakpoints inside templates (mobile preview, narrow embeds). */
 export const TEMPLATE_CONTAINER =
@@ -107,14 +149,11 @@ export function getTemplateNavbarCustomization(
 
 export function buildTemplateSections(data: PortfolioData) {
   const navbar = getTemplateNavbarCustomization(data.portfolio.customization);
-  const hasProfiles =
-    data.socialProfiles.length > 0 ||
-    Boolean(
-      data.portfolio.contactEmail ||
-      data.portfolio.phone ||
-      data.portfolio.websiteUrl ||
-      data.portfolio.location
-    );
+  const hasProfiles = hasContactOrSocialProfiles(
+    data.portfolio,
+    data.socialProfiles,
+    { excludeHeroPlatforms: true },
+  );
 
   const availableSections: TemplateSectionId[] = [
     data.portfolio.summary ? "about" : null,
@@ -320,14 +359,14 @@ export function SocialPills({
   profiles,
   className,
   showUsername = false,
+  excludeHeroPlatforms = false,
 }: {
   profiles: PortfolioData["socialProfiles"];
   className?: string;
   showUsername?: boolean;
+  excludeHeroPlatforms?: boolean;
 }) {
-  const visibleProfiles = profiles.filter(
-    (profile) => profile.platform.toLowerCase() !== "unknown",
-  );
+  const visibleProfiles = visibleSocialProfiles(profiles, { excludeHeroPlatforms });
 
   if (visibleProfiles.length === 0) return null;
 
@@ -584,6 +623,7 @@ export function ProfileLinksSection({
   pillClassName,
   titleClassName,
   textClassName,
+  excludeHeroPlatforms = true,
 }: {
   portfolio: PortfolioData["portfolio"];
   profiles: PortfolioData["socialProfiles"];
@@ -591,17 +631,11 @@ export function ProfileLinksSection({
   pillClassName?: string;
   titleClassName?: string;
   textClassName?: string;
+  excludeHeroPlatforms?: boolean;
 }) {
-  const hasProfiles =
-    profiles.length > 0 ||
-    Boolean(
-      portfolio.contactEmail ||
-      portfolio.phone ||
-      portfolio.websiteUrl ||
-      portfolio.location
-    );
-
-  if (!hasProfiles) return null;
+  if (!hasContactOrSocialProfiles(portfolio, profiles, { excludeHeroPlatforms })) {
+    return null;
+  }
 
   return (
     <div className="space-y-5">
@@ -613,7 +647,12 @@ export function ProfileLinksSection({
       </div>
 
       <ContactChips portfolio={portfolio} chipClassName={chipClassName} />
-      <SocialPills profiles={profiles} showUsername className={pillClassName} />
+      <SocialPills
+        profiles={profiles}
+        showUsername
+        excludeHeroPlatforms={excludeHeroPlatforms}
+        className={pillClassName}
+      />
     </div>
   );
 }

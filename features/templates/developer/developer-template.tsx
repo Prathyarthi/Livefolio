@@ -34,6 +34,9 @@ import { RichText,
   PROJECTS_GRID_2,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
+  SocialPills,
+  hasNonHeroSocialProfiles,
+  visibleSocialProfiles,
 } from "@/features/templates/shared";
 import { CollapsibleList } from "@/features/templates/collapsible-list";
 
@@ -60,6 +63,9 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
     githubStats?.contributionCalendar
   );
   const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const extraSocials = visibleSocialProfiles(socialProfiles, {
+    excludeHeroPlatforms: true,
+  });
 
   const resolved = resolveSectionLayout(
     getTemplateSectionLayout("developer"),
@@ -449,9 +455,9 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                       chipClassName="rounded border border-[var(--lf-g-900-40)] bg-gray-950 px-3 py-1.5 text-sm text-gray-400"
                     />
                   </div>
-                  {socialProfiles.length > 0 && (
+                  {extraSocials.length > 0 && (
                     <div className="mt-5 flex flex-wrap gap-3">
-                      {socialProfiles.map((profile) => (
+                      {extraSocials.map((profile) => (
                         <a
                           key={`${profile.platform}-${profile.url}`}
                           href={profile.url}
@@ -558,11 +564,19 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                   </a>
                 </p>
               )}
-              <div className="mt-4">
+              <div className="mt-4 space-y-3">
                 <HeroProfileButtons
                   profiles={socialProfiles}
                   className="rounded border border-[var(--lf-g-900-40)] bg-gray-900/70 px-3 py-1.5 text-sm text-[var(--lf-g-400-80)] transition-colors hover:text-[var(--lf-g-300)]"
                 />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="rounded border border-[var(--lf-g-900-40)] bg-gray-900/70 px-3 py-1.5 text-sm text-[var(--lf-g-400-80)] transition-colors hover:text-[var(--lf-g-300)]"
+                  />
+                )}
               </div>
               <div className="mt-4 inline-block h-5 w-2.5 animate-pulse bg-[var(--lf-g-400)]" />
             </div>
@@ -611,7 +625,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             guest@portfolio:~$ cat .social-links
           </p>
           <div className="space-y-2">
-            {socialProfiles.map((profile) => (
+            {extraSocials.map((profile) => (
               <div key={profile.platform} className="text-sm">
                 <span className="text-[var(--lf-g-700)]">$</span>{" "}
                 <span className="text-gray-500">open</span>{" "}

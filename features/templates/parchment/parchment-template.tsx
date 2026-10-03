@@ -18,6 +18,8 @@ import { RichText,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
+  HeroProfileButtons,
+  hasNonHeroSocialProfiles,
   ContactChips,
   CustomSectionItems,
   ProfileLinksSection,
@@ -331,7 +333,18 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
 
             <div className="mt-10 flex flex-col items-center gap-6">
               <ContactChips portfolio={portfolio} chipClassName="text-sm font-semibold tracking-widest uppercase border-b border-[#2B2B2B] pb-1" />
-              <SocialPills profiles={socialProfiles} className="text-[#2B2B2B] border border-[#2B2B2B] p-2 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all" />
+              <HeroProfileButtons
+                profiles={socialProfiles}
+                className="text-[#2B2B2B] border border-[#2B2B2B] p-2 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all"
+              />
+              {hasNonHeroSocialProfiles(socialProfiles) && (
+                <SocialPills
+                  profiles={socialProfiles}
+                  showUsername
+                  excludeHeroPlatforms
+                  className="text-[#2B2B2B] border border-[#2B2B2B] p-2 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all"
+                />
+              )}
             </div>
           </div>
         </header>

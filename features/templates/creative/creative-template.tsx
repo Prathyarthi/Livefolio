@@ -25,6 +25,7 @@ import { RichText,
   HERO_TITLE_SCALE_7XL,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
 } from "@/features/templates/shared";
@@ -498,11 +499,12 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                   />
                 </div>
 
-                {socialProfiles.length > 0 && (
+                {hasNonHeroSocialProfiles(socialProfiles) && (
                   <div className="mt-6">
                     <SocialPills
                       profiles={socialProfiles}
                       showUsername
+                      excludeHeroPlatforms
                       className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-white/90 px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] hover:text-stone-900"
                     />
                   </div>

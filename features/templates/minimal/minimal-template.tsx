@@ -27,6 +27,7 @@ import { RichText,
   HERO_TITLE_SCALE_7XL,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -507,11 +508,12 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                 />
               </div>
 
-              {socialProfiles.length > 0 && (
+              {hasNonHeroSocialProfiles(socialProfiles) && (
                 <div className="mt-6">
                   <SocialPills
                     profiles={socialProfiles}
                     showUsername
+                    excludeHeroPlatforms
                     className="rounded-full border border-stone-200/80 bg-white/85 px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-stone-300 hover:bg-white hover:text-stone-900"
                   />
                 </div>

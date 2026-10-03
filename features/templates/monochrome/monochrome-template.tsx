@@ -22,6 +22,7 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -396,10 +397,11 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 profiles={socialProfiles}
                 className="w-full text-left lg:text-right text-sm font-bold uppercase tracking-widest bg-[var(--lf-accent)] text-white px-6 py-3 hover:bg-white hover:text-black border border-[var(--lf-accent)] transition-colors"
               />
-              {socialProfiles.length > 0 && (
+              {hasNonHeroSocialProfiles(socialProfiles) && (
                 <SocialPills
                   profiles={socialProfiles}
                   showUsername
+                  excludeHeroPlatforms
                   className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors"
                 />
               )}

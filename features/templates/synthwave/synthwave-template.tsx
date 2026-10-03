@@ -23,6 +23,7 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   SPLIT_CARD_ROW,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
@@ -435,11 +436,12 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
             />
           </div>
 
-          {socialProfiles.length > 0 && (
+          {hasNonHeroSocialProfiles(socialProfiles) && (
             <div className="mt-4">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="text-sm font-bold text-[#ffbc00] hover:text-white transition-colors px-4 py-2 bg-[#26004c]/50 border border-[#ffbc00]/30 rounded-full"
               />
             </div>

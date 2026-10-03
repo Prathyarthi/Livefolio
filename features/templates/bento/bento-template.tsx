@@ -24,6 +24,7 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_3,
   SocialPills,
+  hasNonHeroSocialProfiles,
   BENTO_GRID,
   SPLIT_CARD_ROW,
   TEMPLATE_CONTAINER,
@@ -128,7 +129,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* Social Links Bento Box */}
-          {socialProfiles.length > 0 && !resolved.isHidden("profiles") && (
+          {hasNonHeroSocialProfiles(socialProfiles) && !resolved.isHidden("profiles") && (
             <div className="col-span-1 @lg:col-span-2 row-span-1 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50 flex flex-col justify-center">
               <h2 className="text-lg font-semibold text-zinc-400 mb-4 flex items-center">
                 <span className="w-2 h-2 rounded-full bg-zinc-300 mr-2" />
@@ -137,6 +138,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-all hover:border-zinc-300 hover:bg-white hover:shadow-sm"
               />
             </div>

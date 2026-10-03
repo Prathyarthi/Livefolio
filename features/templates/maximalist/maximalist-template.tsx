@@ -23,6 +23,8 @@ import { RichText,
   TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
+  SocialPills,
+  hasNonHeroSocialProfiles,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -699,6 +701,14 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                 profiles={data.socialProfiles}
                 className="px-4 py-2 bg-white text-black border-2 border-black font-mono text-xs font-black uppercase neo-shadow hover:bg-[var(--lf-accent)] transition-colors"
               />
+              {hasNonHeroSocialProfiles(data.socialProfiles) && (
+                <SocialPills
+                  profiles={data.socialProfiles}
+                  showUsername
+                  excludeHeroPlatforms
+                  className="px-3 py-1.5 bg-white text-black border-2 border-black font-mono text-xs font-black uppercase neo-shadow hover:bg-[var(--lf-accent)] transition-colors"
+                />
+              )}
             </div>
 
           </div>

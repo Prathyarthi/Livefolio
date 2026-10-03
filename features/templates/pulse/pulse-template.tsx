@@ -32,6 +32,8 @@ import { RichText,
   TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
+  SocialPills,
+  hasNonHeroSocialProfiles,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -326,6 +328,14 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: H
                   profiles={socialProfiles}
                   className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition-colors"
                 />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition-colors"
+                  />
+                )}
               </div>
             </div>
 

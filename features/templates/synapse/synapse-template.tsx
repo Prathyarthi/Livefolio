@@ -38,6 +38,9 @@ import { RichText,
   TechChip,
   TechIcon,
   getSectionLabels,
+  SocialPills,
+  hasNonHeroSocialProfiles,
+  visibleSocialProfiles,
 } from "@/features/templates/shared";
 import { CollapsibleList } from "@/features/templates/collapsible-list";
 import { getTemplateSectionLayout } from "@/features/templates/section-layouts";
@@ -189,9 +192,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
   const groupedSkills = groupSkillsByCategory(data.skills);
   const experiences = sortExperiencesNewestFirst(data.experiences);
   const topSkills = data.skills.slice(0, 6).map((s) => s.name).filter(Boolean);
-  const visibleSocials = data.socialProfiles.filter(
-    (profile) => profile.platform.toLowerCase() !== "unknown",
-  );
+  const visibleSocials = visibleSocialProfiles(data.socialProfiles, {
+    excludeHeroPlatforms: true,
+  });
   const navItems = navbarEnabled ? sections : [];
   const navSectionIds = navItems.map((section) => section.id).join(",");
   const navSectionIdsRef = useRef(navSectionIds);
@@ -822,6 +825,14 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                   profiles={data.socialProfiles}
                   className="px-3 py-1.5 rounded-full border border-black/10 text-xs font-bold hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors"
                 />
+                {hasNonHeroSocialProfiles(data.socialProfiles) && (
+                  <SocialPills
+                    profiles={data.socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="px-3 py-1.5 rounded-full border border-black/10 text-xs font-bold hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors"
+                  />
+                )}
               </div>
             </div>
 

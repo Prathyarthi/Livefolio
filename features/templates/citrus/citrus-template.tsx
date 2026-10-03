@@ -18,6 +18,8 @@ import { RichText,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
+  HeroProfileButtons,
+  hasNonHeroSocialProfiles,
   ContactChips,
   CustomSectionItems,
   ProfileLinksSection,
@@ -310,7 +312,18 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
 
               <div className="mt-8 flex flex-col gap-4">
                 <ContactChips portfolio={portfolio} chipClassName="text-sm font-bold text-[#264653] bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)]/30 px-3 py-1.5 rounded" />
-                <SocialPills profiles={socialProfiles} className="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded p-2 transition-colors" />
+                <HeroProfileButtons
+                  profiles={socialProfiles}
+                  className="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded p-2 transition-colors"
+                />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded p-2 transition-colors"
+                  />
+                )}
               </div>
             </div>
 

@@ -4,9 +4,6 @@ import { useState, useMemo, type ReactNode } from "react";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import { motion, AnimatePresence } from "motion/react";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
-import {
-  PlatformIcon,
-} from "@/components/icons";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { cn } from "@/lib/utils";
 import { formatDateRange, groupSkillsByCategory, sortExperiencesNewestFirst } from "@/features/templates/utils";
@@ -22,7 +19,10 @@ import { RichText,
   CustomSectionItems,
   DescriptionBlock,
   TechIcon,
+  HeroProfileButtons,
   ProfileLinksSection,
+  SocialPills,
+  hasNonHeroSocialProfiles,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -98,18 +98,6 @@ function getSkillLevelDisplay(level: number | null): { label: string; classes: s
     return { label: 'Advanced', classes: 'bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] text-[var(--lf-accent)]' };
   }
   return { label: 'Familiar', classes: 'bg-slate-900 border border-slate-800 text-slate-400' };
-}
-
-/** cachedStats is Record<string, unknown> | null; read known numeric-ish fields safely. */
-function getSocialStatLabel(stats: Record<string, unknown> | null): string | null {
-  if (!stats) return null;
-  if (stats.followers !== undefined && stats.followers !== null) {
-    return `${stats.followers} flwrs`;
-  }
-  if (stats.connections !== undefined && stats.connections !== null) {
-    return `${stats.connections}+ conns`;
-  }
-  return null;
 }
 
 const inter = Inter({
@@ -199,12 +187,6 @@ export function LedgerTemplate({ data }: AppProps) {
       return matchesSearch && matchesTech;
     });
   }, [visibleProjects, projectSearch, selectedTech]);
-
-  // Render social profile icon helper
-  const getSocialIcon = (platform: string, className = 'w-5 h-5') => (
-    <PlatformIcon platform={platform} className={className} />
-  );
-
 
   const blocks: Partial<Record<ReorderableSectionKey, ReactNode>> = {
     about: null,
@@ -961,32 +943,20 @@ export function LedgerTemplate({ data }: AppProps) {
                 chipClassName="w-full @sm:w-auto justify-center @md:justify-start rounded-none border border-slate-800 bg-[#111418] px-3 py-2 text-xs font-mono text-slate-400 text-center @md:text-left"
               />
 
-              {/* Social profiles stats & links */}
-              {socialProfiles.length > 0 && (
-                <div id="hero-socials" className="flex flex-wrap items-center justify-center @md:justify-start gap-3 @sm:gap-4 pt-4">
-                  {socialProfiles.map((profile) => {
-                    const statLabel = getSocialStatLabel(profile.cachedStats);
-                    return (
-                      <a
-                        key={profile.platform}
-                        href={profile.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded-none bg-slate-900 border border-slate-800 hover:border-[var(--lf-accent)] text-slate-400 hover:text-white transition-all flex items-center gap-2 font-mono text-xs group"
-                        id={`social-${profile.platform}`}
-                      >
-                        {getSocialIcon(profile.platform, 'w-4 h-4 text-[var(--lf-accent)]')}
-                        {profile.username && <span className="hidden @sm:inline">@{profile.username}</span>}
-                        {statLabel && (
-                          <span className="px-1.5 py-0.5 rounded-none bg-slate-950 text-[9px] text-slate-500 border border-slate-800/80 group-hover:text-[var(--lf-accent)] transition-colors">
-                            {statLabel}
-                          </span>
-                        )}
-                      </a>
-                    );
-                  })}
-                </div>
-              )}
+              <div id="hero-socials" className="flex flex-col items-center @md:items-start gap-3 pt-4">
+                <HeroProfileButtons
+                  profiles={socialProfiles}
+                  className="p-2 rounded-none bg-slate-900 border border-slate-800 hover:border-[var(--lf-accent)] text-slate-400 hover:text-white transition-all font-mono text-xs"
+                />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="p-2 rounded-none bg-slate-900 border border-slate-800 hover:border-[var(--lf-accent)] text-slate-400 hover:text-white transition-all font-mono text-xs"
+                  />
+                )}
+              </div>
             </div>
           </div>
         </section>

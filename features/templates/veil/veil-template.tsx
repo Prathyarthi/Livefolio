@@ -37,6 +37,8 @@ import { RichText,
   DescriptionBlock,
   HeroProfileButtons,
   ProfileLinksSection,
+  SocialPills,
+  hasNonHeroSocialProfiles,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -542,11 +544,19 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary }: HeroProp
                 portfolio={portfolio}
                 chipClassName="rounded-full border border-[var(--veil-line)] px-3.5 py-1.5 font-mono text-[11px] text-[var(--veil-muted)]"
               />
-              <div id="hero-profiles" className="scroll-mt-24">
+              <div id="hero-profiles" className="scroll-mt-24 space-y-3">
                 <HeroProfileButtons
                   profiles={socialProfiles}
                   className="rounded-full border border-[var(--veil-line-strong)] bg-[var(--veil-paper)] px-4 py-2 text-sm font-medium text-[var(--veil-ink)] transition-all hover:-translate-y-0.5 hover:bg-[var(--lf-accent)]"
                 />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="rounded-full border border-[var(--veil-line-strong)] bg-[var(--veil-paper)] px-4 py-2 text-sm font-medium text-[var(--veil-ink)] transition-all hover:-translate-y-0.5 hover:bg-[var(--lf-accent)]"
+                  />
+                )}
               </div>
             </motion.div>
           </div>
@@ -1203,7 +1213,7 @@ export function VeilTemplate({ data }: AppProps) {
     certifications: certifications.length > 0,
     articles: articles.length > 0,
     achievements: achievements.length > 0,
-    profiles: hasProfiles || socialProfiles.length > 0,
+    profiles: hasProfiles,
   };
   const numbered = resolved.order.full.filter(
     (key) => present[key] && !resolved.isHidden(key),

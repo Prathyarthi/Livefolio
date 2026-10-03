@@ -26,6 +26,7 @@ import { RichText,
   PROJECT_CARD_HEADER,
   PROJECT_CARD_TITLE,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
 } from "../shared";
@@ -365,11 +366,12 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
             />
           </div>
 
-          {socialProfiles.length > 0 && (
+          {hasNonHeroSocialProfiles(socialProfiles) && (
             <div className="mt-6 flex justify-center">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="text-xs font-sans tracking-wider uppercase text-[#555] hover:text-[var(--lf-accent)]"
               />
             </div>

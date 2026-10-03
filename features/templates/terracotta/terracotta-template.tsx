@@ -18,6 +18,8 @@ import { RichText,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
+  HeroProfileButtons,
+  hasNonHeroSocialProfiles,
   ContactChips,
   CustomSectionItems,
   ProfileLinksSection,
@@ -318,7 +320,18 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
 
             <div className="mt-8 flex flex-col items-start gap-4">
               <ContactChips portfolio={portfolio} chipClassName="text-sm uppercase tracking-widest text-[var(--lf-accent)]" />
-              <SocialPills profiles={socialProfiles} className="text-[#3D405B] hover:text-[var(--lf-accent)] transition-colors p-2" />
+              <HeroProfileButtons
+                profiles={socialProfiles}
+                className="text-[#3D405B] hover:text-[var(--lf-accent)] transition-colors p-2"
+              />
+              {hasNonHeroSocialProfiles(socialProfiles) && (
+                <SocialPills
+                  profiles={socialProfiles}
+                  showUsername
+                  excludeHeroPlatforms
+                  className="text-[#3D405B] hover:text-[var(--lf-accent)] transition-colors p-2"
+                />
+              )}
             </div>
           </div>
         </header>

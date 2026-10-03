@@ -26,6 +26,7 @@ import { RichText,
   HERO_TITLE_BASE,
   HERO_TITLE_SCALE_7XL,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   PROJECTS_GRID_2,
@@ -520,11 +521,12 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                 />
               </div>
 
-              {socialProfiles.length > 0 && (
+              {hasNonHeroSocialProfiles(socialProfiles) && (
                 <div className="mt-6">
                   <SocialPills
                     profiles={socialProfiles}
                     showUsername
+                    excludeHeroPlatforms
                     className="border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)]"
                   />
                 </div>
