@@ -236,6 +236,10 @@ function stripTopMargin(className?: string) {
   return className.replace(/\bmt-\S+/g, "").replace(/\s+/g, " ").trim() || undefined;
 }
 
+function descriptionListClass(className?: string) {
+  return cn("list-disc list-outside pl-5", className);
+}
+
 export function DescriptionBlock({
   text,
   paragraphClassName,
@@ -251,7 +255,7 @@ export function DescriptionBlock({
   if (nodes.length === 0) return null;
 
   const paragraphClass = stripLineClamp(paragraphClassName);
-  const listClass = stripLineClamp(listClassName);
+  const listClass = stripLineClamp(listClassName) ?? paragraphClass;
   const headingClass = cn(
     "font-semibold",
     stripLineClamp(headingClassName) ?? paragraphClass,
@@ -271,7 +275,7 @@ export function DescriptionBlock({
 
   if (onlyList && nodes[0]?.type === "list") {
     return (
-      <ExpandableText as="ul" className={listClass} initialLines={3}>
+      <ExpandableText as="ul" className={descriptionListClass(listClass)} initialLines={3}>
         {nodes[0].items.map((line, index) => (
           <li key={`${index}-${line}`}>
             <RichInline text={line} />
@@ -312,7 +316,7 @@ export function DescriptionBlock({
           );
         }
         return (
-          <ul key={`list-${index}`} className={stripTopMargin(listClass)}>
+          <ul key={`list-${index}`} className={descriptionListClass(stripTopMargin(listClass))}>
             {node.items.map((line, itemIndex) => (
               <li key={`${itemIndex}-${line}`}>
                 <RichInline text={line} />

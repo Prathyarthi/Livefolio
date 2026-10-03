@@ -197,9 +197,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                       <h3 className="font-bold text-xs mb-2 border-b border-black pb-1">{category}</h3>
                       <div className="flex flex-wrap gap-1">
                         {names.map((name) => (
-                          <span key={name} className="win95-outset bg-[#c0c0c0] px-2 py-0.5 text-xs">
-                            {name}
-                          </span>
+                          <TechChip
+                            key={name}
+                            name={name}
+                            className="win95-outset bg-[#c0c0c0] px-2 py-0.5 text-xs"
+                            iconClassName="h-3 w-3"
+                          />
                         ))}
                       </div>
                     </div>

@@ -317,12 +317,11 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <span
+                  <TechChip
                     key={name}
+                    name={name}
                     className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700"
-                  >
-                    {name}
-                  </span>
+                  />
                 ))}
               </div>
             </div>

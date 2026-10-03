@@ -14,6 +14,7 @@ import { RichText,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
+  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -215,7 +216,8 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                         </h3>
                         <div className="flex flex-wrap gap-x-6 gap-y-3 pl-11">
                           {names.map((name) => (
-                            <span key={name} className="text-[#e5e5e5] text-sm font-light tracking-wider">
+                            <span key={name} className="inline-flex items-center gap-2 text-[#e5e5e5] text-sm font-light tracking-wider">
+                              <TechIcon name={name} className="h-3.5 w-3.5" />
                               {name}
                             </span>
                           ))}

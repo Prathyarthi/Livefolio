@@ -209,9 +209,11 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {names.map((name) => (
-                            <span key={name} className="bg-[#fdf6e3] text-[#b89547] text-sm font-bold px-4 py-2 rounded-2xl hover:scale-105 transition-transform cursor-default">
-                              {name}
-                            </span>
+                            <TechChip
+                              key={name}
+                              name={name}
+                              className="bg-[#fdf6e3] text-[#b89547] text-sm font-bold px-4 py-2 rounded-2xl hover:scale-105 transition-transform cursor-default"
+                            />
                           ))}
                         </div>
                       </div>

@@ -13,6 +13,7 @@ import { RichText,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
+  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -204,7 +205,8 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-x-6 gap-y-4">
                 {names.map((name) => (
-                  <span key={name} className="text-lg font-bold uppercase tracking-tight">
+                  <span key={name} className="inline-flex items-center gap-2 text-lg font-bold uppercase tracking-tight">
+                    <TechIcon name={name} className="h-4 w-4" />
                     {name}
                   </span>
                 ))}

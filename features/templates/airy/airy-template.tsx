@@ -179,9 +179,11 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                           <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--lf-accent)]">{category}</h3>
                           <div className="flex flex-wrap gap-2">
                             {items.map((skill) => (
-                              <span key={skill} className="rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] hover:text-[var(--lf-accent)] transition-colors cursor-default">
-                                {skill}
-                              </span>
+                              <TechChip
+                                key={skill}
+                                name={skill}
+                                className="rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] hover:text-[var(--lf-accent)] transition-colors cursor-default"
+                              />
                             ))}
                           </div>
                         </div>

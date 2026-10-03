@@ -301,12 +301,11 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {names.map((name) => (
-                        <span
+                        <TechChip
                           key={name}
+                          name={name}
                           className="rounded-xl border border-white/10 bg-white/20 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-                        >
-                          {name}
-                        </span>
+                        />
                       ))}
                     </div>
                   </div>

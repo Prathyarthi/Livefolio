@@ -312,12 +312,11 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <span
+                  <TechChip
                     key={name}
+                    name={name}
                     className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-sm text-zinc-300"
-                  >
-                    {name}
-                  </span>
+                  />
                 ))}
               </div>
             </div>

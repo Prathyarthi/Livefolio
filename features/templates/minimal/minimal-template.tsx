@@ -311,12 +311,11 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <span
+                  <TechChip
                     key={name}
+                    name={name}
                     className="rounded-full border border-stone-200/80 bg-stone-50 px-3 py-1.5 text-sm text-stone-600"
-                  >
-                    {name}
-                  </span>
+                  />
                 ))}
               </div>
             </div>

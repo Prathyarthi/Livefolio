@@ -299,12 +299,11 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <span
+                  <TechChip
                     key={name}
+                    name={name}
                     className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-3 py-1.5 text-sm text-stone-700"
-                  >
-                    {name}
-                  </span>
+                  />
                 ))}
               </div>
             </div>

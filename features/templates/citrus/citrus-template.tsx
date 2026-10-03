@@ -177,9 +177,11 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                           <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-[var(--lf-accent)]">{category}</h3>
                           <div className="flex flex-wrap gap-2">
                             {items.map((skill) => (
-                              <span key={skill} className="bg-[#FFFCF2] border-2 border-[#264653] px-3 py-1.5 text-sm font-bold text-[#264653]">
-                                {skill}
-                              </span>
+                              <TechChip
+                                key={skill}
+                                name={skill}
+                                className="bg-[#FFFCF2] border-2 border-[#264653] px-3 py-1.5 text-sm font-bold text-[#264653]"
+                              />
                             ))}
                           </div>
                         </div>

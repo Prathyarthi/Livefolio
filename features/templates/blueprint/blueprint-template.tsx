@@ -220,9 +220,12 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {names.map((name) => (
-                            <span key={name} className="border border-white/50 text-[10px] uppercase tracking-widest px-2 py-1 hover:bg-[var(--lf-accent)] hover:text-[#003366] transition-colors cursor-default">
-                              {name}
-                            </span>
+                            <TechChip
+                              key={name}
+                              name={name}
+                              className="border border-white/50 text-[10px] uppercase tracking-widest px-2 py-1 hover:bg-[var(--lf-accent)] hover:text-[#003366] transition-colors cursor-default"
+                              iconClassName="h-3 w-3"
+                            />
                           ))}
                         </div>
                       </div>

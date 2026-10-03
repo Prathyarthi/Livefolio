@@ -46,9 +46,36 @@ function readmeParagraphs(markdown: string): string[] {
     );
 }
 
+function isExtensionOrAbbreviationDot(text: string, dotIndex: number): boolean {
+  const prev = text[dotIndex - 1];
+  const next = text[dotIndex + 1];
+  return Boolean(prev && next && /[A-Za-z0-9]/.test(prev) && /[A-Za-z]/.test(next));
+}
+
+function splitSentences(text: string): string[] {
+  const sentences: string[] = [];
+  let start = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch !== "." && ch !== "!" && ch !== "?") continue;
+    if (ch === "." && isExtensionOrAbbreviationDot(text, i)) continue;
+
+    const after = text.slice(i + 1);
+    if (after.trim() === "" || /^\s+[A-Z]/.test(after)) {
+      const sentence = text.slice(start, i + 1).trim();
+      if (sentence) sentences.push(sentence);
+      start = i + 1;
+    }
+  }
+
+  const tail = text.slice(start).trim();
+  if (tail) sentences.push(tail);
+  return sentences;
+}
+
 function toTwoLines(text: string): string {
-  const sentences =
-    text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((part) => part.trim()) ?? [text];
+  const sentences = splitSentences(text);
   if (sentences.length >= 2) {
     return `${sentences[0]}\n${sentences[1]}`;
   }

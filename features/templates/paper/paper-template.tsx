@@ -210,9 +210,15 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                       {Object.entries(groupedSkills).map(([category, names]) => (
                         <div key={category}>
                           <h3 className="text-sm font-bold uppercase tracking-widest mb-3">{category}</h3>
-                          <p className="text-[#444] leading-relaxed">
-                            {names.join(", ")}
-                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {names.map((name) => (
+                              <TechChip
+                                key={name}
+                                name={name}
+                                className="text-xs font-sans uppercase tracking-wider text-[#666] bg-[#e8e4db] px-2 py-1"
+                              />
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>

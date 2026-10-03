@@ -213,9 +213,11 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {names.map((name) => (
-                            <span key={name} className="bg-[#0d0221] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] text-xs font-bold px-3 py-1.5 uppercase tracking-widest hover:border-[var(--lf-accent)] hover:shadow-[0_0_10px_rgba(0,240,255,0.5)] transition-all cursor-default">
-                              {name}
-                            </span>
+                            <TechChip
+                              key={name}
+                              name={name}
+                              className="bg-[#0d0221] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] text-xs font-bold px-3 py-1.5 uppercase tracking-widest hover:border-[var(--lf-accent)] hover:shadow-[0_0_10px_rgba(0,240,255,0.5)] transition-all cursor-default"
+                            />
                           ))}
                         </div>
                       </div>

@@ -320,12 +320,11 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <span
+                  <TechChip
                     key={name}
+                    name={name}
                     className="border-2 border-black bg-[color-mix(in_srgb,var(--lf-accent)_40%,white)] px-3 py-1.5 text-sm font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-[var(--lf-accent)]"
-                  >
-                    {name}
-                  </span>
+                  />
                 ))}
               </div>
             </div>

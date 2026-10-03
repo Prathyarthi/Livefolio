@@ -15,6 +15,7 @@ import { CollapsibleList } from "../collapsible-list";
 import { RichText,
   DescriptionBlock,
   TechChip,
+  TechIcon,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
@@ -193,7 +194,8 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           <h3 className="mb-4 text-sm font-black uppercase tracking-[0.2em] border-b border-[#2B2B2B] pb-2 inline-block">{category}</h3>
                           <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4">
                             {items.map((skill) => (
-                              <span key={skill} className="text-lg font-bold">
+                              <span key={skill} className="inline-flex items-center gap-2 text-lg font-bold">
+                                <TechIcon name={skill} className="h-4 w-4" />
                                 {skill}
                               </span>
                             ))}

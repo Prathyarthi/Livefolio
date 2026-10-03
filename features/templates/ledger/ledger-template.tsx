@@ -525,7 +525,10 @@ export function LedgerTemplate({ data }: AppProps) {
                           className="min-w-0 bg-[#111418] border border-slate-800 p-4 rounded-none flex flex-wrap items-center justify-between gap-3 hover:border-slate-700 transition-colors group"
                         >
                           <div className="space-y-1.5">
-                            <p className="font-mono font-bold text-xs uppercase text-white group-hover:text-[var(--lf-accent)] transition-colors">{name}</p>
+                            <p className="inline-flex items-center gap-2 font-mono font-bold text-xs uppercase text-white group-hover:text-[var(--lf-accent)] transition-colors">
+                              <TechIcon name={name} className="h-3.5 w-3.5" />
+                              {name}
+                            </p>
                           </div>
                           {levelDisplay && (
                             <span className={`px-2 py-0.5 rounded-none text-[9px] font-mono uppercase tracking-widest font-bold ${levelDisplay.classes}`}>

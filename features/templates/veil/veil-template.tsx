@@ -35,6 +35,8 @@ import { RichText,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
+  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
   SocialPills,
@@ -588,7 +590,8 @@ function SkillMarquee({ skills, primaryColor }: { skills: Skill[]; primaryColor:
     <div aria-hidden={hidden || undefined} className="flex shrink-0 items-center">
       {names.map((name) => (
         <span key={name} className="flex items-center">
-          <span className="whitespace-nowrap px-6 font-serif text-3xl italic text-[var(--veil-paper)] @md:text-4xl">
+          <span className="inline-flex items-center gap-3 whitespace-nowrap px-6 font-serif text-3xl italic text-[var(--veil-paper)] @md:text-4xl">
+            <TechIcon name={name} className="h-6 w-6" />
             {name}
           </span>
           <span className="text-sm" style={{ color: primaryColor }}>✦</span>
@@ -893,12 +896,11 @@ function SkillsSection({
               </div>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <span
+                  <TechChip
                     key={`${category}-${name}`}
+                    name={name}
                     className="rounded-full border border-[var(--veil-line-strong)] px-3 py-1.5 text-[13px] text-[var(--veil-paper)]/85 transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--veil-paper)]"
-                  >
-                    {name}
-                  </span>
+                  />
                 ))}
               </div>
             </Reveal>

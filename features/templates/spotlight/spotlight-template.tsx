@@ -271,12 +271,11 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {names.map((name) => (
-                            <span
+                            <TechChip
                               key={name}
+                              name={name}
                               className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700"
-                            >
-                              {name}
-                            </span>
+                            />
                           ))}
                         </div>
                       </div>

@@ -30,6 +30,7 @@ import { RichText,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
+  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
   SocialPills,
@@ -572,7 +573,8 @@ function SkillsMatrix({ skills, primaryColor, labels }: SkillsMatrixProps) {
                     >
                       <div className="flex justify-between items-start">
                         <div className="min-w-0 space-y-1">
-                          <h4 className="line-clamp-2 break-words font-display text-base font-bold text-white group-hover:text-white">
+                          <h4 className="inline-flex items-center gap-2 line-clamp-2 break-words font-display text-base font-bold text-white group-hover:text-white">
+                            <TechIcon name={name} className="h-4 w-4" />
                             {name}
                           </h4>
                         </div>

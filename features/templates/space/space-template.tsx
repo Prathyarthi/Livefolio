@@ -237,12 +237,11 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                               </h3>
                               <div className="flex flex-wrap gap-2">
                                 {names.map((name) => (
-                                  <span
+                                  <TechChip
                                     key={name}
+                                    name={name}
                                     className="rounded-xl bg-[#030014] px-4 py-2 text-sm font-medium text-[color-mix(in_srgb,var(--lf-accent)_70%,white)] border border-[color-mix(in_srgb,var(--lf-accent)_35%,transparent)] hover:border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] hover:text-[color-mix(in_srgb,var(--lf-accent)_85%,white)] transition-colors cursor-default shadow-[0_0_10px_rgba(0,0,0,0.5)]"
-                                  >
-                                    {name}
-                                  </span>
+                                  />
                                 ))}
                               </div>
                             </div>

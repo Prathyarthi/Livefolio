@@ -15,6 +15,7 @@ import { CollapsibleList } from "../collapsible-list";
 import { RichText,
   DescriptionBlock,
   TechChip,
+  TechIcon,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
@@ -189,7 +190,8 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                           <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#3D405B]/50">{category}</h3>
                           <div className="flex flex-wrap gap-x-6 gap-y-3">
                             {items.map((skill) => (
-                              <span key={skill} className="text-lg font-light text-[#3D405B]">
+                              <span key={skill} className="inline-flex items-center gap-2 text-lg font-light text-[#3D405B]">
+                                <TechIcon name={skill} className="h-4 w-4" />
                                 {skill}
                               </span>
                             ))}

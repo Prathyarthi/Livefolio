@@ -212,9 +212,11 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {names.map((name) => (
-                          <span key={name} className="text-xs font-bold uppercase tracking-wider bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-slate-300 px-3 py-1 hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors cursor-default">
-                            {name}
-                          </span>
+                          <TechChip
+                            key={name}
+                            name={name}
+                            className="text-xs font-bold uppercase tracking-wider bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-slate-300 px-3 py-1 hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors cursor-default"
+                          />
                         ))}
                       </div>
                     </div>

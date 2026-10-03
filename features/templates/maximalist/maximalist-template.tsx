@@ -21,6 +21,7 @@ import { RichText,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
+  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
   SocialPills,
@@ -874,7 +875,8 @@ function SkillsSectionComponent({
                       key={`${category}-${name}`}
                       className={`p-5 bg-black border-4 border-white hover:border-[var(--lf-accent)] neo-shadow transition-all group relative overflow-hidden ${slantClass}`}
                     >
-                      <div className="text-2xl font-black text-white group-hover:text-[var(--lf-accent)] transition-colors font-mono tracking-tight uppercase">
+                      <div className="inline-flex items-center gap-3 text-2xl font-black text-white group-hover:text-[var(--lf-accent)] transition-colors font-mono tracking-tight uppercase">
+                        <TechIcon name={name} className="h-6 w-6" />
                         {name}
                       </div>
                     </div>
@@ -1156,8 +1158,9 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
             <div className="font-bold text-[var(--lf-accent)]">SKILL MATRIX:</div>
             <div className="grid grid-cols-1 @sm:grid-cols-2 gap-1 text-[11px] mt-1">
               {data.skills.map((s) => (
-                <div key={s.id}>
-                  • <span className="font-bold text-white">{s.name}</span>
+                <div key={s.id} className="inline-flex items-center gap-1.5">
+                  <TechIcon name={s.name} className="h-3 w-3" />
+                  <span className="font-bold text-white">{s.name}</span>
                   {s.category ? <span className="text-slate-400"> ({s.category})</span> : null}
                 </div>
               ))}

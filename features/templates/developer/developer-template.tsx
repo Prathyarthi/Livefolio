@@ -25,6 +25,7 @@ import { RichText,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
+  TechIcon,
   HeroProfileButtons,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -352,6 +353,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                             return (
                               <span key={skill}>
                                 <span className="text-gray-600">{"  "}</span>
+                                <TechIcon name={skill} className="mr-1.5 inline h-3.5 w-3.5 align-[-2px]" />
                                 <span className="text-[var(--lf-g-300)]">
                                   &quot;{skill}&quot;
                                 </span>
