@@ -213,7 +213,7 @@ function EditTabContent({
       >
         <div
           className={cn(
-            "preview-edit-form [&_button]:text-sm [&_input]:text-sm [&_textarea]:min-h-24 [&_textarea]:text-sm",
+            "preview-edit-form [&_button]:text-sm [&_input]:text-sm [&_textarea]:min-h-24 [&_textarea]:text-sm [&_.ProseMirror]:min-h-24 [&_.ProseMirror]:text-sm",
             DASHBOARD_FORM_COMPACT_CLASS,
             activeStep === "basic" && "flex min-h-0 flex-1 flex-col"
           )}

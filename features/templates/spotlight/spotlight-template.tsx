@@ -1,5 +1,6 @@
 "use client";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PortfolioData } from "../types";
@@ -14,7 +15,7 @@ import { ExternalLink, Menu, X } from "lucide-react";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import {
+import { RichText,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
@@ -204,10 +205,10 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                       >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-bold text-gray-950">{exp.role}</h3>
+                            <h3 className="text-xl font-bold text-gray-950"><RichText text={exp.role} /></h3>
                             <p className="mt-1 text-sm font-medium text-gray-600">
-                              {exp.company}
-                              {exp.location ? ` · ${exp.location}` : ""}
+                              <RichText text={exp.company} />
+                              {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
                             </p>
                           </div>
                           {(exp.startDate || exp.endDate) && (
@@ -242,12 +243,12 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                         className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[var(--lf-accent)]"
                       >
                         <h3 className="text-lg font-bold text-gray-950">
-                          {edu.degree}
+                          <RichText text={edu.degree} />
                           {edu.field ? (
-                            <span className="font-medium text-gray-600"> in {edu.field}</span>
+                            <span className="font-medium text-gray-600"> in <RichText text={edu.field} /></span>
                           ) : null}
                         </h3>
-                        <p className="mt-2 text-sm font-medium text-gray-600">{edu.institution}</p>
+                        <p className="mt-2 text-sm font-medium text-gray-600"><RichText text={edu.institution} /></p>
                         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
                           {(edu.startDate || edu.endDate) && (
                             <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -335,12 +336,12 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                     {articles.map((article) => (
                       <a
                         key={article.id}
-                        href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
+                        href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[var(--lf-accent)]"
                       >
-                        <h3 className="text-xl font-bold text-gray-950">{article.title}</h3>
+                        <h3 className="text-xl font-bold text-gray-950"><RichText text={article.title} /></h3>
                         {article.description && (
                           <p className="mt-2 text-sm text-gray-500">{article.description}</p>
                         )}
@@ -457,7 +458,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                   />
                 ) : (
                   <span className="text-sm font-semibold tracking-tight text-gray-950">
-                    {portfolio.title.slice(0, 2).toUpperCase()}
+                    {stripRichTextToPlain(portfolio.title).slice(0, 2).toUpperCase()}
                   </span>
                 )}
               </a>
@@ -516,7 +517,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             <section className="flex h-screen flex-col place-content-center place-items-center gap-y-4 px-2">
               <h1 className="-mt-7 text-center text-4xl font-extrabold leading-[130%] text-gray-950 md:font-semibold lg:mt-0 lg:text-6xl lg:font-semibold lg:leading-[128%]">
                 Hey! <br />
-                I am {portfolio.title}
+                I am <RichText text={portfolio.title} />
                 <span className="text-[var(--lf-accent)]">.</span>
               </h1>
               <p
@@ -667,14 +668,14 @@ function ProjectCard({
         imageUrl={project.imageUrl ?? null}
         projectId={project.id}
         livePreviewProjectIds={livePreviewProjectIds}
-        alt={project.title}
+        alt={stripRichTextToPlain(project.title)}
         templateId="spotlight"
         loading="lazy"
       />
 
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className={PROJECT_CARD_HEADER}>
-          <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-semibold tracking-tight text-gray-950")}>{project.title}</h3>
+          <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-semibold tracking-tight text-gray-950")}><RichText text={project.title} /></h3>
           {hasLinks ? (
             <ExternalLink size={18} className="mt-0.5 shrink-0 text-gray-700 transition-colors group-hover:text-gray-950" />
           ) : null}
@@ -701,7 +702,7 @@ function ProjectCard({
         <div className="mt-auto flex items-center gap-2 pt-1">
           {project.liveUrl ? (
             <a
-              href={project.liveUrl} data-lf-track="project_live" data-lf-label={project.title} data-lf-id={project.id}
+              href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-md bg-gray-950 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-85"
@@ -711,7 +712,7 @@ function ProjectCard({
           ) : null}
           {project.sourceUrl ? (
             <a
-              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={project.title} data-lf-id={project.id}
+              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 transition-colors hover:border-gray-300"

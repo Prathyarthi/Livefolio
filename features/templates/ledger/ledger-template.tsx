@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, type ReactNode } from "react";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import { motion, AnimatePresence } from "motion/react";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import {
@@ -15,7 +16,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -81,7 +82,7 @@ function displayYear(date: string | null): string {
 
 /** Initials from the first two words of a display name (e.g. "Akshai Kumar" → "AK"). */
 function getInitials(title: string): string {
-  const parts = title.trim().split(/\s+/).filter(Boolean);
+  const parts = stripRichTextToPlain(title).trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
@@ -248,10 +249,10 @@ export function LedgerTemplate({ data }: AppProps) {
                         className="font-mono font-bold text-xs uppercase tracking-wider whitespace-normal break-words w-full"
                         style={{ color: primaryColor }}
                       >
-                        {exp.role}
+                        <RichText text={exp.role} />
                       </span>
                       <span className="text-xs font-mono text-slate-500 whitespace-normal break-words w-full">
-                        {exp.company}
+                        <RichText text={exp.company} />
                       </span>
                     </button>
                   ))}
@@ -274,7 +275,7 @@ export function LedgerTemplate({ data }: AppProps) {
                       <div className="space-y-3 border-b border-slate-800 pb-4">
                           <div className="flex items-start justify-between gap-3">
                           <h3 className="min-w-0 flex-1 text-base @sm:text-lg font-mono font-bold uppercase break-words">
-                            <span style={{ color: primaryColor }}>{exp.role}</span>
+                            <span style={{ color: primaryColor }}><RichText text={exp.role} /></span>
                           </h3>
                           {formatDateRange(exp.startDate, exp.endDate) && (
                             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-slate-900 border border-slate-800 text-xs text-slate-400 font-mono shrink-0">
@@ -287,12 +288,12 @@ export function LedgerTemplate({ data }: AppProps) {
                         </div>
                         <div className="flex items-center gap-2 font-mono text-sm text-white uppercase tracking-wide w-full">
                           <span className="text-slate-500 font-normal shrink-0">@</span>
-                          <span className="min-w-0">{exp.company}</span>
+                          <span className="min-w-0"><RichText text={exp.company} /></span>
                         </div>
                         {exp.location && (
                           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
                             <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                            <span className="uppercase break-words">{exp.location}</span>
+                            <span className="uppercase break-words"><RichText text={exp.location} /></span>
                           </div>
                         )}
                       </div>
@@ -410,7 +411,7 @@ export function LedgerTemplate({ data }: AppProps) {
                         imageUrl={project.imageUrl}
                         projectId={project.id}
                         livePreviewProjectIds={livePreviewProjectIds}
-                        alt={project.title}
+                        alt={stripRichTextToPlain(project.title)}
                         loading="lazy"
                         accentColor={primaryColor}
                         containerClassName="bg-slate-950"
@@ -438,7 +439,7 @@ export function LedgerTemplate({ data }: AppProps) {
                       <div className={PROJECT_CARD_HEADER}>
                         <div className={PROJECT_CARD_META}>
                           <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-mono font-bold text-white uppercase group-hover:text-[var(--lf-accent)] transition-colors")}>
-                            {project.title}
+                            <RichText text={project.title} />
                           </h3>
                         </div>
                       </div>
@@ -691,7 +692,7 @@ export function LedgerTemplate({ data }: AppProps) {
                           {article.readTime ? ` · ${article.readTime} min read` : ''}
                         </span>
                         <h4 className="font-mono font-bold text-white text-sm @sm:text-base group-hover:text-[var(--lf-accent)] transition-colors leading-snug uppercase tracking-wide">
-                          {article.title}
+                          <RichText text={article.title} />
                         </h4>
                         {article.description && (
                           <DescriptionBlock
@@ -744,10 +745,10 @@ export function LedgerTemplate({ data }: AppProps) {
                         </div>
                         <div>
                           <h4 className="font-mono font-bold text-white text-sm @sm:text-base leading-snug uppercase tracking-wide">
-                            {edu.institution}
+                            <RichText text={edu.institution} />
                           </h4>
                           <p className="text-xs text-slate-400 mt-1 font-mono uppercase tracking-wider">
-                            {edu.degree}{edu.field ? ` in ${edu.field}` : ''}
+                            <RichText text={edu.degree} />{edu.field ? ` in ${stripRichTextToPlain(edu.field)}` : ''}
                           </p>
                         </div>
                       </div>
@@ -833,7 +834,7 @@ export function LedgerTemplate({ data }: AppProps) {
             </span>
             <div className="flex min-w-0 flex-col">
               <span className="max-w-[9rem] truncate font-display font-semibold text-white leading-none text-sm tracking-wide group-hover:text-[var(--lf-accent)] transition-colors @sm:max-w-64">
-                {portfolio.title}
+                <RichText text={portfolio.title} />
               </span>
             </div>
           </a>
@@ -926,7 +927,7 @@ export function LedgerTemplate({ data }: AppProps) {
                   "font-display font-extrabold text-white tracking-tighter uppercase leading-none"
                 )}
               >
-                {portfolio.title}
+                <RichText text={portfolio.title} />
               </h1>
 
               {portfolio.headline && (
@@ -937,7 +938,7 @@ export function LedgerTemplate({ data }: AppProps) {
                     "font-mono font-bold text-[var(--lf-accent)] tracking-widest uppercase mt-2"
                   )}
                 >
-                  {portfolio.headline}
+                  <RichText text={portfolio.headline} />
                 </p>
               )}
 
@@ -1021,7 +1022,7 @@ export function LedgerTemplate({ data }: AppProps) {
               {getInitials(portfolio.title)}
             </span>
             <div className="flex min-w-0 flex-col">
-              <span className="break-words text-sm font-semibold text-white uppercase tracking-wider">{portfolio.title}</span>
+              <span className="break-words text-sm font-semibold text-white uppercase tracking-wider"><RichText text={portfolio.title} /></span>
             </div>
           </div>
 

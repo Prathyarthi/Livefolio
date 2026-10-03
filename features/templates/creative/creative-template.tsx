@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -107,7 +108,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                 imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
-                alt={project.title}
+                alt={stripRichTextToPlain(project.title)}
                 loading="lazy"
                 accentColor={primaryColor}
               />
@@ -116,7 +117,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                   <div className="min-w-0 flex-1">
                     <div className={PROJECT_CARD_META}>
                       <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-semibold tracking-tight text-stone-950")}>
-                        {project.title}
+                        <RichText text={project.title} />
                       </h3>
                       {project.featured && (
                         <span className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--lf-accent)]">
@@ -134,7 +135,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                   <ProjectActions
                     liveUrl={project.liveUrl}
                     sourceUrl={project.sourceUrl}
-                    label={project.title}
+                    label={stripRichTextToPlain(project.title)}
                     projectId={project.id}
                     liveClassName="rounded-full bg-stone-950 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-stone-800"
                     sourceClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-white px-4 py-2 text-xs font-medium text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_55%,white)] hover:text-stone-900"
@@ -198,10 +199,10 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-xl font-semibold text-stone-950">{exp.role}</h3>
+                  <h3 className="text-xl font-semibold text-stone-950"><RichText text={exp.role} /></h3>
                   <p className="mt-1 text-sm font-medium text-[var(--lf-accent)]">
-                    {exp.company}
-                    {exp.location ? ` · ${exp.location}` : ""}
+                    <RichText text={exp.company} />
+                    {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
                   </p>
                 </div>
                 {(exp.startDate || exp.endDate) && (
@@ -242,12 +243,12 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
             >
               <h3 className="text-lg font-semibold text-stone-950">
                 <a
-                  href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
+                  href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-[var(--lf-accent)]"
                 >
-                  {article.title}
+                  <RichText text={article.title} />
                 </a>
               </h3>
               {article.description && (
@@ -328,10 +329,10 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
               className="rounded-[1.55rem] border border-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] bg-[#fffaf7] p-5"
             >
               <h3 className="text-lg font-semibold text-stone-950">
-                {edu.degree}
-                {edu.field && <span className="text-stone-500"> in {edu.field}</span>}
+                <RichText text={edu.degree} />
+                {edu.field && <span className="text-stone-500"> in <RichText text={edu.field} /></span>}
               </h3>
-              <p className="mt-2 text-sm text-stone-600">{edu.institution}</p>
+              <p className="mt-2 text-sm text-stone-600"><RichText text={edu.institution} /></p>
               {(edu.startDate || edu.endDate) && (
                 <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
                   {formatDateRange(edu.startDate, edu.endDate)}
@@ -404,7 +405,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
             >
               <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lf-accent)]" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm leading-relaxed text-stone-900">{ach.title}</p>
+                <p className="text-sm leading-relaxed text-stone-900"><RichText text={ach.title} /></p>
                 {ach.date && (
                   <p className="mt-1 text-xs text-stone-500">
                     {new Date(ach.date).toLocaleDateString("en-US", {
@@ -475,11 +476,11 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                     "max-w-3xl font-semibold tracking-tight text-stone-950"
                   )}
                 >
-                  {portfolio.title}
+                  <RichText text={portfolio.title} />
                 </h1>
                 {portfolio.headline && (
                   <p className={cn(HERO_HEADLINE_SCALE, "mt-5 max-w-2xl text-stone-600")}>
-                    {portfolio.headline}
+                    <RichText text={portfolio.headline} />
                   </p>
                 )}
 

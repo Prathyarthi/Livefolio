@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { GithubIcon, PlatformIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -73,14 +74,14 @@ const COLLAPSE_BTN =
   "mt-8 w-full py-3 rounded-xl border border-black/10 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-[var(--lf-accent)] hover:border-[var(--lf-accent)] transition-colors";
 
 function getInitials(title: string): string {
-  const parts = title.trim().split(/\s+/).filter(Boolean);
+  const parts = stripRichTextToPlain(title).trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 }
 
 function shellName(title: string): string {
-  const first = title.trim().split(/\s+/).filter(Boolean)[0];
+  const first = stripRichTextToPlain(title).trim().split(/\s+/).filter(Boolean)[0];
   return first ? first.toLowerCase() : "portfolio";
 }
 
@@ -287,14 +288,14 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     </p>
                   )}
                   <h3 className={cn(INK, "text-base @sm:text-lg @lg:text-xl font-bold leading-snug")}>
-                    {exp.role}
+                    <RichText text={exp.role} />
                   </h3>
                   <p className="text-gray-600 font-medium mb-3 mt-0.5 text-sm @sm:text-base">
-                    {exp.company}
+                    <RichText text={exp.company} />
                     {exp.location && (
                       <span className="text-gray-400 font-normal">
                         {" "}
-                        · {exp.location}
+                        · <RichText text={exp.location} />
                       </span>
                     )}
                   </p>
@@ -343,7 +344,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     imageUrl={proj.imageUrl}
                     projectId={proj.id}
                     livePreviewProjectIds={livePreviewProjectIds}
-                    alt={proj.title}
+                    alt={stripRichTextToPlain(proj.title)}
                     loading="lazy"
                     accentColor={primaryColor}
                     containerClassName="aspect-[16/10] bg-gray-100"
@@ -354,7 +355,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                   <div className={cn(PROJECT_CARD_HEADER, "min-w-0")}>
                     <div className={cn(PROJECT_CARD_META, "min-w-0")}>
                       <h3 className={cn(PROJECT_CARD_TITLE, INK, "text-lg @sm:text-xl @lg:text-2xl font-bold leading-tight")}>
-                        {proj.title}
+                        <RichText text={proj.title} />
                       </h3>
                     </div>
                     {proj.liveUrl ? (
@@ -391,7 +392,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     <ProjectActions
                       liveUrl={proj.liveUrl}
                       sourceUrl={proj.sourceUrl}
-                      label={proj.title}
+                      label={stripRichTextToPlain(proj.title)}
                       projectId={proj.id}
                       liveClassName="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--lf-accent)] text-white hover:opacity-90 transition-opacity"
                       sourceClassName="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-black/10 bg-white text-[#09090b] hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors"
@@ -421,11 +422,11 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                 <GraduationCap className="w-5 h-5 text-[var(--lf-accent)] shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <h3 className={cn(INK, "text-lg font-bold leading-snug")}>
-                    {edu.degree}
-                    {edu.field ? ` in ${edu.field}` : ""}
+                    <RichText text={edu.degree} />
+                    {edu.field ? ` in ${stripRichTextToPlain(edu.field)}` : ""}
                   </h3>
                   <p className="text-gray-600 font-medium text-sm mt-1">
-                    {edu.institution}
+                    <RichText text={edu.institution} />
                   </p>
                   {(edu.startDate || edu.endDate) && (
                     <p className="text-xs font-bold text-[var(--lf-accent)] mt-2">
@@ -468,7 +469,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                   "group rounded-2xl p-6 @sm:p-8 hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] hover:shadow-xl hover:shadow-[color-mix(in_srgb,var(--lf-accent)_8%,transparent)] transition-all duration-300 flex flex-col",
                 )}
                 data-lf-track="article"
-                data-lf-label={article.title}
+                data-lf-label={stripRichTextToPlain(article.title)}
               >
                 <div className="flex items-center justify-between mb-5 @sm:mb-6">
                   {article.tags[0] && (
@@ -479,7 +480,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                   <BookOpen className="w-4 h-4 @sm:w-5 @sm:h-5 text-gray-400 group-hover:text-[var(--lf-accent)] transition-colors ml-auto" />
                 </div>
                 <h3 className={cn(INK, "text-base @sm:text-lg @lg:text-xl font-bold mb-3 leading-snug group-hover:text-[var(--lf-accent)] transition-colors")}>
-                  {article.title}
+                  <RichText text={article.title} />
                 </h3>
                 {article.description && (
                   <DescriptionBlock
@@ -583,7 +584,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
               <Trophy className="w-4 h-4 text-[var(--lf-accent)] shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <p className={cn(INK, "font-medium text-sm leading-relaxed")}>
-                  {item.title}
+                  <RichText text={item.title} />
                 </p>
                 {item.date && (
                   <p className="text-xs font-bold text-[var(--lf-accent)] mt-1">
@@ -615,7 +616,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                       <Trophy className="w-5 h-5 text-[var(--lf-accent)] shrink-0 mt-0.5" />
                       <div className="text-left">
                         <p className={cn(INK, "font-medium leading-relaxed")}>
-                          {item.title}
+                          <RichText text={item.title} />
                         </p>
                         {item.date && (
                           <p className="text-xs font-bold text-[var(--lf-accent)] mt-1">
@@ -690,7 +691,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
               {getInitials(data.portfolio.title)}
             </span>
             <span className={cn(INK, "text-xl font-bold tracking-tight group-hover:text-[var(--lf-accent)] transition-colors")}>
-              {data.portfolio.title}
+              <RichText text={data.portfolio.title} />
             </span>
           </a>
 
@@ -785,7 +786,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
             <div className={cn(HERO_HEADER_COLUMN, "w-full")}>
               {data.portfolio.headline && (
                 <p className="text-xs font-bold text-[var(--lf-accent)] uppercase tracking-widest mb-4 @sm:mb-6 leading-relaxed">
-                  {data.portfolio.headline}
+                  <RichText text={data.portfolio.headline} />
                 </p>
               )}
               <h1
@@ -795,7 +796,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                   "mb-5 font-bold leading-[1.1] !text-[#09090b] @sm:mb-8",
                 )}
               >
-                {data.portfolio.title}
+                <RichText text={data.portfolio.title} />
               </h1>
               {!resolved.isHidden("about") && data.portfolio.summary && (
                 <DescriptionBlock
@@ -844,8 +845,8 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     <span className={INK}>whoami</span>
                   </div>
                   <div className={cn(MUTED, "ml-7 text-xs @lg:text-sm")}>
-                    {data.portfolio.title}
-                    {data.portfolio.headline ? ` — ${data.portfolio.headline}` : ""}
+                    <RichText text={data.portfolio.title} />
+                    {data.portfolio.headline ? ` — ${stripRichTextToPlain(data.portfolio.headline)}` : ""}
                   </div>
                   {topSkills.length > 0 && (
                     <>
@@ -944,7 +945,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       <footer className="py-8 @sm:py-12 border-t border-black/5 px-4 @sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col @sm:flex-row justify-between items-center gap-4 @sm:gap-6 text-center @sm:text-left">
           <div className={cn(MUTED, "text-xs @sm:text-sm")}>
-            © {new Date().getFullYear()} {data.portfolio.title}. Crafted with precision.
+            © {new Date().getFullYear()} <RichText text={data.portfolio.title} />. Crafted with precision.
           </div>
           {visibleSocials.length > 0 && (
             <div className={cn(MUTED, "flex flex-wrap justify-center gap-5 @sm:gap-8 text-xs @sm:text-sm font-medium")}>

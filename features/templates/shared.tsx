@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { parseDescription, normalizeDescription } from "@/lib/description";
 import ExpandableText from "@/components/expandable-text";
+import { RichText } from "@/components/rich-text";
 import { PlatformIcon } from "@/components/icons";
 import type {
   PortfolioCustomization,
@@ -17,9 +18,14 @@ import { getPlatformIcon } from "./utils";
 import { CollapsibleList } from "./collapsible-list";
 
 export { TechChip, TechIcon } from "./tech-chip";
+export { RichText } from "@/components/rich-text";
 
 export { getSectionLabel, getSectionLabels, STANDARD_SECTION_LABELS } from "./section-labels";
 export type { SectionKey } from "./section-labels";
+
+function RichInline({ text }: { text: string }) {
+  return <RichText text={text} />;
+}
 
 const HERO_PROFILE_PLATFORMS = ["github", "linkedin", "medium", "leetcode"] as const;
 
@@ -219,7 +225,7 @@ export function DescriptionBlock({
   if (onlyParagraph && nodes[0]?.type === "paragraph") {
     return (
       <ExpandableText as="p" className={paragraphClass} initialLines={3}>
-        {nodes[0].text}
+        <RichInline text={nodes[0].text} />
       </ExpandableText>
     );
   }
@@ -228,7 +234,9 @@ export function DescriptionBlock({
     return (
       <ExpandableText as="ul" className={listClass} initialLines={3}>
         {nodes[0].items.map((line, index) => (
-          <li key={`${index}-${line}`}>{line}</li>
+          <li key={`${index}-${line}`}>
+            <RichInline text={line} />
+          </li>
         ))}
       </ExpandableText>
     );
@@ -250,7 +258,7 @@ export function DescriptionBlock({
               key={`heading-${index}-${node.text}`}
               className={stripTopMargin(headingClass)}
             >
-              {node.text}
+              <RichInline text={node.text} />
             </p>
           );
         }
@@ -260,14 +268,16 @@ export function DescriptionBlock({
               key={`paragraph-${index}-${node.text}`}
               className={stripTopMargin(paragraphClass)}
             >
-              {node.text}
+              <RichInline text={node.text} />
             </p>
           );
         }
         return (
           <ul key={`list-${index}`} className={stripTopMargin(listClass)}>
             {node.items.map((line, itemIndex) => (
-              <li key={`${itemIndex}-${line}`}>{line}</li>
+              <li key={`${itemIndex}-${line}`}>
+                <RichInline text={line} />
+              </li>
             ))}
           </ul>
         );

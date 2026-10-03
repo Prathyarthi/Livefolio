@@ -1,5 +1,6 @@
 "use client";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
@@ -11,7 +12,7 @@ import {
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import {
+import { RichText,
   DescriptionBlock,
   TechChip,
   TemplateNavbar,
@@ -85,13 +86,13 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                             imageUrl={project.imageUrl ?? null}
                             projectId={project.id}
                             livePreviewProjectIds={livePreviewProjectIds}
-                            alt={project.title}
+                            alt={stripRichTextToPlain(project.title)}
                             containerClassName="overflow-hidden bg-[#F4F1DE]"
                             className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                            accentColor={primaryColor} />
                         </div>
                         <div>
-                          <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-medium text-[#3D405B] mb-3")}>{project.title}</h3>
+                          <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-medium text-[#3D405B] mb-3")}><RichText text={project.title} /></h3>
                           {project.description && (
                             <DescriptionBlock
                               text={project.description}
@@ -110,12 +111,12 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                           </div>
                           <div className="flex gap-6">
                             {project.liveUrl && (
-                              <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={project.title} data-lf-id={project.id} target="_blank" rel="noreferrer" className="text-sm uppercase tracking-widest font-semibold border-b border-[#3D405B] pb-1 hover:text-[var(--lf-accent)] hover:border-[var(--lf-accent)] transition-all">
+                              <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="text-sm uppercase tracking-widest font-semibold border-b border-[#3D405B] pb-1 hover:text-[var(--lf-accent)] hover:border-[var(--lf-accent)] transition-all">
                                 Visit Site
                               </a>
                             )}
                             {project.sourceUrl && (
-                              <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={project.title} data-lf-id={project.id} target="_blank" rel="noreferrer" className="text-sm uppercase tracking-widest font-semibold border-b border-transparent pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-all text-[#3D405B]/60">
+                              <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="text-sm uppercase tracking-widest font-semibold border-b border-transparent pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-all text-[#3D405B]/60">
                                 Source
                               </a>
                             )}
@@ -143,8 +144,8 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                             </span>
                           ) : null}
                           <div className={formatDateRange(exp.startDate, exp.endDate) ? "md:w-3/4" : undefined}>
-                            <h3 className="text-2xl font-medium text-[#3D405B]">{exp.role}</h3>
-                            <p className="text-xl font-light italic text-[#3D405B]/60 mt-1">{exp.company}</p>
+                            <h3 className="text-2xl font-medium text-[#3D405B]"><RichText text={exp.role} /></h3>
+                            <p className="text-xl font-light italic text-[#3D405B]/60 mt-1"><RichText text={exp.company} /></p>
                           </div>
                         </div>
                         {exp.description && (
@@ -166,9 +167,9 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                       {educations.map((edu) => (
                         <div key={edu.id}>
                           <h3 className="text-xl font-medium text-[#3D405B]">
-                            {edu.degree} {edu.field ? `in ${edu.field}` : ""}
+                            <RichText text={edu.degree} /> {edu.field ? `in ${stripRichTextToPlain(edu.field)}` : ""}
                           </h3>
-                          <p className="text-lg font-light italic text-[#3D405B]/60 mt-1">{edu.institution}</p>
+                          <p className="text-lg font-light italic text-[#3D405B]/60 mt-1"><RichText text={edu.institution} /></p>
                           <p className="mt-2 text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)]">{formatDateRange(edu.startDate, edu.endDate)}</p>
                         </div>
                       ))}
@@ -225,7 +226,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                           <div key={ach.id} className="flex gap-4">
                             <Trophy className="h-6 w-6 text-[var(--lf-accent)] shrink-0 mt-1" />
                             <div>
-                              <h3 className="text-xl font-medium text-[#3D405B]">{ach.title}</h3>
+                              <h3 className="text-xl font-medium text-[#3D405B]"><RichText text={ach.title} /></h3>
                               {ach.date && (
                                 <p className="text-sm uppercase tracking-widest font-semibold text-[#3D405B]/50 mt-2">
                                   {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -244,8 +245,8 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                   </h2>
                   <CollapsibleList initial={3} wrapperClassName="space-y-12" buttonClassName="mt-12 mx-auto block uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors">
                     {articles.map((article) => (
-                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block group">
-                        <h3 className="text-2xl font-medium text-[#3D405B] group-hover:text-[var(--lf-accent)] transition-colors mb-3">{article.title}</h3>
+                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block group">
+                        <h3 className="text-2xl font-medium text-[#3D405B] group-hover:text-[var(--lf-accent)] transition-colors mb-3"><RichText text={article.title} /></h3>
                         {article.description && <p className="text-lg font-light text-[#3D405B]/80 mb-4">{article.description}</p>}
                         <div className="flex items-center gap-4 text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)]">
                           {article.publishedAt && <span>{new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>}
@@ -302,7 +303,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
               animate={{ opacity: 1, y: 0 }}
               className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-medium tracking-tight text-[var(--lf-accent)]"
             >
-              {portfolio.title}
+              <RichText text={portfolio.title} />
             </motion.h1>
             {portfolio.headline && (
               <motion.p
@@ -311,7 +312,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                 transition={{ delay: 0.1 }}
                 className="mt-4 text-base @md:text-lg @lg:text-2xl text-[#3D405B]/80 font-light italic"
               >
-                {portfolio.headline}
+                <RichText text={portfolio.headline} />
               </motion.p>
             )}
 

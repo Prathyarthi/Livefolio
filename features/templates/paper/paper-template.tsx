@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
 import {
@@ -11,7 +12,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -98,7 +99,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                             imageUrl={project.imageUrl ?? null}
                             projectId={project.id}
                             livePreviewProjectIds={livePreviewProjectIds}
-                            alt={project.title}
+                            alt={stripRichTextToPlain(project.title)}
                             loading="lazy"
                             containerClassName="overflow-hidden bg-[#f4f1ea]"
                             className="h-full w-full object-cover object-top filter transition-all duration-500"
@@ -107,7 +108,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                       </div>
                       <div className="@md:col-span-7 space-y-4">
                         <div className={PROJECT_CARD_HEADER}>
-                          <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-bold leading-tight")}>{project.title}</h3>
+                          <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-bold leading-tight")}><RichText text={project.title} /></h3>
                           {project.featured && (
                             <span className="text-[10px] font-sans uppercase tracking-widest border border-[#2c2c2c] px-2 py-1 ml-4 shrink-0">
                               Featured
@@ -134,7 +135,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                           <ProjectActions
                             liveUrl={project.liveUrl}
                             sourceUrl={project.sourceUrl}
-                            label={project.title}
+                            label={stripRichTextToPlain(project.title)}
                             projectId={project.id}
                             liveClassName="text-xs font-sans uppercase tracking-widest border-b border-[#2c2c2c] pb-1 hover:text-[#888] hover:border-[#888] transition-colors mr-6"
                             sourceClassName="text-xs font-sans uppercase tracking-widest border-b border-[#2c2c2c] pb-1 hover:text-[#888] hover:border-[#888] transition-colors"
@@ -157,8 +158,8 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                     {experiences.map((exp) => (
                       <article key={exp.id} className="relative pl-6 border-l border-[#2c2c2c]/30">
                         <div className="absolute w-2 h-2 bg-[var(--lf-accent)] hover:bg-[color-mix(in_srgb,var(--lf-accent)_88%,black)] rounded-full left-[-4.5px] top-2" />
-                        <h3 className="text-xl font-bold">{exp.role}</h3>
-                        <p className="text-lg italic text-[#555] mt-1">{exp.company}</p>
+                        <h3 className="text-xl font-bold"><RichText text={exp.role} /></h3>
+                        <p className="text-lg italic text-[#555] mt-1"><RichText text={exp.company} /></p>
                         {(exp.startDate || exp.endDate) && (
                           <p className="text-xs font-sans uppercase tracking-widest text-[#888] mt-2">
                             {formatDateRange(exp.startDate, exp.endDate)}
@@ -188,8 +189,8 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                     >
                       {educations.map((edu) => (
                         <article key={edu.id}>
-                          <h3 className="text-lg font-bold">{edu.degree}</h3>
-                          <p className="text-[#555] italic mt-1">{edu.institution}</p>
+                          <h3 className="text-lg font-bold"><RichText text={edu.degree} /></h3>
+                          <p className="text-[#555] italic mt-1"><RichText text={edu.institution} /></p>
                           <div className="flex justify-between items-center mt-2 text-xs font-sans uppercase tracking-widest text-[#888]">
                             {(edu.startDate || edu.endDate) && (
                               <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -256,7 +257,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                     >
                       {achievements.map((ach) => (
                         <article key={ach.id} className="border-b border-[#2c2c2c]/30 pb-4">
-                          <h3 className="text-lg font-bold">{ach.title}</h3>
+                          <h3 className="text-lg font-bold"><RichText text={ach.title} /></h3>
                           {ach.date && (
                             <div className="mt-2 text-xs font-sans uppercase tracking-widest text-[#888]">
                               {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -278,8 +279,8 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                   {articles.map((article) => (
                     <article key={article.id} className="border-t border-[#2c2c2c] pt-4">
                       <h3 className="text-xl font-bold mb-2 hover:underline underline-offset-4">
-                        <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
-                          {article.title}
+                        <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
+                          <RichText text={article.title} />
                         </a>
                       </h3>
                       {article.description && (
@@ -345,11 +346,11 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
 
         <header className="text-center space-y-6">
           <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-bold uppercase tracking-widest leading-tight">
-            {portfolio.title}
+            <RichText text={portfolio.title} />
           </h1>
           {portfolio.headline && (
             <p className="text-xl italic text-[#555] max-w-2xl mx-auto">
-              {portfolio.headline}
+              <RichText text={portfolio.headline} />
             </p>
           )}
 

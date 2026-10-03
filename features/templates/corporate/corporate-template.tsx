@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -6,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -117,7 +118,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                 imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
-                alt={project.title}
+                alt={stripRichTextToPlain(project.title)}
                 loading="lazy"
                accentColor={primaryColor} />
               <div className={PROJECT_CARD_BODY}>
@@ -125,7 +126,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                   <div className="min-w-0 flex-1">
                     <div className={PROJECT_CARD_META}>
                       <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-semibold text-slate-900")}>
-                        {project.title}
+                        <RichText text={project.title} />
                       </h3>
                       {project.featured && (
                         <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-white">
@@ -180,7 +181,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                   <ProjectActions
                     liveUrl={project.liveUrl}
                     sourceUrl={project.sourceUrl}
-                    label={project.title}
+                    label={stripRichTextToPlain(project.title)}
                     projectId={project.id}
                     liveClassName="rounded-full bg-[var(--lf-accent)] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[color-mix(in_srgb,var(--lf-accent)_85%,black)]"
                     sourceClassName="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
@@ -213,13 +214,13 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="text-xl font-semibold text-slate-900">
-                    {exp.role}
+                    <RichText text={exp.role} />
                   </h3>
                   <p className="mt-1 text-sm font-medium text-[color-mix(in_srgb,var(--lf-accent)_85%,black)]">
-                    {exp.company}
+                    <RichText text={exp.company} />
                   </p>
                   {exp.location && (
-                    <p className="mt-1 text-sm text-slate-500">{exp.location}</p>
+                    <p className="mt-1 text-sm text-slate-500"><RichText text={exp.location} /></p>
                   )}
                 </div>
                 {(exp.startDate || exp.endDate) && (
@@ -260,12 +261,12 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
             >
               <h3 className="text-base font-semibold text-slate-900">
                 <a
-                  href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
+                  href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-[var(--lf-accent)]"
                 >
-                  {article.title}
+                  <RichText text={article.title} />
                 </a>
               </h3>
               {article.description && (
@@ -346,10 +347,10 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
               className="rounded-[1.5rem] border border-slate-200 bg-slate-50/60 p-5"
             >
               <h3 className="text-lg font-semibold text-slate-900">
-                {edu.degree}
-                {edu.field && <span className="text-slate-500"> in {edu.field}</span>}
+                <RichText text={edu.degree} />
+                {edu.field && <span className="text-slate-500"> in <RichText text={edu.field} /></span>}
               </h3>
-              <p className="mt-2 text-sm text-slate-600">{edu.institution}</p>
+              <p className="mt-2 text-sm text-slate-600"><RichText text={edu.institution} /></p>
               {(edu.startDate || edu.endDate) && (
                 <p className="mt-2 text-xs uppercase tracking-[0.22em] text-slate-400">
                   {formatDateRange(edu.startDate, edu.endDate)}
@@ -425,7 +426,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
             >
               <Trophy className="h-4 w-4 text-[var(--lf-accent)] mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-900 leading-relaxed">{ach.title}</p>
+                <p className="text-sm text-slate-900 leading-relaxed"><RichText text={ach.title} /></p>
                 {ach.date && (
                   <p className="mt-1 text-xs text-slate-500">
                     {new Date(ach.date).toLocaleDateString("en-US", {
@@ -489,11 +490,11 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                   "max-w-3xl font-semibold tracking-tight text-white"
                 )}
               >
-                {portfolio.title}
+                <RichText text={portfolio.title} />
               </h1>
               {portfolio.headline && (
                 <p className={cn(HERO_HEADLINE_SCALE, "mt-5 max-w-2xl text-slate-300")}>
-                  {portfolio.headline}
+                  <RichText text={portfolio.headline} />
                 </p>
               )}
 

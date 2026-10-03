@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { cn } from "@/lib/utils";
 import {
@@ -14,7 +15,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -69,7 +70,7 @@ import {
 type Article = PortfolioData["articles"][number];
 
 function getInitials(title: string): string {
-  const parts = title.trim().split(/\s+/).filter(Boolean);
+  const parts = stripRichTextToPlain(title).trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
@@ -135,13 +136,15 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
   const latestExperience = experiences[0];
   const marqueeItems = [
     data.portfolio.headline
-      ? `⚡ ${data.portfolio.title} — ${data.portfolio.headline}`
+      ? `⚡ ${stripRichTextToPlain(data.portfolio.title)} — ${stripRichTextToPlain(data.portfolio.headline)}`
       : data.portfolio.title
-        ? `⚡ ${data.portfolio.title}`
+        ? `⚡ ${stripRichTextToPlain(data.portfolio.title)}`
         : null,
-    data.portfolio.location ? `📍 ${data.portfolio.location}` : null,
+    data.portfolio.location
+      ? `📍 ${stripRichTextToPlain(data.portfolio.location)}`
+      : null,
     latestExperience
-      ? `💼 ${latestExperience.role} @ ${latestExperience.company}`
+      ? `💼 ${stripRichTextToPlain(latestExperience.role)} @ ${stripRichTextToPlain(latestExperience.company)}`
       : null,
     topSkills.length > 0 ? `🔥 ${topSkills.join(" / ")}` : null,
     data.portfolio.contactEmail ? `🚀 ${data.portfolio.contactEmail}` : null,
@@ -214,7 +217,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                         <div>
                           <div className="flex flex-wrap items-center gap-2 mb-1">
                             <span className="text-3xl font-black uppercase tracking-tight">
-                              {exp.company}
+                              <RichText text={exp.company} />
                             </span>
                             {isCurrent && (
                               <span className="bg-[var(--lf-accent)] text-black px-2 py-0.5 text-[10px] font-mono font-black uppercase border border-current">
@@ -223,12 +226,12 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                             )}
                             {exp.location && (
                               <span className="bg-black text-white text-[10px] font-mono font-bold px-2 py-0.5 uppercase border border-white">
-                                {exp.location}
+                                <RichText text={exp.location} />
                               </span>
                             )}
                           </div>
                           <div className="text-xl font-black uppercase tracking-tight opacity-90 font-mono">
-                            {exp.role}
+                            <RichText text={exp.role} />
                           </div>
                         </div>
 
@@ -307,7 +310,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                         imageUrl={proj.imageUrl}
                         projectId={proj.id}
                         livePreviewProjectIds={livePreviewProjectIds}
-                        alt={proj.title}
+                        alt={stripRichTextToPlain(proj.title)}
                         loading="lazy"
                         accentColor={primaryColor}
                         containerClassName="bg-black"
@@ -347,7 +350,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                       <div className={PROJECT_CARD_HEADER}>
                         <div className={PROJECT_CARD_META}>
                           <h3 className={cn(PROJECT_CARD_TITLE, "text-3xl font-black italic uppercase tracking-tighter text-white group-hover:text-[var(--lf-accent)] transition-colors")}>
-                            {proj.title}
+                            <RichText text={proj.title} />
                           </h3>
                         </div>
                       </div>
@@ -412,10 +415,10 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                   className="bg-black border-4 border-white neo-shadow p-6 space-y-3"
                 >
                   <h3 className="text-2xl font-black text-white uppercase tracking-tight">
-                    {edu.degree}
-                    {edu.field ? ` in ${edu.field}` : ""}
+                    <RichText text={edu.degree} />
+                    {edu.field ? ` in ${stripRichTextToPlain(edu.field)}` : ""}
                   </h3>
-                  <p className="font-mono text-sm font-bold text-slate-300">{edu.institution}</p>
+                  <p className="font-mono text-sm font-bold text-slate-300"><RichText text={edu.institution} /></p>
                   {(edu.startDate || edu.endDate) && (
                     <p className="inline-block bg-[var(--lf-accent)] text-black px-2 py-1 font-mono text-xs font-black uppercase">
                       {formatDateRange(edu.startDate, edu.endDate)}
@@ -465,7 +468,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
               >
                 <Trophy className="w-4 h-4 shrink-0 text-[var(--lf-accent)]" />
                 <h3 className="min-w-0 text-base sm:text-lg font-black text-white uppercase tracking-tight">
-                  {ach.title}
+                  <RichText text={ach.title} />
                 </h3>
               </div>
             ))}
@@ -565,7 +568,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
             </div>
             <div className="flex flex-col">
               <span className="font-black font-mono text-sm sm:text-base tracking-tighter text-white uppercase group-hover:text-[var(--lf-accent)] transition-colors">
-                {data.portfolio.title}
+                <RichText text={data.portfolio.title} />
               </span>
             </div>
           </a>
@@ -665,7 +668,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                     "font-black leading-[0.88] sm:leading-[0.82] tracking-tighter uppercase text-white"
                   )}
                 >
-                  {data.portfolio.title}
+                  <RichText text={data.portfolio.title} />
                 </h1>
                 {data.portfolio.headline && (
                   <p
@@ -674,7 +677,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                       "font-black tracking-[0.1em] sm:tracking-[0.15em] uppercase text-[var(--lf-accent)]"
                     )}
                   >
-                    {data.portfolio.headline}
+                    <RichText text={data.portfolio.headline} />
                   </p>
                 )}
               </div>
@@ -761,7 +764,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                 {getInitials(data.portfolio.title)}
               </div>
               <span className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight uppercase whitespace-nowrap">
-                {data.portfolio.title}
+                <RichText text={data.portfolio.title} />
               </span>
             </div>
 
@@ -1050,7 +1053,7 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
       cmd: 'welcome',
       output: (
         <div className="space-y-1 text-slate-300">
-          <div className="text-[var(--lf-accent)] font-black">{data.portfolio.title} INTERACTIVE TERMINAL [v2.4.0]</div>
+          <div className="text-[var(--lf-accent)] font-black"><RichText text={data.portfolio.title} /> INTERACTIVE TERMINAL [v2.4.0]</div>
           <div>Type <span className="text-yellow-400 font-bold">help</span> to list available commands or <span className="text-[var(--lf-accent)] font-bold">contact</span> to reach out directly.</div>
         </div>
       ),
@@ -1088,7 +1091,7 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
       case 'bio':
         output = (
           <div className="text-slate-200">
-            <div className="text-[var(--lf-accent)] font-bold">{data.portfolio.title}</div>
+            <div className="text-[var(--lf-accent)] font-bold"><RichText text={data.portfolio.title} /></div>
             <div>{data.portfolio.summary}</div>
           </div>
         );
@@ -1099,7 +1102,7 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
           <div className="space-y-2 text-slate-200">
             {sortExperiencesNewestFirst(data.experiences).map((exp) => (
               <div key={exp.id} className="border-l-2 border-[var(--lf-accent)] pl-2">
-                <div className="font-bold text-[var(--lf-accent)]">{exp.company} — {exp.role}</div>
+                <div className="font-bold text-[var(--lf-accent)]"><RichText text={exp.company} /> — <RichText text={exp.role} /></div>
                 {formatDateRange(exp.startDate, exp.endDate) && (
                   <div className="text-slate-400 text-[11px]">{formatDateRange(exp.startDate, exp.endDate)}</div>
                 )}
@@ -1192,7 +1195,7 @@ function TerminalContactModal({ data, onClose }: { data: PortfolioData; onClose:
         <div className="flex items-center justify-between pb-3 border-b-2 border-white">
           <div className="flex items-center gap-2 text-[var(--lf-accent)] font-black text-sm">
             <TerminalIcon className="w-4 h-4 animate-pulse" />
-            <span>{data.portfolio.title} CLI TERMINAL</span>
+            <span><RichText text={data.portfolio.title} /> CLI TERMINAL</span>
           </div>
           <button
             onClick={onClose}
@@ -1358,7 +1361,7 @@ function ArticleModal({
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-black text-white uppercase italic">
-          {article.title}
+          <RichText text={article.title} />
         </h2>
 
         {article.publishedAt && (
@@ -1399,7 +1402,7 @@ function ArticleModal({
             rel="noreferrer"
             className="px-5 py-2.5 bg-[var(--lf-accent)] text-black font-black border-2 border-black neo-shadow uppercase"
             data-lf-track="article"
-            data-lf-label={article.title}
+            data-lf-label={stripRichTextToPlain(article.title)}
             data-lf-id={article.id}
           >
             READ FULL ARTICLE →
