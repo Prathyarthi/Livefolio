@@ -10,7 +10,7 @@ import type {
   TemplateSectionId,
 } from "./types";
 import {
-  getSectionLabel,
+  STANDARD_SECTION_LABELS,
   NAVBAR_SECTION_TO_KEY,
 } from "./section-labels";
 import { getStoredSectionLayout, normalizeHidden, type ReorderableSectionKey } from "./section-order";
@@ -175,7 +175,7 @@ export function buildTemplateSections(data: PortfolioData) {
     .slice(0, 4)
     .map((section) => ({
       id: section,
-      label: getSectionLabel(NAVBAR_SECTION_TO_KEY[section], customization),
+      label: STANDARD_SECTION_LABELS[NAVBAR_SECTION_TO_KEY[section]],
     }));
 
   return {
