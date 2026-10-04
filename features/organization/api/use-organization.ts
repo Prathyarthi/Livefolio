@@ -229,6 +229,24 @@ export function useCreateOrganization() {
   });
 }
 
+export type OrgSlugCheckResult = {
+  available: boolean;
+  slug?: string;
+  reason?: "invalid" | "taken";
+};
+
+export async function checkOrganizationSlug(
+  slug: string,
+): Promise<OrgSlugCheckResult> {
+  const res = await fetch("/api/organizations/slug/check", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug }),
+  });
+  if (!res.ok) await throwApiError(res, "Failed to check organization slug");
+  return res.json() as Promise<OrgSlugCheckResult>;
+}
+
 export function useUpdateOrganization(slug: string) {
   const qc = useQueryClient();
   return useMutation({
