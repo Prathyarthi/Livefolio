@@ -283,6 +283,41 @@ export const organization = new Elysia({ prefix: "/organizations" })
     },
   )
 
+  // Check organization slug availability
+  .post(
+    "/slug/check",
+    async (ctx) => {
+      const session = await getSession(ctx.request);
+      if (!session) {
+        ctx.set.status = 401;
+        return { error: "Unauthorized" };
+      }
+
+      const requestedSlug = sanitizeHiringSlug(ctx.body.slug);
+      if (!isValidOrgSlug(requestedSlug)) {
+        return {
+          available: false,
+          reason: "invalid" as const,
+          slug: requestedSlug,
+        };
+      }
+
+      const existing = await prisma.organization.findUnique({
+        where: { slug: requestedSlug },
+        select: { id: true },
+      });
+
+      return {
+        available: !existing,
+        slug: requestedSlug,
+        ...(existing ? { reason: "taken" as const } : {}),
+      };
+    },
+    {
+      body: t.Object({ slug: t.String({ maxLength: 60 }) }),
+    },
+  )
+
   // Get organization by slug (member only)
   .get("/:slug", async (ctx) => {
     const session = await getSession(ctx.request);

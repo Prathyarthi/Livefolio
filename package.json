@@ -54,6 +54,7 @@
     "razorpay": "^2.9.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-easy-crop": "^6.2.3",
     "react-hook-form": "^7.72.0",
     "recharts": "3.8.0",
     "resend": "^6.19.0",
