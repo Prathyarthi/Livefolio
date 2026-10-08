@@ -549,7 +549,7 @@ export function ResumeUploader({
         </CardHeader>
         <CardContent className="space-y-4">
           {portfolio?.resumeUrl ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-text-muted">
               Original PDF saved
             </p>
           ) : null}
@@ -560,17 +560,17 @@ export function ResumeUploader({
             {parseResume.isPending ? (
               <RotatingLoader
                 messages={RESUME_PARSE_MESSAGES}
-                spinnerClassName="text-muted-foreground"
-                messageClassName="text-muted-foreground"
+                spinnerClassName="text-text-muted"
+                messageClassName="text-text-muted"
               />
             ) : (
               <>
-                <FileText className="h-10 w-10 text-muted-foreground" />
+                <FileText className="h-10 w-10 text-text-muted" />
                 <div className="text-center">
                   <p className="text-sm font-medium">
                     Click to upload your resume
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-text-muted mt-1">
                     PDF files only, up to 10MB
                   </p>
                 </div>
@@ -605,7 +605,7 @@ export function ResumeUploader({
               <Label htmlFor="clear-before-import" className="text-foreground">
                 Replace resume sections before import
               </Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-text-muted">
                 When on, we delete your current experiences, education, skills,
                 projects, and certifications immediately before this import runs.
                 Your slug, template, social links, and profile fields stay as they
@@ -622,7 +622,7 @@ export function ResumeUploader({
           <Button
             type="button"
             variant="outline"
-            className="h-auto min-h-11 w-full min-w-0 whitespace-normal border-destructive/40 px-3 py-3 text-center text-destructive hover:bg-destructive/10 hover:text-destructive sm:w-auto sm:px-5"
+            className="h-auto min-h-11 w-full min-w-0 whitespace-normal border-danger/40 px-3 py-3 text-center text-danger hover:bg-danger/10 hover:text-danger sm:w-auto sm:px-5"
             onClick={() => setClearDialogOpen(true)}
             disabled={clearImportable.isPending}
           >
@@ -709,7 +709,7 @@ export function ResumeUploader({
         <div className="space-y-4">
           <div>
             <h3 className="text-lg font-semibold">Parsed Data</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-text-muted">
               Import didn&apos;t finish. Review the data below, then retry.
             </p>
           </div>
@@ -722,7 +722,7 @@ export function ResumeUploader({
             </CardHeader>
             {parsedData.summary && (
               <CardContent>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-text-muted">
                   {parsedData.summary}
                 </p>
               </CardContent>
@@ -742,12 +742,12 @@ export function ResumeUploader({
                 {parsedData.experiences.map((exp, i) => (
                   <div key={i} className="border-b last:border-0 pb-3 last:pb-0">
                     <p className="font-medium text-sm">{exp.role}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-text-muted">
                       {exp.company}
                       {exp.location ? ` - ${exp.location}` : ""}
                     </p>
                     {(exp.startDate || exp.endDate) && (
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-text-muted mt-1">
                         {exp.startDate || ""}{exp.startDate && exp.endDate ? " - " : ""}{exp.endDate || (exp.startDate ? "Present" : "")}
                       </p>
                     )}
@@ -773,11 +773,11 @@ export function ResumeUploader({
                       {edu.degree}
                       {edu.field ? ` in ${edu.field}` : ""}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-text-muted">
                       {edu.institution}
                     </p>
                     {edu.gpa && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-text-muted">
                         GPA: {edu.gpa}
                       </p>
                     )}
@@ -821,7 +821,7 @@ export function ResumeUploader({
                 {parsedData.projects.map((project, i) => (
                   <div key={i} className="border-b last:border-0 pb-3 last:pb-0">
                     <p className="font-medium text-sm">{project.title}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-text-muted">
                       {project.description}
                     </p>
                     {project.techStack.length > 0 && (
@@ -852,10 +852,10 @@ export function ResumeUploader({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
+                <ul className="space-y-2 text-sm text-text-muted">
                   {parsedData.achievements.map((achievement, i) => (
                     <li key={i} className="flex gap-2">
-                      <span className="text-muted-foreground/50">•</span>
+                      <span className="text-text-muted/50">•</span>
                       <span>{achievement}</span>
                     </li>
                   ))}
@@ -895,7 +895,7 @@ export function ResumeUploader({
                           <p className="font-medium text-sm">{String(title)}</p>
                         )}
                         {desc != null && (
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-text-muted">
                             {String(desc)}
                           </p>
                         )}
@@ -906,7 +906,7 @@ export function ResumeUploader({
                                 key={k}
                                 className="text-xs bg-muted px-2 py-0.5 rounded"
                               >
-                                <span className="text-muted-foreground">{k}:</span>{" "}
+                                <span className="text-text-muted">{k}:</span>{" "}
                                 {String(v)}
                               </span>
                             ))}
@@ -932,7 +932,7 @@ export function ResumeUploader({
                 {parsedData.certifications.map((cert, i) => (
                   <div key={i} className="border-b last:border-0 pb-3 last:pb-0">
                     <p className="font-medium text-sm">{cert.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-text-muted">
                       {cert.issuer}
                     </p>
                   </div>

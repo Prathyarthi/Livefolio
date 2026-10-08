@@ -30,13 +30,13 @@ export default function ManageJobPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading job…</div>
+      <div className="text-body-sm text-text-muted">Loading job…</div>
     );
   }
 
   if (error || !job) {
     return (
-      <div className="p-8">
+      <div>
         <h1 className="text-h3">Job not found</h1>
         <Button asChild className="mt-4">
           <Link href={`/company/${orgSlug}/jobs`}>Back to jobs</Link>
@@ -72,7 +72,7 @@ export default function ManageJobPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={job.status === "published" ? "success" : "neutral"}>

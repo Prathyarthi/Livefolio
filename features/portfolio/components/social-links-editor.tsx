@@ -179,7 +179,7 @@ export function SocialLinksEditor() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -197,7 +197,7 @@ export function SocialLinksEditor() {
             <Globe className="h-5 w-5" />
             Social Links
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-muted">
             Connect your social profiles so visitors can find you elsewhere.
           </p>
         </div>
@@ -258,7 +258,7 @@ export function SocialLinksEditor() {
                 {fieldErrors.platform && (
                   <p
                     id="social-platform-error"
-                    className="text-sm text-destructive"
+                    className="text-sm text-danger"
                   >
                     {fieldErrors.platform}
                   </p>
@@ -294,7 +294,7 @@ export function SocialLinksEditor() {
                 {fieldErrors.username && (
                   <p
                     id="social-username-error"
-                    className="text-sm text-destructive"
+                    className="text-sm text-danger"
                   >
                     {fieldErrors.username}
                   </p>
@@ -327,7 +327,7 @@ export function SocialLinksEditor() {
                 type="url"
               />
               {fieldErrors.url && (
-                <p id="social-url-error" className="text-sm text-destructive">
+                <p id="social-url-error" className="text-sm text-danger">
                   {fieldErrors.url}
                 </p>
               )}
@@ -358,8 +358,8 @@ export function SocialLinksEditor() {
       {socials.length === 0 && !isAdding ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Globe className="h-10 w-10 text-muted-foreground/40 mb-3" />
-            <p className="text-muted-foreground">
+            <Globe className="h-10 w-10 text-text-muted/40 mb-3" />
+            <p className="text-text-muted">
               No social profiles added yet. Click &quot;Add Profile&quot; to connect your accounts.
             </p>
           </CardContent>
@@ -383,7 +383,7 @@ export function SocialLinksEditor() {
                         href={social.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-muted-foreground hover:text-primary truncate block"
+                        className="text-xs text-text-muted hover:text-primary truncate block"
                       >
                         {social.url}
                       </a>

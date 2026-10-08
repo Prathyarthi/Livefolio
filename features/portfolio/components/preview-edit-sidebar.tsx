@@ -97,11 +97,11 @@ function DesignTabContent({
                         Live
                       </span>
                     ) : isSaved ? (
-                      <span className="shrink-0 text-[10px] text-zinc-500">
+                      <span className="shrink-0 text-[10px] text-text-muted">
                         Active
                       </span>
                     ) : isTemplateLocked?.(t.id) ? (
-                      <span className="shrink-0 text-[10px] text-zinc-500">
+                      <span className="shrink-0 text-[10px] text-text-muted">
                         PRO
                       </span>
                     ) : null}
@@ -111,7 +111,7 @@ function DesignTabContent({
             })}
           </div>
         ) : (
-          <p className="py-8 text-center text-sm text-zinc-500">
+          <p className="py-8 text-center text-sm text-text-muted">
             Templates not available
           </p>
         )}

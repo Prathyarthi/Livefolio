@@ -180,7 +180,7 @@ export function LivePreviewSelectionDialog({
               ) : null}
             </div>
             {!isPro ? (
-              <p className="mt-2 text-muted-foreground">
+              <p className="mt-2 text-text-muted">
                 Live preview is a Pro feature.{" "}
                 <Link href="/dashboard/billing" className="underline">
                   Upgrade
@@ -188,14 +188,14 @@ export function LivePreviewSelectionDialog({
                 to show live screenshots of your project URLs.
               </p>
             ) : (
-              <p className="mt-2 text-muted-foreground">
+              <p className="mt-2 text-text-muted">
                 Live preview: {selectedCount} / {maxAllowed} selected
               </p>
             )}
           </div>
 
           {candidates.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-text-muted">
               No projects were imported.
             </p>
           ) : (
@@ -217,13 +217,13 @@ export function LivePreviewSelectionDialog({
                           href={liveUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex max-w-full items-center gap-1 text-xs text-primary hover:underline"
+                          className="inline-flex max-w-full items-center gap-1 text-xs text-brand-secondary hover:underline"
                         >
                           <ExternalLink className="h-3 w-3 shrink-0" />
                           <span className="truncate">{liveUrl}</span>
                         </a>
                       ) : (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-text-muted">
                           No live URL on this project
                         </p>
                       )}
@@ -270,13 +270,13 @@ export function LivePreviewSelectionDialog({
           )}
 
           {isPro && exceedsPlan ? (
-            <p className="text-sm text-destructive">
+            <p className="text-sm text-danger">
               Only the first {maxAllowed} live previews will be saved.
             </p>
           ) : null}
 
           {isPro && liveUrlCandidates.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-text-muted">
               Add live URLs to projects later to enable live preview.
             </p>
           ) : null}

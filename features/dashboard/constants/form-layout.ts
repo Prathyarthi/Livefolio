@@ -12,7 +12,7 @@ export const EDIT_FORM_GRID_CLASS = "edit-form-grid grid gap-4 sm:grid-cols-2";
 
 export const EDIT_FORM_SECTION_TITLE_CLASS = "text-base font-semibold leading-none";
 
-export const EDIT_FORM_SECTION_DESC_CLASS = "text-sm text-muted-foreground";
+export const EDIT_FORM_SECTION_DESC_CLASS = "text-body-sm text-text-muted";
 
 /** Section heading block (title + optional description). */
 export const EDIT_FORM_SECTION_HEADER_CLASS = "flex flex-col gap-1";

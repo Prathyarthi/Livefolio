@@ -21,12 +21,12 @@ export default function RecruitersLandingPage() {
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-[var(--radius-md)] focus:bg-brand-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-[var(--radius-md)] focus:bg-text-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-surface-base"
       >
         Skip to main content
       </a>
 
-      <div className="relative min-h-screen overflow-x-hidden bg-surface-base">
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-x-hidden bg-surface-base">
         <div className="glass-ambient" aria-hidden />
         <div className="relative z-[1]">
           <LandingNav variant="recruiter" />

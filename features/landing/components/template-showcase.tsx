@@ -10,25 +10,25 @@ const SHOWCASE_TEMPLATES = [
     id: "modern",
     name: "Modern",
     alt: "Modern portfolio layout",
-    gradient: "from-violet-500/50 to-cyan-400/40",
+    gradient: "from-brand-primary/25 to-brand-secondary/35",
   },
   {
     id: "retro",
     name: "Retro",
     alt: "Retro portfolio layout",
-    gradient: "from-[#ff90e8]/80 to-[#ffc900]/80",
+    gradient: "from-brand-secondary/55 to-warning/50",
   },
   {
     id: "blueprint",
     name: "Blueprint",
     alt: "Blueprint portfolio layout",
-    gradient: "from-[#003366] to-[#002244]",
+    gradient: "from-brand-dark to-brand-primary",
   },
   {
     id: "minimal",
     name: "Minimal",
     alt: "Minimal portfolio layout",
-    gradient: "from-stone-100 to-stone-200",
+    gradient: "from-surface-sunken to-border-default",
   },
 ] as const;
 

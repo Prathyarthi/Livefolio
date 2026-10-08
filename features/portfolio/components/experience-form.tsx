@@ -87,7 +87,7 @@ function validateExperienceForm(form: ExperienceEntry) {
 
 function FieldError({ error }: { error?: string }) {
   return error ? (
-    <p className="text-sm text-destructive" role="alert">
+    <p className="text-sm text-danger" role="alert">
       {error}
     </p>
   ) : null;
@@ -245,7 +245,7 @@ export function ExperienceForm() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -265,7 +265,7 @@ export function ExperienceForm() {
             <Briefcase className="h-5 w-5" />
             Work Experience
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-muted">
             Add your professional experience, most recent first.
           </p>
         </div>
@@ -296,7 +296,7 @@ export function ExperienceForm() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <FieldLabel htmlFor="company" unsaved={isFieldUnsaved("company")}>
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                  <Building2 className="h-4 w-4 text-text-muted" />
                   Company
                 </FieldLabel>
                 <Input
@@ -312,7 +312,7 @@ export function ExperienceForm() {
               </div>
               <div className="space-y-2">
                 <FieldLabel htmlFor="role" unsaved={isFieldUnsaved("role")}>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                  <Briefcase className="h-4 w-4 text-text-muted" />
                   Role
                 </FieldLabel>
                 <Input
@@ -331,7 +331,7 @@ export function ExperienceForm() {
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <FieldLabel htmlFor="startDate" unsaved={isFieldUnsaved("startDate")}>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-text-muted" />
                   Start Date
                 </FieldLabel>
                 <Input
@@ -345,7 +345,7 @@ export function ExperienceForm() {
               </div>
               <div className="space-y-2">
                 <FieldLabel htmlFor="endDate" unsaved={isFieldUnsaved("endDate")}>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-text-muted" />
                   End Date
                 </FieldLabel>
                 <Input
@@ -362,7 +362,7 @@ export function ExperienceForm() {
                   htmlFor="exp-location"
                   unsaved={isFieldUnsaved("location")}
                 >
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <MapPin className="h-4 w-4 text-text-muted" />
                   Location
                 </FieldLabel>
                 <Input
@@ -420,8 +420,8 @@ export function ExperienceForm() {
       {experiences.length === 0 && !isAdding ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Briefcase className="h-10 w-10 text-muted-foreground/40 mb-3" />
-            <p className="text-muted-foreground">
+            <Briefcase className="h-10 w-10 text-text-muted/40 mb-3" />
+            <p className="text-text-muted">
               No experience added yet. Click &quot;Add Experience&quot; to get started.
             </p>
           </CardContent>
@@ -440,14 +440,14 @@ export function ExperienceForm() {
                 <CardContent className="space-y-4 pt-6">
                   <div>
                     <h4 className="text-base font-semibold">Edit Experience</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-text-muted">
                       Update this experience entry.
                     </p>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <FieldLabel htmlFor={`company-${exp.id}`} unsaved={isFieldUnsaved("company")}>
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <Building2 className="h-4 w-4 text-text-muted" />
                         Company
                       </FieldLabel>
                       <Input
@@ -463,7 +463,7 @@ export function ExperienceForm() {
                     </div>
                     <div className="space-y-2">
                       <FieldLabel htmlFor={`role-${exp.id}`} unsaved={isFieldUnsaved("role")}>
-                        <Briefcase className="h-4 w-4 text-muted-foreground" />
+                        <Briefcase className="h-4 w-4 text-text-muted" />
                         Role
                       </FieldLabel>
                       <Input
@@ -482,7 +482,7 @@ export function ExperienceForm() {
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
                       <FieldLabel htmlFor={`startDate-${exp.id}`} unsaved={isFieldUnsaved("startDate")}>
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <Calendar className="h-4 w-4 text-text-muted" />
                         Start Date
                       </FieldLabel>
                       <Input
@@ -495,7 +495,7 @@ export function ExperienceForm() {
                     </div>
                     <div className="space-y-2">
                       <FieldLabel htmlFor={`endDate-${exp.id}`} unsaved={isFieldUnsaved("endDate")}>
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <Calendar className="h-4 w-4 text-text-muted" />
                         End Date
                       </FieldLabel>
                       <Input
@@ -508,7 +508,7 @@ export function ExperienceForm() {
                     </div>
                     <div className="space-y-2">
                       <FieldLabel htmlFor={`exp-location-${exp.id}`} unsaved={isFieldUnsaved("location")}>
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <MapPin className="h-4 w-4 text-text-muted" />
                         Location
                       </FieldLabel>
                       <Input
@@ -564,7 +564,7 @@ export function ExperienceForm() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-base">{exp.role}</h4>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                    <p className="text-sm text-text-muted flex items-center gap-1.5 mt-0.5">
                       <Building2 className="h-3.5 w-3.5" />
                       {exp.company}
                       {exp.location && (
@@ -576,7 +576,7 @@ export function ExperienceForm() {
                       )}
                     </p>
                     {(exp.startDate || exp.endDate) && (
-                      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                      <p className="text-xs text-text-muted mt-1 flex items-center gap-1.5">
                         <Calendar className="h-3 w-3" />
                         {exp.startDate ? exp.startDate.substring(0, 10) : ""}
                         {exp.startDate && exp.endDate && " -- "}
@@ -586,7 +586,7 @@ export function ExperienceForm() {
                     {exp.description && (
                       <>
                         <Separator className="my-3" />
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        <p className="text-sm text-text-muted whitespace-pre-wrap">
                           {exp.description}
                         </p>
                       </>
@@ -607,7 +607,7 @@ export function ExperienceForm() {
                       onClick={() => handleDelete(exp.id)}
                       disabled={isMutating}
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-4 w-4 text-danger" />
                     </Button>
                   </div>
                 </div>

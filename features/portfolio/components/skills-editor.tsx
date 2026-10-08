@@ -134,7 +134,7 @@ export function SkillsEditor() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -157,7 +157,7 @@ export function SkillsEditor() {
           <Wrench className="h-5 w-5" />
           Skills
         </h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-text-muted">
           Add your technical and soft skills. They will be grouped by category.
         </p>
       </div>
@@ -209,7 +209,7 @@ export function SkillsEditor() {
                 }
               />
               {(fieldErrors.name || validationErrors.name) && (
-                <p id="skill-name-error" className="text-sm text-destructive">
+                <p id="skill-name-error" className="text-sm text-danger">
                   {fieldErrors.name || validationErrors.name}
                 </p>
               )}
@@ -251,7 +251,7 @@ export function SkillsEditor() {
               {(fieldErrors.category || validationErrors.category) && (
                 <p
                   id="skill-category-error"
-                  className="text-sm text-destructive"
+                  className="text-sm text-danger"
                 >
                   {fieldErrors.category || validationErrors.category}
                 </p>
@@ -270,7 +270,7 @@ export function SkillsEditor() {
             </Button>
           </div>
           {(fieldErrors.form || validationErrors.form) && (
-            <p className="mt-3 text-sm text-destructive">
+            <p className="mt-3 text-sm text-danger">
               {fieldErrors.form || validationErrors.form}
             </p>
           )}
@@ -281,8 +281,8 @@ export function SkillsEditor() {
       {skills.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Code2 className="h-10 w-10 text-muted-foreground/40 mb-3" />
-            <p className="text-muted-foreground">
+            <Code2 className="h-10 w-10 text-text-muted/40 mb-3" />
+            <p className="text-text-muted">
               No skills added yet. Use the form above to add your first skill.
             </p>
           </CardContent>
@@ -297,7 +297,7 @@ export function SkillsEditor() {
                 <Card key={group.value}>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      <Icon className="h-4 w-4 text-text-muted" />
                       {group.label}s
                       <Badge variant="secondary" className="ml-auto">
                         {group.skills.length}
@@ -363,7 +363,7 @@ export function SkillsEditor() {
 
       {/* Summary Count */}
       {skills.length > 0 && (
-        <p className="text-sm text-muted-foreground text-center">
+        <p className="text-sm text-text-muted text-center">
           {skills.length} skill{skills.length !== 1 ? "s" : ""} total
         </p>
       )}

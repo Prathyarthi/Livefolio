@@ -7,7 +7,8 @@ import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Briefcase,
-  Settings,
+  SlidersHorizontal,
+  Building2,
   LogOut,
   User,
   PanelLeft,
@@ -15,6 +16,7 @@ import {
   Plus,
   CreditCard,
   Users,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -54,11 +56,9 @@ function CompanySidebar({
   const isCollapsed = state === "collapsed";
 
   const canManageBilling = Boolean(org?.permissions.manageOrganization);
-  const activeWorkspaceSlug =
-    workspaceSlug ?? org?.workspaces?.[0]?.slug ?? null;
-  const workspaceBase = activeWorkspaceSlug
-    ? `/company/${orgSlug}/${activeWorkspaceSlug}`
-    : `/company/${orgSlug}`;
+  const workspaceBase = workspaceSlug
+    ? `/company/${orgSlug}/${workspaceSlug}`
+    : null;
 
   const nav = [
     {
@@ -67,8 +67,24 @@ function CompanySidebar({
       icon: LayoutDashboard,
       exact: true,
     },
-    ...(activeWorkspaceSlug
+    ...(!workspaceBase
       ? [
+          {
+            title: "Talent",
+            href: `/company/${orgSlug}/talent`,
+            icon: Users,
+            exact: false,
+          },
+        ]
+      : []),
+    ...(workspaceBase
+      ? [
+          {
+            title: "Overview",
+            href: workspaceBase,
+            icon: Home,
+            exact: true,
+          },
           {
             title: "Jobs",
             href: `${workspaceBase}/jobs`,
@@ -84,7 +100,7 @@ function CompanySidebar({
           {
             title: "Workspace Settings",
             href: `${workspaceBase}/settings`,
-            icon: Settings,
+            icon: SlidersHorizontal,
             exact: false,
           },
         ]
@@ -92,7 +108,7 @@ function CompanySidebar({
     {
       title: "Org Settings",
       href: `/company/${orgSlug}/settings`,
-      icon: Settings,
+      icon: Building2,
       exact: false,
     },
     ...(canManageBilling
@@ -144,7 +160,7 @@ function CompanySidebar({
                 <LogoMark className="h-8 w-8 shrink-0" />
               )}
               <span className="min-w-0 group-data-[collapsible=icon]:hidden">
-                <span className="block truncate font-display text-sm font-bold text-brand-primary">
+                <span className="block truncate font-display text-sm font-bold text-text-primary">
                   {org?.name ?? "Company"}
                 </span>
                 <span className="block text-[11px] text-text-muted">
@@ -191,7 +207,7 @@ function CompanySidebar({
 
       <SidebarFooter className="border-t border-sidebar-border gap-2 p-2">
         <SidebarMenu>
-          {activeWorkspaceSlug ? (
+          {workspaceBase ? (
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="New job">
                 <Link href={`${workspaceBase}/jobs/new`}>
@@ -229,7 +245,7 @@ function CompanySidebar({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={() => signOut({ callbackUrl: "/recruiters" })}
               aria-label="Sign out"
             >
               <LogOut className="h-4 w-4" />
@@ -250,9 +266,11 @@ export function CompanyShell({ children }: { children: React.ReactNode }) {
   const workspaceSlug =
     params.workspaceSlug &&
     params.workspaceSlug !== "settings" &&
-    params.workspaceSlug !== "billing"
+    params.workspaceSlug !== "billing" &&
+    params.workspaceSlug !== "talent"
       ? params.workspaceSlug
       : undefined;
+  const { data: org } = useOrganization(orgSlug);
 
   useEffect(() => {
     document.body.dataset.hiring = "company";
@@ -267,13 +285,13 @@ export function CompanyShell({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <CompanySidebar orgSlug={orgSlug} workspaceSlug={workspaceSlug} />
       <SidebarInset className="relative min-w-0 overflow-x-hidden bg-surface-base">
-        <header className="glass-nav sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border-default px-4 md:hidden">
+        <header className="glass-nav sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 px-4 md:hidden">
           <SidebarTrigger />
-          <span className="text-sm font-medium text-text-primary">
-            Hiring
+          <span className="truncate text-sm font-medium text-text-primary">
+            {org?.name ?? "Hiring"}
           </span>
         </header>
-        <main className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">
+        <main className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)]">
           {children}
         </main>
       </SidebarInset>

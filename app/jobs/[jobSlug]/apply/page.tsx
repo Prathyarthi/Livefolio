@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrgLogo } from "@/features/organization/components/org-logo";
+import { PublicJobHeader } from "@/features/jobs/components/public-job-header";
 import {
   useApplicationPreview,
   useSubmitApplication,
@@ -33,11 +34,19 @@ export default function ApplyJobPage() {
     }
   }, [status, router, jobSlug]);
 
+  const backToJob = (
+    <Button variant="outline" size="sm" asChild>
+      <Link href={`/jobs/${jobSlug}`}>Back to job</Link>
+    </Button>
+  );
+
   if (status === "loading" || isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface-base">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
-      </div>
+      <ApplyChrome>
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+        </div>
+      </ApplyChrome>
     );
   }
 
@@ -50,54 +59,60 @@ export default function ApplyJobPage() {
 
   if (noPortfolio) {
     return (
-      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-4 px-6 py-16">
-        <h1 className="text-h2 text-text-primary">Create your Livefolio first</h1>
-        <p className="text-body-sm text-text-secondary">
-          You need a professional profile before applying. Import a resume or
-          fill in the basics — you can refine it later.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild>
-            <Link href="/dashboard/import">Import resume</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/dashboard">Open dashboard</Link>
-          </Button>
+      <ApplyChrome action={backToJob}>
+        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-4 px-6 py-10">
+          <h1 className="text-h2 text-text-primary">Create your Livefolio first</h1>
+          <p className="text-body-sm text-text-secondary">
+            You need a professional profile before applying. Import a resume or
+            fill in the basics — you can refine it later.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/dashboard/import">Import resume</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/dashboard">Open dashboard</Link>
+            </Button>
+          </div>
         </div>
-      </div>
+      </ApplyChrome>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-4 px-6 py-16">
-        <h1 className="text-h2 text-text-primary">Unable to apply</h1>
-        <p className="text-body-sm text-text-secondary">
-          {error instanceof Error
-            ? error.message
-            : "This job may be closed or unavailable."}
-        </p>
-        <Button asChild variant="outline">
-          <Link href={`/jobs/${jobSlug}`}>Back to job</Link>
-        </Button>
-      </div>
+      <ApplyChrome action={backToJob}>
+        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-4 px-6 py-10">
+          <h1 className="text-h2 text-text-primary">Unable to apply</h1>
+          <p className="text-body-sm text-text-secondary">
+            {error instanceof Error
+              ? error.message
+              : "This job may be closed or unavailable."}
+          </p>
+          <Button asChild variant="outline">
+            <Link href={`/jobs/${jobSlug}`}>Back to job</Link>
+          </Button>
+        </div>
+      </ApplyChrome>
     );
   }
 
   if (data.alreadyApplied && data.existingApplication) {
     return (
-      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-4 px-6 py-16">
-        <h1 className="text-h2 text-text-primary">Already applied</h1>
-        <p className="text-body-sm text-text-secondary">
-          You submitted an application for {data.job.title} at{" "}
-          {data.job.organization.name}.
-        </p>
-        <Button asChild>
-          <Link href={`/dashboard/applications/${data.existingApplication.id}`}>
-            View application
-          </Link>
-        </Button>
-      </div>
+      <ApplyChrome action={backToJob}>
+        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-4 px-6 py-10">
+          <h1 className="text-h2 text-text-primary">Already applied</h1>
+          <p className="text-body-sm text-text-secondary">
+            You submitted an application for {data.job.title} at{" "}
+            {data.job.organization.name}.
+          </p>
+          <Button asChild>
+            <Link href={`/dashboard/applications/${data.existingApplication.id}`}>
+              View application
+            </Link>
+          </Button>
+        </div>
+      </ApplyChrome>
     );
   }
 
@@ -120,8 +135,8 @@ export default function ApplyJobPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-base">
-      <div className="mx-auto w-full max-w-2xl space-y-8 px-6 py-10 md:py-14">
+    <ApplyChrome action={backToJob}>
+      <div className="mx-auto w-full max-w-2xl space-y-8 px-6 py-10">
         <header className="space-y-4">
           <div className="flex items-center gap-3">
             <OrgLogo
@@ -136,7 +151,7 @@ export default function ApplyJobPage() {
               </p>
             </div>
           </div>
-          <h1 className="text-h2 text-text-primary">{data.job.title}</h1>
+          <h1 className="text-h1 text-text-primary">{data.job.title}</h1>
           <p className="text-body-sm text-text-secondary">
             We&apos;ll create an immutable snapshot of your Livefolio at submit
             time.
@@ -230,6 +245,21 @@ export default function ApplyJobPage() {
           </Button>
         </div>
       </div>
+    </ApplyChrome>
+  );
+}
+
+function ApplyChrome({
+  children,
+  action,
+}: {
+  children: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col bg-surface-base">
+      <PublicJobHeader action={action} />
+      {children}
     </div>
   );
 }

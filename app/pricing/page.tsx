@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PricingPageShell } from "@/features/subscriptions/components/pricing-page-shell";
 import { createPageMetadata } from "@/lib/seo";
+import { marketingVariantFrom } from "@/lib/auth-callback";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Pricing & Pro Plans",
@@ -9,6 +10,11 @@ export const metadata: Metadata = createPageMetadata({
   path: "/pricing",
 });
 
-export default function PricingPage() {
-  return <PricingPageShell />;
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const { from } = await searchParams;
+  return <PricingPageShell audience={marketingVariantFrom(from)} />;
 }

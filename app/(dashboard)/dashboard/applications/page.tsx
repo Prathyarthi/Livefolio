@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useMyApplications } from "@/features/applications/api/use-applications";
@@ -19,7 +20,7 @@ export default function MyApplicationsPage() {
   const total = data?.total ?? 0;
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href="/dashboard">← Back to dashboard</Link>
       </Button>
@@ -34,12 +35,15 @@ export default function MyApplicationsPage() {
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading applications…</p>
       ) : error ? (
-        <p className="text-body-sm text-semantic-danger">
+        <p className="text-body-sm text-danger">
           {error instanceof Error ? error.message : "Failed to load"}
         </p>
       ) : applications.length === 0 ? (
-        <div className="rounded-[var(--radius-lg)] border border-dashed border-border-default px-6 py-12 text-center">
-          <h2 className="text-h3 text-text-primary">No applications yet</h2>
+        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+          <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] bg-brand-fill/12">
+            <FileText className="h-6 w-6 text-brand-secondary" aria-hidden />
+          </span>
+          <h2 className="mt-4 text-h3 text-text-primary">No applications yet</h2>
           <p className="mt-1 text-body-sm text-text-secondary">
             When you apply to a job with Livefolio, it will show up here.
           </p>

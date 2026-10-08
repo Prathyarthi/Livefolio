@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { LayoutGrid, Plus } from "lucide-react";
+import { LayoutGrid, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,10 @@ import {
 } from "@/features/organization/api/use-organization";
 import { OrgLogo, OrgBanner } from "@/features/organization/components/org-logo";
 import { sanitizeHiringSlug } from "@/features/jobs/lib/slug";
+import {
+  HiringLoadingState,
+  HiringNotFoundState,
+} from "@/features/organization/components/hiring-page-chrome";
 
 export default function OrganizationHomePage() {
   const params = useParams<{ orgSlug: string }>();
@@ -29,21 +33,22 @@ export default function OrganizationHomePage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading organization…</div>
+      <HiringLoadingState
+        backHref="/company"
+        backLabel="← Back to companies"
+        message="Loading organization…"
+      />
     );
   }
 
   if (error || !org) {
     return (
-      <div className="p-8">
-        <h1 className="text-h3 text-text-primary">Organization not found</h1>
-        <p className="mt-2 text-body-sm text-text-secondary">
-          You may not have access to this company.
-        </p>
-        <Button asChild className="mt-4">
-          <Link href="/company">Back to companies</Link>
-        </Button>
-      </div>
+      <HiringNotFoundState
+        backHref="/company"
+        backLabel="← Back to companies"
+        title="Organization not found"
+        description="You may not have access to this company."
+      />
     );
   }
 
@@ -84,7 +89,7 @@ export default function OrganizationHomePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-4xl space-y-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href="/company">← Back to companies</Link>
       </Button>
@@ -117,22 +122,40 @@ export default function OrganizationHomePage() {
               </p>
             </div>
           </div>
-          {org.permissions.manageOrganization ? (
-            <Button onClick={() => setShowCreate(true)}>
-              <Plus className="h-4 w-4" />
-              New workspace
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild>
+              <Link href={`/company/${orgSlug}/talent`}>
+                <Users className="h-4 w-4" />
+                Find talent
+              </Link>
             </Button>
-          ) : null}
+            {org.permissions.manageOrganization ? (
+              <Button onClick={() => setShowCreate(true)}>
+                <Plus className="h-4 w-4" />
+                New workspace
+              </Button>
+            ) : null}
+          </div>
         </header>
       </div>
 
       {workspaces.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
-          <LayoutGrid className="h-8 w-8 text-text-muted" />
-          <h2 className="mt-3 text-h3 text-text-primary">No workspaces yet</h2>
+        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+          <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] bg-brand-fill/12">
+            <LayoutGrid className="h-6 w-6 text-brand-secondary" aria-hidden />
+          </span>
+          <h2 className="mt-4 text-h3 text-text-primary">No workspaces yet</h2>
           <p className="mt-1 text-body-sm text-text-secondary">
-            Ask an admin to assign you to a workspace.
+            {org.permissions.manageOrganization
+              ? "Create a workspace to start posting jobs."
+              : "Ask an admin to assign you to a workspace."}
           </p>
+          {org.permissions.manageOrganization ? (
+            <Button className="mt-4" onClick={() => setShowCreate(true)}>
+              <Plus className="h-4 w-4" />
+              New workspace
+            </Button>
+          ) : null}
         </div>
       ) : (
         <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
@@ -158,7 +181,7 @@ export default function OrganizationHomePage() {
       )}
 
       {showCreate ? (
-        <div className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <div className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
           <h2 className="text-h3 text-text-primary">New workspace</h2>
           <div className="space-y-2">
             <Label htmlFor="ws-name">Name</Label>

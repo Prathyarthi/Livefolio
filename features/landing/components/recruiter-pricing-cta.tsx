@@ -36,7 +36,7 @@ export function RecruiterPricingCta({
   return (
     <Button
       asChild
-      className="mt-6 w-full"
+      className="w-full"
       variant={highlight ? "accent" : "outline"}
     >
       <Link href={href}>{text}</Link>

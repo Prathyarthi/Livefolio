@@ -127,7 +127,7 @@ export function CompanyTeamSection({
   }
 
   return (
-    <section className="space-y-5 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+    <section className="space-y-5 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
       <div className="space-y-1">
         <h2 className="text-h3 text-text-primary">Team</h2>
         <p className="text-body-sm text-text-secondary">
@@ -140,7 +140,7 @@ export function CompanyTeamSection({
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading team…</p>
       ) : (
-        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+        <ul className="divide-y divide-border-default border-y border-border-default">
           {(members ?? []).map((member) => {
             const editable = canEditMember(member);
             const removable = canRemoveMember(member);
@@ -179,9 +179,17 @@ export function CompanyTeamSection({
                         const canToggle =
                           canManage && member.role !== "owner";
                         return (
-                          <button
+                          <Button
                             key={ws.id}
                             type="button"
+                            size="sm"
+                            variant={
+                              assigned ||
+                              member.role === "owner" ||
+                              member.role === "admin"
+                                ? "default"
+                                : "outline"
+                            }
                             disabled={!canToggle || updateRole.isPending}
                             onClick={() => {
                               if (!canToggle) return;
@@ -193,14 +201,10 @@ export function CompanyTeamSection({
                                 workspaceIds: next,
                               });
                             }}
-                            className={`rounded-full px-2 py-0.5 text-xs ${
-                              assigned || member.role === "owner" || member.role === "admin"
-                                ? "bg-brand-light text-brand-primary"
-                                : "bg-surface-base text-text-muted"
-                            } ${canToggle ? "cursor-pointer" : "cursor-default"}`}
+                            className="h-7 rounded-full px-2.5 text-xs"
                           >
                             {ws.name}
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>
@@ -249,7 +253,7 @@ export function CompanyTeamSection({
       )}
 
       {canManage ? (
-        <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]">
+        <div className="space-y-3 border-t border-border-default pt-5">
           <p className="text-body-sm font-medium text-text-primary">
             Add teammate
           </p>

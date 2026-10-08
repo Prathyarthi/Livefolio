@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -15,17 +14,9 @@ import {
 } from "@/components/ui/select";
 import {
   CURRENCY_OPTIONS,
-  EDUCATION_OPTIONS,
-  SENIORITY_OPTIONS,
-  SALARY_PERIOD_OPTIONS,
   emptyRequirement,
   type JobRoleFormState,
 } from "@/features/jobs/lib/role-fields";
-import {
-  EDUCATION_LABELS,
-  SENIORITY_LABELS,
-  SALARY_PERIOD_LABELS,
-} from "@/features/jobs/constants/labels";
 
 function FieldGroup({
   title,

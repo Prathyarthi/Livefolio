@@ -1,15 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
 import { useApplicantPool } from "@/features/applications/api/use-applications";
 import {
   ApplicantCompareView,
   MAX_COMPARE_CANDIDATES,
   MIN_COMPARE_CANDIDATES,
 } from "@/features/applications/components/applicant-compare-view";
+import {
+  HiringLoadingState,
+  HiringNotFoundState,
+} from "@/features/organization/components/hiring-page-chrome";
 
 export default function CompareApplicantsPage() {
   const params = useParams<{ orgSlug: string; workspaceSlug: string; jobId: string }>();
@@ -17,6 +19,7 @@ export default function CompareApplicantsPage() {
   const orgSlug = params.orgSlug;
   const workspaceSlug = params.workspaceSlug;
   const jobId = params.jobId;
+  const backHref = `/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`;
 
   const ids = useMemo(() => {
     const raw = searchParams.get("ids") ?? "";
@@ -43,60 +46,52 @@ export default function CompareApplicantsPage() {
 
   if (ids.length < MIN_COMPARE_CANDIDATES) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
-        <Button variant="ghost" size="sm" asChild className="-ml-2">
-          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
-            ← Back to applicants
-          </Link>
-        </Button>
-        <h1 className="text-h2 text-text-primary">Select candidates</h1>
-        <p className="text-body-sm text-text-secondary">
-          Choose at least {MIN_COMPARE_CANDIDATES} applicants from the pool to
-          compare evidence.
-        </p>
-      </div>
+      <HiringNotFoundState
+        className="max-w-[1200px]"
+        backHref={backHref}
+        backLabel="← Back to applicants"
+        title="Select candidates"
+        description={`Choose at least ${MIN_COMPARE_CANDIDATES} applicants from the pool to compare evidence.`}
+      />
     );
   }
 
   if (poolQuery.isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">
-        Loading comparison…
-      </div>
+      <HiringLoadingState
+        className="max-w-[1200px]"
+        backHref={backHref}
+        backLabel="← Back to applicants"
+        message="Loading comparison…"
+      />
     );
   }
 
   if (poolQuery.error || !poolQuery.data) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
-        <Button variant="ghost" size="sm" asChild className="-ml-2">
-          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
-            ← Back to applicants
-          </Link>
-        </Button>
-        <p className="text-body-sm text-semantic-danger">
-          {poolQuery.error instanceof Error
+      <HiringNotFoundState
+        className="max-w-[1200px]"
+        backHref={backHref}
+        backLabel="← Back to applicants"
+        title="Couldn't load comparison"
+        description={
+          poolQuery.error instanceof Error
             ? poolQuery.error.message
-            : "Failed to load applicants"}
-        </p>
-      </div>
+            : "Failed to load applicants"
+        }
+      />
     );
   }
 
   if (selected.length < MIN_COMPARE_CANDIDATES) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
-        <Button variant="ghost" size="sm" asChild className="-ml-2">
-          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
-            ← Back to applicants
-          </Link>
-        </Button>
-        <h1 className="text-h2 text-text-primary">Candidates unavailable</h1>
-        <p className="text-body-sm text-text-secondary">
-          Some selected applicants could not be found in this job. Go back and
-          select again.
-        </p>
-      </div>
+      <HiringNotFoundState
+        className="max-w-[1200px]"
+        backHref={backHref}
+        backLabel="← Back to applicants"
+        title="Candidates unavailable"
+        description="Some selected applicants could not be found in this job. Go back and select again."
+      />
     );
   }
 

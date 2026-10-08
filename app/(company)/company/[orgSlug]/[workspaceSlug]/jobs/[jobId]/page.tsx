@@ -14,7 +14,7 @@ import {
   useJob,
   useUpdateJob,
 } from "@/features/jobs/api/use-jobs";
-import { JobHighlights, JobPerkPills } from "@/features/jobs/components/job-highlights";
+import { JobHighlights } from "@/features/jobs/components/job-highlights";
 import { JobRoleFields } from "@/features/jobs/components/job-role-fields";
 import {
   formStateToJobInput,
@@ -28,6 +28,18 @@ import {
 import { getAppOrigin } from "@/lib/domain";
 import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field";
 import { uploadStoredFile } from "@/features/uploads/api/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  HiringLoadingState,
+  HiringNotFoundState,
+} from "@/features/organization/components/hiring-page-chrome";
 
 export default function ManageJobPage() {
   const params = useParams<{ orgSlug: string; workspaceSlug: string; jobId: string }>();
@@ -42,6 +54,7 @@ export default function ManageJobPage() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<JobRoleFormState | null>(null);
+  const [showDelete, setShowDelete] = useState(false);
 
   useEffect(() => {
     if (job) {
@@ -66,18 +79,21 @@ export default function ManageJobPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading job…</div>
+      <HiringLoadingState
+        backHref={`/company/${orgSlug}/${workspaceSlug}/jobs`}
+        backLabel="← Back to jobs"
+        message="Loading job…"
+      />
     );
   }
 
   if (error || !job) {
     return (
-      <div className="p-8">
-        <h1 className="text-h3">Job not found</h1>
-        <Button asChild className="mt-4">
-          <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>Back to jobs</Link>
-        </Button>
-      </div>
+      <HiringNotFoundState
+        backHref={`/company/${orgSlug}/${workspaceSlug}/jobs`}
+        backLabel="← Back to jobs"
+        title="Job not found"
+      />
     );
   }
 
@@ -112,13 +128,14 @@ export default function ManageJobPage() {
   }
 
   async function handleDelete() {
-    if (!confirm("Delete this draft job?")) return;
     try {
       await deleteJob.mutateAsync(jobId);
       toast.success("Draft deleted");
       router.push(`/company/${orgSlug}/${workspaceSlug}/jobs`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setShowDelete(false);
     }
   }
 
@@ -141,7 +158,7 @@ export default function ManageJobPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-4xl space-y-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>← Back to jobs</Link>
       </Button>
@@ -155,7 +172,6 @@ export default function ManageJobPage() {
           </span>
         </div>
         <h1 className="text-h2 text-text-primary">{job.title}</h1>
-        <JobPerkPills job={job} />
       </header>
 
       <JobHighlights job={job} />
@@ -214,7 +230,7 @@ export default function ManageJobPage() {
         {job.status === "draft" && (
           <Button
             variant="destructive"
-            onClick={handleDelete}
+            onClick={() => setShowDelete(true)}
             disabled={deleteJob.isPending}
           >
             Delete draft
@@ -223,7 +239,7 @@ export default function ManageJobPage() {
       </div>
 
       {(job.status === "published" || job.status === "paused") && (
-        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)] md:p-6">
+        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
           <p className="text-label uppercase text-text-secondary">
             Shareable job link
           </p>
@@ -247,7 +263,7 @@ export default function ManageJobPage() {
       )}
 
       {editing && form ? (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
           <JobRoleFields
             values={form}
             onChange={(patch) => setForm((prev) => (prev ? { ...prev, ...patch } : prev))}
@@ -278,13 +294,13 @@ export default function ManageJobPage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
           <JobTextSection title="Description" body={job.description} />
           <JobTextSection title="Responsibilities" body={job.responsibilities} />
           <JobTextSection title="Qualifications" body={job.qualifications} />
           <JobTextSection title="Benefits" body={job.benefits} />
           {(required.length > 0 || preferred.length > 0) && (
-            <section className="grid gap-6 sm:grid-cols-2">
+            <section className="grid gap-6 border-t border-border-default pt-6 sm:grid-cols-2">
               <RequirementCard title="Required" items={required.map((r) => r.label)} />
               <RequirementCard title="Preferred" items={preferred.map((r) => r.label)} />
             </section>
@@ -296,6 +312,34 @@ export default function ManageJobPage() {
         Open the applicant pool to move candidates through the pipeline, shortlist,
         and add private notes.
       </p>
+
+      <Dialog open={showDelete} onOpenChange={setShowDelete}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete this draft?</DialogTitle>
+            <DialogDescription>
+              This removes the draft job. Published roles cannot be deleted from
+              here.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDelete(false)}
+              disabled={deleteJob.isPending}
+            >
+              Keep draft
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void handleDelete()}
+              disabled={deleteJob.isPending}
+            >
+              {deleteJob.isPending ? "Deleting…" : "Delete draft"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -310,7 +354,7 @@ function JobTextSection({
   if (!body?.trim()) return null;
   const lines = splitRichLines(body);
   return (
-    <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+    <section className="space-y-3 border-t border-border-default pt-6 first:border-t-0 first:pt-0">
       <h2 className="text-h3 text-text-primary">{title}</h2>
       {lines.length > 1 ? (
         <ul className="mt-4 space-y-2 text-body-sm text-text-secondary">
@@ -332,7 +376,7 @@ function JobTextSection({
 
 function RequirementCard({ title, items }: { title: string; items: string[] }) {
   return (
-    <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+    <div>
       <h2 className="text-h3 text-text-primary">{title}</h2>
       {items.length === 0 ? (
         <p className="mt-3 text-body-sm text-text-muted">None listed</p>

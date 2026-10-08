@@ -12,6 +12,8 @@ import {
   useWorkspace,
   useUpdateWorkspace,
 } from "@/features/organization/api/use-organization";
+import { sanitizeHiringSlug } from "@/features/jobs/lib/slug";
+import { HiringLoadingState } from "@/features/organization/components/hiring-page-chrome";
 
 export default function WorkspaceSettingsPage() {
   const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
@@ -39,7 +41,11 @@ export default function WorkspaceSettingsPage() {
 
   if (isLoading || !workspace) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading settings…</div>
+      <HiringLoadingState
+        backHref={`/company/${orgSlug}/${workspaceSlug}`}
+        backLabel="← Back to overview"
+        message="Loading settings…"
+      />
     );
   }
 
@@ -47,13 +53,13 @@ export default function WorkspaceSettingsPage() {
     try {
       await updateWorkspace.mutateAsync({
         name: name.trim(),
-        slug: slug.trim() || undefined,
+        slug: sanitizeHiringSlug(slug) || undefined,
         description: description.trim() || null,
         customJobFields: customFields.filter((f) => f.label.trim()),
       });
       toast.success("Workspace settings saved");
-      if (slug.trim() && slug.trim() !== workspaceSlug) {
-        router.push(`/company/${orgSlug}/${slug.trim()}/settings`);
+      if (slug.trim() && sanitizeHiringSlug(slug) !== workspaceSlug) {
+        router.push(`/company/${orgSlug}/${sanitizeHiringSlug(slug)}/settings`);
       }
     } catch (error) {
       toast.error(
@@ -63,7 +69,7 @@ export default function WorkspaceSettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}`}>
           ← Back to overview
@@ -77,96 +83,112 @@ export default function WorkspaceSettingsPage() {
         </p>
       </header>
 
-      {!workspace.permissions.manageOrganization ? (
+      {!workspace.permissions.manageOrganization &&
+      !workspace.permissions.manageJobs ? (
         <p className="text-body-sm text-text-secondary">
-          Only owners and admins can edit workspace settings.
+          Only owners, admins, and recruiters can edit workspace settings.
         </p>
       ) : (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
           <div className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="name">Workspace name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="slug">Workspace slug</Label>
-              <Input
-                id="slug"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-              />
-              <p className="text-xs text-text-muted">
-                Path: /company/{orgSlug}/{slug || "…"}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
+            {workspace.permissions.manageOrganization ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Workspace name</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug">Workspace slug</Label>
+                  <Input
+                    id="slug"
+                    value={slug}
+                    onChange={(e) => setSlug(sanitizeHiringSlug(e.target.value))}
+                  />
+                  <p className="text-xs text-text-muted">
+                    Path: /company/{orgSlug}/{slug || "…"}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              </>
+            ) : null}
 
-            <div className="space-y-3 pt-4 border-t border-border-default">
-              <div>
-                <Label className="text-base">Custom Job Fields</Label>
-                <p className="text-xs text-text-muted">
-                  Define additional fields (like "Travel required" or "Team size") that will automatically appear when creating new jobs in this workspace.
-                </p>
-              </div>
-              
-              <div className="space-y-3">
-                {customFields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="flex items-center gap-2"
-                  >
-                    <Input
-                      value={field.label}
-                      onChange={(e) =>
-                        setCustomFields((prev) =>
-                          prev.map((item, i) =>
-                            i === index ? { ...item, label: e.target.value } : item,
-                          ),
-                        )
-                      }
-                      placeholder="Field label"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        setCustomFields((prev) =>
-                          prev.filter((_, i) => i !== index),
-                        )
-                      }
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() =>
-                  setCustomFields((prev) => [
-                    ...prev,
-                    { id: crypto.randomUUID(), label: "" },
-                  ])
+            {workspace.permissions.manageJobs ? (
+              <div
+                className={
+                  workspace.permissions.manageOrganization
+                    ? "space-y-3 border-t border-border-default pt-4"
+                    : "space-y-3"
                 }
               >
-                Add custom field
-              </Button>
-            </div>
+                <div>
+                  <Label>Custom job fields</Label>
+                  <p className="text-body-sm text-text-muted">
+                    These fields appear when creating new jobs in this
+                    workspace.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {customFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex items-center gap-2"
+                    >
+                      <Input
+                        value={field.label}
+                        onChange={(e) =>
+                          setCustomFields((prev) =>
+                            prev.map((item, i) =>
+                              i === index
+                                ? { ...item, label: e.target.value }
+                                : item,
+                            ),
+                          )
+                        }
+                        placeholder="Field label"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setCustomFields((prev) =>
+                            prev.filter((_, i) => i !== index),
+                          )
+                        }
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    setCustomFields((prev) => [
+                      ...prev,
+                      { id: crypto.randomUUID(), label: "" },
+                    ])
+                  }
+                >
+                  Add custom field
+                </Button>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex flex-wrap items-center gap-2 border-t border-border-default pt-6">

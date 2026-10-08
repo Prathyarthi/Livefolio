@@ -83,7 +83,7 @@ function validateEducationForm(form: EducationEntry) {
 
 function FieldError({ error }: { error?: string }) {
   return error ? (
-    <p className="text-sm text-destructive" role="alert">
+    <p className="text-sm text-danger" role="alert">
       {error}
     </p>
   ) : null;
@@ -161,7 +161,7 @@ export function EducationForm() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -179,7 +179,7 @@ export function EducationForm() {
             <GraduationCap className="h-5 w-5" />
             Education
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-muted">
             Add your degrees, certifications, and academic achievements.
           </p>
         </div>
@@ -210,7 +210,7 @@ export function EducationForm() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <FieldLabel htmlFor="institution" unsaved={isFieldUnsaved("institution")}>
-                  <School className="h-4 w-4 text-muted-foreground" />
+                  <School className="h-4 w-4 text-text-muted" />
                   Institution
                 </FieldLabel>
                 <Input
@@ -226,7 +226,7 @@ export function EducationForm() {
               </div>
               <div className="space-y-2">
                 <FieldLabel htmlFor="degree" unsaved={isFieldUnsaved("degree")}>
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  <GraduationCap className="h-4 w-4 text-text-muted" />
                   Degree
                 </FieldLabel>
                 <Input
@@ -245,7 +245,7 @@ export function EducationForm() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <FieldLabel htmlFor="field" unsaved={isFieldUnsaved("field")}>
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  <BookOpen className="h-4 w-4 text-text-muted" />
                   Field of Study
                 </FieldLabel>
                 <Input
@@ -279,7 +279,7 @@ export function EducationForm() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <FieldLabel htmlFor="edu-startDate" unsaved={isFieldUnsaved("startDate")}>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-text-muted" />
                   Start Date
                 </FieldLabel>
                 <Input
@@ -292,7 +292,7 @@ export function EducationForm() {
               </div>
               <div className="space-y-2">
                 <FieldLabel htmlFor="edu-endDate" unsaved={isFieldUnsaved("endDate")}>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-text-muted" />
                   End Date
                 </FieldLabel>
                 <Input
@@ -347,8 +347,8 @@ export function EducationForm() {
       {educations.length === 0 && !isAdding ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <GraduationCap className="h-10 w-10 text-muted-foreground/40 mb-3" />
-            <p className="text-muted-foreground">
+            <GraduationCap className="h-10 w-10 text-text-muted/40 mb-3" />
+            <p className="text-text-muted">
               No education added yet. Click &quot;Add Education&quot; to get started.
             </p>
           </CardContent>
@@ -363,20 +363,20 @@ export function EducationForm() {
                     <h4 className="font-semibold text-base">
                       {edu.degree}
                       {edu.field && (
-                        <span className="text-muted-foreground font-normal">
+                        <span className="text-text-muted font-normal">
                           {" "}
                           in {edu.field}
                         </span>
                       )}
                     </h4>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                    <p className="text-sm text-text-muted flex items-center gap-1.5 mt-0.5">
                       <School className="h-3.5 w-3.5" />
                       {edu.institution}
                       {edu.gpa && (
                         <span className="ml-2 text-xs">GPA: {edu.gpa}</span>
                       )}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                    <p className="text-xs text-text-muted mt-1 flex items-center gap-1.5">
                       <Calendar className="h-3 w-3" />
                       {edu.startDate?.substring(0, 10)}
                       {" -- "}
@@ -385,7 +385,7 @@ export function EducationForm() {
                     {edu.description && (
                       <>
                         <Separator className="my-3" />
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        <p className="text-sm text-text-muted whitespace-pre-wrap">
                           {edu.description}
                         </p>
                       </>
@@ -397,7 +397,7 @@ export function EducationForm() {
                     onClick={() => handleDelete(edu.id)}
                     disabled={isMutating}
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    <Trash2 className="h-4 w-4 text-danger" />
                   </Button>
                 </div>
               </CardContent>

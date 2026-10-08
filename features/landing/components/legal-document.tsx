@@ -11,13 +11,11 @@ export function LegalDocument({ title, lastUpdated, children }: LegalDocumentPro
   return (
     <article className="mx-auto max-w-3xl">
       <header className="mb-10 text-center">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-zinc-500">
-          Legal
+        <p className="eyebrow uppercase">Legal</p>
+        <h1 className="mt-3 text-h1 text-text-primary">{title}</h1>
+        <p className="mt-3 text-body-sm text-text-muted">
+          Last updated: {lastUpdated}
         </p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-zinc-50 md:text-4xl">
-          {title}
-        </h1>
-        <p className="mt-3 text-sm text-zinc-500">Last updated: {lastUpdated}</p>
       </header>
 
       <div

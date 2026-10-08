@@ -7,14 +7,10 @@ import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePublicJob } from "@/features/jobs/api/use-jobs";
-import {
-  JobHighlights,
-  JobPerkPills,
-} from "@/features/jobs/components/job-highlights";
+import { JobHighlights } from "@/features/jobs/components/job-highlights";
+import { PublicJobHeader } from "@/features/jobs/components/public-job-header";
 import { splitRichLines } from "@/features/jobs/constants/labels";
 import { OrgBanner, OrgLogo } from "@/features/organization/components/org-logo";
-import { LogoMark } from "@/components/logo";
-import { siteConfig } from "@/lib/site";
 
 export default function PublicJobPage() {
   const params = useParams<{ jobSlug: string }>();
@@ -24,22 +20,34 @@ export default function PublicJobPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface-base text-body-sm text-text-muted">
-        Loading job…
+      <div className="flex min-h-0 flex-1 flex-col bg-surface-base">
+        <PublicJobHeader />
+        <div className="flex flex-1 items-center justify-center text-body-sm text-text-muted">
+          Loading job…
+        </div>
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface-base px-6 text-center">
-        <h1 className="text-h2 text-text-primary">Job not found</h1>
-        <p className="text-body-sm text-text-secondary">
-          This role may be closed or the link is incorrect.
-        </p>
-        <Button asChild>
-          <Link href="/">Go home</Link>
-        </Button>
+      <div className="flex min-h-0 flex-1 flex-col bg-surface-base">
+        <PublicJobHeader
+          action={
+            <Button asChild size="sm">
+              <Link href="/">Go home</Link>
+            </Button>
+          }
+        />
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+          <h1 className="text-h2 text-text-primary">Job not found</h1>
+          <p className="text-body-sm text-text-secondary">
+            This role may be closed or the link is incorrect.
+          </p>
+          <Button asChild>
+            <Link href="/">Go home</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -54,20 +62,14 @@ export default function PublicJobPage() {
   const isPaused = job.status === "paused";
 
   return (
-    <div className="min-h-screen bg-surface-base">
-      <header className="sticky top-0 z-20 border-b border-border-default bg-surface-raised/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <LogoMark className="h-7 w-7" />
-            <span className="font-display text-sm font-bold text-brand-primary">
-              {siteConfig.name}
-            </span>
-          </Link>
+    <div className="flex min-h-0 flex-1 flex-col bg-surface-base">
+      <PublicJobHeader
+        action={
           <Button asChild size="sm" disabled={isPaused}>
             <Link href={applyHref}>Apply with Livefolio</Link>
           </Button>
-        </div>
-      </header>
+        }
+      />
 
       {org.bannerUrl ? (
         <div className="relative h-44 overflow-hidden md:h-64">
@@ -108,7 +110,6 @@ export default function PublicJobPage() {
                     <Badge variant="neutral">Applications paused</Badge>
                   ) : null}
                 </div>
-                <JobPerkPills job={job} />
               </div>
             </section>
 
@@ -126,7 +127,7 @@ export default function PublicJobPage() {
             <JobTextSection title="Benefits" body={job.benefits} />
 
             {org.description ? (
-              <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+              <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
                 <h2 className="text-h3 text-text-primary">About {org.name}</h2>
                 <p className="mt-4 whitespace-pre-wrap text-body text-text-secondary">
                   {org.description}
@@ -179,7 +180,7 @@ function JobTextSection({
   if (!body?.trim()) return null;
   const lines = splitRichLines(body);
   return (
-    <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+    <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
       <h2 className="text-h3 text-text-primary">{title}</h2>
       {lines.length > 1 ? (
         <ul className="mt-4 space-y-2.5 text-body text-text-secondary">

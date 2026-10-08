@@ -31,7 +31,7 @@ function ResumeToPortfolio() {
         </div>
       </div>
 
-      <div className="folio-wand relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-brand-secondary font-mono text-xs font-bold text-white shadow-[var(--shadow-card)]">
+      <div className="folio-wand relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-brand-fill font-mono text-xs font-bold text-brand-on-fill shadow-[var(--shadow-card)]">
         →
       </div>
 

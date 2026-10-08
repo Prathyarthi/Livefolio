@@ -92,7 +92,7 @@ export default function NewJobPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
       <header className="space-y-1">
         <p className="eyebrow uppercase">New job</p>
         <h1 className="text-h2 text-text-primary">Create a role</h1>

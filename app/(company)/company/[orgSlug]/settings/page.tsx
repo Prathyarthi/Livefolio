@@ -16,6 +16,7 @@ import {
 import { CompanyTeamSection } from "@/features/organization/components/company-team-section";
 import { OrgBrandingImageField } from "@/features/organization/components/org-branding-field";
 import { useOrgJobs } from "@/features/jobs/api/use-jobs";
+import { HiringLoadingState } from "@/features/organization/components/hiring-page-chrome";
 
 export default function CompanySettingsPage() {
   const params = useParams<{ orgSlug: string }>();
@@ -53,7 +54,11 @@ export default function CompanySettingsPage() {
 
   if (isLoading || !org) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading settings…</div>
+      <HiringLoadingState
+        backHref={`/company/${orgSlug}`}
+        backLabel="← Back to organization"
+        message="Loading settings…"
+      />
     );
   }
 
@@ -77,14 +82,14 @@ export default function CompanySettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
+        <Link href={`/company/${orgSlug}`}>← Back to organization</Link>
       </Button>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="eyebrow uppercase">Settings</p>
-          <h1 className="text-h2 text-text-primary">Company branding</h1>
+          <p className="eyebrow uppercase">Organization</p>
+          <h1 className="text-h2 text-text-primary">Organization settings</h1>
           <p className="text-body-sm text-text-secondary">
             These details appear on public job pages.
           </p>
@@ -100,12 +105,16 @@ export default function CompanySettingsPage() {
           <Button variant="outline" asChild>
             <Link
               href={
-                org.workspaces[0]
+                org.workspaces.length === 1
                   ? `/company/${orgSlug}/${org.workspaces[0].slug}/jobs/new`
                   : `/company/${orgSlug}`
               }
             >
-              Publish a job to preview
+              {org.workspaces.length === 0
+                ? "Create a workspace to preview"
+                : org.workspaces.length === 1
+                  ? "Publish a job to preview"
+                  : "Open a workspace to publish"}
             </Link>
           </Button>
         )}
@@ -116,14 +125,14 @@ export default function CompanySettingsPage() {
           Only owners and admins can edit company settings.
         </p>
       ) : (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
           <div className="space-y-5">
             <div className="space-y-3">
               <div>
-                <p className="text-sm font-medium text-text-primary">
+                <p className="font-medium text-text-primary">
                   Banner and logo
                 </p>
-                <p className="text-xs text-text-muted">
+                <p className="text-body-sm text-text-muted">
                   Uploads save immediately. Placeholders stay until you add
                   assets.
                 </p>
@@ -187,12 +196,16 @@ export default function CompanySettingsPage() {
                     onChange={(e) => setBrandColor(e.target.value)}
                     placeholder="#1a1a1a"
                   />
-                  <span
-                    aria-hidden
-                    className="h-10 w-10 shrink-0 rounded-[var(--radius-md)] border border-border-default"
-                    style={{
-                      background: brandColor.trim() || "var(--brand-primary)",
-                    }}
+                  <input
+                    type="color"
+                    value={
+                      /^#[0-9a-fA-F]{6}$/.test(brandColor.trim())
+                        ? brandColor.trim()
+                        : "#1a1a1a"
+                    }
+                    onChange={(e) => setBrandColor(e.target.value)}
+                    className="h-10 w-10 shrink-0 cursor-pointer rounded-[var(--radius-md)] border border-border-default bg-transparent p-0.5"
+                    aria-label="Pick brand color"
                   />
                 </div>
               </div>

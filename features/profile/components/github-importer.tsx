@@ -232,11 +232,11 @@ export function GitHubImporter() {
                     {data.profile.name ?? username}
                   </h3>
                   {data.profile.bio && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-text-muted">
                       {data.profile.bio}
                     </p>
                   )}
-                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4 mt-1 text-sm text-text-muted">
                     {data.profile.location && (
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
@@ -311,7 +311,7 @@ export function GitHubImporter() {
                           </p>
                         </div>
                         {repo.description && (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2 ml-6">
+                          <p className="text-xs text-text-muted mt-1 line-clamp-2 ml-6">
                             {repo.description}
                           </p>
                         )}
@@ -321,11 +321,11 @@ export function GitHubImporter() {
                               {repo.language}
                             </Badge>
                           )}
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1 text-xs text-text-muted">
                             <Star className="h-3 w-3" />
                             {repo.stars}
                           </span>
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1 text-xs text-text-muted">
                             <GitFork className="h-3 w-3" />
                             {repo.forks}
                           </span>
@@ -342,7 +342,7 @@ export function GitHubImporter() {
                               </Badge>
                             ))}
                             {repo.topics.length > 4 && (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-text-muted">
                                 +{repo.topics.length - 4} more
                               </span>
                             )}

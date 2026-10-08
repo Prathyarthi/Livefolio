@@ -416,7 +416,7 @@ export function CustomSectionEditor() {
             </div>
           ))}
           {visibleError && (
-            <p id={errorId} className="text-sm text-destructive">
+            <p id={errorId} className="text-sm text-danger">
               {visibleError}
             </p>
           )}
@@ -450,7 +450,7 @@ export function CustomSectionEditor() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -463,7 +463,7 @@ export function CustomSectionEditor() {
             <Layers className="h-5 w-5" />
             Custom Sections
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-muted">
             Add any section to your portfolio — volunteer work, publications,
             languages, or anything else.
           </p>
@@ -533,7 +533,7 @@ export function CustomSectionEditor() {
                 sectionValidationErrors.sectionType) && (
                 <p
                   id="custom-section-label-error"
-                  className="text-sm text-destructive"
+                  className="text-sm text-danger"
                 >
                   {sectionErrors.label ||
                     sectionErrors.sectionType ||
@@ -543,7 +543,7 @@ export function CustomSectionEditor() {
               )}
             </div>
             {(sectionErrors.form || sectionValidationErrors.form) && (
-              <p className="text-sm text-destructive">
+              <p className="text-sm text-danger">
                 {sectionErrors.form || sectionValidationErrors.form}
               </p>
             )}
@@ -580,8 +580,8 @@ export function CustomSectionEditor() {
       {customSections.length === 0 && !showAddSection ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Layers className="h-10 w-10 text-muted-foreground/40 mb-3" />
-            <p className="text-muted-foreground">
+            <Layers className="h-10 w-10 text-text-muted/40 mb-3" />
+            <p className="text-text-muted">
               No custom sections yet. Click &quot;Add Section&quot; to create
               one.
             </p>
@@ -607,13 +607,13 @@ export function CustomSectionEditor() {
                       onClick={() => toggleExpanded(section.id)}
                     >
                       {isExpanded ? (
-                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                        <ChevronUp className="h-4 w-4 text-text-muted" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        <ChevronDown className="h-4 w-4 text-text-muted" />
                       )}
                       <CardTitle className="text-base">
                         {section.label}{" "}
-                        <span className="text-muted-foreground font-normal">
+                        <span className="text-text-muted font-normal">
                           ({items.length}{" "}
                           {items.length === 1 ? "item" : "items"})
                         </span>
@@ -639,7 +639,7 @@ export function CustomSectionEditor() {
                         disabled={isMutating}
                         title="Delete section"
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-danger" />
                       </Button>
                     </div>
                   </div>
@@ -652,7 +652,7 @@ export function CustomSectionEditor() {
                       : null}
 
                     {items.length === 0 && editingSectionId !== section.id && (
-                      <p className="text-sm text-muted-foreground py-4 text-center">
+                      <p className="text-sm text-text-muted py-4 text-center">
                         No items yet. Click + to add one.
                       </p>
                     )}
@@ -697,7 +697,7 @@ export function CustomSectionEditor() {
                               </p>
                             )}
                             {desc != null && (
-                              <p className="text-sm text-muted-foreground line-clamp-2">
+                              <p className="text-sm text-text-muted line-clamp-2">
                                 {String(desc)}
                               </p>
                             )}
@@ -733,7 +733,7 @@ export function CustomSectionEditor() {
                               onClick={() => handleDeleteItem(section, idx)}
                               disabled={isMutating}
                             >
-                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                              <Trash2 className="h-3.5 w-3.5 text-danger" />
                             </Button>
                           </div>
                         </div>

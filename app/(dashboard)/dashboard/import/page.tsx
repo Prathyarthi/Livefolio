@@ -88,21 +88,6 @@ export default function ImportPage() {
 
       <Separator className="mt-6" />
 
-      <div className="shrink-0 py-4">
-        <FlowFooter
-          className="border-0 p-0"
-          message={null}
-          previous={{
-            href: "/dashboard/templates",
-            label: "Previous: Templates",
-          }}
-          next={{
-            label: "Next: Preview",
-            onClick: () => router.push("/dashboard/preview"),
-          }}
-        />
-      </div>
-
       <div className="flex w-full flex-1 flex-col lg:flex-row lg:gap-0">
         <aside className={DASHBOARD_IMPORT_TRACKER_ASIDE_CLASS}>
           <ImportSourceSelector
@@ -145,6 +130,21 @@ export default function ImportPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="shrink-0 pt-4">
+        <FlowFooter
+          className="border-0 p-0"
+          message={null}
+          previous={{
+            href: "/dashboard/templates",
+            label: "Previous: Templates",
+          }}
+          next={{
+            label: "Next: Preview",
+            onClick: () => router.push("/dashboard/preview"),
+          }}
+        />
       </div>
     </div>
   );

@@ -665,7 +665,7 @@ export default function AdminEmailsPage() {
                           type="button"
                           size="sm"
                           variant="outline"
-                          className="text-destructive"
+                          className="text-danger"
                           onClick={() => void handleDeleteTemplate(template.id)}
                         >
                           <Trash2 className="h-4 w-4" />

@@ -42,7 +42,7 @@ export function BillingIntervalToggle({
             className={cn(
               "relative rounded-full px-4 py-2 text-sm font-medium transition-colors",
               selected
-                ? "bg-brand-secondary text-white"
+                ? "bg-brand-fill text-brand-on-fill"
                 : "text-text-secondary hover:bg-surface-raised hover:text-text-primary"
             )}
           >
@@ -51,7 +51,7 @@ export function BillingIntervalToggle({
               <span
                 className={cn(
                   "ml-1.5 text-[10px] font-semibold uppercase tracking-wide",
-                  selected ? "text-white/80" : "text-success"
+                  selected ? "text-brand-on-fill/80" : "text-success"
                 )}
               >
                 −{savings}%

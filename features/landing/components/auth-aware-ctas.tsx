@@ -30,7 +30,7 @@ export function AuthAwareCtas({
             </Link>
           </Button>
           <Button asChild variant="outline" size={size}>
-            <Link href="/dashboard">Go to dashboard</Link>
+            <Link href="/">For candidates</Link>
           </Button>
         </div>
       );
@@ -45,7 +45,7 @@ export function AuthAwareCtas({
           </Link>
         </Button>
         <Button asChild variant="outline" size={size}>
-          <Link href="#how-it-works">See how it works</Link>
+          <Link href="/recruiters#how-it-works">See how it works</Link>
         </Button>
       </div>
     );

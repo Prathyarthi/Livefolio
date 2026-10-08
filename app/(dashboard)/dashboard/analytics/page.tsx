@@ -324,7 +324,7 @@ export default function AnalyticsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 py-2 md:py-6">
+    <div className="mx-auto max-w-4xl space-y-8">
       <header className="space-y-1">
         <p className="eyebrow uppercase">Insights</p>
         <h1 className="text-h2 text-text-primary">Portfolio analytics</h1>
@@ -679,7 +679,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 {clicksByTypeData.length === 0 ? (
-                  <p className="py-10 text-center text-body-sm text-text-muted">
+                  <p className="py-6 text-body-sm text-text-muted">
                     No link clicks yet. Publish your portfolio and share it to
                     start collecting click data.
                   </p>
@@ -730,7 +730,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 {topLinksData.length === 0 ? (
-                  <p className="py-10 text-center text-body-sm text-text-muted">
+                  <p className="py-6 text-body-sm text-text-muted">
                     No link clicks yet.
                   </p>
                 ) : (
@@ -765,7 +765,7 @@ export default function AnalyticsPage() {
         </div>
       ) : (
         <Card className={statCardClassName}>
-          <CardContent className="py-8 text-center text-body-sm text-text-secondary">
+          <CardContent className="py-6 text-body-sm text-text-secondary">
             Could not load analytics. Try refreshing the page.
           </CardContent>
         </Card>

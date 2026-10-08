@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ExternalLink, Plus } from "lucide-react";
+import { Briefcase, ExternalLink, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useOrgJobs } from "@/features/jobs/api/use-jobs";
@@ -40,7 +40,7 @@ export default function CompanyJobsPage() {
   const origin = useMemo(() => getAppOrigin(), []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-4xl space-y-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
       </Button>
@@ -77,8 +77,11 @@ export default function CompanyJobsPage() {
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading jobs…</p>
       ) : !jobs || jobs.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-12 text-center shadow-[var(--shadow-card)] md:p-8">
-          <h2 className="text-h3 text-text-primary">No jobs in this view</h2>
+        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
+          <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] bg-brand-fill/12">
+            <Briefcase className="h-6 w-6 text-brand-secondary" aria-hidden />
+          </span>
+          <h2 className="mt-4 text-h3 text-text-primary">No jobs in this view</h2>
           <p className="mt-1 text-body-sm text-text-secondary">
             Create a job draft, then publish when you&apos;re ready.
           </p>
@@ -88,7 +91,7 @@ export default function CompanyJobsPage() {
           {jobs.map((job) => (
             <li
               key={job.id}
-              className="flex flex-wrap items-center justify-between gap-4 px-5 py-4"
+              className="flex flex-wrap items-start justify-between gap-4 px-5 py-4"
             >
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -123,6 +126,11 @@ export default function CompanyJobsPage() {
                     `${job._count?.applications ?? 0} applicants`,
                   ])}
                 </p>
+                {(job.status === "published" || job.status === "paused") && (
+                  <p className="truncate text-mono text-xs text-text-muted">
+                    {origin}/jobs/{job.slug}
+                  </p>
+                )}
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" asChild>
@@ -144,11 +152,6 @@ export default function CompanyJobsPage() {
                   </Link>
                 </Button>
               </div>
-              {(job.status === "published" || job.status === "paused") && (
-                <p className="w-full truncate text-mono text-xs text-text-muted">
-                  {origin}/jobs/{job.slug}
-                </p>
-              )}
             </li>
           ))}
         </ul>

@@ -10,7 +10,7 @@ export default function MyApplicationsPage() {
   const { data, isLoading, error } = useMyApplications();
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-2xl space-y-6">
       <header className="space-y-1">
         <p className="eyebrow uppercase">Applications</p>
         <h1 className="text-h2 text-text-primary">My applications</h1>
@@ -22,7 +22,7 @@ export default function MyApplicationsPage() {
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading applications…</p>
       ) : error ? (
-        <p className="text-body-sm text-semantic-danger">
+        <p className="text-body-sm text-danger">
           {error instanceof Error ? error.message : "Failed to load"}
         </p>
       ) : !data || data.applications.length === 0 ? (

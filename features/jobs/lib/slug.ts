@@ -19,6 +19,7 @@ const RESERVED_ORG_SLUGS = new Set([
 export const RESERVED_WORKSPACE_SLUGS = new Set([
   "settings",
   "billing",
+  "talent",
   "members",
   "new",
   "workspaces",

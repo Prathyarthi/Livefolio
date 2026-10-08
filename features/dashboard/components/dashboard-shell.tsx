@@ -23,7 +23,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo, LogoMark } from "@/components/logo";
 import { siteConfig } from "@/lib/site";
-import { Footer } from "@/features/landing/components/footer";
 import {
   Sidebar,
   SidebarContent,
@@ -85,7 +84,7 @@ function AppSidebar() {
             aria-label={`${siteConfig.name} home`}
           >
             <LogoMark className="h-8 w-8 shrink-0 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8" />
-            <span className="font-display text-lg font-bold text-brand-primary group-data-[collapsible=icon]:hidden">
+            <span className="font-display text-lg font-bold text-text-primary group-data-[collapsible=icon]:hidden">
               {siteConfig.name}
             </span>
           </Link>
@@ -220,10 +219,6 @@ function DashboardHeader() {
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const hideFooter =
-    pathname.startsWith("/dashboard/edit") ||
-    pathname.startsWith("/dashboard/preview") ||
-    pathname.startsWith("/dashboard/import");
   const fullHeightPanel =
     pathname.startsWith("/dashboard/edit") ||
     pathname.startsWith("/dashboard/preview");
@@ -256,7 +251,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         >
           {children}
         </main>
-        {!hideFooter ? <Footer /> : null}
       </SidebarInset>
     </SidebarProvider>
   );

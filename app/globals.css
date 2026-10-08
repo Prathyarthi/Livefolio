@@ -43,6 +43,8 @@
   --color-brand-secondary: var(--color-brand-secondary);
   --color-brand-dark: var(--color-brand-dark);
   --color-brand-light: var(--color-brand-light);
+  --color-brand-fill: var(--color-brand-fill);
+  --color-brand-on-fill: var(--color-brand-on-fill);
 
   /* ── Surfaces / borders / text → utilities ── */
   --color-surface-base: var(--color-surface-base);
@@ -93,11 +95,16 @@
 
 /* ─── Design Tokens — LIGHT (default) ──────────────────────────── */
 :root {
-  /* Brand — Studio Notebook */
+  /* Brand — roles stay stable across themes:
+     primary = identity (type, wordmark, outlines)
+     secondary = accent as text / decoration on the current surface
+     fill / on-fill = CTA buttons (WCAG AA with paired text) */
   --color-brand-primary: #2a2744;
-  --color-brand-secondary: #e86a5a;
+  --color-brand-secondary: #b44538;
   --color-brand-dark: #211f3d;
   --color-brand-light: #f3f1ec;
+  --color-brand-fill: #b44538;
+  --color-brand-on-fill: #ffffff;
 
   /* Neutral surfaces */
   --color-surface-base: #fbfaf7;
@@ -142,14 +149,14 @@
   --foreground: var(--color-text-primary);
   --card: var(--color-surface-raised);
   --card-foreground: var(--color-text-primary);
-  --popover: var(--color-surface-base);
+  --popover: var(--color-surface-raised);
   --popover-foreground: var(--color-text-primary);
-  --primary: var(--color-brand-secondary);
-  --primary-foreground: #ffffff;
+  --primary: var(--color-brand-fill);
+  --primary-foreground: var(--color-brand-on-fill);
   --secondary: var(--color-brand-light);
   --secondary-foreground: var(--color-brand-dark);
   --muted: var(--color-surface-sunken);
-  --muted-foreground: var(--color-text-secondary);
+  --muted-foreground: var(--color-text-muted);
   --accent: var(--color-brand-light);
   --accent-foreground: var(--color-brand-dark);
   --destructive: var(--color-danger);
@@ -165,8 +172,8 @@
 
   --sidebar: var(--color-surface-raised);
   --sidebar-foreground: var(--color-text-primary);
-  --sidebar-primary: var(--color-brand-secondary);
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary: var(--color-brand-fill);
+  --sidebar-primary-foreground: var(--color-brand-on-fill);
   --sidebar-accent: var(--color-brand-light);
   --sidebar-accent-foreground: var(--color-brand-dark);
   --sidebar-border: var(--color-border-default);
@@ -176,11 +183,14 @@
 /* ─── Design Tokens — DARK (warm studio night) ─────────────────── */
 .dark,
 [data-theme="dark"] {
-  /* Brand — terracotta leads on dark; cream for soft accents */
-  --color-brand-primary: #ed7a6d;
+  /* Same roles as light: identity stays cream, accent stays terracotta,
+     fill is a darker coral that keeps white button text at 4.5:1. */
+  --color-brand-primary: #f4f1ea;
   --color-brand-secondary: #f09588;
-  --color-brand-dark: #f5a89e;
-  --color-brand-light: #252320;
+  --color-brand-dark: #f4f1ea;
+  --color-brand-light: #322824;
+  --color-brand-fill: #c24e40;
+  --color-brand-on-fill: #ffffff;
 
   /* Warm charcoal surfaces (no purple cast) */
   --color-surface-base: #111010;
@@ -190,7 +200,7 @@
   --color-border-strong: #433f3a;
   --color-text-primary: #f4f1ea;
   --color-text-secondary: #b0a99f;
-  --color-text-muted: #7d756c;
+  --color-text-muted: #8f877e;
 
   /* Semantic — slightly brighter for dark backgrounds */
   --color-success: #62c9ae;
@@ -211,12 +221,12 @@
   --card-foreground: var(--color-text-primary);
   --popover: var(--color-surface-raised);
   --popover-foreground: var(--color-text-primary);
-  --primary: var(--color-brand-secondary);
-  --primary-foreground: #ffffff;
+  --primary: var(--color-brand-fill);
+  --primary-foreground: var(--color-brand-on-fill);
   --secondary: var(--color-brand-light);
   --secondary-foreground: var(--color-text-primary);
   --muted: var(--color-surface-sunken);
-  --muted-foreground: var(--color-text-secondary);
+  --muted-foreground: var(--color-text-muted);
   --accent: var(--color-brand-light);
   --accent-foreground: var(--color-text-primary);
   --destructive: var(--color-danger);
@@ -226,8 +236,8 @@
 
   --sidebar: var(--color-surface-raised);
   --sidebar-foreground: var(--color-text-primary);
-  --sidebar-primary: var(--color-brand-secondary);
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary: var(--color-brand-fill);
+  --sidebar-primary-foreground: var(--color-brand-on-fill);
   --sidebar-accent: var(--color-brand-light);
   --sidebar-accent-foreground: var(--color-text-primary);
   --sidebar-border: var(--color-border-default);
@@ -445,9 +455,14 @@ body {
   }
 
   .glass-overlay {
-    background: color-mix(in srgb, var(--color-text-primary) 28%, transparent);
+    background: color-mix(in srgb, #1a1828 45%, transparent);
     -webkit-backdrop-filter: blur(10px) saturate(1.2);
     backdrop-filter: blur(10px) saturate(1.2);
+  }
+
+  .dark .glass-overlay,
+  [data-theme="dark"] .glass-overlay {
+    background: color-mix(in srgb, #000000 68%, transparent);
   }
 
   .glass-ambient {
@@ -548,8 +563,8 @@ body {
 }
 .dark .hero-blob,
 [data-theme="dark"] .hero-blob {
-  background: var(--color-brand-primary);
-  opacity: 0.08;
+  background: var(--color-brand-secondary);
+  opacity: 0.12;
 }
 
 /* ─── Marquee (social proof logos) ─────────────────────────────── */
@@ -678,6 +693,59 @@ body {
   animation: rail-cursor-blink 1s step-end infinite;
 }
 
+/* ─── Legal documents ──────────────────────────────────────────── */
+.legal-prose h2 {
+  margin-top: var(--space-6);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.legal-prose h2:first-child {
+  margin-top: 0;
+}
+
+.legal-prose h3 {
+  margin-top: var(--space-5);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.legal-prose p {
+  margin-top: var(--space-3);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+.legal-prose ul {
+  margin-top: var(--space-3);
+  list-style: disc;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+.legal-prose a {
+  color: var(--color-brand-secondary);
+  text-underline-offset: 4px;
+}
+
+.legal-prose a:hover {
+  color: var(--color-brand-primary);
+  text-decoration: underline;
+}
+
+.legal-prose strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
 /* ─── Reduced motion ───────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -689,25 +757,6 @@ body {
     scroll-behavior: auto !important;
   }
 
-  .legal-prose h2 {
-    @apply mt-8 text-lg font-semibold text-zinc-100 first:mt-0;
-  }
-
-  .legal-prose h3 {
-    @apply mt-5 text-base font-medium text-zinc-200;
-  }
-
-  .legal-prose p {
-    @apply mt-3 text-sm leading-relaxed text-zinc-400;
-  }
-
-  .legal-prose ul {
-    @apply mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-zinc-400;
-  }
-
-  .legal-prose a {
-    @apply text-teal-400 underline-offset-4 transition-colors hover:text-teal-300 hover:underline;
-  }
 }
 
 /* ─── Marketing footer (unlayered — reliable light/dark colors) ── */
@@ -730,7 +779,7 @@ body {
   --mf-bg: #141312;
   --mf-text: #b0a99f;
   --mf-heading: #f4f1ea;
-  --mf-muted: #7d756c;
+  --mf-muted: #8f877e;
   --mf-border: #2c2a26;
   --mf-hover: #f4f1ea;
   --mf-hover-surface: rgba(244, 241, 234, 0.08);

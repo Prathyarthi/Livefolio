@@ -5,21 +5,16 @@ import {
   CalendarClock,
   GraduationCap,
   MapPin,
-  Sparkles,
-  Users,
   Building2,
   Info,
 } from "lucide-react";
 import type { Job } from "@/features/jobs/api/use-jobs";
 import type { CustomFieldDraft } from "@/features/jobs/lib/role-fields";
 import {
-  EDUCATION_LABELS,
   EMPLOYMENT_TYPE_LABELS,
-  SENIORITY_LABELS,
   WORKPLACE_TYPE_LABELS,
   formatDeadline,
   formatExperienceRange,
-  formatOpenings,
   formatSalaryRange,
 } from "@/features/jobs/constants/labels";
 
@@ -105,40 +100,18 @@ export function JobHighlights({ job }: { job: Job }) {
   if (items.length === 0) return null;
 
   return (
-    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid gap-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
-        <li
-          key={`${item.label}-${item.value}`}
-          className="flex items-start gap-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]"
-        >
+        <li key={`${item.label}-${item.value}`} className="flex min-w-0 items-start gap-3">
           <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-brand-light text-brand-primary">
             {item.icon}
           </span>
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-              {item.label}
-            </p>
+            <p className="text-label uppercase text-text-muted">{item.label}</p>
             <p className="mt-0.5 font-medium text-text-primary">{item.value}</p>
           </div>
         </li>
       ))}
     </ul>
-  );
-}
-
-export function JobPerkPills({ job }: { job: Job }) {
-  const perks: string[] = [];
-  if (perks.length === 0) return null;
-  return (
-    <div className="flex flex-wrap gap-2">
-      {perks.map((perk) => (
-        <span
-          key={perk}
-          className="rounded-full border border-brand-primary/20 bg-brand-light px-3 py-1 text-xs font-medium text-brand-dark"
-        >
-          {perk}
-        </span>
-      ))}
-    </div>
   );
 }
