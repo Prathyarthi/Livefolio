@@ -139,6 +139,51 @@ function parseOptionalInt(value: string): number | null {
   return Number.isFinite(n) ? Math.trunc(n) : null;
 }
 
+export function formStateToPreviewJob(
+  form: JobRoleFormState,
+  organization: Job["organization"],
+  extras?: Partial<Pick<Job, "id" | "slug" | "status" | "workspaceId" | "createdAt" | "updatedAt" | "publishedAt">>,
+): Job {
+  const now = extras?.createdAt ?? new Date().toISOString();
+  return {
+    id: extras?.id ?? "preview",
+    organizationId: organization.id,
+    workspaceId: extras?.workspaceId ?? "preview",
+    title: form.title.trim() || "Untitled role",
+    slug: extras?.slug ?? "preview",
+    description: form.description,
+    department: trimOrNull(form.department),
+    employmentType: form.employmentType || null,
+    location: trimOrNull(form.location),
+    workplaceType: form.workplaceType || null,
+    experienceMin: parseOptionalInt(form.experienceMin),
+    experienceMax: parseOptionalInt(form.experienceMax),
+    salaryMin: parseOptionalInt(form.salaryMin),
+    salaryMax: parseOptionalInt(form.salaryMax),
+    salaryCurrency: form.salaryCurrency || "USD",
+    customFields: form.customFields,
+    responsibilities: trimOrNull(form.responsibilities),
+    qualifications: trimOrNull(form.qualifications),
+    benefits: trimOrNull(form.benefits),
+    applicationDeadline: form.applicationDeadline || null,
+    status: extras?.status ?? "published",
+    publishedAt: extras?.publishedAt ?? now,
+    createdAt: now,
+    updatedAt: extras?.updatedAt ?? now,
+    organization,
+    requirements: form.requirements
+      .filter((r) => r.label.trim())
+      .map((r, index) => ({
+        id: r.id ?? r.key,
+        type: r.type,
+        category: r.category,
+        label: r.label.trim(),
+        description: r.description ?? null,
+        sortOrder: index,
+      })),
+  };
+}
+
 export function formStateToJobInput(state: JobRoleFormState): JobInput {
   return {
     title: state.title.trim(),
