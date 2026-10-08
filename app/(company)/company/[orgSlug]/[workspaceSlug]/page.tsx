@@ -74,7 +74,7 @@ export default function CompanyOverviewPage() {
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href={`/company/${orgSlug}/settings`}>
+            <Link href={`/company/${orgSlug}/${workspaceSlug}/settings`}>
               <Settings className="h-4 w-4" />
               Settings
             </Link>

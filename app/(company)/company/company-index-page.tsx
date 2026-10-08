@@ -153,12 +153,12 @@ export function CompanyIndexPage() {
         </header>
 
         {orgs && orgs.length > 0 ? (
-          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+          <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
             {orgs.map(({ organization, role }) => (
               <li key={organization.id}>
                 <Link
                   href={`/company/${organization.slug}`}
-                  className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-base"
+                  className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-sunken/50"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <OrgLogo
