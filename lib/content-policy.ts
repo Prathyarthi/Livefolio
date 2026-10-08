@@ -2,6 +2,8 @@ import { stripRichTextToPlain } from "@/lib/rich-text";
 
 export const MAX_STORED_URL_CHARS = 2_048;
 export const MAX_SHORT_LABEL_CHARS = 160;
+/** Achievements are often a title plus a one-line description from a resume. */
+export const MAX_ACHIEVEMENT_TITLE_CHARS = 2_000;
 export const MAX_LONG_TEXT_CHARS = 10_000;
 /** Raw stored markdown/HTML may include mark syntax overhead. */
 export const MAX_LONG_TEXT_RAW_CHARS = MAX_LONG_TEXT_CHARS * 2;
