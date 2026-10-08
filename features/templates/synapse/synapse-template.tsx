@@ -33,6 +33,7 @@ import { RichText,
   HERO_HEADLINE_SCALE,
   HERO_TITLE_BASE,
   HERO_TITLE_SCALE_6XL,
+  PROJECTS_GRID_2,
   PROJECTS_GRID_3,
   TEMPLATE_CONTAINER,
   TechChip,
@@ -56,7 +57,6 @@ import {
   ChevronRight,
   ExternalLink,
   GraduationCap,
-  Mail,
   Menu,
   Trophy,
   X,
@@ -327,9 +327,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
             {labels.projects}
           </SectionHeading>
           <CollapsibleList
-            initial={6}
-            wrapperClassName={cn(PROJECTS_GRID_3, "gap-5 @sm:gap-6 @md:gap-8")}
-            buttonClassName={cn(COLLAPSE_BTN, "@md:col-span-2 @lg:col-span-3")}
+            initial={4}
+            wrapperClassName={cn(PROJECTS_GRID_2, "gap-5 @sm:gap-6 @md:gap-8")}
+            buttonClassName={cn(COLLAPSE_BTN, "@md:col-span-2")}
           >
             {visibleProjects.map((proj) => (
               <div
@@ -903,7 +903,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           </section>
         )}
 
-        {(data.portfolio.contactEmail || visibleSocials.length > 0) && (
+        {visibleSocials.length > 0 && (
           <section id="contact" className={cn(SECTION_PAD, "scroll-mt-24")}>
             <div className="max-w-4xl mx-auto text-center bg-gradient-to-b from-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] to-transparent p-8 @sm:p-12 rounded-[32px] @sm:rounded-[40px] border border-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)]">
               <h2 className="text-3xl @sm:text-4xl font-bold mb-4 @sm:mb-6 leading-tight !text-[#09090b]">
@@ -913,40 +913,29 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                 If you&apos;re building something that needs to ship, let&apos;s talk.
               </p>
               <div className="flex flex-col @sm:flex-row gap-4 @sm:gap-6 justify-center items-center">
-                {data.portfolio.contactEmail && (
-                  <a
-                    href={`mailto:${data.portfolio.contactEmail}`}
-                    className="w-full @sm:w-auto px-8 py-4 @sm:px-10 @sm:py-5 bg-[#09090b] text-white rounded-2xl font-bold text-base @sm:text-lg hover:scale-105 hover:bg-[var(--lf-accent)] transition-all flex items-center justify-center gap-3"
-                    data-lf-track="email"
-                  >
-                    <Mail size={19} /> Say Hello
-                  </a>
-                )}
-                {visibleSocials.length > 0 && (
-                  <div className="flex gap-3 @sm:gap-4">
-                    {visibleSocials.slice(0, 5).map((profile) => (
-                      <a
-                        key={`${profile.platform}-${profile.url}`}
-                        href={profile.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={profile.platform}
-                        className={cn(
-                          CARD,
-                          ACCENT_HOVER,
-                          "w-12 h-12 @sm:w-14 @sm:h-14 rounded-xl @sm:rounded-2xl flex items-center justify-center hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] transition-colors",
-                        )}
-                        data-lf-track="social"
-                        data-lf-label={profile.platform}
-                      >
-                        <PlatformIcon
-                          platform={profile.platform}
-                          className="h-5 w-5 text-[#09090b]"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                )}
+                <div className="flex gap-3 @sm:gap-4">
+                  {visibleSocials.slice(0, 5).map((profile) => (
+                    <a
+                      key={`${profile.platform}-${profile.url}`}
+                      href={profile.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={profile.platform}
+                      className={cn(
+                        CARD,
+                        ACCENT_HOVER,
+                        "w-12 h-12 @sm:w-14 @sm:h-14 rounded-xl @sm:rounded-2xl flex items-center justify-center hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] transition-colors",
+                      )}
+                      data-lf-track="social"
+                      data-lf-label={profile.platform}
+                    >
+                      <PlatformIcon
+                        platform={profile.platform}
+                        className="h-5 w-5 text-[#09090b]"
+                      />
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
