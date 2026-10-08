@@ -27,7 +27,16 @@ function RichInline({ text }: { text: string }) {
   return <RichText text={text} />;
 }
 
-export const HERO_PROFILE_PLATFORMS = ["github", "linkedin", "medium", "leetcode"] as const;
+export const HERO_PROFILE_PLATFORMS = [
+  "github",
+  "linkedin",
+  "medium",
+  "devto",
+  "hashnode",
+  "leetcode",
+  "codeforces",
+  "stackoverflow",
+] as const;
 
 const HERO_PROFILE_PLATFORM_SET = new Set<string>(HERO_PROFILE_PLATFORMS);
 

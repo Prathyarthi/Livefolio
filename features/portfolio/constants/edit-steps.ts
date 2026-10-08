@@ -38,6 +38,6 @@ export const EDIT_STEP_DESCRIPTIONS: Record<EditStepValue, string> = {
   projects: "Featured work with links, tech stack, and descriptions.",
   achievements: "Awards, talks, milestones, and standout moments.",
   custom: "Extra sections for anything that does not fit elsewhere.",
-  social: "GitHub, LinkedIn, Medium, LeetCode, and other profiles.",
+  social: "GitHub, LinkedIn, writing platforms, coding profiles, and other links.",
   publish: "Go live, share your link, and let recruiters find you.",
 };

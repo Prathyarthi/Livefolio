@@ -1,9 +1,10 @@
 import type { PortfolioData } from "./types";
 import { formatSectionLabel } from "./section-labels";
 import { normalizeSocialProfiles } from "@/lib/social-profile";
+import { applyHiddenIntegrations } from "@/lib/integration-visibility";
 
 export function portfolioToTemplateData(portfolio: any): PortfolioData {
-  return {
+  const data = {
     portfolio: {
       title: portfolio.title ?? "",
       headline: portfolio.headline ?? "",
@@ -129,5 +130,19 @@ export function portfolioToTemplateData(portfolio: any): PortfolioData {
     livePreviewProjectIds: Array.isArray(portfolio.livePreviewProjectIds)
       ? portfolio.livePreviewProjectIds
       : [],
+  };
+
+  const visible = applyHiddenIntegrations({
+    customization: data.portfolio.customization,
+    socialProfiles: data.socialProfiles,
+    articles: data.articles,
+    projects: data.projects,
+  });
+
+  return {
+    ...data,
+    socialProfiles: visible.socialProfiles,
+    articles: visible.articles,
+    projects: visible.projects,
   };
 }

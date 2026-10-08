@@ -15,7 +15,7 @@ const STEPS = [
   {
     icon: Rocket,
     title: "Publish",
-    body: "Pick a layout and go live on your own link. Optionally connect GitHub, Medium, and LeetCode to keep it updated.",
+    body: "Pick a layout and go live on your own link. Optionally connect GitHub, your writing, and coding profiles to keep it updated.",
   },
 ];
 
