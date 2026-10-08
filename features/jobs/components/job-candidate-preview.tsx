@@ -46,6 +46,7 @@ function formToPreviewJob(form: JobRoleFormState, org: PreviewOrg): Job {
     salaryMax: input.salaryMax ?? null,
     salaryCurrency: input.salaryCurrency ?? "USD",
     customFields: input.customFields ?? [],
+    screeningQuestions: input.screeningQuestions ?? [],
     responsibilities: input.responsibilities ?? null,
     qualifications: input.qualifications ?? null,
     benefits: input.benefits ?? null,
@@ -243,6 +244,13 @@ export function JobCandidatePreview({
             <p className="mt-1.5 text-xs text-text-secondary">
               Candidates share a living profile instead of a static resume.
             </p>
+            {(job.screeningQuestions?.length ?? 0) > 0 ? (
+              <p className="mt-1.5 text-xs text-text-muted">
+                Applicants will be asked {job.screeningQuestions?.length} extra
+                question
+                {(job.screeningQuestions?.length ?? 0) === 1 ? "" : "s"}.
+              </p>
+            ) : null}
             <Button size="sm" className="mt-3 w-full" disabled>
               Apply with Livefolio
             </Button>
