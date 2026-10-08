@@ -45,7 +45,7 @@ export function DeleteAccountDialog({
             </p>
             <ul className="mt-2 space-y-1.5 text-sm text-text-secondary dark:text-text-primary">
               <li>Your portfolio and all published content</li>
-              <li>Imported resume, GitHub, and Medium data</li>
+              <li>Imported resume and platform data</li>
               <li>Analytics and subscription access</li>
               <li>Your account and login credentials</li>
             </ul>

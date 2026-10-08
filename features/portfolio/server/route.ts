@@ -19,6 +19,7 @@ import {
   normalizeHidden,
   normalizeOrder,
 } from "@/features/templates/section-order";
+import { normalizeHiddenIntegrations } from "@/lib/integration-visibility";
 import { sendPublishedPortfolioEmailSafe } from "@/lib/email-published";
 import {
   ContentValidationError,
@@ -329,6 +330,14 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             },
           };
         }
+        if (customization?.hiddenIntegrations !== undefined) {
+          normalizedCustomization = {
+            ...normalizedCustomization,
+            hiddenIntegrations: normalizeHiddenIntegrations(
+              customization.hiddenIntegrations,
+            ),
+          };
+        }
         portfolioFields = {
           ...rest,
           ...(title !== undefined
@@ -504,6 +513,9 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             ),
             primaryColor: t.Optional(
               t.String({ pattern: "^#[0-9a-fA-F]{6}$" }),
+            ),
+            hiddenIntegrations: t.Optional(
+              t.Array(t.String({ maxLength: 32 }), { maxItems: 16 }),
             ),
           }),
         }),

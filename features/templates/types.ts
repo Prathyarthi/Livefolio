@@ -18,6 +18,8 @@ export interface PortfolioCustomization {
   sectionLayout?: SectionLayoutCustomization;
   /** Accent color hex (e.g. #3b82f6) for templates that support the shared palette. */
   primaryColor?: string;
+  /** Integration platforms the user has turned off for the public portfolio. */
+  hiddenIntegrations?: string[];
   [key: string]: unknown;
 }
 

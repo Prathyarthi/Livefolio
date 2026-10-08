@@ -16,8 +16,8 @@ export function Integrations() {
             Enrich your portfolio beyond the resume
           </h2>
           <p className="prose-measure mx-auto mt-4 text-body text-text-secondary">
-            Your resume gets you live fast. Then connect GitHub, Medium, and
-            LeetCode to pull in repos, articles, and coding stats — so your
+            Your resume gets you live fast. Then connect the platforms where your
+            work already lives - repos, articles, and coding stats - so your
             portfolio stays current without starting over.
           </p>
         </div>
