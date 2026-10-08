@@ -15,6 +15,7 @@ import {
 import {
   emptyJobRoleForm,
   formStateToJobInput,
+  validateJobRoleForm,
   type JobRoleFormState,
 } from "@/features/jobs/lib/role-fields";
 import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field";
@@ -65,8 +66,9 @@ export default function NewJobPage() {
 
   async function handleSubmit(publish: boolean) {
     if (!form) return;
-    if (!form.title.trim() || !form.description.trim()) {
-      toast.error("Title and description are required");
+    const formError = validateJobRoleForm(form);
+    if (formError) {
+      toast.error(formError);
       return;
     }
 

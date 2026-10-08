@@ -15,6 +15,11 @@ import {
   useApplicationPreview,
   useSubmitApplication,
 } from "@/features/applications/api/use-applications";
+import { ScreeningQuestionsDrawer } from "@/features/applications/components/screening-questions-drawer";
+import {
+  unansweredRequiredQuestions,
+  type ScreeningAnswerInput,
+} from "@/features/jobs/lib/screening-questions";
 
 export default function ApplyJobPage() {
   const params = useParams<{ jobSlug: string }>();
@@ -24,6 +29,10 @@ export default function ApplyJobPage() {
   const { data, isLoading, error, refetch } = useApplicationPreview(jobSlug);
   const submit = useSubmitApplication(jobSlug);
   const [coverNote, setCoverNote] = useState("");
+  const [screeningAnswers, setScreeningAnswers] = useState<
+    ScreeningAnswerInput[]
+  >([]);
+  const [questionsOpen, setQuestionsOpen] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -32,6 +41,12 @@ export default function ApplyJobPage() {
       );
     }
   }, [status, router, jobSlug]);
+
+  useEffect(() => {
+    if ((data?.job.screeningQuestions?.length ?? 0) > 0) {
+      setQuestionsOpen(true);
+    }
+  }, [data?.job.screeningQuestions?.length]);
 
   if (status === "loading" || isLoading) {
     return (
@@ -103,11 +118,22 @@ export default function ApplyJobPage() {
 
   const snapshot = data.snapshot;
   const profile = snapshot.profile;
+  const screeningQuestions = data.job.screeningQuestions ?? [];
 
   async function handleSubmit() {
+    const missing = unansweredRequiredQuestions(
+      screeningQuestions,
+      screeningAnswers,
+    );
+    if (missing.length > 0) {
+      setQuestionsOpen(true);
+      toast.error(`Please answer: ${missing[0]?.prompt}`);
+      return;
+    }
     try {
       const application = await submit.mutateAsync({
         coverNote: coverNote.trim() || undefined,
+        screeningAnswers,
       });
       toast.success("Application submitted");
       router.push(`/dashboard/applications/${application.id}`);
@@ -218,6 +244,26 @@ export default function ApplyJobPage() {
           />
         </div>
 
+        {screeningQuestions.length > 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4">
+            <div>
+              <p className="text-body-sm font-medium text-text-primary">
+                A few questions from the hiring team
+              </p>
+              <p className="text-xs text-text-muted">
+                Please answer these before you submit.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setQuestionsOpen(true)}
+            >
+              Answer questions
+            </Button>
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap gap-3">
           <Button onClick={handleSubmit} disabled={submit.isPending} size="lg">
             {submit.isPending ? "Submitting…" : "Submit application"}
@@ -230,6 +276,13 @@ export default function ApplyJobPage() {
           </Button>
         </div>
       </div>
+      <ScreeningQuestionsDrawer
+        open={questionsOpen}
+        onOpenChange={setQuestionsOpen}
+        questions={screeningQuestions}
+        answers={screeningAnswers}
+        onAnswersChange={setScreeningAnswers}
+      />
     </div>
   );
 }

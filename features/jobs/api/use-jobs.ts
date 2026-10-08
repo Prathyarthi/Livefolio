@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ScreeningQuestion } from "@/features/jobs/lib/screening-questions";
 
 export class ApiRequestError extends Error {
   upgradeRequired?: boolean;
@@ -83,6 +84,7 @@ export type Job = {
   salaryMax: number | null;
   salaryCurrency: string | null;
   customFields?: Array<{ id?: string; label: string; value: string }> | null;
+  screeningQuestions?: ScreeningQuestion[] | null;
   responsibilities: string | null;
   qualifications: string | null;
   benefits: string | null;
@@ -117,6 +119,7 @@ export type JobInput = {
   salaryMax?: number | null;
   salaryCurrency?: string | null;
   customFields?: Array<{ id?: string; label: string; value: string }> | null;
+  screeningQuestions?: ScreeningQuestion[] | null;
   responsibilities?: string | null;
   qualifications?: string | null;
   benefits?: string | null;

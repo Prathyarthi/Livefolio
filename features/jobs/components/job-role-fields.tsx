@@ -26,6 +26,7 @@ import {
   SENIORITY_LABELS,
   SALARY_PERIOD_LABELS,
 } from "@/features/jobs/constants/labels";
+import { JobScreeningQuestionsFields } from "@/features/jobs/components/job-screening-questions-fields";
 
 function FieldGroup({
   title,
@@ -413,6 +414,16 @@ export function JobRoleFields({
             ))}
           </div>
         </div>
+      </FieldGroup>
+
+      <FieldGroup
+        title="Application questions"
+        description="These open when someone clicks Apply. You can add up to 10."
+      >
+        <JobScreeningQuestionsFields
+          questions={values.screeningQuestions}
+          onChange={(screeningQuestions) => onChange({ screeningQuestions })}
+        />
       </FieldGroup>
     </div>
   );
