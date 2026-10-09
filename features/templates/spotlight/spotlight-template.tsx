@@ -15,7 +15,7 @@ import { ExternalLink, Menu, X } from "lucide-react";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
@@ -340,6 +340,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                         rel="noopener noreferrer"
                         className="block rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[var(--lf-accent)]"
                       >
+                        <ArticleSourceLabel source={article.source} className="mb-2" />
                         <h3 className="text-xl font-bold text-gray-950"><RichText text={article.title} /></h3>
                         {article.description && (
                           <p className="mt-2 text-sm text-gray-500">{article.description}</p>

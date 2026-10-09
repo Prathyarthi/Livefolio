@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -257,6 +257,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
               key={article.id}
               className="border-4 border-black bg-white p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
             >
+              <ArticleSourceLabel source={article.source} className="mb-2" />
               <h3 className="font-sans text-lg font-black uppercase text-black">
                 <a
                   href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}

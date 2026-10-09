@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Heart, Star } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -321,6 +321,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
             >
               {articles.map((article) => (
                 <article key={article.id} className="bg-white rounded-[2.5rem] p-8 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(255,179,186,0.15)] transition-all flex flex-col group">
+                  <ArticleSourceLabel source={article.source} className="mb-2" />
                   <h3 className="text-xl font-extrabold text-[#2d2d2d] mb-4 group-hover:text-[#6aabdf] transition-colors leading-tight">
                     <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
                       <RichText text={article.title} />

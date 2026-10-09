@@ -13,7 +13,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { ArrowUpRight, Star } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -327,6 +327,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                         key={article.id}
                         className="rounded-3xl bg-[#0B0F19]/60 backdrop-blur-xl border border-[color-mix(in_srgb,var(--lf-accent)_22%,transparent)] p-6 transition-all hover:border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] hover:shadow-[0_0_20px_color-mix(in srgb, var(--lf-accent) 20%, transparent)] hover:-translate-y-1"
                       >
+                        <ArticleSourceLabel source={article.source} className="mb-2" />
                         <h3 className="text-lg font-bold text-white mb-3">
                           <a
                             href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}

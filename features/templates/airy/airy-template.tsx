@@ -12,7 +12,7 @@ import {
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   DescriptionBlock,
   TechChip,
   TemplateNavbar,
@@ -234,6 +234,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                   <CollapsibleList initial={3} wrapperClassName="grid gap-6 md:grid-cols-2" buttonClassName="mt-6 mx-auto bg-white border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] text-[var(--lf-accent)] px-6 py-2 rounded-full font-medium hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] transition-colors">
                     {articles.map((article) => (
                       <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block rounded-3xl bg-white border border-slate-100 p-6 shadow-xs hover:border-[color-mix(in_srgb,var(--lf-accent)_35%,white)] hover:shadow-md transition-all">
+                        <ArticleSourceLabel source={article.source} className="mb-2" />
                         <h3 className="text-xl font-bold text-slate-800 mb-2"><RichText text={article.title} /></h3>
                         {article.description && <p className="text-slate-600 text-sm mb-4 line-clamp-2">{article.description}</p>}
                         <div className="flex flex-wrap gap-2 mb-4">

@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -260,6 +260,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
               key={article.id}
               className="rounded-[1.5rem] border border-slate-200 bg-slate-50/60 p-5"
             >
+              <ArticleSourceLabel source={article.source} className="mb-2" />
               <h3 className="text-base font-semibold text-slate-900">
                 <a
                   href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}

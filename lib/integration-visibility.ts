@@ -75,7 +75,7 @@ export function isHiddenIntegrationUrl(
 type VisibilityInput = {
   customization?: { hiddenIntegrations?: unknown } | null;
   socialProfiles: Array<{ platform: string; url: string }>;
-  articles: Array<{ url: string }>;
+  articles: Array<{ url: string; source?: string | null }>;
   projects: Array<{ sourceUrl: string | null }>;
 };
 
@@ -97,9 +97,11 @@ export function applyHiddenIntegrations<T extends VisibilityInput>(data: T): T {
     socialProfiles: data.socialProfiles.filter(
       (profile) => !hidden.has(profile.platform.toLowerCase()),
     ),
-    articles: data.articles.filter(
-      (article) => !isHiddenIntegrationUrl(article.url, hidden, profileHosts),
-    ),
+    articles: data.articles.filter((article) => {
+      const source = article.source?.toLowerCase();
+      if (source && hidden.has(source)) return false;
+      return !isHiddenIntegrationUrl(article.url, hidden, profileHosts);
+    }),
     projects: data.projects.filter(
       (project) =>
         !hidden.has("github") ||

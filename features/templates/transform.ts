@@ -2,6 +2,7 @@ import type { PortfolioData } from "./types";
 import { formatSectionLabel } from "./section-labels";
 import { normalizeSocialProfiles } from "@/lib/social-profile";
 import { applyHiddenIntegrations } from "@/lib/integration-visibility";
+import { resolveArticleSource } from "@/lib/article-source";
 
 export function portfolioToTemplateData(portfolio: any): PortfolioData {
   const data = {
@@ -85,6 +86,7 @@ export function portfolioToTemplateData(portfolio: any): PortfolioData {
           : new Date(a.publishedAt).toISOString()
         : null,
       readTime: a.readTime ?? null,
+      source: a.source ?? null,
     })),
     socialProfiles: normalizeSocialProfiles(
       (portfolio.socialProfiles ?? []).map((s: any) => ({
@@ -132,10 +134,19 @@ export function portfolioToTemplateData(portfolio: any): PortfolioData {
       : [],
   };
 
+  const articles = data.articles.map((article: PortfolioData["articles"][number]) => ({
+    ...article,
+    source: resolveArticleSource(
+      article.url,
+      article.source,
+      data.socialProfiles,
+    ),
+  }));
+
   const visible = applyHiddenIntegrations({
     customization: data.portfolio.customization,
     socialProfiles: data.socialProfiles,
-    articles: data.articles,
+    articles,
     projects: data.projects,
   });
 

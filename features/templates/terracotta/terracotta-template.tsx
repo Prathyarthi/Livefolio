@@ -12,7 +12,7 @@ import {
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   DescriptionBlock,
   TechChip,
   TechIcon,
@@ -250,6 +250,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                   <CollapsibleList initial={3} wrapperClassName="space-y-12" buttonClassName="mt-12 mx-auto block uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors">
                     {articles.map((article) => (
                       <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block group">
+                        <ArticleSourceLabel source={article.source} className="mb-2" />
                         <h3 className="text-2xl font-medium text-[#3D405B] group-hover:text-[var(--lf-accent)] transition-colors mb-3"><RichText text={article.title} /></h3>
                         {article.description && <p className="text-lg font-light text-[#3D405B]/80 mb-4">{article.description}</p>}
                         <div className="flex items-center gap-4 text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)]">

@@ -12,7 +12,7 @@ import {
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   DescriptionBlock,
   TechChip,
   TemplateNavbar,
@@ -232,6 +232,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                   <CollapsibleList initial={3} wrapperClassName="grid gap-8 md:grid-cols-2" buttonClassName="mt-12 mx-auto bg-[#264653] text-white px-8 py-3 font-bold uppercase tracking-widest hover:bg-[var(--lf-accent)] transition-colors">
                     {articles.map((article) => (
                       <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block bg-white border-4 border-[#264653] p-8 rounded-xl shadow-[8px_8px_0_0_#264653] hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--lf-accent)] transition-all">
+                        <ArticleSourceLabel source={article.source} className="mb-2" />
                         <h3 className="text-2xl font-black text-[#264653] uppercase mb-4"><RichText text={article.title} /></h3>
                         {article.description && <p className="text-lg font-medium text-[#264653]/80 mb-6">{article.description}</p>}
                         <div className="flex items-center gap-4 text-sm font-bold tracking-widest uppercase text-[var(--lf-accent)]">
