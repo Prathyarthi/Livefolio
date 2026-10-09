@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Sun, Music, Zap } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -325,6 +325,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
             >
               {articles.map((article) => (
                 <article key={article.id} className="bg-[#1a0b2e]/80 border-t-4 border-[var(--lf-accent)] p-6 shadow-[0_0_15px_rgba(0,240,255,0.1)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all flex flex-col group">
+                  <ArticleSourceLabel source={article.source} className="mb-2" />
                   <h3 className="text-lg font-black text-white uppercase tracking-wider mb-4 group-hover:text-[var(--lf-accent)] transition-colors leading-tight drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">
                     <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
                       <RichText text={article.title} />

@@ -81,6 +81,7 @@ export interface PortfolioData {
     tags: string[];
     publishedAt: string | null;
     readTime: number | null;
+    source: string | null;
   }>;
   socialProfiles: Array<{
     platform: string;

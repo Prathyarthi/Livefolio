@@ -44,6 +44,30 @@ export function isHeroProfilePlatform(platform: string) {
   return HERO_PROFILE_PLATFORM_SET.has(platform.toLowerCase());
 }
 
+export function ArticleSourceLabel({
+  source,
+  className,
+}: {
+  source?: string | null;
+  className?: string;
+}) {
+  if (!source) return null;
+  const label = getPlatformIcon(source);
+  if (!label) return null;
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider opacity-80",
+        className,
+      )}
+    >
+      <PlatformIcon platform={source} className="h-3 w-3" />
+      <span>{label}</span>
+    </span>
+  );
+}
+
 export function visibleSocialProfiles(
   profiles: PortfolioData["socialProfiles"],
   options?: { excludeHeroPlatforms?: boolean },

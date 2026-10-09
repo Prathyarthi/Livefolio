@@ -12,6 +12,7 @@ import { fetchCodeforcesStats } from "@/lib/codeforces";
 import { fetchDevtoArticles } from "@/lib/devto";
 import { fetchHashnodeArticles } from "@/lib/hashnode";
 import { fetchStackOverflowProfile } from "@/lib/stackoverflow";
+import { normalizeArticleSource } from "@/lib/article-source";
 import { fetchLeetCodeStats } from "@/lib/leetcode";
 import { fetchMediumArticles } from "@/lib/medium";
 import { getPlanLimitMessage, resolveAccessForUser } from "@/lib/entitlements";
@@ -92,7 +93,9 @@ type ImportedArticleBody = {
 async function insertImportedArticles(
   portfolioId: string,
   articles: ImportedArticleBody[],
+  source: string,
 ) {
+  const articleSource = normalizeArticleSource(source);
   const prepared = articles.flatMap((article, index) => {
     const url = sanitizeImportedStoredUrl(article.url, `Articles[${index}].url`);
     const title = sanitizeImportedLabel(article.title);
@@ -116,6 +119,7 @@ async function insertImportedArticles(
         ),
         publishedAt,
         readTime: article.readTime ?? null,
+        source: articleSource,
       },
     ];
   });
@@ -533,6 +537,7 @@ export const profile = new Elysia({ prefix: "/profile" })
             ),
             publishedAt,
             readTime: article.readTime ?? null,
+            source: "medium",
           }].filter((entry) => entry.title);
         });
 
@@ -629,7 +634,11 @@ export const profile = new Elysia({ prefix: "/profile" })
 
       const portfolio = await ensureUserPortfolio(gate.session.userId);
       const username = sanitizeImportedLabel(ctx.body.username);
-      const result = await insertImportedArticles(portfolio.id, ctx.body.articles);
+      const result = await insertImportedArticles(
+        portfolio.id,
+        ctx.body.articles,
+        "devto",
+      );
       if (username) {
         await upsertImportedProfile(
           portfolio.id,
@@ -681,7 +690,11 @@ export const profile = new Elysia({ prefix: "/profile" })
 
       const portfolio = await ensureUserPortfolio(gate.session.userId);
       const username = sanitizeImportedLabel(ctx.body.username);
-      const result = await insertImportedArticles(portfolio.id, ctx.body.articles);
+      const result = await insertImportedArticles(
+        portfolio.id,
+        ctx.body.articles,
+        "hashnode",
+      );
       if (username) {
         await upsertImportedProfile(
           portfolio.id,
@@ -737,7 +750,11 @@ export const profile = new Elysia({ prefix: "/profile" })
 
       const portfolio = await ensureUserPortfolio(gate.session.userId);
       const username = sanitizeImportedLabel(ctx.body.username);
-      const result = await insertImportedArticles(portfolio.id, ctx.body.answers);
+      const result = await insertImportedArticles(
+        portfolio.id,
+        ctx.body.answers,
+        "stackoverflow",
+      );
       if (username) {
         await upsertImportedProfile(
           portfolio.id,

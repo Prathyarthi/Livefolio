@@ -18,6 +18,7 @@ import {
   sanitizeImportedStringList,
   sanitizeImportedStoredUrl,
 } from "@/lib/content-policy";
+import { resolveArticleSource } from "@/lib/article-source";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -210,6 +211,7 @@ export async function bulkImportPortfolioData(
           MAX_TECH_STACK_ITEMS,
           MAX_TECH_STACK_ITEM_CHARS,
         ),
+        source: resolveArticleSource(url, article.source),
       }];
     });
   const certifications = data.certifications
@@ -398,6 +400,7 @@ export async function bulkImportPortfolioData(
               tags: article.tags,
               publishedAt: toDateOrNull(article.publishedAt),
               readTime: article.readTime,
+              source: article.source,
               sortOrder: idx,
             },
           })

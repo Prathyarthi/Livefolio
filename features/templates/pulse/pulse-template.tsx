@@ -24,7 +24,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -813,6 +813,7 @@ function ArticlesSection({
               id={`article-card-${art.id}`}
             >
               <div className="space-y-1">
+                <ArticleSourceLabel source={art.source} className="mb-1" />
                 {art.publishedAt && (
                   <span className="text-[10px] font-mono text-slate-500 bg-[#0a0a0a] px-2 py-0.5 rounded border border-white/10">
                     {displayDate(art.publishedAt)}

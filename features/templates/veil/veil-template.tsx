@@ -30,7 +30,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -1038,6 +1038,7 @@ function ArticlesSection({
                   {art.readTime ? <span className={cn("block", FAINT)}>{art.readTime} min read</span> : null}
                 </div>
                 <div className="min-w-0 space-y-2 @md:col-span-8">
+                  <ArticleSourceLabel source={art.source} />
                   <h3 className="font-serif text-3xl leading-tight tracking-tight text-[var(--veil-paper)] transition-colors group-hover:text-[var(--lf-accent)] [overflow-wrap:anywhere]">
                     {art.title}
                   </h3>

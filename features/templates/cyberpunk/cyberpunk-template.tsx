@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Terminal, Zap, Cpu } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -323,6 +323,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             >
               {articles.map((article) => (
                 <article key={article.id} className="border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-5 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] hover:border-[var(--lf-accent)] transition-colors group flex flex-col">
+                  <ArticleSourceLabel source={article.source} className="mb-2" />
                   <h3 className="text-lg font-bold text-white uppercase tracking-wider mb-3 group-hover:text-[var(--lf-accent)] transition-colors">
                     <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
                       <RichText text={article.title} />
