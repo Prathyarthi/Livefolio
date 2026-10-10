@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RichText } from "@/components/rich-text";
 import { useMyApplications } from "@/features/applications/api/use-applications";
 import { APPLICATION_STATUS_LABELS } from "@/features/jobs/constants/labels";
 import { ListPagination } from "@/components/list-pagination";
@@ -58,7 +59,7 @@ export default function MyApplicationsPage() {
                 >
                   <div className="min-w-0 space-y-1">
                     <p className="truncate font-medium text-text-primary">
-                      {application.job.title}
+                      <RichText as="span" text={application.job.title} />
                     </p>
                     <p className="text-body-sm text-text-secondary">
                       {application.job.organization.name} · Applied{" "}

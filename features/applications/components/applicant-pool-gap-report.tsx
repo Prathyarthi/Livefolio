@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { RichText } from "@/components/rich-text";
 import type { PoolGapReport } from "@/features/applications/lib/pool-gaps";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 
 export function ApplicantPoolGapReport({
   report,
@@ -56,12 +58,16 @@ export function ApplicantPoolGapReport({
       {uncoveredRequired.length > 0 ? (
         <p className="text-body-sm text-semantic-danger">
           Nobody in this pool has evidence for{" "}
-          {uncoveredRequired.map((row) => row.label).join(", ")}.
+          {uncoveredRequired
+            .map((row) => stripRichTextToPlain(row.label))
+            .join(", ")}
+          .
         </p>
       ) : weakRequired.length > 0 ? (
         <p className="text-body-sm text-text-secondary">
           Thin coverage on{" "}
-          {weakRequired.map((row) => row.label).join(", ")} — under 25% of
+          {weakRequired.map((row) => stripRichTextToPlain(row.label)).join(", ")}{" "}
+          — under 25% of
           applicants.
         </p>
       ) : (
@@ -75,7 +81,9 @@ export function ApplicantPoolGapReport({
           <li key={`${row.type}::${row.label}`} className="space-y-1.5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="text-body-sm text-text-primary">
-                <span className="font-medium">{row.label}</span>
+                <span className="font-medium">
+                  <RichText as="span" text={row.label} />
+                </span>
                 <span className="ml-2 text-xs text-text-muted">
                   {row.type === "required" ? "Required" : "Preferred"}
                 </span>
