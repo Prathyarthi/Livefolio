@@ -3,9 +3,8 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -67,10 +66,11 @@ export function JobRoleFields({
       >
         <div className="space-y-2">
           <Label htmlFor="title">Job title</Label>
-          <Input
+          <RichTextEditor
             id="title"
+            singleLine
             value={values.title}
-            onChange={(e) => onChange({ title: e.target.value })}
+            onChange={(title) => onChange({ title })}
             placeholder="Senior Marketing Manager"
           />
           <p className="text-xs text-text-muted">
@@ -81,21 +81,22 @@ export function JobRoleFields({
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
           {descriptionExtra}
-          <Textarea
+          <RichTextEditor
             id="description"
             value={values.description}
-            onChange={(e) => onChange({ description: e.target.value })}
-            rows={8}
+            onChange={(description) => onChange({ description })}
+            minHeight="12rem"
             placeholder="Describe the role, team, and impact."
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="department">Department</Label>
-            <Input
+            <RichTextEditor
               id="department"
+              singleLine
               value={values.department}
-              onChange={(e) => onChange({ department: e.target.value })}
+              onChange={(department) => onChange({ department })}
               placeholder="Marketing"
             />
           </div>
@@ -109,10 +110,11 @@ export function JobRoleFields({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
-            <Input
+            <RichTextEditor
               id="location"
+              singleLine
               value={values.location}
-              onChange={(e) => onChange({ location: e.target.value })}
+              onChange={(location) => onChange({ location })}
               placeholder="Bangalore / Remote"
             />
           </div>
@@ -236,31 +238,31 @@ export function JobRoleFields({
         </div>
         <div className="space-y-2">
           <Label htmlFor="responsibilities">Responsibilities</Label>
-          <Textarea
+          <RichTextEditor
             id="responsibilities"
             value={values.responsibilities}
-            onChange={(e) => onChange({ responsibilities: e.target.value })}
-            rows={5}
+            onChange={(responsibilities) => onChange({ responsibilities })}
+            minHeight="8rem"
             placeholder="One responsibility per line."
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="qualifications">Qualifications</Label>
-          <Textarea
+          <RichTextEditor
             id="qualifications"
             value={values.qualifications}
-            onChange={(e) => onChange({ qualifications: e.target.value })}
-            rows={5}
+            onChange={(qualifications) => onChange({ qualifications })}
+            minHeight="8rem"
             placeholder="One qualification per line."
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="benefits">Benefits</Label>
-          <Textarea
+          <RichTextEditor
             id="benefits"
             value={values.benefits}
-            onChange={(e) => onChange({ benefits: e.target.value })}
-            rows={4}
+            onChange={(benefits) => onChange({ benefits })}
+            minHeight="7rem"
             placeholder="Health insurance, flexible hours, learning stipend…"
           />
         </div>
@@ -291,12 +293,13 @@ export function JobRoleFields({
               >
                 <div className="space-y-1">
                   <Label className="text-xs">Field label</Label>
-                  <Input
+                  <RichTextEditor
+                    singleLine
                     value={field.label}
-                    onChange={(e) =>
+                    onChange={(label) =>
                       onChange({
                         customFields: values.customFields.map((item, i) =>
-                          i === index ? { ...item, label: e.target.value } : item,
+                          i === index ? { ...item, label } : item,
                         ),
                       })
                     }
@@ -305,12 +308,13 @@ export function JobRoleFields({
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Value</Label>
-                  <Input
+                  <RichTextEditor
+                    singleLine
                     value={field.value}
-                    onChange={(e) =>
+                    onChange={(value) =>
                       onChange({
                         customFields: values.customFields.map((item, i) =>
-                          i === index ? { ...item, value: e.target.value } : item,
+                          i === index ? { ...item, value } : item,
                         ),
                       })
                     }
@@ -385,12 +389,13 @@ export function JobRoleFields({
                     <SelectItem value="preferred">Preferred</SelectItem>
                   </SelectContent>
                 </Select>
-                <Input
+                <RichTextEditor
+                  singleLine
                   value={req.label}
-                  onChange={(e) =>
+                  onChange={(label) =>
                     onChange({
                       requirements: values.requirements.map((item, i) =>
-                        i === index ? { ...item, label: e.target.value } : item,
+                        i === index ? { ...item, label } : item,
                       ),
                     })
                   }

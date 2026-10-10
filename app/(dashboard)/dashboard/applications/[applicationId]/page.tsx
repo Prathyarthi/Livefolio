@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RichText } from "@/components/rich-text";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMyApplication } from "@/features/applications/api/use-applications";
 import {
@@ -50,7 +51,9 @@ export default function ApplicationDetailPage() {
         <Badge variant="neutral">
           {APPLICATION_STATUS_LABELS[data.status] ?? data.status}
         </Badge>
-        <h1 className="text-h2 text-text-primary">{data.job.title}</h1>
+        <h1 className="text-h2 text-text-primary">
+          <RichText as="span" text={data.job.title} />
+        </h1>
         <p className="text-body-sm text-text-secondary">
           {formatJobMeta([
             data.job.organization.name,

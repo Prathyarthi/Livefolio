@@ -10,6 +10,7 @@ import {
   Building2,
   Info,
 } from "lucide-react";
+import { RichText } from "@/components/rich-text";
 import type { Job } from "@/features/jobs/api/use-jobs";
 import type { CustomFieldDraft } from "@/features/jobs/lib/role-fields";
 import {
@@ -138,7 +139,7 @@ export function JobHighlights({
           </span>
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-              {item.label}
+              <RichText as="span" text={item.label} />
             </p>
             <p
               className={
@@ -147,7 +148,7 @@ export function JobHighlights({
                   : "mt-0.5 font-medium text-text-primary"
               }
             >
-              {item.value}
+              <RichText as="span" text={item.value} />
             </p>
           </div>
         </li>
@@ -177,7 +178,7 @@ export function JobPerkPills({ job }: { job: Job }) {
           key={perk}
           className="rounded-full border border-brand-primary/20 bg-brand-light px-3 py-1 text-xs font-medium text-brand-dark"
         >
-          {perk}
+          <RichText as="span" text={perk} />
         </span>
       ))}
     </div>

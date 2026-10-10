@@ -10,6 +10,7 @@ import {
   type JobJdInput,
   type JobSearchProfile,
 } from "@/features/jobs/lib/search-profile";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 
 const EXTRACT_SYSTEM = `You extract a hiring search profile from a job description.
 Return ONLY valid JSON. No markdown, no code fences.
@@ -111,13 +112,19 @@ export async function refreshJobSearchProfile(jobId: string): Promise<JobSearchP
   }
 
   const input: JobJdInput = {
-    title: job.title,
-    description: job.description,
-    responsibilities: job.responsibilities,
-    qualifications: job.qualifications,
-    location: job.location,
+    title: stripRichTextToPlain(job.title),
+    description: stripRichTextToPlain(job.description),
+    responsibilities: job.responsibilities
+      ? stripRichTextToPlain(job.responsibilities)
+      : job.responsibilities,
+    qualifications: job.qualifications
+      ? stripRichTextToPlain(job.qualifications)
+      : job.qualifications,
+    location: job.location ? stripRichTextToPlain(job.location) : job.location,
     experienceMin: job.experienceMin,
-    department: job.department,
+    department: job.department
+      ? stripRichTextToPlain(job.department)
+      : job.department,
   };
   const hash = sourceHash(jobJdSource(input));
   const existing = parseJobSearchProfile(job.searchProfile);

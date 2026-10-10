@@ -7,6 +7,7 @@ import { ExternalLink, FileText, Search, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RichText } from "@/components/rich-text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -173,7 +174,11 @@ export default function JobApplicantsPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-h2 text-text-primary">
-              {data?.job.title ?? "Applicant pool"}
+              {data?.job.title ? (
+                <RichText as="span" text={data.job.title} />
+              ) : (
+                "Applicant pool"
+              )}
             </h1>
             <p className="text-body-sm text-text-secondary">
               {hasActiveFilters
