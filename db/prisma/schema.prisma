@@ -502,8 +502,6 @@ model Job {
 
   customFields   Json?   @default("[]")
 
-  screeningQuestions Json? @default("[]")
-
   responsibilities String? @db.Text
   qualifications   String? @db.Text
   benefits         String? @db.Text
@@ -566,8 +564,6 @@ model Application {
   shortlistedAt DateTime?
 
   coverNote   String?  @db.Text
-
-  screeningAnswers Json?
   submittedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

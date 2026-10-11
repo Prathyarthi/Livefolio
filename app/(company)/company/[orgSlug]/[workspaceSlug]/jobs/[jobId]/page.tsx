@@ -19,7 +19,6 @@ import { JobRoleFields } from "@/features/jobs/components/job-role-fields";
 import {
   formStateToJobInput,
   jobToFormState,
-  validateJobRoleForm,
   type JobRoleFormState,
 } from "@/features/jobs/lib/role-fields";
 import {
@@ -125,9 +124,8 @@ export default function ManageJobPage() {
 
   async function handleSaveEdits() {
     if (!form) return;
-    const formError = validateJobRoleForm(form);
-    if (formError) {
-      toast.error(formError);
+    if (!form.title.trim() || !form.description.trim()) {
+      toast.error("Title and description are required");
       return;
     }
     try {

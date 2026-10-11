@@ -17,10 +17,6 @@ import {
 } from "@/lib/org-entitlements";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import { deleteObjectQuiet, isR2Configured } from "@/lib/r2";
-import {
-  normalizeScreeningQuestionsForSave,
-  parseScreeningQuestions,
-} from "@/features/jobs/lib/screening-questions";
 
 const OPEN_JOB_STATUSES = new Set(["published", "paused"]);
 
@@ -158,10 +154,6 @@ function toOptionalInt(value?: number | null) {
   if (value == null) return null;
   if (!Number.isFinite(value)) return null;
   return Math.trunc(value);
-}
-
-function parseScreeningQuestionsBody(value: unknown) {
-  return normalizeScreeningQuestionsForSave(parseScreeningQuestions(value));
 }
 
 type RequirementInput = {
@@ -369,14 +361,6 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         return { error: "Invalid status" };
       }
 
-      const screeningQuestionsResult = parseScreeningQuestionsBody(
-        ctx.body.screeningQuestions,
-      );
-      if (!screeningQuestionsResult.ok) {
-        ctx.set.status = 400;
-        return { error: screeningQuestionsResult.error };
-      }
-
       const jobCreateData = {
           organizationId: org.id,
           workspaceId: access.workspace.id,
@@ -397,7 +381,6 @@ export const jobs = new Elysia({ prefix: "/jobs" })
           qualifications: optionalTrim(ctx.body.qualifications),
           benefits: optionalTrim(ctx.body.benefits),
           customFields: ctx.body.customFields ?? [],
-          screeningQuestions: screeningQuestionsResult.questions,
           applicationDeadline: toOptionalDate(ctx.body.applicationDeadline),
           status: resolvedStatus,
           publishedAt: resolvedStatus === "published" ? new Date() : null,
@@ -457,7 +440,6 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         qualifications: t.Optional(t.Nullable(t.String({ maxLength: 20000 }))),
         benefits: t.Optional(t.Nullable(t.String({ maxLength: 10000 }))),
         customFields: t.Optional(t.Any()),
-        screeningQuestions: t.Optional(t.Any()),
         applicationDeadline: t.Optional(t.Nullable(t.String())),
         status: t.Optional(t.Union(JOB_STATUSES.map((v) => t.Literal(v)))),
         requirements: t.Optional(
@@ -532,15 +514,6 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         OPEN_JOB_STATUSES.has(nextStatus) &&
         !OPEN_JOB_STATUSES.has(existing.status);
 
-      const screeningQuestionsUpdate =
-        ctx.body.screeningQuestions !== undefined
-          ? parseScreeningQuestionsBody(ctx.body.screeningQuestions)
-          : null;
-      if (screeningQuestionsUpdate && !screeningQuestionsUpdate.ok) {
-        ctx.set.status = 400;
-        return { error: screeningQuestionsUpdate.error };
-      }
-
       const jobUpdateData = {
           ...(ctx.body.title !== undefined
             ? { title: ctx.body.title.trim() }
@@ -589,9 +562,6 @@ export const jobs = new Elysia({ prefix: "/jobs" })
             : {}),
           ...(ctx.body.customFields !== undefined
             ? { customFields: ctx.body.customFields }
-            : {}),
-          ...(screeningQuestionsUpdate?.ok
-            ? { screeningQuestions: screeningQuestionsUpdate.questions }
             : {}),
           ...(ctx.body.applicationDeadline !== undefined
             ? {
@@ -673,7 +643,6 @@ export const jobs = new Elysia({ prefix: "/jobs" })
         qualifications: t.Optional(t.Nullable(t.String({ maxLength: 20000 }))),
         benefits: t.Optional(t.Nullable(t.String({ maxLength: 10000 }))),
         customFields: t.Optional(t.Any()),
-        screeningQuestions: t.Optional(t.Any()),
         applicationDeadline: t.Optional(t.Nullable(t.String())),
         status: t.Optional(t.Union(JOB_STATUSES.map((v) => t.Literal(v)))),
         requirements: t.Optional(

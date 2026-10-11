@@ -47,7 +47,6 @@ import {
 import type { ParsedResume } from "@/lib/gemini";
 import { normalizeSocialProfile } from "@/lib/social-profile";
 import {
-  MAX_ACHIEVEMENT_TITLE_CHARS,
   MAX_CUSTOM_SECTIONS,
   MAX_SECTION_ROWS,
   MAX_SKILL_FIELD_CHARS,
@@ -407,10 +406,7 @@ export function ResumeUploader({
         ...data.achievements
           .slice(0, remainingRows(activePortfolio.achievements?.length))
           .flatMap((achievement) => {
-            const title = sanitizeImportedLabel(
-              achievement,
-              MAX_ACHIEVEMENT_TITLE_CHARS,
-            );
+            const title = sanitizeImportedLabel(achievement);
             if (!title) return [];
             return [
               postImport(

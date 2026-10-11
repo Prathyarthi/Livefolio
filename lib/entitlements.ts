@@ -3,18 +3,9 @@ import { isAnyBillingReady } from "@/lib/billing";
 
 const FREE_TRIAL_DAYS = 30;
 
-const FREE_TEMPLATE_IDS = [
-  "minimal",
-  "modern",
-  "corporate",
-  "developer",
-  "vibrant",
-  "paper",
-  "airy",
-] as const;
-const FREE_TEMPLATE_ID_SET = new Set<string>(FREE_TEMPLATE_IDS);
+const FREE_TEMPLATE_IDS = ["minimal"] as const;
 const PREMIUM_TEMPLATE_IDS = Object.keys(templateCatalog).filter(
-  (id) => !FREE_TEMPLATE_ID_SET.has(id)
+  (id) => id !== "minimal"
 );
 
 export type AccessTier = "free" | "trial" | "pro";

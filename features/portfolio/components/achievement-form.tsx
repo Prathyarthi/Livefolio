@@ -44,7 +44,7 @@ import {
   validationMessage,
   validateField,
 } from "@/features/portfolio/lib/client-validation";
-import { MAX_ACHIEVEMENT_TITLE_CHARS } from "@/lib/content-policy";
+import { MAX_SHORT_LABEL_CHARS } from "@/lib/content-policy";
 
 interface AchievementEntry {
   id?: string;
@@ -105,7 +105,7 @@ export function AchievementForm() {
       clientValidators.requiredLabel(
         form.title,
         "Achievement title",
-        MAX_ACHIEVEMENT_TITLE_CHARS,
+        MAX_SHORT_LABEL_CHARS,
       ),
     );
     return errors;
@@ -251,6 +251,7 @@ export function AchievementForm() {
               </FieldLabel>
               <RichTextEditor
                 id="title"
+                singleLine
                 value={form.title}
                 onChange={(title) => {
                   setForm((prev) => ({ ...prev, title }));
@@ -351,6 +352,7 @@ export function AchievementForm() {
                       </FieldLabel>
                       <RichTextEditor
                         id={`title-${ach.id}`}
+                        singleLine
                         value={form.title}
                         onChange={(title) => {
                           setForm((prev) => ({ ...prev, title }));

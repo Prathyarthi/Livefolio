@@ -1,5 +1,4 @@
 import type { PortfolioData } from "./types";
-import { formatSectionLabel } from "./section-labels";
 import { normalizeSocialProfiles } from "@/lib/social-profile";
 
 export function portfolioToTemplateData(portfolio: any): PortfolioData {
@@ -123,7 +122,7 @@ export function portfolioToTemplateData(portfolio: any): PortfolioData {
     customSections: (portfolio.customSections ?? []).map((cs: any) => ({
       id: cs.id,
       sectionType: cs.sectionType,
-      label: typeof cs.label === "string" ? formatSectionLabel(cs.label) : cs.label,
+      label: cs.label,
       items: Array.isArray(cs.items) ? cs.items : [],
     })),
     livePreviewProjectIds: Array.isArray(portfolio.livePreviewProjectIds)

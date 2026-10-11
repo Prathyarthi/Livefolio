@@ -10,7 +10,6 @@ import {
   UploadRequestError,
   getUploadUsage,
 } from "@/features/uploads/api/client";
-import { ImageCropDialog } from "@/features/uploads/components/image-crop-dialog";
 import { useUpdateOrganization } from "@/features/organization/api/use-organization";
 import {
   MAX_ORG_BANNER_BYTES,
@@ -37,7 +36,6 @@ export function OrgBrandingImageField({
   const queryClient = useQueryClient();
   const updateOrg = useUpdateOrganization(orgSlug);
   const [uploading, setUploading] = useState(false);
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const isBanner = kind === "org_banner";
   const maxBytes = isBanner ? MAX_ORG_BANNER_BYTES : MAX_ORG_LOGO_BYTES;
   const label = isBanner ? "Company banner" : "Company logo";
@@ -45,13 +43,7 @@ export function OrgBrandingImageField({
     ? "1600×400 recommended · JPEG, PNG, or WebP · up to 5MB"
     : "400×400 recommended · JPEG, PNG, or WebP · up to 2MB";
 
-  function closeCropper() {
-    if (cropSrc) URL.revokeObjectURL(cropSrc);
-    setCropSrc(null);
-    if (inputRef.current) inputRef.current.value = "";
-  }
-
-  function handleFileSelected(file: File | undefined) {
+  async function handleFile(file: File | undefined) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Please choose a JPEG, PNG, or WebP image");
@@ -64,11 +56,6 @@ export function OrgBrandingImageField({
       return;
     }
 
-    if (cropSrc) URL.revokeObjectURL(cropSrc);
-    setCropSrc(URL.createObjectURL(file));
-  }
-
-  async function uploadCroppedFile(file: File) {
     const usage = await getUploadUsage().catch(() => null);
     if (usage && usage.configured === false) {
       toast.error("File storage is not configured.");
@@ -88,7 +75,6 @@ export function OrgBrandingImageField({
         await queryClient.invalidateQueries({ queryKey: ["jobs"] });
         toast.success(`${isBanner ? "Banner" : "Logo"} uploaded`);
       }
-      closeCropper();
     } catch (error) {
       toast.error(
         error instanceof UploadRequestError || error instanceof Error
@@ -97,6 +83,7 @@ export function OrgBrandingImageField({
       );
     } finally {
       setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
     }
   }
 
@@ -174,18 +161,7 @@ export function OrgBrandingImageField({
         accept={ACCEPT}
         className="hidden"
         aria-label={`Upload ${label}`}
-        onChange={(e) => handleFileSelected(e.target.files?.[0])}
-      />
-      <ImageCropDialog
-        open={Boolean(cropSrc)}
-        imageSrc={cropSrc}
-        title={isBanner ? "Crop banner" : "Crop logo"}
-        aspect={isBanner ? 4 / 1 : 1}
-        outputMaxWidth={isBanner ? 1600 : 400}
-        outputMaxHeight={isBanner ? 400 : 400}
-        confirmLabel={uploading ? "Uploading…" : "Save crop"}
-        onCancel={closeCropper}
-        onConfirm={uploadCroppedFile}
+        onChange={(e) => void handleFile(e.target.files?.[0])}
       />
     </div>
   );

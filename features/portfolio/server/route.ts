@@ -29,7 +29,6 @@ import {
   MAX_LONG_TEXT_RAW_CHARS,
   MAX_PHONE_CHARS,
   MAX_SECTION_ROWS,
-  MAX_ACHIEVEMENT_TITLE_CHARS,
   MAX_SHORT_LABEL_CHARS,
   MAX_SKILL_FIELD_CHARS,
   MAX_SKILLS,
@@ -1849,7 +1848,6 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
               title: normalizeRequiredLabel(
                 ctx.body.title,
                 "Achievement title",
-                MAX_ACHIEVEMENT_TITLE_CHARS,
               ),
               portfolioId: p.id,
               sortOrder: count,
@@ -1866,7 +1864,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
     {
       body: t.Object({
-        title: t.String({ minLength: 1, maxLength: MAX_ACHIEVEMENT_TITLE_CHARS }),
+        title: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
         date: t.Optional(t.Union([t.String(), t.Null()])),
       }),
     },
@@ -1887,7 +1885,6 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
           updateData.title = normalizeRequiredLabel(
             ctx.body.title,
             "Achievement title",
-            MAX_ACHIEVEMENT_TITLE_CHARS,
           );
         }
         if (date !== undefined) {
@@ -1922,7 +1919,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         t.Object({
           title: t.String({
             minLength: 1,
-            maxLength: MAX_ACHIEVEMENT_TITLE_CHARS,
+            maxLength: MAX_SHORT_LABEL_CHARS,
           }),
           date: t.Union([t.String(), t.Null()]),
           sortOrder: t.Number(),

@@ -1,9 +1,4 @@
 import type { Job, JobInput, JobRequirement } from "@/features/jobs/api/use-jobs";
-import {
-  normalizeScreeningQuestionsForSave,
-  parseScreeningQuestions,
-  type ScreeningQuestion,
-} from "@/features/jobs/lib/screening-questions";
 
 export const SENIORITY_OPTIONS = [
   "intern",
@@ -66,7 +61,6 @@ export type JobRoleFormState = {
   benefits: string;
   customFields: CustomFieldDraft[];
   requirements: RequirementDraft[];
-  screeningQuestions: ScreeningQuestion[];
 };
 
 export function emptyRequirement(
@@ -99,7 +93,6 @@ export function emptyJobRoleForm(): JobRoleFormState {
     benefits: "",
     customFields: [],
     requirements: [emptyRequirement("required")],
-    screeningQuestions: [],
   };
 }
 
@@ -125,7 +118,6 @@ export function jobToFormState(job: Job): JobRoleFormState {
     customFields: Array.isArray(job.customFields)
       ? (job.customFields as CustomFieldDraft[])
       : [],
-    screeningQuestions: parseScreeningQuestions(job.screeningQuestions),
     requirements:
       job.requirements.length > 0
         ? job.requirements.map((req) => ({
@@ -134,15 +126,6 @@ export function jobToFormState(job: Job): JobRoleFormState {
           }))
         : [emptyRequirement("required")],
   };
-}
-
-export function validateJobRoleForm(state: JobRoleFormState): string | null {
-  if (!state.title.trim() || !state.description.trim()) {
-    return "Title and description are required";
-  }
-  const screening = normalizeScreeningQuestionsForSave(state.screeningQuestions);
-  if (!screening.ok) return screening.error;
-  return null;
 }
 
 function trimOrNull(value: string): string | null {
@@ -174,12 +157,6 @@ export function formStateToJobInput(state: JobRoleFormState): JobInput {
     qualifications: trimOrNull(state.qualifications),
     benefits: trimOrNull(state.benefits),
     customFields: state.customFields.filter((f) => f.label.trim() && f.value.trim()),
-    screeningQuestions: (() => {
-      const result = normalizeScreeningQuestionsForSave(
-        state.screeningQuestions,
-      );
-      return result.ok ? result.questions : [];
-    })(),
     requirements: state.requirements
       .filter((r) => r.label.trim())
       .map(({ type, category, label, description }, index) => ({

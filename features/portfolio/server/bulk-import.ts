@@ -3,7 +3,6 @@ import type { Prisma } from "@/db/generated/prisma/client";
 import type { PortfolioData } from "@/features/templates/types";
 import {
   ContentValidationError,
-  MAX_ACHIEVEMENT_TITLE_CHARS,
   MAX_CUSTOM_SECTIONS,
   MAX_SECTION_ROWS,
   MAX_SKILL_FIELD_CHARS,
@@ -228,10 +227,7 @@ export async function bulkImportPortfolioData(
     .slice(0, MAX_SECTION_ROWS)
     .map((achievement) => ({
       ...achievement,
-      title: sanitizeImportedLabel(
-        achievement.title,
-        MAX_ACHIEVEMENT_TITLE_CHARS,
-      ),
+      title: sanitizeImportedLabel(achievement.title),
     }))
     .filter((achievement) => achievement.title);
   const seenSectionTypes = new Set<string>();

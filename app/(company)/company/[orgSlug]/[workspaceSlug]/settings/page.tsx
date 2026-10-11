@@ -12,7 +12,6 @@ import {
   useWorkspace,
   useUpdateWorkspace,
 } from "@/features/organization/api/use-organization";
-import { WorkspaceTeamSection } from "@/features/organization/components/workspace-team-section";
 
 export default function WorkspaceSettingsPage() {
   const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
@@ -177,13 +176,6 @@ export default function WorkspaceSettingsPage() {
           </div>
         </div>
       )}
-
-      <WorkspaceTeamSection
-        orgSlug={orgSlug}
-        workspaceSlug={workspaceSlug}
-        canManage={workspace.permissions.manageOrganization}
-        viewerRole={workspace.role}
-      />
     </div>
   );
 }

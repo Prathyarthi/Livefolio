@@ -3,11 +3,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import type { PoolGapReport } from "@/features/applications/lib/pool-gaps";
-import type {
-  ScreeningAnswer,
-  ScreeningAnswerInput,
-  ScreeningQuestion,
-} from "@/features/jobs/lib/screening-questions";
 
 async function throwApiError(
   response: Response,
@@ -39,7 +34,6 @@ export type CandidateApplication = {
   status: string;
   stage: string;
   coverNote: string | null;
-  screeningAnswers?: ScreeningAnswer[] | null;
   submittedAt: string;
   job: {
     id: string;
@@ -78,7 +72,6 @@ export type ApplicationPreview = {
       logoUrl: string | null;
       bannerUrl?: string | null;
     };
-    screeningQuestions?: ScreeningQuestion[];
   };
   alreadyApplied: boolean;
   existingApplication: {
@@ -146,10 +139,7 @@ export function useApplicationPreview(jobSlug: string | undefined) {
 export function useSubmitApplication(jobSlug: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data?: {
-      coverNote?: string;
-      screeningAnswers?: ScreeningAnswerInput[];
-    }) => {
+    mutationFn: async (data?: { coverNote?: string }) => {
       const res = await fetch(`/api/applications/apply/${jobSlug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -282,7 +272,6 @@ export type CompanyApplicationDetail = {
   shortlisted: boolean;
   shortlistedAt: string | null;
   coverNote: string | null;
-  screeningAnswers?: ScreeningAnswer[] | null;
   submittedAt: string;
   user: {
     id: string;

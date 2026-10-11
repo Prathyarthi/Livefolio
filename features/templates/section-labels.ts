@@ -46,26 +46,13 @@ function getStoredSectionLabels(
   return labels;
 }
 
-/** Title-case headings stored in all caps. Mixed-case labels stay as written. */
-export function formatSectionLabel(label: string): string {
-  const trimmed = label.trim();
-  const letters = trimmed.replace(/[^A-Za-z]/g, "");
-  if (!letters || letters !== letters.toUpperCase()) return trimmed;
-  return trimmed
-    .toLowerCase()
-    .replace(
-      /(^|[^a-z0-9'])([a-z])/g,
-      (_match, boundary: string, char: string) => boundary + char.toUpperCase()
-    );
-}
-
 export function getSectionLabel(
   key: SectionKey,
   customization?: PortfolioCustomization | Record<string, unknown> | null
 ): string {
   const stored = getStoredSectionLabels(customization);
   const override = stored[key]?.trim();
-  if (override) return formatSectionLabel(override);
+  if (override) return override;
   return STANDARD_SECTION_LABELS[key];
 }
 
@@ -76,7 +63,7 @@ export function getSectionLabels(
   return Object.fromEntries(
     (Object.keys(STANDARD_SECTION_LABELS) as SectionKey[]).map((key) => [
       key,
-      formatSectionLabel(stored[key]?.trim() || STANDARD_SECTION_LABELS[key]),
+      stored[key]?.trim() || STANDARD_SECTION_LABELS[key],
     ])
   ) as Record<SectionKey, string>;
 }

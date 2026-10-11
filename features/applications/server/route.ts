@@ -30,11 +30,6 @@ import {
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import { buildPoolGapReport } from "@/features/applications/lib/pool-gaps";
 import { parsePageParams, paginateSlice } from "@/lib/pagination";
-import {
-  parseScreeningAnswers,
-  parseScreeningQuestions,
-  validateScreeningAnswers,
-} from "@/features/jobs/lib/screening-questions";
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -225,7 +220,6 @@ export const applications = new Elysia({ prefix: "/applications" })
         title: true,
         slug: true,
         status: true,
-        screeningQuestions: true,
         organization: {
           select: {
             id: true,
@@ -260,10 +254,7 @@ export const applications = new Elysia({ prefix: "/applications" })
     }
 
     return {
-      job: {
-        ...job,
-        screeningQuestions: parseScreeningQuestions(job.screeningQuestions),
-      },
+      job,
       alreadyApplied: Boolean(existing),
       existingApplication: existing,
       snapshot: snapshot.data,
@@ -289,7 +280,6 @@ export const applications = new Elysia({ prefix: "/applications" })
           slug: true,
           status: true,
           applicationDeadline: true,
-          screeningQuestions: true,
           organization: {
             select: {
               id: true,
@@ -336,23 +326,12 @@ export const applications = new Elysia({ prefix: "/applications" })
         };
       }
 
-      const screeningQuestions = parseScreeningQuestions(job.screeningQuestions);
-      const screening = validateScreeningAnswers(
-        screeningQuestions,
-        ctx.body.screeningAnswers,
-      );
-      if (!screening.ok) {
-        ctx.set.status = 400;
-        return { error: screening.error };
-      }
-
       const application = await prisma.application.create({
         data: {
           jobId: job.id,
           userId: session.userId,
           portfolioId: snapshot.portfolioId,
           coverNote: optionalTrim(ctx.body.coverNote),
-          screeningAnswers: screening.answers,
           status: "applied",
           stage: "new",
           snapshot: {
@@ -369,7 +348,6 @@ export const applications = new Elysia({ prefix: "/applications" })
     {
       body: t.Object({
         coverNote: t.Optional(t.String({ maxLength: 5000 })),
-        screeningAnswers: t.Optional(t.Any()),
       }),
     },
   )
@@ -585,7 +563,6 @@ export const applications = new Elysia({ prefix: "/applications" })
       shortlisted: application.stage === "shortlisted",
       shortlistedAt: application.shortlistedAt,
       coverNote: application.coverNote,
-      screeningAnswers: parseScreeningAnswers(application.screeningAnswers),
       submittedAt: application.submittedAt,
       user: application.user,
       resumeFileId: resumeByUser.get(application.user.id) ?? null,

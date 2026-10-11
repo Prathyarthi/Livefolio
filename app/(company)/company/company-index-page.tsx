@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Loader2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,19 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  checkOrganizationSlug,
   useCreateOrganization,
   useOrganizations,
 } from "@/features/organization/api/use-organization";
-import { isValidOrgSlug, sanitizeHiringSlug } from "@/features/jobs/lib/slug";
+import { sanitizeHiringSlug } from "@/features/jobs/lib/slug";
 import { OrgLogo } from "@/features/organization/components/org-logo";
-
-function getOrgSlugInlineError(slug: string): string | null {
-  if (!slug) return null;
-  if (slug.length < 2) return "Slug must be at least 2 characters";
-  if (!isValidOrgSlug(slug)) return "This slug is invalid or reserved";
-  return null;
-}
 
 export function CompanyIndexPage() {
   const router = useRouter();
@@ -33,59 +25,11 @@ export function CompanyIndexPage() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [showCreate, setShowCreate] = useState(false);
-  const [checkingSlug, setCheckingSlug] = useState(false);
-  const [slugTaken, setSlugTaken] = useState(false);
 
   const slugPreview = useMemo(
     () => slug || (name ? sanitizeHiringSlug(name) : ""),
     [slug, name],
   );
-  const slugFormatError = useMemo(
-    () => getOrgSlugInlineError(slugPreview),
-    [slugPreview],
-  );
-  const slugInlineError =
-    slugFormatError ??
-    (slugTaken ? "This organization slug is already in use" : null);
-  const canCreate =
-    Boolean(name.trim()) &&
-    Boolean(slugPreview) &&
-    !slugFormatError &&
-    !slugTaken &&
-    !checkingSlug &&
-    !createOrg.isPending;
-
-  useEffect(() => {
-    if (!showCreate) return;
-
-    if (!slugPreview || slugFormatError) {
-      setSlugTaken(false);
-      setCheckingSlug(false);
-      return;
-    }
-
-    let cancelled = false;
-    setCheckingSlug(true);
-    setSlugTaken(false);
-
-    const timer = setTimeout(() => {
-      void checkOrganizationSlug(slugPreview)
-        .then((result) => {
-          if (!cancelled) setSlugTaken(!result.available);
-        })
-        .catch(() => {
-          if (!cancelled) setSlugTaken(false);
-        })
-        .finally(() => {
-          if (!cancelled) setCheckingSlug(false);
-        });
-    }, 300);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [showCreate, slugPreview, slugFormatError]);
 
   if (isLoading) {
     return (
@@ -100,10 +44,6 @@ export function CompanyIndexPage() {
       toast.error("Company name is required");
       return;
     }
-    if (slugInlineError) {
-      toast.error(slugInlineError);
-      return;
-    }
     try {
       const result = await createOrg.mutateAsync({
         name: name.trim(),
@@ -113,12 +53,6 @@ export function CompanyIndexPage() {
       toast.success("Organization created");
       router.push(`/company/${result.organization.slug}`);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to create company";
-      if (message.toLowerCase().includes("slug is already in use")) {
-        setSlugTaken(true);
-        return;
-      }
       const upgradeSlug =
         error &&
         typeof error === "object" &&
@@ -127,7 +61,7 @@ export function CompanyIndexPage() {
           ? (error as { upgradeOrgSlug: string }).upgradeOrgSlug
           : null;
       toast.error(
-        message,
+        error instanceof Error ? error.message : "Failed to create company",
         upgradeSlug
           ? {
               action: {
@@ -153,12 +87,12 @@ export function CompanyIndexPage() {
         </header>
 
         {orgs && orgs.length > 0 ? (
-          <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
             {orgs.map(({ organization, role }) => (
               <li key={organization.id}>
                 <Link
                   href={`/company/${organization.slug}`}
-                  className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-sunken/50"
+                  className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-base"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <OrgLogo
@@ -216,23 +150,10 @@ export function CompanyIndexPage() {
                 value={slug}
                 onChange={(e) => setSlug(sanitizeHiringSlug(e.target.value))}
                 placeholder={slugPreview || "acme"}
-                aria-invalid={Boolean(slugInlineError)}
               />
               <p className="text-xs text-text-muted">
                 Organization path: /company/{slugPreview || "…"}
               </p>
-              {checkingSlug ? (
-                <p className="text-xs text-text-muted">Checking availability…</p>
-              ) : null}
-              {slugInlineError ? (
-                <p className="text-xs text-destructive">{slugInlineError}</p>
-              ) : null}
-              {!checkingSlug &&
-              !slugInlineError &&
-              slugPreview &&
-              isValidOrgSlug(slugPreview) ? (
-                <p className="text-xs text-emerald-600">Slug is available</p>
-              ) : null}
             </div>
             <div className="space-y-2">
               <Label htmlFor="company-desc">About</Label>
@@ -244,7 +165,7 @@ export function CompanyIndexPage() {
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleCreate} disabled={!canCreate}>
+              <Button onClick={handleCreate} disabled={createOrg.isPending}>
                 Create organization
               </Button>
               <Button variant="ghost" onClick={() => setShowCreate(false)}>

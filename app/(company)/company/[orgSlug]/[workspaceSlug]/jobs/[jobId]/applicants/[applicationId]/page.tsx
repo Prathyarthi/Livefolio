@@ -22,7 +22,6 @@ import {
   type PipelineStage,
 } from "@/features/jobs/constants/labels";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
-import { ScreeningAnswersSection } from "@/features/applications/components/screening-answers-section";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 
 export default function ApplicantDetailPage() {
@@ -209,8 +208,6 @@ export default function ApplicantDetailPage() {
           </p>
         </section>
       ) : null}
-
-      <ScreeningAnswersSection answers={data.screeningAnswers} />
 
       {data.evidence &&
       (data.evidence.requirementMatches.length > 0 ||

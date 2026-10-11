@@ -15,7 +15,6 @@ import { splitRichLines } from "@/features/jobs/constants/labels";
 import { OrgBanner, OrgLogo } from "@/features/organization/components/org-logo";
 import { LogoMark } from "@/components/logo";
 import { siteConfig } from "@/lib/site";
-import { parseScreeningQuestions } from "@/features/jobs/lib/screening-questions";
 
 export default function PublicJobPage() {
   const params = useParams<{ jobSlug: string }>();
@@ -53,7 +52,6 @@ export default function PublicJobPage() {
       ? `/jobs/${job.slug}/apply`
       : `/sign-in?callbackUrl=${encodeURIComponent(`/jobs/${job.slug}/apply`)}`;
   const isPaused = job.status === "paused";
-  const questionCount = parseScreeningQuestions(job.screeningQuestions).length;
 
   return (
     <div className="min-h-screen bg-surface-base">
@@ -158,12 +156,6 @@ export default function PublicJobPage() {
               <Button asChild size="lg" className="mt-5 w-full" disabled={isPaused}>
                 <Link href={applyHref}>Apply with Livefolio</Link>
               </Button>
-              {questionCount > 0 ? (
-                <p className="mt-3 text-body-sm text-text-muted">
-                  You’ll be asked {questionCount} extra question
-                  {questionCount === 1 ? "" : "s"} when you apply.
-                </p>
-              ) : null}
               {isPaused ? (
                 <p className="mt-3 text-body-sm text-text-muted">
                   This company has temporarily paused applications.
