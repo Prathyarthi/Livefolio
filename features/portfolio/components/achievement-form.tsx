@@ -10,8 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FieldLabel } from "@/features/portfolio/components/field-label";
-import { RichTextEditor } from "@/components/rich-text-editor";
-import { RichText } from "@/components/rich-text";
 import {
   Card,
   CardContent,
@@ -249,14 +247,11 @@ export function AchievementForm() {
               <FieldLabel htmlFor="title" unsaved={isFieldUnsaved("title")}>
                 Title
               </FieldLabel>
-              <RichTextEditor
+              <Input
                 id="title"
-                singleLine
+                name="title"
                 value={form.title}
-                onChange={(title) => {
-                  setForm((prev) => ({ ...prev, title }));
-                  setFieldErrors((prev) => ({ ...prev, title: undefined }));
-                }}
+                onChange={handleChange}
                 onBlur={() => setFieldErrors({ title: validationErrors.title })}
                 placeholder="e.g., Won Best Innovation Award at TechConf 2025"
                 aria-invalid={Boolean(
@@ -350,14 +345,11 @@ export function AchievementForm() {
                       >
                         Title
                       </FieldLabel>
-                      <RichTextEditor
+                      <Input
                         id={`title-${ach.id}`}
-                        singleLine
+                        name="title"
                         value={form.title}
-                        onChange={(title) => {
-                          setForm((prev) => ({ ...prev, title }));
-                          setFieldErrors((prev) => ({ ...prev, title: undefined }));
-                        }}
+                        onChange={handleChange}
                         onBlur={() =>
                           setFieldErrors({ title: validationErrors.title })
                         }
@@ -420,9 +412,7 @@ export function AchievementForm() {
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-base">
-                          <RichText text={ach.title} />
-                        </h4>
+                        <h4 className="font-semibold text-base">{ach.title}</h4>
                         {ach.date && (
                           <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
                             <Calendar className="h-3 w-3" />

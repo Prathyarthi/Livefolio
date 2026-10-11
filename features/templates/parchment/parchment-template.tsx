@@ -1,6 +1,5 @@
 "use client";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
@@ -12,18 +11,14 @@ import {
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import { RichText,
+import {
   DescriptionBlock,
   TechChip,
-  TechIcon,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
-  HeroProfileButtons,
-  hasNonHeroSocialProfiles,
   ContactChips,
   CustomSectionItems,
-  ProfileLinksSection,
   PROJECT_CARD,
   PROJECT_CARD_TITLE,
   TEMPLATE_CONTAINER,
@@ -51,7 +46,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("parchment", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const { navbarEnabled, sections } = buildTemplateSections(data);
   const groupedSkills = groupSkillsByCategory(skills);
 
   const githubProfile = socialProfiles.find((p) => p.platform.toLowerCase() === "github");
@@ -94,7 +89,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                               imageUrl={project.imageUrl ?? null}
                               projectId={project.id}
                               livePreviewProjectIds={livePreviewProjectIds}
-                              alt={stripRichTextToPlain(project.title)}
+                              alt={project.title}
                               containerClassName="overflow-hidden bg-white"
                               className="h-full w-full object-cover object-top filter transition-all duration-700"
                              accentColor={primaryColor} />
@@ -102,7 +97,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                         </div>
 
                         <div className="@md:col-span-7 flex flex-col h-full justify-center">
-                          <h3 className={cn(PROJECT_CARD_TITLE, "text-4xl font-black uppercase mb-4 text-[var(--lf-accent)]")}><RichText text={project.title} /></h3>
+                          <h3 className={cn(PROJECT_CARD_TITLE, "text-4xl font-black uppercase mb-4 text-[var(--lf-accent)]")}>{project.title}</h3>
                           {project.description && (
                             <DescriptionBlock
                               text={project.description}
@@ -121,12 +116,12 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           </div>
                           <div className="flex gap-6 mt-auto">
                             {project.liveUrl && (
-                              <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="flex items-center gap-2 font-bold uppercase tracking-widest border-b-2 border-[var(--lf-accent)] text-[var(--lf-accent)] hover:text-[#2B2B2B] hover:border-[#2B2B2B] transition-colors pb-1">
+                              <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={project.title} data-lf-id={project.id} target="_blank" rel="noreferrer" className="flex items-center gap-2 font-bold uppercase tracking-widest border-b-2 border-[var(--lf-accent)] text-[var(--lf-accent)] hover:text-[#2B2B2B] hover:border-[#2B2B2B] transition-colors pb-1">
                                 Examine
                               </a>
                             )}
                             {project.sourceUrl && (
-                              <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="flex items-center gap-2 font-bold uppercase tracking-widest border-b-2 border-[#2B2B2B] text-[#2B2B2B] hover:text-[var(--lf-accent)] hover:border-[var(--lf-accent)] transition-colors pb-1">
+                              <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={project.title} data-lf-id={project.id} target="_blank" rel="noreferrer" className="flex items-center gap-2 font-bold uppercase tracking-widest border-b-2 border-[#2B2B2B] text-[#2B2B2B] hover:text-[var(--lf-accent)] hover:border-[var(--lf-accent)] transition-colors pb-1">
                                 Manuscript
                               </a>
                             )}
@@ -147,9 +142,9 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                     {experiences.map((exp) => (
                       <div key={exp.id} className="relative">
                         <div className="border-b-2 border-[#2B2B2B] mb-4 pb-4">
-                          <h3 className="text-2xl font-black uppercase"><RichText text={exp.role} /></h3>
+                          <h3 className="text-2xl font-black uppercase">{exp.role}</h3>
                           <div className="flex justify-between items-baseline mt-2">
-                            <p className="text-xl font-bold italic text-[var(--lf-accent)]"><RichText text={exp.company} /></p>
+                            <p className="text-xl font-bold italic text-[var(--lf-accent)]">{exp.company}</p>
                             {formatDateRange(exp.startDate, exp.endDate) && (
                               <span className="font-bold tracking-widest uppercase text-sm">{formatDateRange(exp.startDate, exp.endDate)}</span>
                             )}
@@ -173,9 +168,9 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                       {educations.map((edu) => (
                         <div key={edu.id} className="relative pl-6 border-l-4 border-[#2B2B2B]">
                           <h3 className="text-xl font-black uppercase">
-                            <RichText text={edu.degree} /> {edu.field ? `in ${stripRichTextToPlain(edu.field)}` : ""}
+                            {edu.degree} {edu.field ? `in ${edu.field}` : ""}
                           </h3>
-                          <p className="text-lg font-bold italic text-[var(--lf-accent)] mt-1"><RichText text={edu.institution} /></p>
+                          <p className="text-lg font-bold italic text-[var(--lf-accent)] mt-1">{edu.institution}</p>
                           <p className="mt-3 text-sm font-bold tracking-widest uppercase">{formatDateRange(edu.startDate, edu.endDate)}</p>
                         </div>
                       ))}
@@ -194,8 +189,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           <h3 className="mb-4 text-sm font-black uppercase tracking-[0.2em] border-b border-[#2B2B2B] pb-2 inline-block">{category}</h3>
                           <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4">
                             {items.map((skill) => (
-                              <span key={skill} className="inline-flex items-center gap-2 text-lg font-bold">
-                                <TechIcon name={skill} className="h-4 w-4" />
+                              <span key={skill} className="text-lg font-bold">
                                 {skill}
                               </span>
                             ))}
@@ -236,7 +230,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           <div key={ach.id} className="flex gap-6 items-center">
                             <Trophy className="h-10 w-10 text-[var(--lf-accent)] shrink-0" strokeWidth={1.5} />
                             <div>
-                              <h3 className="text-lg font-black uppercase"><RichText text={ach.title} /></h3>
+                              <h3 className="text-lg font-black uppercase">{ach.title}</h3>
                               {ach.date && (
                                 <p className="text-sm font-bold tracking-widest uppercase mt-2">
                                   {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -256,8 +250,8 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                   </div>
                   <CollapsibleList initial={3} wrapperClassName="grid md:grid-cols-2 gap-8" buttonClassName="mt-12 mx-auto block uppercase tracking-[0.2em] font-bold border-2 border-[#2B2B2B] px-8 py-3 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-colors">
                     {articles.map((article) => (
-                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block border-2 border-[#2B2B2B] p-8 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all group">
-                        <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-[var(--lf-accent)] transition-colors"><RichText text={article.title} /></h3>
+                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block border-2 border-[#2B2B2B] p-8 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all group">
+                        <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-[var(--lf-accent)] transition-colors">{article.title}</h3>
                         {article.description && <p className="text-lg leading-relaxed mb-6 font-normal group-hover:text-[#F1EEDC]/80">{article.description}</p>}
                         <div className="flex items-center gap-4 text-xs font-bold tracking-widest uppercase">
                           {article.publishedAt && <span>{new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>}
@@ -266,24 +260,6 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                       </a>
                     ))}
                   </CollapsibleList>
-                </section>
-              ),
-    profiles: hasProfiles && (
-                <section key="profiles" id="profiles" className="scroll-mt-32">
-                  <div className="flex items-center gap-6 mb-12">
-                    <h2 className="text-3xl font-black uppercase tracking-widest whitespace-nowrap">{labels.profiles}</h2>
-                    <div className="h-px w-full bg-[#2B2B2B]" />
-                  </div>
-                  <div className="border-2 border-[#2B2B2B] p-8 bg-white">
-                    <ProfileLinksSection
-                      portfolio={portfolio}
-                      profiles={socialProfiles}
-                      chipClassName="border-2 border-[#2B2B2B] bg-[#F1EEDC] px-3 py-1.5 text-sm font-bold text-[#2B2B2B]"
-                      pillClassName="border-2 border-[#2B2B2B] bg-[var(--lf-accent)] px-3 py-1.5 text-sm font-bold text-[#2B2B2B] hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-colors"
-                      titleClassName="text-sm font-black uppercase tracking-widest text-[#2B2B2B]"
-                      textClassName="text-base font-normal text-[#2B2B2B]/80"
-                    />
-                  </div>
                 </section>
               ),
     github: contributionCalendar && (
@@ -320,7 +296,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
               className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-6xl @lg:text-8xl font-black tracking-tight uppercase"
               style={{ fontVariant: "small-caps" }}
             >
-              <RichText text={portfolio.title} />
+              {portfolio.title}
             </motion.h1>
             {portfolio.headline && (
               <motion.p
@@ -329,24 +305,13 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                 transition={{ delay: 0.1 }}
                 className="mt-6 text-lg @md:text-xl @lg:text-3xl font-normal italic text-[var(--lf-accent)] px-4 @md:px-8"
               >
-                <RichText text={portfolio.headline} />
+                {portfolio.headline}
               </motion.p>
             )}
 
             <div className="mt-10 flex flex-col items-center gap-6">
               <ContactChips portfolio={portfolio} chipClassName="text-sm font-semibold tracking-widest uppercase border-b border-[#2B2B2B] pb-1" />
-              <HeroProfileButtons
-                profiles={socialProfiles}
-                className="text-[#2B2B2B] border border-[#2B2B2B] p-2 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all"
-              />
-              {hasNonHeroSocialProfiles(socialProfiles) && (
-                <SocialPills
-                  profiles={socialProfiles}
-                  showUsername
-                  excludeHeroPlatforms
-                  className="text-[#2B2B2B] border border-[#2B2B2B] p-2 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all"
-                />
-              )}
+              <SocialPills profiles={socialProfiles} className="text-[#2B2B2B] border border-[#2B2B2B] p-2 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all" />
             </div>
           </div>
         </header>

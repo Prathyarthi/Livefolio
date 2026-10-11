@@ -1,6 +1,5 @@
 "use client";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
@@ -12,17 +11,14 @@ import {
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import { RichText,
+import {
   DescriptionBlock,
   TechChip,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
-  HeroProfileButtons,
-  hasNonHeroSocialProfiles,
   ContactChips,
   CustomSectionItems,
-  ProfileLinksSection,
   PROJECT_CARD,
   PROJECT_CARD_TITLE,
   TEMPLATE_CONTAINER,
@@ -50,7 +46,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("citrus", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const { navbarEnabled, sections } = buildTemplateSections(data);
   const groupedSkills = groupSkillsByCategory(skills);
 
   const githubProfile = socialProfiles.find((p) => p.platform.toLowerCase() === "github");
@@ -86,12 +82,12 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                             imageUrl={project.imageUrl ?? null}
                             projectId={project.id}
                             livePreviewProjectIds={livePreviewProjectIds}
-                            alt={stripRichTextToPlain(project.title)}
+                            alt={project.title}
                             containerClassName="overflow-hidden border-b-4 border-[#264653] bg-[#264653]/10"
                             className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                            accentColor={primaryColor} />
                           <div className="p-8 flex-1 flex flex-col">
-                            <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-black text-[#264653] mb-4 uppercase")}><RichText text={project.title} /></h3>
+                            <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-black text-[#264653] mb-4 uppercase")}>{project.title}</h3>
                             {project.description && (
                               <DescriptionBlock
                                 text={project.description}
@@ -110,12 +106,12 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                             </div>
                             <div className="mt-auto flex gap-4">
                               {project.liveUrl && (
-                                <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="bg-[var(--lf-accent)] text-white px-5 py-2 font-bold uppercase tracking-wider border-2 border-[#264653] hover:bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)] hover:text-[#264653] transition-colors">
+                                <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={project.title} data-lf-id={project.id} target="_blank" rel="noreferrer" className="bg-[var(--lf-accent)] text-white px-5 py-2 font-bold uppercase tracking-wider border-2 border-[#264653] hover:bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)] hover:text-[#264653] transition-colors">
                                   Live Demo
                                 </a>
                               )}
                               {project.sourceUrl && (
-                                <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="bg-white text-[#264653] px-5 py-2 font-bold uppercase tracking-wider border-2 border-[#264653] hover:bg-[#264653] hover:text-white transition-colors">
+                                <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={project.title} data-lf-id={project.id} target="_blank" rel="noreferrer" className="bg-white text-[#264653] px-5 py-2 font-bold uppercase tracking-wider border-2 border-[#264653] hover:bg-[#264653] hover:text-white transition-colors">
                                   Source
                                 </a>
                               )}
@@ -135,8 +131,8 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                       <div key={exp.id} className="relative bg-white border-4 border-[#264653] p-8 rounded-xl shadow-[8px_8px_0_0_var(--lf-accent)]">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b-4 border-[#264653]/10 pb-6">
                           <div>
-                            <h3 className="text-2xl font-black text-[#264653] uppercase"><RichText text={exp.role} /></h3>
-                            <p className="text-xl font-bold text-[var(--lf-accent)] mt-1"><RichText text={exp.company} /></p>
+                            <h3 className="text-2xl font-black text-[#264653] uppercase">{exp.role}</h3>
+                            <p className="text-xl font-bold text-[var(--lf-accent)] mt-1">{exp.company}</p>
                           </div>
                           {formatDateRange(exp.startDate, exp.endDate) && (
                             <span className="bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)] text-[#264653] px-4 py-2 font-bold uppercase tracking-widest border-2 border-[#264653] rounded">
@@ -159,9 +155,9 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                       {educations.map((edu) => (
                         <div key={edu.id} className="bg-white border-4 border-[#264653] p-6 rounded-xl shadow-[6px_6px_0_0_#264653]">
                           <h3 className="text-xl font-black text-[#264653] uppercase">
-                            <RichText text={edu.degree} /> {edu.field ? `in ${stripRichTextToPlain(edu.field)}` : ""}
+                            {edu.degree} {edu.field ? `in ${edu.field}` : ""}
                           </h3>
-                          <p className="text-lg font-bold text-[var(--lf-accent)] mt-2"><RichText text={edu.institution} /></p>
+                          <p className="text-lg font-bold text-[var(--lf-accent)] mt-2">{edu.institution}</p>
                           <p className="mt-4 text-sm font-bold tracking-widest text-[#264653]/60 uppercase">{formatDateRange(edu.startDate, edu.endDate)}</p>
                         </div>
                       ))}
@@ -177,11 +173,9 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                           <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-[var(--lf-accent)]">{category}</h3>
                           <div className="flex flex-wrap gap-2">
                             {items.map((skill) => (
-                              <TechChip
-                                key={skill}
-                                name={skill}
-                                className="bg-[#FFFCF2] border-2 border-[#264653] px-3 py-1.5 text-sm font-bold text-[#264653]"
-                              />
+                              <span key={skill} className="bg-[#FFFCF2] border-2 border-[#264653] px-3 py-1.5 text-sm font-bold text-[#264653]">
+                                {skill}
+                              </span>
                             ))}
                           </div>
                         </div>
@@ -214,7 +208,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                           <div key={ach.id} className="flex gap-4 bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] border-l-8 border-[color-mix(in_srgb,var(--lf-accent)_50%,white)] p-6">
                             <Trophy className="h-8 w-8 text-[var(--lf-accent)] shrink-0" />
                             <div>
-                              <h3 className="text-lg font-black text-[#264653] uppercase"><RichText text={ach.title} /></h3>
+                              <h3 className="text-lg font-black text-[#264653] uppercase">{ach.title}</h3>
                               {ach.date && (
                                 <p className="text-sm font-bold tracking-widest text-[#264653]/60 uppercase mt-2">
                                   {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -231,8 +225,8 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                   <h2 className="mb-12 text-4xl font-black text-[#264653] uppercase tracking-tight">{labels.articles}</h2>
                   <CollapsibleList initial={3} wrapperClassName="grid gap-8 md:grid-cols-2" buttonClassName="mt-12 mx-auto bg-[#264653] text-white px-8 py-3 font-bold uppercase tracking-widest hover:bg-[var(--lf-accent)] transition-colors">
                     {articles.map((article) => (
-                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block bg-white border-4 border-[#264653] p-8 rounded-xl shadow-[8px_8px_0_0_#264653] hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--lf-accent)] transition-all">
-                        <h3 className="text-2xl font-black text-[#264653] uppercase mb-4"><RichText text={article.title} /></h3>
+                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block bg-white border-4 border-[#264653] p-8 rounded-xl shadow-[8px_8px_0_0_#264653] hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--lf-accent)] transition-all">
+                        <h3 className="text-2xl font-black text-[#264653] uppercase mb-4">{article.title}</h3>
                         {article.description && <p className="text-lg font-medium text-[#264653]/80 mb-6">{article.description}</p>}
                         <div className="flex items-center gap-4 text-sm font-bold tracking-widest uppercase text-[var(--lf-accent)]">
                           {article.publishedAt && <span>{new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>}
@@ -241,21 +235,6 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                       </a>
                     ))}
                   </CollapsibleList>
-                </section>
-              ),
-    profiles: hasProfiles && (
-                <section key="profiles" id="profiles" className="scroll-mt-32 max-w-4xl">
-                  <h2 className="mb-10 text-4xl font-black text-[#264653] uppercase tracking-tight">{labels.profiles}</h2>
-                  <div className="bg-white border-4 border-[#264653] p-8 rounded-xl shadow-[8px_8px_0_0_var(--lf-accent)]">
-                    <ProfileLinksSection
-                      portfolio={portfolio}
-                      profiles={socialProfiles}
-                      chipClassName="text-sm font-bold text-[#264653] bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)]/30 px-3 py-1.5 rounded"
-                      pillClassName="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded px-3 py-1.5 transition-colors"
-                      titleClassName="text-sm font-black uppercase tracking-widest text-[var(--lf-accent)]"
-                      textClassName="text-lg font-medium text-[#264653]/80"
-                    />
-                  </div>
                 </section>
               ),
     github: contributionCalendar && (
@@ -299,7 +278,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                 animate={{ opacity: 1, y: 0 }}
                 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-6xl @lg:text-8xl font-black tracking-tighter text-[#264653] uppercase leading-none"
               >
-                <RichText text={portfolio.title} />
+                {portfolio.title}
               </motion.h1>
               {portfolio.headline && (
                 <motion.p
@@ -308,24 +287,13 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                   transition={{ delay: 0.1 }}
                   className="mt-6 text-2xl md:text-3xl text-[var(--lf-accent)] font-bold tracking-tight"
                 >
-                  <RichText text={portfolio.headline} />
+                  {portfolio.headline}
                 </motion.p>
               )}
 
               <div className="mt-8 flex flex-col gap-4">
                 <ContactChips portfolio={portfolio} chipClassName="text-sm font-bold text-[#264653] bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)]/30 px-3 py-1.5 rounded" />
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded p-2 transition-colors"
-                />
-                {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded p-2 transition-colors"
-                  />
-                )}
+                <SocialPills profiles={socialProfiles} className="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded p-2 transition-colors" />
               </div>
             </div>
 

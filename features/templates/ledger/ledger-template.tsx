@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useMemo, type ReactNode } from "react";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 import { motion, AnimatePresence } from "motion/react";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import {
+  PlatformIcon,
+} from "@/components/icons";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { cn } from "@/lib/utils";
 import { formatDateRange, groupSkillsByCategory, sortExperiencesNewestFirst } from "@/features/templates/utils";
@@ -13,16 +15,13 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { RichText,
+import {
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
   TechIcon,
-  HeroProfileButtons,
   ProfileLinksSection,
-  SocialPills,
-  hasNonHeroSocialProfiles,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -82,7 +81,7 @@ function displayYear(date: string | null): string {
 
 /** Initials from the first two words of a display name (e.g. "Akshai Kumar" → "AK"). */
 function getInitials(title: string): string {
-  const parts = stripRichTextToPlain(title).trim().split(/\s+/).filter(Boolean);
+  const parts = title.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
@@ -98,6 +97,18 @@ function getSkillLevelDisplay(level: number | null): { label: string; classes: s
     return { label: 'Advanced', classes: 'bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] text-[var(--lf-accent)]' };
   }
   return { label: 'Familiar', classes: 'bg-slate-900 border border-slate-800 text-slate-400' };
+}
+
+/** cachedStats is Record<string, unknown> | null; read known numeric-ish fields safely. */
+function getSocialStatLabel(stats: Record<string, unknown> | null): string | null {
+  if (!stats) return null;
+  if (stats.followers !== undefined && stats.followers !== null) {
+    return `${stats.followers} flwrs`;
+  }
+  if (stats.connections !== undefined && stats.connections !== null) {
+    return `${stats.connections}+ conns`;
+  }
+  return null;
 }
 
 const inter = Inter({
@@ -188,6 +199,12 @@ export function LedgerTemplate({ data }: AppProps) {
     });
   }, [visibleProjects, projectSearch, selectedTech]);
 
+  // Render social profile icon helper
+  const getSocialIcon = (platform: string, className = 'w-5 h-5') => (
+    <PlatformIcon platform={platform} className={className} />
+  );
+
+
   const blocks: Partial<Record<ReorderableSectionKey, ReactNode>> = {
     about: null,
     experience: experiences.length > 0
@@ -231,10 +248,10 @@ export function LedgerTemplate({ data }: AppProps) {
                         className="font-mono font-bold text-xs uppercase tracking-wider whitespace-normal break-words w-full"
                         style={{ color: primaryColor }}
                       >
-                        <RichText text={exp.role} />
+                        {exp.role}
                       </span>
                       <span className="text-xs font-mono text-slate-500 whitespace-normal break-words w-full">
-                        <RichText text={exp.company} />
+                        {exp.company}
                       </span>
                     </button>
                   ))}
@@ -257,7 +274,7 @@ export function LedgerTemplate({ data }: AppProps) {
                       <div className="space-y-3 border-b border-slate-800 pb-4">
                           <div className="flex items-start justify-between gap-3">
                           <h3 className="min-w-0 flex-1 text-base @sm:text-lg font-mono font-bold uppercase break-words">
-                            <span style={{ color: primaryColor }}><RichText text={exp.role} /></span>
+                            <span style={{ color: primaryColor }}>{exp.role}</span>
                           </h3>
                           {formatDateRange(exp.startDate, exp.endDate) && (
                             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-slate-900 border border-slate-800 text-xs text-slate-400 font-mono shrink-0">
@@ -270,12 +287,12 @@ export function LedgerTemplate({ data }: AppProps) {
                         </div>
                         <div className="flex items-center gap-2 font-mono text-sm text-white uppercase tracking-wide w-full">
                           <span className="text-slate-500 font-normal shrink-0">@</span>
-                          <span className="min-w-0"><RichText text={exp.company} /></span>
+                          <span className="min-w-0">{exp.company}</span>
                         </div>
                         {exp.location && (
                           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
                             <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                            <span className="uppercase break-words"><RichText text={exp.location} /></span>
+                            <span className="uppercase break-words">{exp.location}</span>
                           </div>
                         )}
                       </div>
@@ -393,7 +410,7 @@ export function LedgerTemplate({ data }: AppProps) {
                         imageUrl={project.imageUrl}
                         projectId={project.id}
                         livePreviewProjectIds={livePreviewProjectIds}
-                        alt={stripRichTextToPlain(project.title)}
+                        alt={project.title}
                         loading="lazy"
                         accentColor={primaryColor}
                         containerClassName="bg-slate-950"
@@ -421,7 +438,7 @@ export function LedgerTemplate({ data }: AppProps) {
                       <div className={PROJECT_CARD_HEADER}>
                         <div className={PROJECT_CARD_META}>
                           <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-mono font-bold text-white uppercase group-hover:text-[var(--lf-accent)] transition-colors")}>
-                            <RichText text={project.title} />
+                            {project.title}
                           </h3>
                         </div>
                       </div>
@@ -525,10 +542,7 @@ export function LedgerTemplate({ data }: AppProps) {
                           className="min-w-0 bg-[#111418] border border-slate-800 p-4 rounded-none flex flex-wrap items-center justify-between gap-3 hover:border-slate-700 transition-colors group"
                         >
                           <div className="space-y-1.5">
-                            <p className="inline-flex items-center gap-2 font-mono font-bold text-xs uppercase text-white group-hover:text-[var(--lf-accent)] transition-colors">
-                              <TechIcon name={name} className="h-3.5 w-3.5" />
-                              {name}
-                            </p>
+                            <p className="font-mono font-bold text-xs uppercase text-white group-hover:text-[var(--lf-accent)] transition-colors">{name}</p>
                           </div>
                           {levelDisplay && (
                             <span className={`px-2 py-0.5 rounded-none text-[9px] font-mono uppercase tracking-widest font-bold ${levelDisplay.classes}`}>
@@ -677,7 +691,7 @@ export function LedgerTemplate({ data }: AppProps) {
                           {article.readTime ? ` · ${article.readTime} min read` : ''}
                         </span>
                         <h4 className="font-mono font-bold text-white text-sm @sm:text-base group-hover:text-[var(--lf-accent)] transition-colors leading-snug uppercase tracking-wide">
-                          <RichText text={article.title} />
+                          {article.title}
                         </h4>
                         {article.description && (
                           <DescriptionBlock
@@ -730,10 +744,10 @@ export function LedgerTemplate({ data }: AppProps) {
                         </div>
                         <div>
                           <h4 className="font-mono font-bold text-white text-sm @sm:text-base leading-snug uppercase tracking-wide">
-                            <RichText text={edu.institution} />
+                            {edu.institution}
                           </h4>
                           <p className="text-xs text-slate-400 mt-1 font-mono uppercase tracking-wider">
-                            <RichText text={edu.degree} />{edu.field ? ` in ${stripRichTextToPlain(edu.field)}` : ''}
+                            {edu.degree}{edu.field ? ` in ${edu.field}` : ''}
                           </p>
                         </div>
                       </div>
@@ -819,7 +833,7 @@ export function LedgerTemplate({ data }: AppProps) {
             </span>
             <div className="flex min-w-0 flex-col">
               <span className="max-w-[9rem] truncate font-display font-semibold text-white leading-none text-sm tracking-wide group-hover:text-[var(--lf-accent)] transition-colors @sm:max-w-64">
-                <RichText text={portfolio.title} />
+                {portfolio.title}
               </span>
             </div>
           </a>
@@ -912,7 +926,7 @@ export function LedgerTemplate({ data }: AppProps) {
                   "font-display font-extrabold text-white tracking-tighter uppercase leading-none"
                 )}
               >
-                <RichText text={portfolio.title} />
+                {portfolio.title}
               </h1>
 
               {portfolio.headline && (
@@ -923,7 +937,7 @@ export function LedgerTemplate({ data }: AppProps) {
                     "font-mono font-bold text-[var(--lf-accent)] tracking-widest uppercase mt-2"
                   )}
                 >
-                  <RichText text={portfolio.headline} />
+                  {portfolio.headline}
                 </p>
               )}
 
@@ -946,20 +960,32 @@ export function LedgerTemplate({ data }: AppProps) {
                 chipClassName="w-full @sm:w-auto justify-center @md:justify-start rounded-none border border-slate-800 bg-[#111418] px-3 py-2 text-xs font-mono text-slate-400 text-center @md:text-left"
               />
 
-              <div id="hero-socials" className="flex flex-col items-center @md:items-start gap-3 pt-4">
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="p-2 rounded-none bg-slate-900 border border-slate-800 hover:border-[var(--lf-accent)] text-slate-400 hover:text-white transition-all font-mono text-xs"
-                />
-                {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="p-2 rounded-none bg-slate-900 border border-slate-800 hover:border-[var(--lf-accent)] text-slate-400 hover:text-white transition-all font-mono text-xs"
-                  />
-                )}
-              </div>
+              {/* Social profiles stats & links */}
+              {socialProfiles.length > 0 && (
+                <div id="hero-socials" className="flex flex-wrap items-center justify-center @md:justify-start gap-3 @sm:gap-4 pt-4">
+                  {socialProfiles.map((profile) => {
+                    const statLabel = getSocialStatLabel(profile.cachedStats);
+                    return (
+                      <a
+                        key={profile.platform}
+                        href={profile.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2 rounded-none bg-slate-900 border border-slate-800 hover:border-[var(--lf-accent)] text-slate-400 hover:text-white transition-all flex items-center gap-2 font-mono text-xs group"
+                        id={`social-${profile.platform}`}
+                      >
+                        {getSocialIcon(profile.platform, 'w-4 h-4 text-[var(--lf-accent)]')}
+                        {profile.username && <span className="hidden @sm:inline">@{profile.username}</span>}
+                        {statLabel && (
+                          <span className="px-1.5 py-0.5 rounded-none bg-slate-950 text-[9px] text-slate-500 border border-slate-800/80 group-hover:text-[var(--lf-accent)] transition-colors">
+                            {statLabel}
+                          </span>
+                        )}
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -995,7 +1021,7 @@ export function LedgerTemplate({ data }: AppProps) {
               {getInitials(portfolio.title)}
             </span>
             <div className="flex min-w-0 flex-col">
-              <span className="break-words text-sm font-semibold text-white uppercase tracking-wider"><RichText text={portfolio.title} /></span>
+              <span className="break-words text-sm font-semibold text-white uppercase tracking-wider">{portfolio.title}</span>
             </div>
           </div>
 

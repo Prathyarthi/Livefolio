@@ -16,6 +16,7 @@ import {
   LogOut,
   User,
   PanelLeft,
+  FileCheck2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,8 +46,7 @@ const NAV = [
   { title: "Templates", href: "/dashboard/templates", icon: Palette },
   { title: "Import", href: "/dashboard/import", icon: Download },
   { title: "Preview", href: "/dashboard/preview", icon: Eye },
-  // Applications hidden until the job applications product is ready.
-  // { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
+  { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { title: "Billing", href: "/dashboard/billing", icon: CreditCard },
   { title: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -242,7 +242,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <SidebarInset
         className={
           fullHeightPanel
-            ? "relative flex h-dvh max-h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface-base"
+            ? "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-surface-base lg:h-svh lg:max-h-svh lg:overflow-hidden"
             : "relative min-w-0 overflow-x-hidden bg-surface-base"
         }
       >
@@ -250,7 +250,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <main
           className={
             fullHeightPanel
-              ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-[var(--space-5)]"
+              ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)] lg:overflow-hidden"
               : "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)]"
           }
         >

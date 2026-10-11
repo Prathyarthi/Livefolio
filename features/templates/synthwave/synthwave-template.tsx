@@ -1,5 +1,4 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -7,7 +6,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Sun, Music, Zap } from "lucide-react";
-import { RichText,
+import {
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -23,7 +22,6 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
-  hasNonHeroSocialProfiles,
   SPLIT_CARD_ROW,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
@@ -108,7 +106,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                       imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
-                      alt={stripRichTextToPlain(project.title)}
+                      alt={project.title}
                       loading="lazy"
                       containerClassName="overflow-hidden bg-[#0d0221]"
                       className="h-full w-full object-cover object-top filter contrast-125 saturate-150 transition-transform duration-700 group-hover:scale-110"
@@ -121,7 +119,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                       <div className={cn(PROJECT_CARD_HEADER, "mb-3")}>
                         <div className={PROJECT_CARD_META}>
                           <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-black text-white uppercase tracking-wider group-hover:text-[var(--lf-accent)] transition-colors drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]")}>
-                            <RichText text={project.title} />
+                            {project.title}
                           </h3>
                           {project.featured && (
                             <span className="bg-[#ffbc00] text-[#0d0221] text-xs font-bold px-2 py-1 shrink-0 uppercase tracking-widest">
@@ -153,7 +151,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                         <ProjectActions
                           liveUrl={project.liveUrl}
                           sourceUrl={project.sourceUrl}
-                          label={stripRichTextToPlain(project.title)}
+                          label={project.title}
                           projectId={project.id}
                           liveClassName="bg-[var(--lf-accent)] text-[#0d0221] text-xs font-bold px-5 py-2 hover:bg-white transition-colors mr-3 uppercase tracking-widest shadow-[0_0_10px_rgba(0,240,255,0.5)]"
                           sourceClassName="border border-[var(--lf-accent)] text-[var(--lf-accent)] text-xs font-bold px-5 py-2 hover:bg-[var(--lf-accent)] hover:text-[#0d0221] transition-colors uppercase tracking-widest"
@@ -178,8 +176,8 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
               >
                 {experiences.map((exp) => (
                   <article key={exp.id} className="bg-[#1a0b2e]/80 border-l-4 border-[var(--lf-accent)] p-6 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
-                    <h3 className="text-xl font-black text-white uppercase tracking-wider mb-1 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"><RichText text={exp.role} /></h3>
-                    <p className="text-[var(--lf-accent)] font-bold text-lg mb-3 uppercase tracking-widest"><RichText text={exp.company} /></p>
+                    <h3 className="text-xl font-black text-white uppercase tracking-wider mb-1 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">{exp.role}</h3>
+                    <p className="text-[var(--lf-accent)] font-bold text-lg mb-3 uppercase tracking-widest">{exp.company}</p>
                     {(exp.startDate || exp.endDate) && (
                       <div className="inline-block bg-[#0d0221] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] text-[10px] font-bold px-3 py-1 mb-4 uppercase tracking-widest">
                         {formatDateRange(exp.startDate, exp.endDate)}
@@ -213,11 +211,9 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {names.map((name) => (
-                            <TechChip
-                              key={name}
-                              name={name}
-                              className="bg-[#0d0221] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] text-xs font-bold px-3 py-1.5 uppercase tracking-widest hover:border-[var(--lf-accent)] hover:shadow-[0_0_10px_rgba(0,240,255,0.5)] transition-all cursor-default"
-                            />
+                            <span key={name} className="bg-[#0d0221] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] text-xs font-bold px-3 py-1.5 uppercase tracking-widest hover:border-[var(--lf-accent)] hover:shadow-[0_0_10px_rgba(0,240,255,0.5)] transition-all cursor-default">
+                              {name}
+                            </span>
                           ))}
                         </div>
                       </div>
@@ -238,8 +234,8 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                 >
                   {educations.map((edu) => (
                     <article key={edu.id} className="bg-[#1a0b2e]/80 border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-6 hover:border-[var(--lf-accent)] transition-colors">
-                      <h3 className="text-lg font-black text-white uppercase tracking-wider"><RichText text={edu.degree} /></h3>
-                      <p className="text-[var(--lf-accent)] text-sm font-bold mt-1 uppercase tracking-widest"><RichText text={edu.institution} /></p>
+                      <h3 className="text-lg font-black text-white uppercase tracking-wider">{edu.degree}</h3>
+                      <p className="text-[var(--lf-accent)] text-sm font-bold mt-1 uppercase tracking-widest">{edu.institution}</p>
                       <div className="flex justify-between items-center mt-4 text-[10px] font-bold text-[#b0b0b0] uppercase tracking-widest">
                         {(edu.startDate || edu.endDate) && (
                           <span className="bg-[#0d0221] px-2 py-1 border border-[#b0b0b0]/30">{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -301,7 +297,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                         <Zap className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-black text-white uppercase tracking-wider leading-snug"><RichText text={ach.title} /></h3>
+                        <h3 className="text-sm font-black text-white uppercase tracking-wider leading-snug">{ach.title}</h3>
                         {ach.date && (
                           <p className="text-[10px] font-bold text-[var(--lf-accent)] mt-2 uppercase tracking-widest">
                             {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -326,8 +322,8 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
               {articles.map((article) => (
                 <article key={article.id} className="bg-[#1a0b2e]/80 border-t-4 border-[var(--lf-accent)] p-6 shadow-[0_0_15px_rgba(0,240,255,0.1)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all flex flex-col group">
                   <h3 className="text-lg font-black text-white uppercase tracking-wider mb-4 group-hover:text-[var(--lf-accent)] transition-colors leading-tight drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">
-                    <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
-                      <RichText text={article.title} />
+                    <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
+                      {article.title}
                     </a>
                   </h3>
                   {article.description && (
@@ -418,12 +414,12 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
 
         <header className="flex flex-col items-center text-center max-w-4xl mx-auto pt-10">
           <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-6xl @lg:text-8xl font-black text-transparent bg-clip-text bg-linear-to-b from-[var(--lf-accent)] to-[var(--lf-accent)] mb-4 tracking-tighter drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]" style={{ WebkitTextStroke: '1px #ffffff' }}>
-            <RichText text={portfolio.title} />
+            {portfolio.title}
           </h1>
 
           {portfolio.headline && (
             <p className="text-base @md:text-xl @lg:text-3xl text-[#ffbc00] font-bold mb-10 tracking-widest uppercase drop-shadow-[0_0_8px_rgba(255,188,0,0.8)]">
-              <RichText text={portfolio.headline} />
+              {portfolio.headline}
             </p>
           )}
 
@@ -438,12 +434,11 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
             />
           </div>
 
-          {hasNonHeroSocialProfiles(socialProfiles) && (
+          {socialProfiles.length > 0 && (
             <div className="mt-4">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
-                excludeHeroPlatforms
                 className="text-sm font-bold text-[#ffbc00] hover:text-white transition-colors px-4 py-2 bg-[#26004c]/50 border border-[#ffbc00]/30 rounded-full"
               />
             </div>

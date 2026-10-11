@@ -1,6 +1,5 @@
 "use client";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PortfolioData } from "../types";
@@ -15,15 +14,12 @@ import { ExternalLink, Menu, X } from "lucide-react";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import { RichText,
+import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
-  HeroProfileButtons,
   ProfileLinksSection,
-  SocialPills,
-  hasNonHeroSocialProfiles,
   PROJECT_CARD,
   PROJECT_CARD_HEADER,
   PROJECT_CARD_TITLE,
@@ -31,8 +27,6 @@ import { RichText,
   TEMPLATE_CONTAINER,
   getSectionLabel,
   getSectionLabels,
-  hasContactOrSocialProfiles,
-  isHeroProfilePlatform,
 } from "../shared";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import {
@@ -70,9 +64,14 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
   const contributionCalendar = parseContributionCalendar(
     githubStats?.contributionCalendar
   );
-  const hasProfiles = hasContactOrSocialProfiles(portfolio, socialProfiles, {
-    excludeHeroPlatforms: true,
-  });
+  const hasProfiles =
+    socialProfiles.length > 0 ||
+    Boolean(
+      portfolio.contactEmail ||
+      portfolio.phone ||
+      portfolio.websiteUrl ||
+      portfolio.location
+    );
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -205,10 +204,10 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                       >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-bold text-gray-950"><RichText text={exp.role} /></h3>
+                            <h3 className="text-xl font-bold text-gray-950">{exp.role}</h3>
                             <p className="mt-1 text-sm font-medium text-gray-600">
-                              <RichText text={exp.company} />
-                              {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
+                              {exp.company}
+                              {exp.location ? ` · ${exp.location}` : ""}
                             </p>
                           </div>
                           {(exp.startDate || exp.endDate) && (
@@ -243,12 +242,12 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                         className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[var(--lf-accent)]"
                       >
                         <h3 className="text-lg font-bold text-gray-950">
-                          <RichText text={edu.degree} />
+                          {edu.degree}
                           {edu.field ? (
-                            <span className="font-medium text-gray-600"> in <RichText text={edu.field} /></span>
+                            <span className="font-medium text-gray-600"> in {edu.field}</span>
                           ) : null}
                         </h3>
-                        <p className="mt-2 text-sm font-medium text-gray-600"><RichText text={edu.institution} /></p>
+                        <p className="mt-2 text-sm font-medium text-gray-600">{edu.institution}</p>
                         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
                           {(edu.startDate || edu.endDate) && (
                             <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -271,11 +270,12 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {names.map((name) => (
-                            <TechChip
+                            <span
                               key={name}
-                              name={name}
                               className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700"
-                            />
+                            >
+                              {name}
+                            </span>
                           ))}
                         </div>
                       </div>
@@ -335,12 +335,12 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                     {articles.map((article) => (
                       <a
                         key={article.id}
-                        href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
+                        href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[var(--lf-accent)]"
                       >
-                        <h3 className="text-xl font-bold text-gray-950"><RichText text={article.title} /></h3>
+                        <h3 className="text-xl font-bold text-gray-950">{article.title}</h3>
                         {article.description && (
                           <p className="mt-2 text-sm text-gray-500">{article.description}</p>
                         )}
@@ -457,7 +457,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                   />
                 ) : (
                   <span className="text-sm font-semibold tracking-tight text-gray-950">
-                    {stripRichTextToPlain(portfolio.title).slice(0, 2).toUpperCase()}
+                    {portfolio.title.slice(0, 2).toUpperCase()}
                   </span>
                 )}
               </a>
@@ -516,7 +516,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             <section className="flex h-screen flex-col place-content-center place-items-center gap-y-4 px-2">
               <h1 className="-mt-7 text-center text-4xl font-extrabold leading-[130%] text-gray-950 md:font-semibold lg:mt-0 lg:text-6xl lg:font-semibold lg:leading-[128%]">
                 Hey! <br />
-                I am <RichText text={portfolio.title} />
+                I am {portfolio.title}
                 <span className="text-[var(--lf-accent)]">.</span>
               </h1>
               <p
@@ -535,20 +535,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="text-gray-950 transition duration-300 hover:opacity-70"
-                />
-                {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="text-sm text-gray-700 transition duration-300 hover:opacity-70"
-                  />
-                )}
-              </div>
+              <HeroSocialRow profiles={socialProfiles} />
 
               <div className="mt-[150px] animate-bounce">
                 <a href="#projects" aria-label="Scroll to projects">
@@ -594,15 +581,12 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             </section>
           ))}
 
-          {showFloatSocial &&
-            socialProfiles.some((profile) => isHeroProfilePlatform(profile.platform)) && (
+          {showFloatSocial && socialProfiles.length > 0 && (
             <div className="absolute right-0 top-[290px] z-20 hidden lg:block">
               <div className="relative -z-10 mb-4 justify-center">
                 <div className="rounded-lg bg-[#fbfffe] px-3 py-6 shadow-2xl drop-shadow-2xl">
                   <div className="flex flex-col gap-3">
-                    {socialProfiles
-                      .filter((profile) => isHeroProfilePlatform(profile.platform))
-                      .map((p) => (
+                    {socialProfiles.map((p) => (
                       <a
                         key={`${p.platform}-${p.url}`}
                         href={p.url}
@@ -645,6 +629,26 @@ function SocialIcon({ platform }: { platform: string }) {
   return <ExternalLink className={className} />;
 }
 
+function HeroSocialRow({ profiles }: { profiles: PortfolioData["socialProfiles"] }) {
+  if (profiles.length === 0) return null;
+  return (
+    <div className="mb-3 mt-0 flex justify-center space-x-7 lg:justify-start">
+      {profiles.map((p) => (
+        <a
+          key={`${p.platform}-${p.url}`}
+          href={p.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-950 transition duration-300 hover:opacity-70"
+          aria-label={p.platform}
+        >
+          <SocialIcon platform={p.platform} />
+        </a>
+      ))}
+    </div>
+  );
+}
+
 function ProjectCard({
   project,
   livePreviewProjectIds,
@@ -663,14 +667,14 @@ function ProjectCard({
         imageUrl={project.imageUrl ?? null}
         projectId={project.id}
         livePreviewProjectIds={livePreviewProjectIds}
-        alt={stripRichTextToPlain(project.title)}
+        alt={project.title}
         templateId="spotlight"
         loading="lazy"
       />
 
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className={PROJECT_CARD_HEADER}>
-          <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-semibold tracking-tight text-gray-950")}><RichText text={project.title} /></h3>
+          <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-semibold tracking-tight text-gray-950")}>{project.title}</h3>
           {hasLinks ? (
             <ExternalLink size={18} className="mt-0.5 shrink-0 text-gray-700 transition-colors group-hover:text-gray-950" />
           ) : null}
@@ -697,7 +701,7 @@ function ProjectCard({
         <div className="mt-auto flex items-center gap-2 pt-1">
           {project.liveUrl ? (
             <a
-              href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
+              href={project.liveUrl} data-lf-track="project_live" data-lf-label={project.title} data-lf-id={project.id}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-md bg-gray-950 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-85"
@@ -707,7 +711,7 @@ function ProjectCard({
           ) : null}
           {project.sourceUrl ? (
             <a
-              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
+              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={project.title} data-lf-id={project.id}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 transition-colors hover:border-gray-300"

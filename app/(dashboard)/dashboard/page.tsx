@@ -33,7 +33,7 @@ export default function DashboardPage() {
         <h1 className="text-h2 text-text-primary">Hi, {firstName}</h1>
         <p className="text-body-sm text-text-secondary">
           {portfolio
-            ? "Import a resume to fill most sections, then tweak anything by hand."
+            ? "Pick up where you left off — edits save as you go."
             : "Create a portfolio to unlock the editor and preview."}
         </p>
       </header>
@@ -53,7 +53,7 @@ export default function DashboardPage() {
             <CreatePortfolioPrompt
               className="mx-auto w-full max-w-xs items-center"
               buttonClassName="sm:min-w-[13rem] sm:w-auto"
-              onCreated={() => router.push("/dashboard/import")}
+              onCreated={() => router.push("/dashboard/edit")}
             />
           </div>
         ) : isLoading ? (
@@ -91,15 +91,9 @@ export default function DashboardPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button size="lg" className="w-full sm:w-auto" asChild>
-                <Link href="/dashboard/import">
-                  <FileText className="h-4 w-4" />
-                  Import resume
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
                 <Link href="/dashboard/edit">
                   <Pencil className="h-4 w-4" />
-                  Edit manually
+                  Open editor
                 </Link>
               </Button>
               {portfolio.isPublished && portfolio.slug ? (
@@ -145,8 +139,8 @@ export default function DashboardPage() {
       </div>
 
       <FlowFooter
-        message="Import your resume first — then tweak sections and preview before you publish."
-        next={{ href: "/dashboard/import", label: "Import resume" }}
+        message="Edits autosave. Use preview before you publish."
+        next={{ href: "/dashboard/edit", label: "Go to editor" }}
       />
     </div>
   );

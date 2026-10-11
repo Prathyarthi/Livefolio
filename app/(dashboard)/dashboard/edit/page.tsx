@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, Share2, FileText } from "lucide-react";
@@ -21,7 +20,10 @@ import {
 import { usePortfolio } from "@/features/portfolio/api/use-portfolio";
 import { CreatePortfolioPrompt, PORTFOLIO_ACTION_BUTTON_CLASS } from "@/features/portfolio/components/create-portfolio-prompt";
 import { EditStepContent } from "@/features/portfolio/components/edit-step-content";
-import { EditStepTracker } from "@/features/portfolio/components/edit-step-tracker";
+import {
+  EditStepProgressBar,
+  EditStepTracker,
+} from "@/features/portfolio/components/edit-step-tracker";
 import { ShareDialog } from "@/features/portfolio/components/share-dialog";
 import {
   EDIT_STEP_DESCRIPTIONS,
@@ -33,8 +35,32 @@ function EditPortfolioPageContent() {
   const router = useRouter();
   const { data: portfolio, isLoading } = usePortfolio();
   const [activeStep, setActiveStep] = useState<EditStepValue>("basic");
-  const currentStep =
-    EDIT_STEPS.find((step) => step.value === activeStep) ?? EDIT_STEPS[0];
+
+  const activeIndex = useMemo(
+    () => EDIT_STEPS.findIndex((step) => step.value === activeStep),
+    [activeStep]
+  );
+
+  const currentStep = EDIT_STEPS[activeIndex];
+  const previousStep = activeIndex > 0 ? EDIT_STEPS[activeIndex - 1] : null;
+  const nextStep =
+    activeIndex < EDIT_STEPS.length - 1 ? EDIT_STEPS[activeIndex + 1] : null;
+
+  const goPrevious = () => {
+    if (activeIndex <= 0) {
+      router.push("/dashboard");
+      return;
+    }
+    setActiveStep(EDIT_STEPS[activeIndex - 1].value);
+  };
+
+  const goNext = () => {
+    if (activeIndex < EDIT_STEPS.length - 1) {
+      setActiveStep(EDIT_STEPS[activeIndex + 1].value);
+      return;
+    }
+    router.push("/dashboard/templates");
+  };
 
   if (isLoading) {
     return (
@@ -71,12 +97,13 @@ function EditPortfolioPageContent() {
 
   return (
     <div className={DASHBOARD_PANEL_PAGE_CLASS}>
-      <div className="shrink-0">
+      <div className="shrink-0 space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-h2 text-text-primary">Edit portfolio</h1>
-            <p className="mt-1 max-w-2xl text-body-sm text-text-secondary">
-              Import a resume to fill sections fast, or edit any section below.
+            <p className="mt-1 max-w-2xl text-body-sm text-text-secondary lg:hidden">
+              Work through one section at a time. Use the progress tracker to jump
+              between steps.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -85,10 +112,10 @@ function EditPortfolioPageContent() {
             ) : (
               <Badge variant="neutral">Draft</Badge>
             )}
-            <Button size="sm" asChild>
+            <Button variant="outline" size="sm" asChild>
               <Link href="/dashboard/import">
                 <FileText className="mr-2 h-4 w-4" />
-                Import resume
+                Import resume (PDF)
               </Link>
             </Button>
             {portfolio.slug && (
@@ -109,18 +136,43 @@ function EditPortfolioPageContent() {
         </div>
       </div>
 
-      <Separator className="mt-4 mb-4" />
+      <Separator className="mt-6" />
 
-      <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden lg:flex-row lg:gap-0">
+      <div className="shrink-0 py-4">
+        <FlowFooter
+          className="border-0 p-0"
+          message={null}
+          previous={
+            activeIndex <= 0
+              ? { href: "/dashboard", label: "Back to Overview" }
+              : {
+                  label: `Previous: ${previousStep?.label ?? "section"}`,
+                  onClick: goPrevious,
+                }
+          }
+          next={{
+            label: nextStep ? `Next: ${nextStep.label}` : "Next: Templates",
+            onClick: goNext,
+          }}
+        />
+      </div>
+
+      <div className="flex min-h-0 w-full flex-1 flex-col lg:flex-row lg:gap-0 lg:overflow-hidden">
         <aside className={DASHBOARD_TRACKER_ASIDE_CLASS}>
           <EditStepTracker
             activeStep={activeStep}
             onStepChange={setActiveStep}
+            portfolio={portfolio}
           />
         </aside>
 
         <div className={DASHBOARD_MAIN_COLUMN_CLASS}>
+          <EditStepProgressBar activeStep={activeStep} />
+
           <div className="shrink-0 lg:hidden">
+            <p className="eyebrow">
+              Step {activeIndex + 1} of {EDIT_STEPS.length}
+            </p>
             <h2 className="text-h3 text-text-primary">{currentStep.label}</h2>
             <p className="mt-0.5 text-body-sm text-text-secondary">
               {EDIT_STEP_DESCRIPTIONS[activeStep]}
@@ -128,35 +180,11 @@ function EditPortfolioPageContent() {
           </div>
 
           <div className={DASHBOARD_CONTENT_FRAME_CLASS}>
-            <div
-              className={cn(
-                DASHBOARD_CONTENT_INNER_CLASS,
-                activeStep === "basic" && "overflow-hidden pb-0 sm:pb-0"
-              )}
-            >
+            <div className={DASHBOARD_CONTENT_INNER_CLASS}>
               <EditStepContent step={activeStep} />
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="shrink-0 pt-4">
-        <FlowFooter
-          className="border-0 p-0"
-          message={null}
-          previous={{ href: "/dashboard", label: "Back to Overview" }}
-          next={
-            activeStep === "publish"
-              ? {
-                  label: "Templates",
-                  onClick: () => router.push("/dashboard/templates"),
-                }
-              : {
-                  label: "Publish",
-                  onClick: () => setActiveStep("publish"),
-                }
-          }
-        />
       </div>
     </div>
   );

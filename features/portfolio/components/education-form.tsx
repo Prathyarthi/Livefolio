@@ -9,8 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FieldLabel } from "@/features/portfolio/components/field-label";
-import { RichTextEditor } from "@/components/rich-text-editor";
-import { RichText } from "@/components/rich-text";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -214,14 +213,11 @@ export function EducationForm() {
                   <School className="h-4 w-4 text-muted-foreground" />
                   Institution
                 </FieldLabel>
-                <RichTextEditor
+                <Input
                   id="institution"
-                  singleLine
+                  name="institution"
                   value={form.institution}
-                  onChange={(institution) => {
-                    setForm((prev) => ({ ...prev, institution }));
-                    setFieldErrors((prev) => ({ ...prev, institution: undefined }));
-                  }}
+                  onChange={handleChange}
                   onBlur={() => handleBlur("institution")}
                   aria-invalid={Boolean(currentErrors.institution)}
                   placeholder="MIT"
@@ -233,14 +229,11 @@ export function EducationForm() {
                   <GraduationCap className="h-4 w-4 text-muted-foreground" />
                   Degree
                 </FieldLabel>
-                <RichTextEditor
+                <Input
                   id="degree"
-                  singleLine
+                  name="degree"
                   value={form.degree}
-                  onChange={(degree) => {
-                    setForm((prev) => ({ ...prev, degree }));
-                    setFieldErrors((prev) => ({ ...prev, degree: undefined }));
-                  }}
+                  onChange={handleChange}
                   onBlur={() => handleBlur("degree")}
                   aria-invalid={Boolean(currentErrors.degree)}
                   placeholder="Bachelor of Science"
@@ -255,14 +248,11 @@ export function EducationForm() {
                   <BookOpen className="h-4 w-4 text-muted-foreground" />
                   Field of Study
                 </FieldLabel>
-                <RichTextEditor
+                <Input
                   id="field"
-                  singleLine
+                  name="field"
                   value={form.field}
-                  onChange={(field) => {
-                    setForm((prev) => ({ ...prev, field }));
-                    setFieldErrors((prev) => ({ ...prev, field: undefined }));
-                  }}
+                  onChange={handleChange}
                   onBlur={() => handleBlur("field")}
                   aria-invalid={Boolean(currentErrors.field)}
                   placeholder="Computer Science"
@@ -319,17 +309,15 @@ export function EducationForm() {
               <FieldLabel htmlFor="edu-description" unsaved={isFieldUnsaved("description")}>
                 Description
               </FieldLabel>
-              <RichTextEditor
+              <Textarea
                 id="edu-description"
+                name="description"
                 value={form.description}
-                onChange={(description) => {
-                  setForm((prev) => ({ ...prev, description }));
-                  setFieldErrors((prev) => ({ ...prev, description: undefined }));
-                }}
+                onChange={handleChange}
                 onBlur={() => handleBlur("description")}
                 aria-invalid={Boolean(currentErrors.description)}
                 placeholder="Notable coursework, achievements, activities..."
-                minHeight="6rem"
+                rows={3}
               />
               <FieldError error={fieldErrors.description} />
             </div>
@@ -373,17 +361,17 @@ export function EducationForm() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-base">
-                      <RichText text={edu.degree} />
+                      {edu.degree}
                       {edu.field && (
                         <span className="text-muted-foreground font-normal">
                           {" "}
-                          in <RichText text={edu.field} />
+                          in {edu.field}
                         </span>
                       )}
                     </h4>
                     <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                       <School className="h-3.5 w-3.5" />
-                      <RichText text={edu.institution} />
+                      {edu.institution}
                       {edu.gpa && (
                         <span className="ml-2 text-xs">GPA: {edu.gpa}</span>
                       )}
@@ -397,9 +385,9 @@ export function EducationForm() {
                     {edu.description && (
                       <>
                         <Separator className="my-3" />
-                        <div className="text-sm text-muted-foreground">
-                          <RichText text={edu.description} as="p" />
-                        </div>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                          {edu.description}
+                        </p>
                       </>
                     )}
                   </div>

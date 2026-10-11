@@ -1,5 +1,4 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -8,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Terminal, FolderOpen, FileText, Globe } from "lucide-react";
-import { RichText,
+import {
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -23,7 +22,6 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
-  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -106,7 +104,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                       imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
-                      alt={stripRichTextToPlain(project.title)}
+                      alt={project.title}
                       loading="lazy"
                       containerClassName="win95-inset aspect-[16/10] min-h-[140px] bg-[#c0c0c0]"
                       className="h-full w-full object-cover object-top"
@@ -115,7 +113,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                   </div>
                   <div className="p-3 flex flex-col grow text-black">
                     <div className={cn(PROJECT_CARD_HEADER, "mb-2")}>
-                      <h3 className={cn(PROJECT_CARD_TITLE, "font-bold text-sm pr-2")}><RichText text={project.title} /></h3>
+                      <h3 className={cn(PROJECT_CARD_TITLE, "font-bold text-sm pr-2")}>{project.title}</h3>
                       {project.featured && (
                         <span className="bg-[var(--lf-accent)] text-white text-[10px] px-1">★</span>
                       )}
@@ -143,7 +141,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                       <ProjectActions
                         liveUrl={project.liveUrl}
                         sourceUrl={project.sourceUrl}
-                        label={stripRichTextToPlain(project.title)}
+                        label={project.title}
                         projectId={project.id}
                         liveClassName="win95-button px-2 py-1 text-xs font-bold mr-2"
                         sourceClassName="win95-button px-2 py-1 text-xs"
@@ -167,12 +165,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 {experiences.map((exp) => (
                   <div key={exp.id} className="win95-inset bg-white p-3 text-sm">
                     <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-bold"><RichText text={exp.role} /></h3>
+                      <h3 className="font-bold">{exp.role}</h3>
                       {(exp.startDate || exp.endDate) && (
                         <span className="text-xs">{formatDateRange(exp.startDate, exp.endDate)}</span>
                       )}
                     </div>
-                    <p className="text-[var(--lf-accent)] mb-2"><RichText text={exp.company} /></p>
+                    <p className="text-[var(--lf-accent)] mb-2">{exp.company}</p>
                     {exp.description && (
                       <div className="text-xs leading-relaxed">
                         <DescriptionBlock
@@ -197,12 +195,9 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                       <h3 className="font-bold text-xs mb-2 border-b border-black pb-1">{category}</h3>
                       <div className="flex flex-wrap gap-1">
                         {names.map((name) => (
-                          <TechChip
-                            key={name}
-                            name={name}
-                            className="win95-outset bg-[#c0c0c0] px-2 py-0.5 text-xs"
-                            iconClassName="h-3 w-3"
-                          />
+                          <span key={name} className="win95-outset bg-[#c0c0c0] px-2 py-0.5 text-xs">
+                            {name}
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -221,8 +216,8 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 >
                   {educations.map((edu) => (
                     <div key={edu.id} className="win95-inset bg-white p-3 text-sm">
-                      <h3 className="font-bold"><RichText text={edu.degree} /></h3>
-                      <p className="text-xs mt-1"><RichText text={edu.institution} /></p>
+                      <h3 className="font-bold">{edu.degree}</h3>
+                      <p className="text-xs mt-1">{edu.institution}</p>
                       <div className="flex justify-between items-center mt-2 text-xs">
                         {(edu.startDate || edu.endDate) && (
                           <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -280,7 +275,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                     <div key={ach.id} className="win95-inset bg-white p-3 text-sm flex items-start gap-3">
                       <span className="text-lg">🏆</span>
                       <div>
-                        <h3 className="font-bold"><RichText text={ach.title} /></h3>
+                        <h3 className="font-bold">{ach.title}</h3>
                         {ach.date && (
                           <p className="text-xs mt-1">
                             {new Date(ach.date).toLocaleDateString()}
@@ -303,8 +298,8 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
             >
               {articles.map((article) => (
                 <div key={article.id} className="win95-inset bg-white p-3 text-sm flex flex-col">
-                  <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="text-[var(--lf-accent)] underline hover:text-[#ff0000] font-bold mb-2">
-                    <RichText text={article.title} />
+                  <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="text-[var(--lf-accent)] underline hover:text-[#ff0000] font-bold mb-2">
+                    {article.title}
                   </a>
                   {article.description && (
                     <p className="text-xs mb-2 grow">{article.description}</p>
@@ -361,9 +356,9 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
         <Window title="System Properties">
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="grow">
-              <h1 className="text-3xl font-bold mb-2"><RichText text={portfolio.title} /></h1>
+              <h1 className="text-3xl font-bold mb-2">{portfolio.title}</h1>
               {portfolio.headline && (
-                <p className="text-sm mb-4"><RichText text={portfolio.headline} /></p>
+                <p className="text-sm mb-4">{portfolio.headline}</p>
               )}
 
               <div className="flex flex-wrap gap-2 mb-4">
@@ -373,19 +368,11 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap gap-2">
                 <HeroProfileButtons
                   profiles={socialProfiles}
                   className="win95-button px-3 py-1 text-xs font-bold"
                 />
-                {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="win95-button px-3 py-1 text-xs font-bold"
-                  />
-                )}
               </div>
             </div>
           </div>

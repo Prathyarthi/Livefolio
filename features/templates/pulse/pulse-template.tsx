@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 import {
   Inter,
   JetBrains_Mono,
@@ -24,17 +23,14 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { RichText,
+import {
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
-  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
-  SocialPills,
-  hasNonHeroSocialProfiles,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -299,7 +295,7 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: H
                 )}
               >
                 <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 not-italic font-sans font-bold">
-                  <RichText text={portfolio.title} />
+                  {portfolio.title}
                 </span>
               </h1>
 
@@ -308,7 +304,7 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: H
                   className={cn(HERO_HEADLINE_SCALE, "font-display font-medium tracking-tight")}
                   style={{ color: primaryColor }}
                 >
-                  <RichText text={portfolio.headline} />
+                  {portfolio.headline}
                 </h2>
               )}
 
@@ -329,14 +325,6 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: H
                   profiles={socialProfiles}
                   className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition-colors"
                 />
-                {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition-colors"
-                  />
-                )}
               </div>
             </div>
 
@@ -399,7 +387,7 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                           <div className="space-y-2">
                             <div className="flex items-start justify-between gap-3">
                               <h4 className="min-w-0 flex-1 font-display text-base @sm:text-lg font-bold text-white group-hover:text-slate-200 transition-colors break-words">
-                                <RichText text={exp.role} />
+                                {exp.role}
                               </h4>
                               {(dateRange || duration) && (
                                 <div className="inline-flex items-start gap-2 text-xs font-mono text-slate-500 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-md shrink-0">
@@ -423,7 +411,7 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                               className="block w-full font-sans text-sm font-semibold transition-colors"
                               style={{ color: primaryColor }}
                             >
-                              <RichText text={exp.company} />
+                              {exp.company}
                             </span>
                           </div>
 
@@ -431,7 +419,7 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                           {exp.location && (
                             <div className="flex items-center gap-1.5 text-xs font-mono text-slate-500">
                               <MapPin className="h-3 w-3" />
-                              <span><RichText text={exp.location} /></span>
+                              <span>{exp.location}</span>
                             </div>
                           )}
 
@@ -486,7 +474,7 @@ function EducationSection({ educations, primaryColor, labels }: EducationSection
                 <div className="space-y-1">
                   <div className="flex justify-between items-start gap-4">
                     <h4 className="font-display text-base font-bold text-white">
-                      <RichText text={edu.degree} />
+                      {edu.degree}
                     </h4>
                     {displayYear(edu.endDate || edu.startDate) && (
                       <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-500 bg-[#0a0a0a]/80 px-2 py-0.5 rounded border border-white/10">
@@ -499,14 +487,14 @@ function EducationSection({ educations, primaryColor, labels }: EducationSection
                   </div>
                   {edu.field && (
                     <p className="font-sans text-sm text-slate-400 font-medium">
-                      <RichText text={edu.field} />
+                      {edu.field}
                     </p>
                   )}
                   <p
                     className="font-display text-xs font-semibold"
                     style={{ color: primaryColor }}
                   >
-                    <RichText text={edu.institution} />
+                    {edu.institution}
                   </p>
                 </div>
 
@@ -573,8 +561,7 @@ function SkillsMatrix({ skills, primaryColor, labels }: SkillsMatrixProps) {
                     >
                       <div className="flex justify-between items-start">
                         <div className="min-w-0 space-y-1">
-                          <h4 className="inline-flex items-center gap-2 line-clamp-2 break-words font-display text-base font-bold text-white group-hover:text-white">
-                            <TechIcon name={name} className="h-4 w-4" />
+                          <h4 className="line-clamp-2 break-words font-display text-base font-bold text-white group-hover:text-white">
                             {name}
                           </h4>
                         </div>
@@ -642,7 +629,7 @@ function ProjectsShowcase({
                   imageUrl={project.imageUrl}
                   projectId={project.id}
                   livePreviewProjectIds={livePreviewProjectIds}
-                  alt={stripRichTextToPlain(project.title)}
+                  alt={project.title}
                   loading="lazy"
                   accentColor={primaryColor}
                   containerClassName="bg-[#0a0a0a] border-b border-white/10"
@@ -665,7 +652,7 @@ function ProjectsShowcase({
                   <div className={PROJECT_CARD_HEADER}>
                     <div className={PROJECT_CARD_META}>
                       <h3 className={cn(PROJECT_CARD_TITLE, "font-display text-xl @sm:text-2xl font-bold text-white leading-tight")}>
-                        <RichText text={project.title} />
+                        {project.title}
                       </h3>
                     </div>
                   </div>
@@ -876,7 +863,7 @@ function AchievementsSection({
                   </span>
                 )}
                 <h4 className="font-display text-sm font-bold text-white leading-snug group-hover:text-slate-300 transition-colors">
-                  <RichText text={ach.title} />
+                  {ach.title}
                 </h4>
               </div>
             </div>
@@ -1094,7 +1081,7 @@ export function PulseTemplate({ data }: AppProps) {
 
       {/* Primary Header/Nav */}
       <Header
-        portfolioTitle={stripRichTextToPlain(portfolio.title)}
+        portfolioTitle={portfolio.title}
         navItems={navItems}
         activeSection={activeSection}
         setActiveSection={setActiveSection}
@@ -1140,7 +1127,7 @@ export function PulseTemplate({ data }: AppProps) {
         <div className="flex flex-col @md:flex-row items-center justify-between w-full gap-6">
           <div className="flex items-center gap-2">
             <Cpu className="h-4 w-4" style={{ color: primaryColor }} />
-            <span>{stripRichTextToPlain(portfolio.title).toUpperCase()}</span>
+            <span>{portfolio.title.toUpperCase()}</span>
           </div>
         </div>
       </footer>

@@ -1,5 +1,4 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -7,13 +6,12 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { ArrowRight } from "lucide-react";
-import { RichText,
+import {
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
-  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -23,7 +21,6 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
-  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -109,7 +106,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
-                alt={stripRichTextToPlain(project.title)}
+                alt={project.title}
                 loading="lazy"
                 containerClassName="mb-6 overflow-hidden bg-gray-100"
                 className="h-full w-full object-cover object-top filter transition-all duration-700 group-hover:scale-105"
@@ -118,7 +115,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
               <div className="flex flex-col grow">
                 <div className={cn(PROJECT_CARD_HEADER, "mb-4")}>
                   <h3 className={cn(PROJECT_CARD_TITLE, "flex-1 text-3xl font-black uppercase tracking-tighter")}>
-                    <RichText text={project.title} />
+                    {project.title}
                   </h3>
                   {project.featured && (
                     <span className="shrink-0 border border-[var(--lf-accent)] px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
@@ -149,7 +146,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                   <ProjectActions
                     liveUrl={project.liveUrl}
                     sourceUrl={project.sourceUrl}
-                    label={stripRichTextToPlain(project.title)}
+                    label={project.title}
                     projectId={project.id}
                     liveClassName="text-sm font-bold uppercase tracking-widest border-b-2 border-[var(--lf-accent)] pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors flex items-center gap-2"
                     sourceClassName="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-300 pb-1 text-gray-500 hover:text-black hover:border-[var(--lf-accent)] transition-colors"
@@ -172,8 +169,8 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         >
           {experiences.map((exp) => (
             <article key={exp.id} className="border-l-4 border-[var(--lf-accent)] pl-6">
-              <h3 className="text-2xl font-black uppercase tracking-tight mb-1"><RichText text={exp.role} /></h3>
-              <p className="text-xl font-medium text-gray-600 mb-4"><RichText text={exp.company} /></p>
+              <h3 className="text-2xl font-black uppercase tracking-tight mb-1">{exp.role}</h3>
+              <p className="text-xl font-medium text-gray-600 mb-4">{exp.company}</p>
               {(exp.startDate || exp.endDate) && (
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
                   {formatDateRange(exp.startDate, exp.endDate)}
@@ -205,8 +202,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-x-6 gap-y-4">
                 {names.map((name) => (
-                  <span key={name} className="inline-flex items-center gap-2 text-lg font-bold uppercase tracking-tight">
-                    <TechIcon name={name} className="h-4 w-4" />
+                  <span key={name} className="text-lg font-bold uppercase tracking-tight">
                     {name}
                   </span>
                 ))}
@@ -227,8 +223,8 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         >
           {educations.map((edu) => (
             <article key={edu.id} className="border-b border-gray-200 pb-6">
-              <h3 className="text-xl font-black uppercase tracking-tight"><RichText text={edu.degree} /></h3>
-              <p className="text-lg text-gray-600 mt-1"><RichText text={edu.institution} /></p>
+              <h3 className="text-xl font-black uppercase tracking-tight">{edu.degree}</h3>
+              <p className="text-lg text-gray-600 mt-1">{edu.institution}</p>
               <div className="flex justify-between items-center mt-4 text-xs font-bold uppercase tracking-widest text-gray-400">
                 {(edu.startDate || edu.endDate) && (
                   <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -284,7 +280,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         >
           {achievements.map((ach) => (
             <article key={ach.id} className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-bold uppercase tracking-tight leading-snug"><RichText text={ach.title} /></h3>
+              <h3 className="text-lg font-bold uppercase tracking-tight leading-snug">{ach.title}</h3>
               {ach.date && (
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mt-2">
                   {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -307,8 +303,8 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
           {articles.map((article) => (
             <article key={article.id} className="group flex flex-col">
               <h3 className="text-2xl font-black uppercase tracking-tighter mb-4 leading-tight">
-                <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-4 flex items-start justify-between">
-                  <RichText text={article.title} />
+                <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-4 flex items-start justify-between">
+                  {article.title}
                   <ArrowRight className="w-6 h-6 shrink-0 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                 </a>
               </h3>
@@ -365,7 +361,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
       {navbarEnabled && (
         <div className="sticky top-0 z-50 bg-white border-b border-[var(--lf-accent)]">
           <div className="mx-auto max-w-7xl px-4 md:px-8 py-4 flex justify-between items-center">
-            <div className="font-bold text-xl tracking-tighter uppercase">{stripRichTextToPlain(portfolio.title).split(' ')[0]}</div>
+            <div className="font-bold text-xl tracking-tighter uppercase">{portfolio.title.split(' ')[0]}</div>
             <TemplateNavbar
               items={sections}
               className="flex gap-6"
@@ -380,11 +376,11 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         <header className="grid min-w-0 grid-cols-1 @lg:grid-cols-12 gap-12 items-end">
           <div className="min-w-0 @lg:col-span-8">
             <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-6xl @lg:text-8xl @xl:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] mb-8">
-              <RichText text={portfolio.title} />
+              {portfolio.title}
             </h1>
             {portfolio.headline && (
               <p className="text-lg @md:text-2xl @lg:text-4xl font-medium tracking-tight max-w-3xl">
-                <RichText text={portfolio.headline} />
+                {portfolio.headline}
               </p>
             )}
           </div>
@@ -399,11 +395,10 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 profiles={socialProfiles}
                 className="w-full text-left lg:text-right text-sm font-bold uppercase tracking-widest bg-[var(--lf-accent)] text-white px-6 py-3 hover:bg-white hover:text-black border border-[var(--lf-accent)] transition-colors"
               />
-              {hasNonHeroSocialProfiles(socialProfiles) && (
+              {socialProfiles.length > 0 && (
                 <SocialPills
                   profiles={socialProfiles}
                   showUsername
-                  excludeHeroPlatforms
                   className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors"
                 />
               )}

@@ -1,5 +1,4 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -7,14 +6,13 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Diamond, Star, Award } from "lucide-react";
-import { RichText,
+import {
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
-  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -25,7 +23,6 @@ import { RichText,
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
-  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
 } from "../shared";
@@ -111,7 +108,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                       imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
-                      alt={stripRichTextToPlain(project.title)}
+                      alt={project.title}
                       loading="lazy"
                       containerClassName="overflow-hidden bg-[#0b132b]"
                       className="h-full w-full object-cover object-top filter sepia-[0.3] contrast-125 transition-transform duration-1000 group-hover:scale-105"
@@ -122,7 +119,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                     <div className={cn(PROJECT_CARD_HEADER, "mb-4")}>
                       <div className={PROJECT_CARD_META}>
                         <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-serif text-[var(--lf-accent)] uppercase tracking-widest")}>
-                          <RichText text={project.title} />
+                          {project.title}
                         </h3>
                         {project.featured && (
                           <span className="border border-[var(--lf-accent)] text-[var(--lf-accent)] text-[10px] font-bold px-2 py-1 uppercase tracking-[0.2em]">
@@ -154,7 +151,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                       <ProjectActions
                         liveUrl={project.liveUrl}
                         sourceUrl={project.sourceUrl}
-                        label={stripRichTextToPlain(project.title)}
+                        label={project.title}
                         projectId={project.id}
                         liveClassName="bg-[var(--lf-accent)] text-[#0b132b] text-xs font-bold px-6 py-2 hover:bg-white transition-colors mr-4 uppercase tracking-[0.15em]"
                         sourceClassName="border border-[var(--lf-accent)] text-[var(--lf-accent)] text-xs font-bold px-6 py-2 hover:bg-[var(--lf-accent)] hover:text-[#0b132b] transition-colors uppercase tracking-[0.15em]"
@@ -178,9 +175,9 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
               >
                 {experiences.map((exp) => (
                   <article key={exp.id} className="border-t border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] pt-6">
-                    <h3 className="text-xl font-serif text-[var(--lf-accent)] uppercase tracking-wider mb-2"><RichText text={exp.role} /></h3>
+                    <h3 className="text-xl font-serif text-[var(--lf-accent)] uppercase tracking-wider mb-2">{exp.role}</h3>
                     <div className="flex flex-wrap justify-between items-baseline gap-2 mb-4">
-                      <p className="text-white font-light tracking-widest uppercase text-sm"><RichText text={exp.company} /></p>
+                      <p className="text-white font-light tracking-widest uppercase text-sm">{exp.company}</p>
                       {(exp.startDate || exp.endDate) && (
                         <p className="text-[#888] text-[10px] font-bold uppercase tracking-[0.2em]">
                           {formatDateRange(exp.startDate, exp.endDate)}
@@ -216,8 +213,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                         </h3>
                         <div className="flex flex-wrap gap-x-6 gap-y-3 pl-11">
                           {names.map((name) => (
-                            <span key={name} className="inline-flex items-center gap-2 text-[#e5e5e5] text-sm font-light tracking-wider">
-                              <TechIcon name={name} className="h-3.5 w-3.5" />
+                            <span key={name} className="text-[#e5e5e5] text-sm font-light tracking-wider">
                               {name}
                             </span>
                           ))}
@@ -240,8 +236,8 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                 >
                   {educations.map((edu) => (
                     <article key={edu.id} className="border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] p-6 bg-[#111c3d]">
-                      <h3 className="text-lg font-serif text-[var(--lf-accent)] uppercase tracking-wider mb-1"><RichText text={edu.degree} /></h3>
-                      <p className="text-white text-sm font-light tracking-widest uppercase mb-4"><RichText text={edu.institution} /></p>
+                      <h3 className="text-lg font-serif text-[var(--lf-accent)] uppercase tracking-wider mb-1">{edu.degree}</h3>
+                      <p className="text-white text-sm font-light tracking-widest uppercase mb-4">{edu.institution}</p>
                       <div className="flex justify-between items-center pt-4 border-t border-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] text-[10px] font-bold text-[#888] uppercase tracking-[0.2em]">
                         {(edu.startDate || edu.endDate) && (
                           <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -301,7 +297,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                     <article key={ach.id} className="border-b border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] pb-4 flex items-start gap-4">
                       <Star className="w-4 h-4 text-[var(--lf-accent)] mt-1 shrink-0" />
                       <div>
-                        <h3 className="text-sm font-serif text-[var(--lf-accent)] uppercase tracking-wider leading-snug"><RichText text={ach.title} /></h3>
+                        <h3 className="text-sm font-serif text-[var(--lf-accent)] uppercase tracking-wider leading-snug">{ach.title}</h3>
                         {ach.date && (
                           <p className="text-[10px] font-bold text-[#888] mt-2 uppercase tracking-[0.2em]">
                             {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -327,8 +323,8 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                 <article key={article.id} className="bg-[#111c3d] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] p-8 hover:border-[var(--lf-accent)] transition-all flex flex-col text-center items-center">
                   <Award className="w-6 h-6 text-[var(--lf-accent)] mb-6" />
                   <h3 className="text-xl font-serif text-[var(--lf-accent)] uppercase tracking-wider mb-4 leading-snug">
-                    <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                      <RichText text={article.title} />
+                    <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      {article.title}
                     </a>
                   </h3>
                   {article.description && (
@@ -428,12 +424,12 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
           </div>
 
           <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-serif text-[var(--lf-accent)] mb-6 tracking-wider uppercase font-light">
-            <RichText text={portfolio.title} />
+            {portfolio.title}
           </h1>
 
           {portfolio.headline && (
             <p className="text-lg md:text-xl text-[#a0a0a0] font-light mb-12 tracking-[0.15em] uppercase max-w-2xl">
-              <RichText text={portfolio.headline} />
+              {portfolio.headline}
             </p>
           )}
 
@@ -448,12 +444,11 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
             />
           </div>
 
-          {hasNonHeroSocialProfiles(socialProfiles) && (
+          {socialProfiles.length > 0 && (
             <div className="mt-4 border-t border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] pt-6 w-full max-w-md">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
-                excludeHeroPlatforms
                 className="text-xs font-bold text-[#888] hover:text-[var(--lf-accent)] transition-colors uppercase tracking-widest"
               />
             </div>

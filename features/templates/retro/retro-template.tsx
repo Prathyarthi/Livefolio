@@ -1,5 +1,4 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -7,7 +6,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import { RichText,
+import {
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -26,7 +25,6 @@ import { RichText,
   HERO_TITLE_BASE,
   HERO_TITLE_SCALE_7XL,
   SocialPills,
-  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   PROJECTS_GRID_2,
@@ -119,7 +117,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                 imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
-                alt={stripRichTextToPlain(project.title)}
+                alt={project.title}
                 loading="lazy"
                 containerClassName="border-b-4 border-black"
                 className="h-full w-full object-cover object-top filter transition-all duration-500"
@@ -129,7 +127,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                   <div className="min-w-0 flex-1">
                     <div className={PROJECT_CARD_META}>
                       <h3 className={cn(PROJECT_CARD_TITLE, "font-sans text-2xl font-black uppercase leading-tight text-black")}>
-                        <RichText text={project.title} />
+                        {project.title}
                       </h3>
                       {project.featured && (
                         <span className="shrink-0 border-2 border-black bg-[var(--lf-accent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -148,7 +146,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                     <ProjectActions
                       liveUrl={project.liveUrl}
                       sourceUrl={project.sourceUrl}
-                      label={stripRichTextToPlain(project.title)}
+                      label={project.title}
                       projectId={project.id}
                       liveClassName="border-2 border-black bg-[#23a094] px-4 py-2 text-xs font-bold uppercase text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)]"
                       sourceClassName="border-2 border-black bg-white px-4 py-2 text-xs font-bold uppercase text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)]"
@@ -214,11 +212,11 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="font-sans text-xl font-black uppercase text-black">
-                    <RichText text={exp.role} />
+                    {exp.role}
                   </h3>
                   <p className="mt-1 text-sm font-bold text-gray-700">
-                    <RichText text={exp.company} />
-                    {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
+                    {exp.company}
+                    {exp.location ? ` · ${exp.location}` : ""}
                   </p>
                 </div>
                 {(exp.startDate || exp.endDate) && (
@@ -259,12 +257,12 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
             >
               <h3 className="font-sans text-lg font-black uppercase text-black">
                 <a
-                  href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
+                  href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:underline"
                 >
-                  <RichText text={article.title} />
+                  {article.title}
                 </a>
               </h3>
               {article.description && (
@@ -320,11 +318,12 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <TechChip
+                  <span
                     key={name}
-                    name={name}
                     className="border-2 border-black bg-[color-mix(in_srgb,var(--lf-accent)_40%,white)] px-3 py-1.5 text-sm font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-[var(--lf-accent)]"
-                  />
+                  >
+                    {name}
+                  </span>
                 ))}
               </div>
             </div>
@@ -350,10 +349,10 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
               className="border-4 border-black bg-[#f4f0ea] p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
             >
               <h3 className="font-sans text-lg font-black uppercase text-black">
-                <RichText text={edu.degree} />
-                {edu.field && <span className="text-gray-600"> in <RichText text={edu.field} /></span>}
+                {edu.degree}
+                {edu.field && <span className="text-gray-600"> in {edu.field}</span>}
               </h3>
-              <p className="mt-2 text-sm font-bold text-gray-700"><RichText text={edu.institution} /></p>
+              <p className="mt-2 text-sm font-bold text-gray-700">{edu.institution}</p>
               {(edu.startDate || edu.endDate) && (
                 <p className="mt-2 inline-block border-2 border-black bg-white px-2 py-1 text-xs font-bold uppercase tracking-widest text-black">
                   {formatDateRange(edu.startDate, edu.endDate)}
@@ -429,7 +428,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
             >
               <Trophy className="mt-0.5 h-5 w-5 shrink-0 text-black" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold leading-relaxed text-black"><RichText text={ach.title} /></p>
+                <p className="text-sm font-bold leading-relaxed text-black">{ach.title}</p>
                 {ach.date && (
                   <p className="mt-2 inline-block border-2 border-black bg-white px-2 py-1 text-xs font-bold text-black">
                     {new Date(ach.date).toLocaleDateString("en-US", {
@@ -493,7 +492,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                   "font-sans font-black uppercase tracking-tight text-black"
                 )}
               >
-                <RichText text={portfolio.title} />
+                {portfolio.title}
               </h1>
               {portfolio.headline && (
                 <p
@@ -502,7 +501,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                     "mt-5 max-w-2xl border-l-4 border-black pl-4 font-bold text-black"
                   )}
                 >
-                  <RichText text={portfolio.headline} />
+                  {portfolio.headline}
                 </p>
               )}
 
@@ -520,12 +519,11 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                 />
               </div>
 
-              {hasNonHeroSocialProfiles(socialProfiles) && (
+              {socialProfiles.length > 0 && (
                 <div className="mt-6">
                   <SocialPills
                     profiles={socialProfiles}
                     showUsername
-                    excludeHeroPlatforms
                     className="border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)]"
                   />
                 </div>

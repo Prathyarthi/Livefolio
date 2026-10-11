@@ -7,7 +7,6 @@ import {
   fetchGitHubContributionsFromProfilePage,
   fetchGitHubProfile,
 } from "@/lib/github";
-import { resolveGitHubProjectDescriptions } from "@/lib/github-project-description";
 import { fetchLeetCodeStats } from "@/lib/leetcode";
 import { fetchMediumArticles } from "@/lib/medium";
 import { getPlanLimitMessage, resolveAccessForUser } from "@/lib/entitlements";
@@ -115,15 +114,11 @@ export const profile = new Elysia({ prefix: "/profile" })
       const portfolio = await ensureUserPortfolio(gate.session.userId);
       const username = sanitizeImportedLabel(ctx.body.username);
       const showHeatmap = ctx.body.showHeatmap === true;
-      const resolvedDescriptions = await resolveGitHubProjectDescriptions(
-        username,
-        ctx.body.repos,
-      );
 
       const projects = ctx.body.repos
         .map((repo, index) => ({
           title: sanitizeImportedLabel(repo.name),
-          description: sanitizeImportedLongText(resolvedDescriptions[index]),
+          description: sanitizeImportedLongText(repo.description),
           sourceUrl: sanitizeImportedStoredUrl(
             repo.url,
             `Repositories[${index}].url`,

@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FieldLabel } from "@/features/portfolio/components/field-label";
-import { RichTextEditor } from "@/components/rich-text-editor";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Combobox,
@@ -677,14 +677,11 @@ export function ProjectForm() {
             <FieldLabel htmlFor={`proj-title${suffix}`} unsaved={isFieldUnsaved("title")}>
               Title
             </FieldLabel>
-            <RichTextEditor
+            <Input
               id={`proj-title${suffix}`}
-              singleLine
+              name="title"
               value={form.title}
-              onChange={(title) => {
-                setForm((prev) => ({ ...prev, title }));
-                setFieldErrors((prev) => ({ ...prev, title: undefined }));
-              }}
+              onChange={handleChange}
               onBlur={() => validateProjectField("title")}
               aria-invalid={Boolean(fieldErrors.title)}
               aria-describedby={
@@ -720,13 +717,11 @@ export function ProjectForm() {
           <FieldLabel htmlFor={`proj-description${suffix}`} unsaved={isFieldUnsaved("description")}>
             Description
           </FieldLabel>
-          <RichTextEditor
+          <Textarea
             id={`proj-description${suffix}`}
+            name="description"
             value={form.description}
-            onChange={(description) => {
-              setForm((prev) => ({ ...prev, description }));
-              setFieldErrors((prev) => ({ ...prev, description: undefined }));
-            }}
+            onChange={handleChange}
             onBlur={() => validateProjectField("description")}
             aria-invalid={Boolean(fieldErrors.description)}
             aria-describedby={
@@ -735,7 +730,7 @@ export function ProjectForm() {
                 : undefined
             }
             placeholder="Describe what the project does, the problem it solves, and your role..."
-            minHeight="7rem"
+            rows={4}
           />
           {fieldErrors.description && (
             <p

@@ -1,5 +1,4 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -7,7 +6,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import { RichText,
+import {
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -27,7 +26,6 @@ import { RichText,
   HERO_TITLE_SCALE_7XL,
   PROJECTS_GRID_2,
   SocialPills,
-  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -119,7 +117,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                 imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
-                alt={stripRichTextToPlain(project.title)}
+                alt={project.title}
                 loading="lazy"
                 containerClassName="overflow-hidden bg-stone-100"
                accentColor={primaryColor} />
@@ -128,7 +126,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                   <div className="min-w-0 flex-1">
                     <div className={PROJECT_CARD_META}>
                       <h3 className={cn(PROJECT_CARD_TITLE, "font-serif text-2xl font-semibold text-[var(--lf-accent)]")}>
-                        <RichText text={project.title} />
+                        {project.title}
                       </h3>
                       {project.featured && (
                         <span className="rounded-full border border-stone-900 bg-[var(--lf-accent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-stone-100">
@@ -146,7 +144,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                   <ProjectActions
                     liveUrl={project.liveUrl}
                     sourceUrl={project.sourceUrl}
-                    label={stripRichTextToPlain(project.title)}
+                    label={project.title}
                     projectId={project.id}
                     liveClassName="rounded-full bg-[var(--lf-accent)] px-4 py-2 text-xs font-medium text-stone-100 transition-colors hover:bg-[color-mix(in_srgb,var(--lf-accent)_85%,black)]"
                     sourceClassName="rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
@@ -211,11 +209,11 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="font-serif text-xl font-semibold text-stone-900">
-                    <RichText text={exp.role} />
+                    {exp.role}
                   </h3>
                   <p className="mt-1 text-sm text-stone-500">
-                    <RichText text={exp.company} />
-                    {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
+                    {exp.company}
+                    {exp.location ? ` · ${exp.location}` : ""}
                   </p>
                 </div>
                 {(exp.startDate || exp.endDate) && (
@@ -256,12 +254,12 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
             >
               <h3 className="font-serif text-lg font-semibold text-stone-900">
                 <a
-                  href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
+                  href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-stone-600"
                 >
-                  <RichText text={article.title} />
+                  {article.title}
                 </a>
               </h3>
               {article.description && (
@@ -311,11 +309,12 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <TechChip
+                  <span
                     key={name}
-                    name={name}
                     className="rounded-full border border-stone-200/80 bg-stone-50 px-3 py-1.5 text-sm text-stone-600"
-                  />
+                  >
+                    {name}
+                  </span>
                 ))}
               </div>
             </div>
@@ -341,10 +340,10 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
               className="rounded-[1.6rem] border border-stone-200/80 bg-[#fffdf9] p-5 shadow-[0_10px_30px_rgba(28,25,23,0.04)]"
             >
               <h3 className="font-serif text-lg font-semibold text-stone-900">
-                <RichText text={edu.degree} />
-                {edu.field && <span className="text-stone-500"> in <RichText text={edu.field} /></span>}
+                {edu.degree}
+                {edu.field && <span className="text-stone-500"> in {edu.field}</span>}
               </h3>
-              <p className="mt-2 text-sm text-stone-500"><RichText text={edu.institution} /></p>
+              <p className="mt-2 text-sm text-stone-500">{edu.institution}</p>
               {(edu.startDate || edu.endDate) && (
                 <p className="mt-1 text-xs uppercase tracking-[0.2em] text-stone-400">
                   {formatDateRange(edu.startDate, edu.endDate)}
@@ -420,7 +419,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
             >
               <Trophy className="h-4 w-4 text-stone-500 mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-stone-900 leading-relaxed"><RichText text={ach.title} /></p>
+                <p className="text-sm text-stone-900 leading-relaxed">{ach.title}</p>
                 {ach.date && (
                   <p className="mt-1 text-xs text-stone-500">
                     {new Date(ach.date).toLocaleDateString("en-US", {
@@ -485,11 +484,11 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                   "max-w-3xl font-serif font-semibold tracking-tight text-[var(--lf-accent)]"
                 )}
               >
-                <RichText text={portfolio.title} />
+                {portfolio.title}
               </h1>
               {portfolio.headline && (
                 <p className={cn(HERO_HEADLINE_SCALE, "mt-5 max-w-2xl text-stone-600")}>
-                  <RichText text={portfolio.headline} />
+                  {portfolio.headline}
                 </p>
               )}
 
@@ -507,12 +506,11 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                 />
               </div>
 
-              {hasNonHeroSocialProfiles(socialProfiles) && (
+              {socialProfiles.length > 0 && (
                 <div className="mt-6">
                   <SocialPills
                     profiles={socialProfiles}
                     showUsername
-                    excludeHeroPlatforms
                     className="rounded-full border border-stone-200/80 bg-white/85 px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-stone-300 hover:bg-white hover:text-stone-900"
                   />
                 </div>

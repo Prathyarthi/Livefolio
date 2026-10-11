@@ -53,7 +53,6 @@ const AIRY_FAMILY: ReorderableSectionKey[] = [
   "certifications",
   "achievements",
   "articles",
-  "profiles",
   "github",
 ];
 
