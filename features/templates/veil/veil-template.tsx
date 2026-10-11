@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import { Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { MotionConfig, motion } from "motion/react";
 import {
@@ -29,13 +30,17 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
+  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
+  SocialPills,
+  hasNonHeroSocialProfiles,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -522,7 +527,7 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary }: HeroProp
                 {...rise(0.2)}
                 className={cn(HERO_HEADLINE_SCALE, "max-w-2xl font-medium text-[var(--veil-paper)]")}
               >
-                {portfolio.headline}
+                <RichText text={portfolio.headline} />
               </motion.p>
             )}
 
@@ -541,11 +546,19 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary }: HeroProp
                 portfolio={portfolio}
                 chipClassName="rounded-full border border-[var(--veil-line)] px-3.5 py-1.5 font-mono text-[11px] text-[var(--veil-muted)]"
               />
-              <div id="hero-profiles" className="scroll-mt-24">
+              <div id="hero-profiles" className="scroll-mt-24 space-y-3">
                 <HeroProfileButtons
                   profiles={socialProfiles}
                   className="rounded-full border border-[var(--veil-line-strong)] bg-[var(--veil-paper)] px-4 py-2 text-sm font-medium text-[var(--veil-ink)] transition-all hover:-translate-y-0.5 hover:bg-[var(--lf-accent)]"
                 />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="rounded-full border border-[var(--veil-line-strong)] bg-[var(--veil-paper)] px-4 py-2 text-sm font-medium text-[var(--veil-ink)] transition-all hover:-translate-y-0.5 hover:bg-[var(--lf-accent)]"
+                  />
+                )}
               </div>
             </motion.div>
           </div>
@@ -555,7 +568,7 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary }: HeroProp
               <Portrait
                 key={portraitSrc}
                 src={portraitSrc}
-                name={portfolio.title}
+                name={stripRichTextToPlain(portfolio.title)}
                 primaryColor={primaryColor}
               />
             </div>
@@ -577,7 +590,8 @@ function SkillMarquee({ skills, primaryColor }: { skills: Skill[]; primaryColor:
     <div aria-hidden={hidden || undefined} className="flex shrink-0 items-center">
       {names.map((name) => (
         <span key={name} className="flex items-center">
-          <span className="whitespace-nowrap px-6 font-serif text-3xl italic text-[var(--veil-paper)] @md:text-4xl">
+          <span className="inline-flex items-center gap-3 whitespace-nowrap px-6 font-serif text-3xl italic text-[var(--veil-paper)] @md:text-4xl">
+            <TechIcon name={name} className="h-6 w-6" />
             {name}
           </span>
           <span className="text-sm" style={{ color: primaryColor }}>✦</span>
@@ -682,14 +696,14 @@ function ExperienceSection({
                   <div className="min-w-0 space-y-4 @md:col-span-9">
                     <div className="space-y-2">
                       <h3 className="font-serif text-3xl leading-tight tracking-tight text-[var(--veil-paper)] transition-transform duration-500 group-hover:translate-x-1 @md:text-4xl [overflow-wrap:anywhere]">
-                        {exp.role}
+                        <RichText text={exp.role} />
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                        <span className="font-medium text-[var(--lf-accent)]">{exp.company}</span>
+                        <span className="font-medium text-[var(--lf-accent)]"><RichText text={exp.company} /></span>
                         {exp.location && (
                           <span className={cn("flex items-center gap-1.5 font-mono text-[11px]", FAINT)}>
                             <MapPin className="h-3 w-3" />
-                            {exp.location}
+                            <RichText text={exp.location} />
                           </span>
                         )}
                       </div>
@@ -759,7 +773,7 @@ function ProjectsSection({
                     imageUrl={project.imageUrl}
                     projectId={project.id}
                     livePreviewProjectIds={livePreviewProjectIds}
-                    alt={project.title}
+                    alt={stripRichTextToPlain(project.title)}
                     loading="lazy"
                     accentColor={primaryColor}
                     containerClassName={cn("border-b bg-[var(--veil-ink)]", LINE)}
@@ -779,7 +793,7 @@ function ProjectsSection({
                   <div className={PROJECT_CARD_HEADER}>
                     <div className={PROJECT_CARD_META}>
                       <h3 className={cn(PROJECT_CARD_TITLE, "font-serif text-3xl leading-tight tracking-tight text-[var(--veil-paper)]")}>
-                        {project.title}
+                        <RichText text={project.title} />
                       </h3>
                     </div>
                     {project.language && (
@@ -832,7 +846,7 @@ function ProjectsSection({
                     <ProjectActions
                       liveUrl={project.liveUrl}
                       sourceUrl={project.sourceUrl}
-                      label={project.title}
+                      label={stripRichTextToPlain(project.title)}
                       projectId={project.id}
                       liveClassName="inline-flex items-center justify-center rounded-full bg-[var(--veil-paper)] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--veil-ink)] transition-colors hover:bg-[var(--lf-accent)]"
                       sourceClassName="inline-flex items-center justify-center rounded-full border border-[var(--veil-line-strong)] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--veil-paper)] transition-colors hover:border-[var(--lf-accent)]"
@@ -882,12 +896,11 @@ function SkillsSection({
               </div>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <span
+                  <TechChip
                     key={`${category}-${name}`}
+                    name={name}
                     className="rounded-full border border-[var(--veil-line-strong)] px-3 py-1.5 text-[13px] text-[var(--veil-paper)]/85 transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--veil-paper)]"
-                  >
-                    {name}
-                  </span>
+                  />
                 ))}
               </div>
             </Reveal>
@@ -925,10 +938,10 @@ function EducationSection({
                   </p>
                   <div className="min-w-0 space-y-2 @md:col-span-6">
                     <h3 className="font-serif text-3xl leading-tight tracking-tight text-[var(--veil-paper)] [overflow-wrap:anywhere]">
-                      {edu.degree}
+                      <RichText text={edu.degree} />
                     </h3>
-                    {edu.field && <p className={cn("text-sm", MUTED)}>{edu.field}</p>}
-                    <p className="text-sm font-medium text-[var(--lf-accent)]">{edu.institution}</p>
+                    {edu.field && <p className={cn("text-sm", MUTED)}><RichText text={edu.field} /></p>}
+                    <p className="text-sm font-medium text-[var(--lf-accent)]"><RichText text={edu.institution} /></p>
                   </div>
                   {edu.gpa && (
                     <div className="@md:col-span-3 @md:text-right">
@@ -1076,7 +1089,7 @@ function AchievementsSection({
                   )}
                 </div>
                 <h3 className="font-serif text-2xl leading-snug text-[var(--veil-paper)] [overflow-wrap:anywhere]">
-                  {ach.title}
+                  <RichText text={ach.title} />
                 </h3>
               </article>
             </Reveal>
@@ -1202,7 +1215,7 @@ export function VeilTemplate({ data }: AppProps) {
     certifications: certifications.length > 0,
     articles: articles.length > 0,
     achievements: achievements.length > 0,
-    profiles: hasProfiles || socialProfiles.length > 0,
+    profiles: hasProfiles,
   };
   const numbered = resolved.order.full.filter(
     (key) => present[key] && !resolved.isHidden(key),
@@ -1314,7 +1327,7 @@ export function VeilTemplate({ data }: AppProps) {
         <div aria-hidden className={styles.grain} />
 
         <Header
-          portfolioTitle={portfolio.title}
+          portfolioTitle={stripRichTextToPlain(portfolio.title)}
           navItems={navItems}
           activeSection={activeSection}
           setActiveSection={setActiveSection}
@@ -1362,13 +1375,13 @@ export function VeilTemplate({ data }: AppProps) {
                 "select-none font-serif text-[16cqw] leading-none tracking-tight [overflow-wrap:anywhere] @lg:text-[12cqw]",
               )}
             >
-              {portfolio.title}
+              <RichText text={portfolio.title} />
             </p>
           </div>
           <div className={cn(SHELL, "flex flex-col gap-4 border-t py-8 font-mono text-[10px] uppercase tracking-[0.2em] @md:flex-row @md:items-center @md:justify-between", LINE, FAINT)}>
             <span className="flex items-center gap-3">
               <DitherMark />
-              © {new Date().getFullYear()} {portfolio.title}
+              © {new Date().getFullYear()} <RichText text={portfolio.title} />
             </span>
             <button
               type="button"

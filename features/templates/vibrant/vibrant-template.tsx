@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -6,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -22,6 +23,7 @@ import {
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   SPLIT_CARD_ROW,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
@@ -110,7 +112,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                         imageUrl={project.imageUrl ?? null}
                         projectId={project.id}
                         livePreviewProjectIds={livePreviewProjectIds}
-                        alt={project.title}
+                        alt={stripRichTextToPlain(project.title)}
                         loading="lazy"
                         containerClassName="overflow-hidden bg-slate-800"
                         className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
@@ -120,12 +122,12 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                     <div className={cn(PROJECT_CARD_BODY, "relative z-20 flex flex-col grow p-8")}>
                       <div className={cn(PROJECT_CARD_HEADER, "mb-4")}>
                         <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-bold text-white group-hover:text-[var(--lf-accent)] transition-colors")}>
-                          {project.title}
+                          <RichText text={project.title} />
                         </h3>
                         <ProjectActions
                           liveUrl={project.liveUrl}
                           sourceUrl={project.sourceUrl}
-                          label={project.title}
+                          label={stripRichTextToPlain(project.title)}
                           projectId={project.id}
                           liveClassName="rounded-full bg-white/10 p-2 text-white hover:bg-[var(--lf-accent)] hover:text-white transition-colors"
                           sourceClassName="rounded-full bg-white/5 p-2 text-slate-300 hover:bg-white/20 transition-colors"
@@ -172,11 +174,11 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                       <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                         <div>
                           <h3 className="text-xl font-bold text-white">
-                            {exp.role}
+                            <RichText text={exp.role} />
                           </h3>
                           <p className="text-[var(--lf-accent)] font-medium mt-1">
-                            {exp.company}
-                            {exp.location ? <span className="text-slate-500"> · {exp.location}</span> : ""}
+                            <RichText text={exp.company} />
+                            {exp.location ? <span className="text-slate-500"> · <RichText text={exp.location} /></span> : ""}
                           </p>
                         </div>
                         {(exp.startDate || exp.endDate) && (
@@ -210,12 +212,11 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                           </h3>
                           <div className="flex flex-wrap gap-2">
                             {names.map((name) => (
-                              <span
+                              <TechChip
                                 key={name}
+                                name={name}
                                 className="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 border border-white/5 hover:border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] hover:text-white transition-colors cursor-default"
-                              >
-                                {name}
-                              </span>
+                              />
                             ))}
                           </div>
                         </div>
@@ -239,10 +240,10 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                         className="rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-white/10 p-6"
                       >
                         <h3 className="text-lg font-bold text-white">
-                          {edu.degree}
-                          {edu.field && <span className="text-slate-400 font-normal"> in {edu.field}</span>}
+                          <RichText text={edu.degree} />
+                          {edu.field && <span className="text-slate-400 font-normal"> in <RichText text={edu.field} /></span>}
                         </h3>
-                        <p className="text-[var(--lf-accent)] mt-1">{edu.institution}</p>
+                        <p className="text-[var(--lf-accent)] mt-1"><RichText text={edu.institution} /></p>
                         <div className="flex items-center justify-between mt-4">
                           {(edu.startDate || edu.endDate) && (
                             <span className="text-sm text-slate-500">
@@ -310,7 +311,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                           <Trophy className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-white leading-snug">{ach.title}</h3>
+                          <h3 className="text-lg font-bold text-white leading-snug"><RichText text={ach.title} /></h3>
                           {ach.date && (
                             <p className="text-sm text-slate-400 mt-1">
                               {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -338,12 +339,12 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                   >
                     <h3 className="text-lg font-bold text-white mb-3">
                       <a
-                        href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
+                        href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-[var(--lf-accent)] transition-colors"
                       >
-                        {article.title}
+                        <RichText text={article.title} />
                       </a>
                     </h3>
                     {article.description && (
@@ -427,12 +428,12 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
 
         <header className="relative flex flex-col items-center text-center mb-20 md:mb-32">
           <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-slate-200 to-slate-400 mb-6">
-            {portfolio.title}
+            <RichText text={portfolio.title} />
           </h1>
 
           {portfolio.headline && (
             <p className="text-base @md:text-lg @lg:text-2xl text-slate-400 font-medium max-w-3xl mb-10 leading-relaxed">
-              {portfolio.headline}
+              <RichText text={portfolio.headline} />
             </p>
           )}
 
@@ -447,11 +448,12 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
             />
           </div>
 
-          {socialProfiles.length > 0 && (
+          {hasNonHeroSocialProfiles(socialProfiles) && (
             <div className="mt-8">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="rounded-full border border-white/5 bg-transparent px-4 py-2 text-sm font-medium text-slate-400 transition-all hover:text-white hover:bg-white/5"
               />
             </div>
