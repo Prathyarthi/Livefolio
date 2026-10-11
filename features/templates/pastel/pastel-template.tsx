@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -6,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Heart, Star } from "lucide-react";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -23,6 +24,7 @@ import {
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   SPLIT_CARD_ROW,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
@@ -108,7 +110,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                     imageUrl={project.imageUrl ?? null}
                     projectId={project.id}
                     livePreviewProjectIds={livePreviewProjectIds}
-                    alt={project.title}
+                    alt={stripRichTextToPlain(project.title)}
                     loading="lazy"
                     containerClassName="mb-6 overflow-hidden rounded-[2rem] bg-[#fff5f8]"
                     className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
@@ -117,7 +119,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                   <div className={cn(PROJECT_CARD_BODY, "flex flex-col grow px-4 pb-4")}>
                     <div className={cn(PROJECT_CARD_HEADER, "mb-3")}>
                       <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-extrabold text-[#2d2d2d] group-hover:text-[var(--lf-accent)] transition-colors")}>
-                        {project.title}
+                        <RichText text={project.title} />
                       </h3>
                       {project.featured && (
                         <span className="bg-[#fff8c4] text-[#8a8200] text-xs font-bold px-3 py-1 rounded-full shrink-0">
@@ -148,7 +150,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                       <ProjectActions
                         liveUrl={project.liveUrl}
                         sourceUrl={project.sourceUrl}
-                        label={project.title}
+                        label={stripRichTextToPlain(project.title)}
                         projectId={project.id}
                         liveClassName="bg-[color-mix(in_srgb,var(--lf-accent)_45%,white)] text-[#0066b3] text-sm font-bold px-5 py-2.5 rounded-full hover:bg-[#a0d4ff] transition-colors mr-3"
                         sourceClassName="bg-gray-100 text-gray-600 text-sm font-bold px-5 py-2.5 rounded-full hover:bg-gray-200 transition-colors"
@@ -172,8 +174,8 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
               >
                 {experiences.map((exp) => (
                   <article key={exp.id} className="bg-white rounded-[2rem] p-8 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(255,179,186,0.15)] transition-all">
-                    <h3 className="text-xl font-extrabold text-[#2d2d2d] mb-1">{exp.role}</h3>
-                    <p className="text-[var(--lf-accent)] font-bold text-lg mb-3">{exp.company}</p>
+                    <h3 className="text-xl font-extrabold text-[#2d2d2d] mb-1"><RichText text={exp.role} /></h3>
+                    <p className="text-[var(--lf-accent)] font-bold text-lg mb-3"><RichText text={exp.company} /></p>
                     {(exp.startDate || exp.endDate) && (
                       <div className="inline-block bg-[#f4f4f4] text-[#888] text-xs font-bold px-3 py-1 rounded-full mb-4">
                         {formatDateRange(exp.startDate, exp.endDate)}
@@ -207,9 +209,11 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           {names.map((name) => (
-                            <span key={name} className="bg-[#fdf6e3] text-[#b89547] text-sm font-bold px-4 py-2 rounded-2xl hover:scale-105 transition-transform cursor-default">
-                              {name}
-                            </span>
+                            <TechChip
+                              key={name}
+                              name={name}
+                              className="bg-[#fdf6e3] text-[#b89547] text-sm font-bold px-4 py-2 rounded-2xl hover:scale-105 transition-transform cursor-default"
+                            />
                           ))}
                         </div>
                       </div>
@@ -230,8 +234,8 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                 >
                   {educations.map((edu) => (
                     <article key={edu.id} className="bg-white rounded-[2rem] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.02)]">
-                      <h3 className="text-lg font-extrabold text-[#2d2d2d]">{edu.degree}</h3>
-                      <p className="mt-1 text-base font-bold text-[#6aabdf]">{edu.institution}</p>
+                      <h3 className="text-lg font-extrabold text-[#2d2d2d]"><RichText text={edu.degree} /></h3>
+                      <p className="mt-1 text-base font-bold text-[#6aabdf]"><RichText text={edu.institution} /></p>
                       <div className="flex justify-between items-center mt-4 text-xs font-bold text-[#888]">
                         {(edu.startDate || edu.endDate) && (
                           <span className="bg-[#f4f4f4] px-3 py-1 rounded-full">{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -293,7 +297,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                         <Star className="w-5 h-5" fill="currentColor" />
                       </div>
                       <div>
-                        <h3 className="text-base font-extrabold text-[#2d2d2d] leading-snug">{ach.title}</h3>
+                        <h3 className="text-base font-extrabold text-[#2d2d2d] leading-snug"><RichText text={ach.title} /></h3>
                         {ach.date && (
                           <p className="text-xs font-bold text-[#888] mt-1">
                             {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -318,8 +322,8 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
               {articles.map((article) => (
                 <article key={article.id} className="bg-white rounded-[2.5rem] p-8 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(255,179,186,0.15)] transition-all flex flex-col group">
                   <h3 className="text-xl font-extrabold text-[#2d2d2d] mb-4 group-hover:text-[#6aabdf] transition-colors leading-tight">
-                    <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
-                      {article.title}
+                    <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
+                      <RichText text={article.title} />
                     </a>
                   </h3>
                   {article.description && (
@@ -399,12 +403,12 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
 
         <header className="flex flex-col items-center text-center max-w-3xl mx-auto">
           <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-extrabold text-[#2d2d2d] mb-6 tracking-tight">
-            {portfolio.title}
+            <RichText text={portfolio.title} />
           </h1>
 
           {portfolio.headline && (
             <p className="text-base @md:text-lg @lg:text-2xl text-[#888] font-medium mb-10 leading-relaxed">
-              {portfolio.headline}
+              <RichText text={portfolio.headline} />
             </p>
           )}
 
@@ -419,11 +423,12 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
             />
           </div>
 
-          {socialProfiles.length > 0 && (
+          {hasNonHeroSocialProfiles(socialProfiles) && (
             <div className="mt-4">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="text-sm font-bold text-[#aaa] hover:text-[var(--lf-accent)] transition-colors px-4 py-2 bg-white/50 rounded-full"
               />
             </div>

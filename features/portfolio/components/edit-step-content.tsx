@@ -16,12 +16,7 @@ import { SocialLinksEditor } from "@/features/portfolio/components/social-links-
 export function EditStepContent({ step }: { step: EditStepValue }) {
   switch (step) {
     case "basic":
-      return (
-        <div className={`${EDIT_FORM_STACK_CLASS} [&_h3]:text-base`}>
-          <OpenToWorkToggle />
-          <PortfolioForm />
-        </div>
-      );
+      return <PortfolioForm />;
     case "experience":
       return <ExperienceForm />;
     case "education":
@@ -37,7 +32,12 @@ export function EditStepContent({ step }: { step: EditStepValue }) {
     case "social":
       return <SocialLinksEditor />;
     case "publish":
-      return <PublishButton />;
+      return (
+        <div className={EDIT_FORM_STACK_CLASS}>
+          <OpenToWorkToggle />
+          <PublishButton />
+        </div>
+      );
     default: {
       const _exhaustive: never = step;
       return _exhaustive;

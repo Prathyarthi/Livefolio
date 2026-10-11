@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -6,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Crosshair, Box, Layers } from "lucide-react";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -22,6 +23,7 @@ import {
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -112,7 +114,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                       imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
-                      alt={project.title}
+                      alt={stripRichTextToPlain(project.title)}
                       loading="lazy"
                       containerClassName="overflow-hidden border border-dashed border-white/30 bg-[#002244]"
                       className="h-full w-full object-cover object-top opacity-70 mix-blend-screen filter contrast-150 transition-opacity group-hover:opacity-100"
@@ -123,7 +125,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                     <div className={cn(PROJECT_CARD_HEADER, "mb-4")}>
                       <div className={PROJECT_CARD_META}>
                         <h3 className={cn(PROJECT_CARD_TITLE, "text-xl font-bold uppercase tracking-wider")}>
-                          {project.title}
+                          <RichText text={project.title} />
                         </h3>
                         {project.featured && (
                           <span className="border border-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest shrink-0">
@@ -155,7 +157,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                       <ProjectActions
                         liveUrl={project.liveUrl}
                         sourceUrl={project.sourceUrl}
-                        label={project.title}
+                        label={stripRichTextToPlain(project.title)}
                         projectId={project.id}
                         liveClassName="text-[10px] font-bold uppercase tracking-widest bg-[var(--lf-accent)] text-[#003366] px-4 py-2 hover:bg-transparent hover:text-white border border-white transition-colors"
                         sourceClassName="text-[10px] font-bold uppercase tracking-widest border border-white/50 px-4 py-2 hover:border-[var(--lf-accent)] transition-colors"
@@ -183,8 +185,8 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                     <div className="text-[10px] text-white/50 uppercase tracking-widest mb-2">
                       OP.{index + 1}
                     </div>
-                    <h3 className="text-lg font-bold uppercase tracking-wider mb-1">{exp.role}</h3>
-                    <p className="text-white/80 uppercase tracking-widest text-sm mb-2">{exp.company}</p>
+                    <h3 className="text-lg font-bold uppercase tracking-wider mb-1"><RichText text={exp.role} /></h3>
+                    <p className="text-white/80 uppercase tracking-widest text-sm mb-2"><RichText text={exp.company} /></p>
                     {(exp.startDate || exp.endDate) && (
                       <p className="text-[10px] uppercase tracking-widest text-white/50 mb-4 border border-white/30 inline-block px-2 py-1">
                         {formatDateRange(exp.startDate, exp.endDate)}
@@ -218,9 +220,12 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {names.map((name) => (
-                            <span key={name} className="border border-white/50 text-[10px] uppercase tracking-widest px-2 py-1 hover:bg-[var(--lf-accent)] hover:text-[#003366] transition-colors cursor-default">
-                              {name}
-                            </span>
+                            <TechChip
+                              key={name}
+                              name={name}
+                              className="border border-white/50 text-[10px] uppercase tracking-widest px-2 py-1 hover:bg-[var(--lf-accent)] hover:text-[#003366] transition-colors cursor-default"
+                              iconClassName="h-3 w-3"
+                            />
                           ))}
                         </div>
                       </div>
@@ -242,8 +247,8 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                   {educations.map((edu) => (
                     <article key={edu.id} className="border border-white/50 p-6 bg-[#003366]/80 backdrop-blur-sm relative">
                       <div className="absolute top-0 right-0 w-3 h-3 border-b border-l border-white/50" />
-                      <h3 className="text-base font-bold uppercase tracking-wider mb-1">{edu.degree}</h3>
-                      <p className="text-white/80 text-sm uppercase tracking-widest mb-4">{edu.institution}</p>
+                      <h3 className="text-base font-bold uppercase tracking-wider mb-1"><RichText text={edu.degree} /></h3>
+                      <p className="text-white/80 text-sm uppercase tracking-widest mb-4"><RichText text={edu.institution} /></p>
                       <div className="flex justify-between items-center pt-4 border-t border-dashed border-white/30 text-[10px] uppercase tracking-widest text-white/60">
                         {(edu.startDate || edu.endDate) && (
                           <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -303,7 +308,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                     <article key={ach.id} className="border border-white/30 p-4 flex items-start gap-4 bg-[#003366]/80 backdrop-blur-sm">
                       <Layers className="w-4 h-4 text-white/50 mt-0.5 shrink-0" />
                       <div>
-                        <h3 className="text-sm font-bold uppercase tracking-wider leading-snug">{ach.title}</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-wider leading-snug"><RichText text={ach.title} /></h3>
                         {ach.date && (
                           <p className="text-[10px] text-white/60 mt-2 uppercase tracking-widest">
                             {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -329,8 +334,8 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                 <article key={article.id} className="border-2 border-white/50 p-6 bg-[#003366]/80 backdrop-blur-sm hover:bg-[color-mix(in_srgb,var(--lf-accent)_18%,transparent)] transition-colors flex flex-col relative">
                   <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-white/50" />
                   <h3 className="text-base font-bold uppercase tracking-wider mb-4 leading-snug">
-                    <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
-                      {article.title}
+                    <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
+                      <RichText text={article.title} />
                     </a>
                   </h3>
                   {article.description && (
@@ -430,12 +435,12 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
             </div>
 
             <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-bold uppercase tracking-tighter mb-6">
-              {portfolio.title}
+              <RichText text={portfolio.title} />
             </h1>
 
             {portfolio.headline && (
               <p className="text-base @md:text-lg @lg:text-2xl text-white/80 uppercase tracking-widest max-w-2xl mb-10">
-                {portfolio.headline}
+                <RichText text={portfolio.headline} />
               </p>
             )}
 
@@ -450,11 +455,12 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
               />
             </div>
 
-            {socialProfiles.length > 0 && (
+            {hasNonHeroSocialProfiles(socialProfiles) && (
               <div className="mt-4">
                 <SocialPills
                   profiles={socialProfiles}
                   showUsername
+                  excludeHeroPlatforms
                   className="text-[10px] uppercase tracking-widest text-white/60 hover:text-white transition-colors"
                 />
               </div>

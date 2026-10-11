@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { FieldLabel } from "@/features/portfolio/components/field-label";
 import { FormField } from "@/features/portfolio/components/form-field";
 import { FormSection } from "@/features/portfolio/components/form-section";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -181,15 +181,17 @@ export function PortfolioForm() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex min-h-0 flex-1 items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className={EDIT_FORM_STACK_CLASS}>
-      <Card>
+    <div className="flex min-h-0 flex-1 flex-col [&_h3]:text-base">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className={EDIT_FORM_STACK_CLASS}>
+          <Card>
         <CardContent className="flex flex-col gap-4">
           <FormSection
             title="Basic Information"
@@ -200,11 +202,14 @@ export function PortfolioForm() {
               <FieldLabel htmlFor="title" unsaved={isFieldUnsaved("title")}>
                 Full Name / Title
               </FieldLabel>
-              <Input
+              <RichTextEditor
                 id="title"
-                name="title"
+                singleLine
                 value={form.title}
-                onChange={handleChange}
+                onChange={(title) => {
+                  setForm((prev) => ({ ...prev, title }));
+                  setFieldErrors((prev) => ({ ...prev, title: undefined }));
+                }}
                 onBlur={() => handleBlur("title")}
                 aria-invalid={Boolean(currentErrors.title)}
                 placeholder="John Doe"
@@ -214,11 +219,14 @@ export function PortfolioForm() {
               <FieldLabel htmlFor="headline" unsaved={isFieldUnsaved("headline")}>
                 Headline
               </FieldLabel>
-              <Input
+              <RichTextEditor
                 id="headline"
-                name="headline"
+                singleLine
                 value={form.headline}
-                onChange={handleChange}
+                onChange={(headline) => {
+                  setForm((prev) => ({ ...prev, headline }));
+                  setFieldErrors((prev) => ({ ...prev, headline: undefined }));
+                }}
                 onBlur={() => handleBlur("headline")}
                 aria-invalid={Boolean(currentErrors.headline)}
                 placeholder="Full-Stack Developer | Open Source Enthusiast"
@@ -228,15 +236,21 @@ export function PortfolioForm() {
               <FieldLabel htmlFor="summary" unsaved={isFieldUnsaved("summary")}>
                 Summary
               </FieldLabel>
-              <Textarea
+              <RichTextEditor
                 id="summary"
-                name="summary"
                 value={form.summary}
-                onChange={handleChange}
+                onChange={(summary) => {
+                  setForm((prev) => ({ ...prev, summary }));
+                  setFieldErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.summary;
+                    return next;
+                  });
+                }}
                 onBlur={() => handleBlur("summary")}
                 aria-invalid={Boolean(currentErrors.summary)}
                 placeholder="Write a brief summary about yourself, your experience, and what you're passionate about..."
-                rows={5}
+                minHeight="8rem"
               />
             </FormField>
           </FormSection>
@@ -293,11 +307,14 @@ export function PortfolioForm() {
                   <MapPin className="h-4 w-4 text-muted-foreground" />
                   Location
                 </FieldLabel>
-                <Input
+                <RichTextEditor
                   id="location"
-                  name="location"
+                  singleLine
                   value={form.location}
-                  onChange={handleChange}
+                  onChange={(location) => {
+                    setForm((prev) => ({ ...prev, location }));
+                    setFieldErrors((prev) => ({ ...prev, location: undefined }));
+                  }}
                   onBlur={() => handleBlur("location")}
                   aria-invalid={Boolean(currentErrors.location)}
                   placeholder="San Francisco, CA"
@@ -326,6 +343,8 @@ export function PortfolioForm() {
           </FormSection>
         </CardContent>
       </Card>
+        </div>
+      </div>
 
       <EditFormActions>
         <Button

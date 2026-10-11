@@ -1,6 +1,10 @@
+import { stripRichTextToPlain } from "@/lib/rich-text";
+
 export const MAX_STORED_URL_CHARS = 2_048;
 export const MAX_SHORT_LABEL_CHARS = 160;
 export const MAX_LONG_TEXT_CHARS = 10_000;
+/** Raw stored markdown/HTML may include mark syntax overhead. */
+export const MAX_LONG_TEXT_RAW_CHARS = MAX_LONG_TEXT_CHARS * 2;
 export const MAX_EMAIL_CHARS = 254;
 export const MAX_PHONE_CHARS = 32;
 export const MAX_SECTION_ROWS = 50;
@@ -73,13 +77,20 @@ export function normalizeLongText(
   fieldName = "Text",
 ) {
   const normalized = normalizeLineEndings(value ?? "");
-  if (normalized.length > MAX_LONG_TEXT_CHARS) {
+  if (TEXT_CONTROL_CHARACTERS.test(normalized)) {
+    throw new ContentValidationError(`${fieldName} contains control characters`);
+  }
+  // Allow markdown/HTML mark overhead, but cap visible plain text.
+  const plainLength = stripRichTextToPlain(normalized).length;
+  if (plainLength > MAX_LONG_TEXT_CHARS) {
     throw new ContentValidationError(
       `${fieldName} must be at most ${MAX_LONG_TEXT_CHARS} characters`,
     );
   }
-  if (TEXT_CONTROL_CHARACTERS.test(normalized)) {
-    throw new ContentValidationError(`${fieldName} contains control characters`);
+  if (normalized.length > MAX_LONG_TEXT_RAW_CHARS) {
+    throw new ContentValidationError(
+      `${fieldName} is too large after formatting`,
+    );
   }
   return normalized;
 }

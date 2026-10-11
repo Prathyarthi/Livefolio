@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -6,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Terminal, Zap, Cpu } from "lucide-react";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -22,6 +23,7 @@ import {
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -107,7 +109,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                       imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
-                      alt={project.title}
+                      alt={stripRichTextToPlain(project.title)}
                       loading="lazy"
                       containerClassName="bg-[#050505]"
                       className="h-full w-full object-cover object-top opacity-70 filter contrast-125 transition-all duration-500 group-hover:opacity-100"
@@ -119,7 +121,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                     <div className={cn(PROJECT_CARD_HEADER, "mb-4")}>
                       <div className={PROJECT_CARD_META}>
                         <h3 className={cn(PROJECT_CARD_TITLE, "text-xl font-bold text-white uppercase tracking-wider group-hover:text-[var(--lf-accent)] transition-colors")}>
-                          {project.title}
+                          <RichText text={project.title} />
                         </h3>
                         {project.featured && (
                           <span className="text-[10px] font-bold uppercase tracking-widest bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] text-white px-2 py-1 shrink-0 shadow-[0_0_10px_rgba(255,0,255,0.5)]">
@@ -151,7 +153,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                       <ProjectActions
                         liveUrl={project.liveUrl}
                         sourceUrl={project.sourceUrl}
-                        label={project.title}
+                        label={stripRichTextToPlain(project.title)}
                         projectId={project.id}
                         liveClassName="text-xs font-bold uppercase tracking-widest bg-[var(--lf-accent)] text-black px-4 py-2 hover:bg-white transition-colors mr-3 shadow-[0_0_10px_rgba(0,255,0,0.4)]"
                         sourceClassName="text-xs font-bold uppercase tracking-widest border border-[var(--lf-accent)] text-[var(--lf-accent)] px-4 py-2 hover:bg-[var(--lf-accent)] hover:text-black transition-colors"
@@ -176,8 +178,8 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                 {experiences.map((exp) => (
                   <article key={exp.id} className="border-l-2 border-[color-mix(in_srgb,var(--lf-accent)_65%,white)] pl-4 py-2 relative group">
                     <div className="absolute left-[-5px] top-3 w-2 h-2 bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_65%,white)] group-hover:bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] transition-colors" />
-                    <h3 className="text-lg font-bold text-white uppercase tracking-wider">{exp.role}</h3>
-                    <p className="text-[var(--lf-accent)] text-sm mt-1 uppercase tracking-widest">{exp.company}</p>
+                    <h3 className="text-lg font-bold text-white uppercase tracking-wider"><RichText text={exp.role} /></h3>
+                    <p className="text-[var(--lf-accent)] text-sm mt-1 uppercase tracking-widest"><RichText text={exp.company} /></p>
                     {(exp.startDate || exp.endDate) && (
                       <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-2">
                         [{formatDateRange(exp.startDate, exp.endDate)}]
@@ -210,9 +212,11 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {names.map((name) => (
-                          <span key={name} className="text-xs font-bold uppercase tracking-wider bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-slate-300 px-3 py-1 hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors cursor-default">
-                            {name}
-                          </span>
+                          <TechChip
+                            key={name}
+                            name={name}
+                            className="text-xs font-bold uppercase tracking-wider bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-slate-300 px-3 py-1 hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors cursor-default"
+                          />
                         ))}
                       </div>
                     </div>
@@ -232,8 +236,8 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                 >
                   {educations.map((edu) => (
                     <article key={edu.id} className="border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-4 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] hover:border-[var(--lf-accent)] transition-colors">
-                      <h3 className="text-base font-bold text-white uppercase tracking-wider">{edu.degree}</h3>
-                      <p className="text-[var(--lf-accent)] text-sm mt-1">{edu.institution}</p>
+                      <h3 className="text-base font-bold text-white uppercase tracking-wider"><RichText text={edu.degree} /></h3>
+                      <p className="text-[var(--lf-accent)] text-sm mt-1"><RichText text={edu.institution} /></p>
                       <div className="flex justify-between items-center mt-3 text-[10px] uppercase tracking-widest text-slate-500">
                         {(edu.startDate || edu.endDate) && (
                           <span>[{formatDateRange(edu.startDate, edu.endDate)}]</span>
@@ -295,7 +299,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                         <Zap className="w-4 h-4" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">{ach.title}</h3>
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider"><RichText text={ach.title} /></h3>
                         {ach.date && (
                           <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-2">
                             [{new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}]
@@ -320,8 +324,8 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
               {articles.map((article) => (
                 <article key={article.id} className="border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-5 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] hover:border-[var(--lf-accent)] transition-colors group flex flex-col">
                   <h3 className="text-lg font-bold text-white uppercase tracking-wider mb-3 group-hover:text-[var(--lf-accent)] transition-colors">
-                    <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
-                      {article.title}
+                    <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
+                      <RichText text={article.title} />
                     </a>
                   </h3>
                   {article.description && (
@@ -411,11 +415,11 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                 System.Init()
               </div>
               <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-black uppercase tracking-tighter text-white drop-shadow-[0_0_10px_rgba(0,255,0,0.8)] mb-4">
-                {portfolio.title}
+                <RichText text={portfolio.title} />
               </h1>
               {portfolio.headline && (
                 <p className="text-xl text-[var(--lf-accent)] font-medium max-w-2xl mb-8 uppercase tracking-wide">
-                  &gt; {portfolio.headline}_
+                  &gt; <RichText text={portfolio.headline} />_
                 </p>
               )}
 
@@ -436,11 +440,12 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
 
           </div>
 
-          {socialProfiles.length > 0 && (
+          {hasNonHeroSocialProfiles(socialProfiles) && (
             <div className="mt-8 pt-6 border-t border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)]">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="text-xs font-bold uppercase tracking-widest text-[#008800] hover:text-[var(--lf-accent)] transition-colors"
               />
             </div>

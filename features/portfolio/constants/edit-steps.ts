@@ -31,8 +31,7 @@ export const EDIT_STEPS = [
 export type EditStepValue = (typeof EDIT_STEPS)[number]["value"];
 
 export const EDIT_STEP_DESCRIPTIONS: Record<EditStepValue, string> = {
-  basic:
-    "Your name, headline, summary, how people can reach you, and whether recruiters can find you.",
+  basic: "Your name, headline, summary, and how people can reach you.",
   experience: "Roles, companies, and what you accomplished in each job.",
   education: "Degrees, institutions, and relevant academic details.",
   skills: "Technologies and strengths grouped by category.",
@@ -40,5 +39,5 @@ export const EDIT_STEP_DESCRIPTIONS: Record<EditStepValue, string> = {
   achievements: "Awards, talks, milestones, and standout moments.",
   custom: "Extra sections for anything that does not fit elsewhere.",
   social: "GitHub, LinkedIn, Medium, LeetCode, and other profiles.",
-  publish: "Choose your subdomain, go live, and share your portfolio.",
+  publish: "Go live, share your link, and let recruiters find you.",
 };

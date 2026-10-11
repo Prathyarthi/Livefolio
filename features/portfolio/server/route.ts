@@ -26,6 +26,7 @@ import {
   MAX_CUSTOM_SECTIONS,
   MAX_EMAIL_CHARS,
   MAX_LONG_TEXT_CHARS,
+  MAX_LONG_TEXT_RAW_CHARS,
   MAX_PHONE_CHARS,
   MAX_SECTION_ROWS,
   MAX_SHORT_LABEL_CHARS,
@@ -431,7 +432,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             t.Null(),
           ]),
           summary: t.Union([
-            t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+            t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
             t.Null(),
           ]),
           avatarUrl: t.Union([
@@ -460,7 +461,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             t.Null(),
           ]),
           metaDescription: t.Union([
-            t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+            t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
             t.Null(),
           ]),
           openToWork: t.Boolean(),
@@ -785,7 +786,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         company: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
         role: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
         description: t.Optional(
-          t.Union([t.String({ maxLength: MAX_LONG_TEXT_CHARS }), t.Null()]),
+          t.Union([t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }), t.Null()]),
         ),
         startDate: t.Optional(t.Union([t.String(), t.Null()])),
         endDate: t.Optional(t.Union([t.String(), t.Null()])),
@@ -868,7 +869,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         t.Object({
           company: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
           role: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
-          description: t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+          description: t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
           startDate: t.String(),
           endDate: t.Union([t.String(), t.Null()]),
           location: t.Union([
@@ -976,7 +977,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
           ]),
         ),
         description: t.Optional(
-          t.Union([t.String({ maxLength: MAX_LONG_TEXT_CHARS }), t.Null()]),
+          t.Union([t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }), t.Null()]),
         ),
         startDate: t.Optional(t.Union([t.String(), t.Null()])),
         endDate: t.Optional(t.Union([t.String(), t.Null()])),
@@ -1079,7 +1080,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             t.Null(),
           ]),
           description: t.Union([
-            t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+            t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
             t.Null(),
           ]),
           startDate: t.String(),
@@ -1351,7 +1352,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     {
       body: t.Object({
         title: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
-        description: t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+        description: t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
         imageUrl: t.Optional(
           t.Union([
             t.String({ maxLength: MAX_STORED_URL_CHARS }),
@@ -1495,7 +1496,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             minLength: 1,
             maxLength: MAX_SHORT_LABEL_CHARS,
           }),
-          description: t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+          description: t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
           imageUrl: t.Union([
             t.String({ maxLength: MAX_STORED_URL_CHARS }),
             t.Null(),
