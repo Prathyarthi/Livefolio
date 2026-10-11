@@ -339,7 +339,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                           {formatDateRange(edu.startDate, edu.endDate)}
                         </p>
                       )}
-                      {edu.gpa && <p className="text-xs font-bold text-zinc-700 bg-zinc-200 px-2 py-0.5 rounded">GPA: {edu.gpa}</p>}
+                      {edu.gpa && <p className="text-xs font-bold text-zinc-700 bg-zinc-200 px-2 py-0.5 rounded">{edu.gpa}</p>}
                     </div>
                   </article>
                 ))}

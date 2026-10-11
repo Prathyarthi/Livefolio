@@ -240,7 +240,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                         {(edu.startDate || edu.endDate) && (
                           <span className="bg-[#f4f4f4] px-3 py-1 rounded-full">{formatDateRange(edu.startDate, edu.endDate)}</span>
                         )}
-                        {edu.gpa && <span className="bg-[#fff8c4] text-[#8a8200] px-3 py-1 rounded-full">GPA {edu.gpa}</span>}
+                        {edu.gpa && <span className="bg-[#fff8c4] text-[#8a8200] px-3 py-1 rounded-full">{edu.gpa}</span>}
                       </div>
                     </article>
                   ))}

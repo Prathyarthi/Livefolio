@@ -945,7 +945,7 @@ function EducationSection({
                   </div>
                   {edu.gpa && (
                     <div className="@md:col-span-3 @md:text-right">
-                      <span className={cn("font-mono text-[10px] uppercase tracking-[0.2em]", FAINT)}>GPA</span>
+                      <span className={cn("font-mono text-[10px] uppercase tracking-[0.2em]", FAINT)}>GPA / %</span>
                       <p className="font-serif text-4xl leading-none text-[var(--veil-paper)]">{edu.gpa}</p>
                     </div>
                   )}

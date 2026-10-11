@@ -339,7 +339,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                   {formatDateRange(edu.startDate, edu.endDate)}
                 </p>
               )}
-              {edu.gpa && <p className="mt-3 text-xs text-stone-500">GPA: {edu.gpa}</p>}
+              {edu.gpa && <p className="mt-3 text-xs text-stone-500">{edu.gpa}</p>}
             </article>
           ))}
         </CollapsibleList>

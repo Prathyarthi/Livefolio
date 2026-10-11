@@ -244,7 +244,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                         {(edu.startDate || edu.endDate) && (
                           <span className="bg-[#0d0221] px-2 py-1 border border-[#b0b0b0]/30">{formatDateRange(edu.startDate, edu.endDate)}</span>
                         )}
-                        {edu.gpa && <span className="text-[#ffbc00]">GPA {edu.gpa}</span>}
+                        {edu.gpa && <span className="text-[#ffbc00]">{edu.gpa}</span>}
                       </div>
                     </article>
                   ))}

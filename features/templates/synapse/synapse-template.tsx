@@ -437,7 +437,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     </p>
                   )}
                   {edu.gpa && (
-                    <p className={cn(MUTED, "text-xs mt-1")}>GPA: {edu.gpa}</p>
+                    <p className={cn(MUTED, "text-xs mt-1")}>{edu.gpa}</p>
                   )}
                 </div>
               </div>

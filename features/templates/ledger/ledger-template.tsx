@@ -749,7 +749,7 @@ export function LedgerTemplate({ data }: AppProps) {
                         )}
                         {edu.gpa && (
                           <span className="px-2 py-0.5 rounded-none bg-slate-900 border border-slate-800 text-[var(--lf-accent)] font-bold">
-                            GPA {edu.gpa}
+                            {edu.gpa}
                           </span>
                         )}
                       </div>

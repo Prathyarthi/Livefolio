@@ -250,7 +250,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                               {formatDateRange(edu.startDate, edu.endDate)}
                             </span>
                           )}
-                          {edu.gpa && <span className="text-sm font-medium text-slate-300">GPA: {edu.gpa}</span>}
+                          {edu.gpa && <span className="text-sm font-medium text-slate-300">{edu.gpa}</span>}
                         </div>
                       </article>
                     ))}

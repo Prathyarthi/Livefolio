@@ -360,7 +360,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
                   {formatDateRange(edu.startDate, edu.endDate)}
                 </p>
               )}
-              {edu.gpa && <p className="mt-3 text-xs font-bold text-gray-700">GPA: {edu.gpa}</p>}
+              {edu.gpa && <p className="mt-3 text-xs font-bold text-gray-700">{edu.gpa}</p>}
             </article>
           ))}
         </CollapsibleList>

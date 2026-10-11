@@ -165,6 +165,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                           </h3>
                           <p className="text-[var(--lf-accent)] font-medium mt-1"><RichText text={edu.institution} /></p>
                           <p className="mt-2 text-sm text-slate-500">{formatDateRange(edu.startDate, edu.endDate)}</p>
+                          {edu.gpa ? <p className="mt-1 text-sm text-slate-500">{edu.gpa}</p> : null}
                         </div>
                       ))}
                     </CollapsibleList>

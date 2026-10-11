@@ -177,6 +177,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           </h3>
                           <p className="text-lg font-bold italic text-[var(--lf-accent)] mt-1"><RichText text={edu.institution} /></p>
                           <p className="mt-3 text-sm font-bold tracking-widest uppercase">{formatDateRange(edu.startDate, edu.endDate)}</p>
+                          {edu.gpa ? <p className="mt-2 text-sm font-bold tracking-widest uppercase">{edu.gpa}</p> : null}
                         </div>
                       ))}
                     </CollapsibleList>
