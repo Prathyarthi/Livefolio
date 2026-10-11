@@ -13,6 +13,7 @@ import {
   formatJobMeta,
 } from "@/features/jobs/constants/labels";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { ScreeningAnswersSection } from "@/features/applications/components/screening-answers-section";
 
 export default function ApplicationDetailPage() {
   const params = useParams<{ applicationId: string }>();
@@ -88,6 +89,11 @@ export default function ApplicationDetailPage() {
           </p>
         </section>
       ) : null}
+
+      <ScreeningAnswersSection
+        answers={data.screeningAnswers}
+        title="Your answers"
+      />
 
       {snapshot && profile ? (
         <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6">

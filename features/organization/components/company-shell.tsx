@@ -124,13 +124,13 @@ function CompanySidebar({
             />
           </button>
         ) : (
-          <div className="flex min-w-0 flex-col gap-1 px-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
+          <div className="flex min-w-0 items-center gap-1 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
             <Link
               href={`/company/${orgSlug}`}
               onClick={() => {
                 if (isMobile) setOpenMobile(false);
               }}
-              className="flex min-w-0 items-center gap-2 overflow-hidden"
+              className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden"
             >
               {org?.logoUrl ? (
                 <OrgLogo
@@ -152,6 +152,9 @@ function CompanySidebar({
                 </span>
               </span>
             </Link>
+            {!isMobile ? (
+              <SidebarTrigger className="size-8 shrink-0" />
+            ) : null}
           </div>
         )}
       </SidebarHeader>
@@ -169,7 +172,9 @@ function CompanySidebar({
                     <SidebarMenuButton
                       asChild
                       isActive={active}
+                      size="lg"
                       tooltip={title}
+                      className="gap-3 text-base [&_svg]:size-5 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:[&_span]:hidden group-data-[collapsible=icon]:[&_svg]:size-5"
                     >
                       <Link
                         href={href}
@@ -177,7 +182,7 @@ function CompanySidebar({
                           if (isMobile) setOpenMobile(false);
                         }}
                       >
-                        <Icon />
+                        <Icon aria-hidden />
                         <span>{title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -189,32 +194,54 @@ function CompanySidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border gap-2 p-2">
-        <SidebarMenu>
+      <SidebarFooter className="border-t border-sidebar-border gap-2 group-data-[collapsible=icon]:p-1">
+        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
           {activeWorkspaceSlug ? (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="New job">
-                <Link href={`${workspaceBase}/jobs/new`}>
-                  <Plus />
+              <SidebarMenuButton
+                asChild
+                size="lg"
+                tooltip="New job"
+                className="gap-3 text-base [&_svg]:size-5 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:[&_span]:hidden group-data-[collapsible=icon]:[&_svg]:size-5"
+              >
+                <Link
+                  href={`${workspaceBase}/jobs/new`}
+                  onClick={() => {
+                    if (isMobile) setOpenMobile(false);
+                  }}
+                >
+                  <Plus aria-hidden />
                   <span>New job</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ) : null}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Your Livefolio">
-              <Link href="/dashboard">
-                <ArrowLeft />
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              tooltip="Your Livefolio"
+              className="gap-3 text-base [&_svg]:size-5 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:[&_span]:hidden group-data-[collapsible=icon]:[&_svg]:size-5"
+            >
+              <Link
+                href="/dashboard"
+                onClick={() => {
+                  if (isMobile) setOpenMobile(false);
+                }}
+              >
+                <ArrowLeft aria-hidden />
                 <span>Your Livefolio</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <div className="flex items-center gap-2 px-1 group-data-[collapsible=icon]:justify-center">
-          <Avatar className="h-8 w-8">
+        <div className="flex items-center gap-2 rounded-md p-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-1.5 group-data-[collapsible=icon]:p-1">
+          <Avatar className="h-8 w-8 shrink-0 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8">
             <AvatarImage src={user?.avatar} alt="" />
-            <AvatarFallback>
-              <User className="h-4 w-4" />
+            <AvatarFallback className="bg-brand-light text-brand-dark">
+              {user?.name?.charAt(0)?.toUpperCase() ?? (
+                <User className="h-4 w-4" aria-hidden />
+              )}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
@@ -223,16 +250,19 @@ function CompanySidebar({
             </p>
             <p className="truncate text-xs text-text-muted">{user?.email}</p>
           </div>
-          <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
-            <ThemeToggle />
+          <div className="flex shrink-0 items-center gap-0.5 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1">
+            <ThemeToggle className="size-8 group-data-[collapsible=icon]:size-8" />
             <Button
               variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => signOut({ callbackUrl: "/" })}
+              size="icon-sm"
+              className="group-data-[collapsible=icon]:size-8"
               aria-label="Sign out"
+              onClick={() => signOut({ callbackUrl: "/" })}
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut
+                className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5"
+                aria-hidden
+              />
             </Button>
           </div>
         </div>
@@ -264,19 +294,33 @@ export function CompanyShell({ children }: { children: React.ReactNode }) {
   if (!orgSlug) return null;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "17.5rem",
+          "--sidebar-width-icon": "4rem",
+        } as React.CSSProperties
+      }
+    >
       <CompanySidebar orgSlug={orgSlug} workspaceSlug={workspaceSlug} />
       <SidebarInset className="relative min-w-0 overflow-x-hidden bg-surface-base">
-        <header className="glass-nav sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border-default px-4 md:hidden">
-          <SidebarTrigger />
-          <span className="text-sm font-medium text-text-primary">
-            Hiring
-          </span>
-        </header>
+        <CompanyHeader />
         <main className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">
           {children}
         </main>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function CompanyHeader() {
+  return (
+    <header className="glass-nav sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4 md:hidden">
+      <SidebarTrigger className="size-9" />
+      <span className="text-sm font-medium text-text-primary">Hiring</span>
+      <div className="ml-auto flex items-center gap-1">
+        <ThemeToggle className="size-9" />
+      </div>
+    </header>
   );
 }
