@@ -1,17 +1,22 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { RichText } from "@/components/rich-text";
 import {
   JobHighlights,
   JobPerkPills,
 } from "@/features/jobs/components/job-highlights";
+import {
+  JobRequirementCard,
+  JobTextSection,
+} from "@/features/jobs/components/job-text-section";
 import type { Job, JobOrganization } from "@/features/jobs/api/use-jobs";
 import {
   formStateToJobInput,
   type JobRoleFormState,
 } from "@/features/jobs/lib/role-fields";
-import { splitRichLines } from "@/features/jobs/constants/labels";
 import { OrgBanner, OrgLogo } from "@/features/organization/components/org-logo";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 
 type PreviewOrg = Pick<
   JobOrganization,
@@ -70,76 +75,6 @@ function formToPreviewJob(form: JobRoleFormState, org: PreviewOrg): Job {
   };
 }
 
-function PreviewTextSection({
-  title,
-  body,
-  emptyHint,
-}: {
-  title: string;
-  body: string | null;
-  emptyHint?: string;
-}) {
-  const trimmed = body?.trim() ?? "";
-  if (!trimmed) {
-    if (!emptyHint) return null;
-    return (
-      <section className="rounded-[var(--radius-lg)] border border-dashed border-border-default bg-surface-raised/80 p-4">
-        <h3 className="text-sm font-medium text-text-primary">{title}</h3>
-        <p className="mt-2 text-body-sm text-text-muted">{emptyHint}</p>
-      </section>
-    );
-  }
-
-  const lines = splitRichLines(trimmed);
-  return (
-    <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]">
-      <h3 className="text-sm font-medium text-text-primary">{title}</h3>
-      {lines.length > 1 ? (
-        <ul className="mt-3 space-y-2 text-body-sm text-text-secondary">
-          {lines.map((line) => (
-            <li key={line} className="flex gap-2">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary" />
-              <span>{line}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-3 whitespace-pre-wrap text-body-sm text-text-secondary">
-          {trimmed}
-        </p>
-      )}
-    </section>
-  );
-}
-
-function PreviewRequirementCard({
-  title,
-  items,
-}: {
-  title: string;
-  items: string[];
-}) {
-  return (
-    <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]">
-      <h3 className="text-sm font-medium text-text-primary">{title}</h3>
-      {items.length === 0 ? (
-        <p className="mt-2 text-body-sm text-text-muted">None listed yet</p>
-      ) : (
-        <ul className="mt-3 flex flex-wrap gap-1.5">
-          {items.map((item) => (
-            <li
-              key={item}
-              className="rounded-full border border-border-default bg-surface-base px-2.5 py-1 text-xs text-text-primary"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
 export function JobCandidatePreview({
   form,
   organization,
@@ -157,7 +92,7 @@ export function JobCandidatePreview({
   const preferred = job.requirements
     .filter((r) => r.type === "preferred")
     .map((r) => r.label);
-  const hasTitle = Boolean(form.title.trim());
+  const hasTitle = Boolean(stripRichTextToPlain(form.title));
 
   return (
     <aside className="rounded-[var(--radius-lg)] border border-border-default bg-surface-base shadow-[var(--shadow-card)]">
@@ -196,65 +131,57 @@ export function JobCandidatePreview({
               </div>
             ) : null}
             <div className="min-w-0 pt-1">
-              <p className="font-medium text-text-primary">{org.name}</p>
+              <p className="font-medium text-text-primary">
+                <RichText as="span" text={org.name} />
+              </p>
+              
               {org.location ? (
-                <p className="text-body-sm text-text-secondary">{org.location}</p>
+                <p className="text-body-sm text-text-secondary">
+                  <RichText as="span" text={org.location} />
+                </p>
               ) : null}
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <h2
               className={`text-xl font-semibold tracking-tight ${
                 hasTitle ? "text-text-primary" : "text-text-muted"
               }`}
             >
-              {job.title}
+              <RichText as="span" text={job.title} />
             </h2>
             <JobPerkPills job={job} />
           </div>
 
           <JobHighlights job={job} compact={compact} />
 
-          <PreviewTextSection
+          <JobTextSection
+            compact
             title="About the role"
             body={job.description || null}
             emptyHint="Add a description to show candidates what this role is about."
           />
-          <PreviewTextSection
+          <JobTextSection
+            compact
             title="Responsibilities"
             body={job.responsibilities}
           />
           {(required.length > 0 || preferred.length > 0) && (
             <div className="grid gap-3">
-              <PreviewRequirementCard title="Required" items={required} />
-              <PreviewRequirementCard title="Preferred" items={preferred} />
+              <JobRequirementCard compact title="Required" items={required} />
+              <JobRequirementCard compact title="Preferred" items={preferred} />
             </div>
           )}
-          <PreviewTextSection
+          <JobTextSection
+            compact
             title="Qualifications"
             body={job.qualifications}
           />
-          <PreviewTextSection title="Benefits" body={job.benefits} />
-
-          <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]">
-            <h3 className="text-sm font-medium text-text-primary">
-              Apply with your Livefolio
-            </h3>
-            <p className="mt-1.5 text-xs text-text-secondary">
-              Candidates share a living profile instead of a static resume.
-            </p>
-            {(job.screeningQuestions?.length ?? 0) > 0 ? (
-              <p className="mt-1.5 text-xs text-text-muted">
-                Applicants will be asked {job.screeningQuestions?.length} extra
-                question
-                {(job.screeningQuestions?.length ?? 0) === 1 ? "" : "s"}.
-              </p>
-            ) : null}
-            <Button size="sm" className="mt-3 w-full" disabled>
-              Apply with Livefolio
-            </Button>
-          </div>
+          <JobTextSection compact title="Benefits" body={job.benefits} />
+          <Button size="sm" disabled>
+            Apply with Livefolio
+          </Button>
         </div>
       </div>
     </aside>

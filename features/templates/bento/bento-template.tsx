@@ -9,7 +9,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy, ArrowUpRight } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -339,7 +339,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                           {formatDateRange(edu.startDate, edu.endDate)}
                         </p>
                       )}
-                      {edu.gpa && <p className="text-xs font-bold text-zinc-700 bg-zinc-200 px-2 py-0.5 rounded">GPA: {edu.gpa}</p>}
+                      {edu.gpa && <p className="text-xs font-bold text-zinc-700 bg-zinc-200 px-2 py-0.5 rounded">{edu.gpa}</p>}
                     </div>
                   </article>
                 ))}
@@ -362,6 +362,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                 {articles.map((article) => (
                   <article key={article.id} className="group">
                     <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-2xl hover:bg-zinc-50 transition-colors border border-transparent hover:border-zinc-200/60">
+                      <ArticleSourceLabel source={article.source} className="mb-2" />
                       <h3 className="font-bold text-zinc-900 group-hover:text-green-600 transition-colors flex items-center justify-between">
                         <span className="truncate pr-4"><RichText text={article.title} /></span>
                         <ArrowUpRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-green-600" />

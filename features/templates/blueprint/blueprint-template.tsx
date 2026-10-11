@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Crosshair, Box, Layers } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -253,7 +253,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                         {(edu.startDate || edu.endDate) && (
                           <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
                         )}
-                        {edu.gpa && <span>GPA: {edu.gpa}</span>}
+                        {edu.gpa && <span>{edu.gpa}</span>}
                       </div>
                     </article>
                   ))}
@@ -333,6 +333,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
               {articles.map((article) => (
                 <article key={article.id} className="border-2 border-white/50 p-6 bg-[#003366]/80 backdrop-blur-sm hover:bg-[color-mix(in_srgb,var(--lf-accent)_18%,transparent)] transition-colors flex flex-col relative">
                   <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-white/50" />
+                  <ArticleSourceLabel source={article.source} className="mb-2" />
                   <h3 className="text-base font-bold uppercase tracking-wider mb-4 leading-snug">
                     <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
                       <RichText text={article.title} />

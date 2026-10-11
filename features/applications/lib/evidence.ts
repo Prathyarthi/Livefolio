@@ -1,6 +1,7 @@
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import type { JobRequirementInput } from "@/features/applications/lib/search";
 import { yearsFromRanges } from "@/features/applications/lib/applicant-summary";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 
 export type EvidenceItem = {
   kind:
@@ -309,7 +310,10 @@ export function buildApplicantEvidence(
   }
 
   const requirementMatches: RequirementMatch[] = requirements.map((req) => {
-    const evidence = collectEvidenceForRequirement(snapshot, req.label);
+    const evidence = collectEvidenceForRequirement(
+      snapshot,
+      stripRichTextToPlain(req.label),
+    );
     return {
       label: req.label,
       type: req.type,

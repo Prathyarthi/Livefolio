@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Briefcase, Plus, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RichText } from "@/components/rich-text";
 import { useWorkspace } from "@/features/organization/api/use-organization";
 import { useOrgJobs } from "@/features/jobs/api/use-jobs";
 import {
@@ -131,7 +132,7 @@ export default function CompanyOverviewPage() {
                 >
                   <div className="min-w-0 space-y-1">
                     <p className="truncate font-medium text-text-primary">
-                      {job.title}
+                      <RichText as="span" text={job.title} />
                     </p>
                     <p className="text-body-sm text-text-secondary">
                       {formatJobMeta([

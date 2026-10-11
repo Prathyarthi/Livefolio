@@ -4,7 +4,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -242,6 +242,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
               key={article.id}
               className="rounded-[1.55rem] border border-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] bg-[#fffaf7] p-5"
             >
+              <ArticleSourceLabel source={article.source} className="mb-2" />
               <h3 className="text-lg font-semibold text-stone-950">
                 <a
                   href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
@@ -338,7 +339,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                   {formatDateRange(edu.startDate, edu.endDate)}
                 </p>
               )}
-              {edu.gpa && <p className="mt-3 text-xs text-stone-500">GPA: {edu.gpa}</p>}
+              {edu.gpa && <p className="mt-3 text-xs text-stone-500">{edu.gpa}</p>}
             </article>
           ))}
         </CollapsibleList>

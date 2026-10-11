@@ -1,3 +1,5 @@
+import { stripRichTextToPlain } from "@/lib/rich-text";
+
 export const SCREENING_QUESTION_TYPES = [
   "short_text",
   "long_text",
@@ -195,7 +197,7 @@ export function normalizeScreeningQuestionsForSave(
       if (options.length < MIN_CHOICE_OPTIONS) {
         return {
           ok: false,
-          error: `"${next.prompt}" needs at least ${MIN_CHOICE_OPTIONS} choices`,
+          error: `"${stripRichTextToPlain(next.prompt)}" needs at least ${MIN_CHOICE_OPTIONS} choices`,
         };
       }
       if (options.length > MAX_CHOICE_OPTIONS) {
@@ -303,7 +305,7 @@ export function validateScreeningAnswers(
       if (text.length > max) {
         return {
           ok: false,
-          error: `Answer to "${question.prompt}" is too long`,
+          error: `Answer to "${stripRichTextToPlain(question.prompt)}" is too long`,
         };
       }
       value = text || null;
@@ -315,7 +317,7 @@ export function validateScreeningAnswers(
         if (!Number.isFinite(n)) {
           return {
             ok: false,
-            error: `"${question.prompt}" must be a number`,
+            error: `"${stripRichTextToPlain(question.prompt)}" must be a number`,
           };
         }
         value = n;
@@ -344,7 +346,7 @@ export function validateScreeningAnswers(
     if (question.required && !answered) {
       return {
         ok: false,
-        error: `Please answer: ${question.prompt}`,
+        error: `Please answer: ${stripRichTextToPlain(question.prompt)}`,
       };
     }
 

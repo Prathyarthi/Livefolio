@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Diamond, Star, Award } from "lucide-react";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -246,7 +246,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                         {(edu.startDate || edu.endDate) && (
                           <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
                         )}
-                        {edu.gpa && <span className="text-[var(--lf-accent)]">GPA {edu.gpa}</span>}
+                        {edu.gpa && <span className="text-[var(--lf-accent)]">{edu.gpa}</span>}
                       </div>
                     </article>
                   ))}
@@ -326,6 +326,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
               {articles.map((article) => (
                 <article key={article.id} className="bg-[#111c3d] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] p-8 hover:border-[var(--lf-accent)] transition-all flex flex-col text-center items-center">
                   <Award className="w-6 h-6 text-[var(--lf-accent)] mb-6" />
+                  <ArticleSourceLabel source={article.source} className="mb-2" />
                   <h3 className="text-xl font-serif text-[var(--lf-accent)] uppercase tracking-wider mb-4 leading-snug">
                     <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                       <RichText text={article.title} />

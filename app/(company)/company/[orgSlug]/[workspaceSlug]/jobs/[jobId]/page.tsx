@@ -14,18 +14,20 @@ import {
   useJob,
   useUpdateJob,
 } from "@/features/jobs/api/use-jobs";
+import { RichText } from "@/components/rich-text";
 import { JobHighlights, JobPerkPills } from "@/features/jobs/components/job-highlights";
 import { JobRoleFields } from "@/features/jobs/components/job-role-fields";
+import {
+  JobRequirementCard,
+  JobTextSection,
+} from "@/features/jobs/components/job-text-section";
 import {
   formStateToJobInput,
   jobToFormState,
   validateJobRoleForm,
   type JobRoleFormState,
 } from "@/features/jobs/lib/role-fields";
-import {
-  JOB_STATUS_LABELS,
-  splitRichLines,
-} from "@/features/jobs/constants/labels";
+import { JOB_STATUS_LABELS } from "@/features/jobs/constants/labels";
 import { getAppOrigin } from "@/lib/domain";
 import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field";
 import { uploadStoredFile } from "@/features/uploads/api/client";
@@ -156,7 +158,9 @@ export default function ManageJobPage() {
             {job._count?.applications ?? 0} applicants
           </span>
         </div>
-        <h1 className="text-h2 text-text-primary">{job.title}</h1>
+        <h1 className="text-h2 text-text-primary">
+          <RichText as="span" text={job.title} />
+        </h1>
         <JobPerkPills job={job} />
       </header>
 
@@ -287,8 +291,8 @@ export default function ManageJobPage() {
           <JobTextSection title="Benefits" body={job.benefits} />
           {(required.length > 0 || preferred.length > 0) && (
             <section className="grid gap-6 sm:grid-cols-2">
-              <RequirementCard title="Required" items={required.map((r) => r.label)} />
-              <RequirementCard title="Preferred" items={preferred.map((r) => r.label)} />
+              <JobRequirementCard title="Required" items={required.map((r) => r.label)} />
+              <JobRequirementCard title="Preferred" items={preferred.map((r) => r.label)} />
             </section>
           )}
         </div>
@@ -298,58 +302,6 @@ export default function ManageJobPage() {
         Open the applicant pool to move candidates through the pipeline, shortlist,
         and add private notes.
       </p>
-    </div>
-  );
-}
-
-function JobTextSection({
-  title,
-  body,
-}: {
-  title: string;
-  body: string | null;
-}) {
-  if (!body?.trim()) return null;
-  const lines = splitRichLines(body);
-  return (
-    <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
-      <h2 className="text-h3 text-text-primary">{title}</h2>
-      {lines.length > 1 ? (
-        <ul className="mt-4 space-y-2 text-body-sm text-text-secondary">
-          {lines.map((line) => (
-            <li key={line} className="flex gap-2">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary" />
-              <span>{line}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-4 whitespace-pre-wrap text-body-sm text-text-secondary">
-          {body}
-        </p>
-      )}
-    </section>
-  );
-}
-
-function RequirementCard({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
-      <h2 className="text-h3 text-text-primary">{title}</h2>
-      {items.length === 0 ? (
-        <p className="mt-3 text-body-sm text-text-muted">None listed</p>
-      ) : (
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {items.map((item) => (
-            <li
-              key={item}
-              className="rounded-full border border-border-default bg-surface-base px-3 py-1 text-body-sm text-text-primary"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

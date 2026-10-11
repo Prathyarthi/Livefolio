@@ -12,7 +12,7 @@ import {
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import { RichText,
+import { ArticleSourceLabel, RichText,
   DescriptionBlock,
   TechChip,
   TechIcon,
@@ -177,6 +177,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                           </h3>
                           <p className="text-lg font-bold italic text-[var(--lf-accent)] mt-1"><RichText text={edu.institution} /></p>
                           <p className="mt-3 text-sm font-bold tracking-widest uppercase">{formatDateRange(edu.startDate, edu.endDate)}</p>
+                          {edu.gpa ? <p className="mt-2 text-sm font-bold tracking-widest uppercase">{edu.gpa}</p> : null}
                         </div>
                       ))}
                     </CollapsibleList>
@@ -257,6 +258,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                   <CollapsibleList initial={3} wrapperClassName="grid md:grid-cols-2 gap-8" buttonClassName="mt-12 mx-auto block uppercase tracking-[0.2em] font-bold border-2 border-[#2B2B2B] px-8 py-3 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-colors">
                     {articles.map((article) => (
                       <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block border-2 border-[#2B2B2B] p-8 hover:bg-[#2B2B2B] hover:text-[#F1EEDC] transition-all group">
+                        <ArticleSourceLabel source={article.source} className="mb-2" />
                         <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-[var(--lf-accent)] transition-colors"><RichText text={article.title} /></h3>
                         {article.description && <p className="text-lg leading-relaxed mb-6 font-normal group-hover:text-[#F1EEDC]/80">{article.description}</p>}
                         <div className="flex items-center gap-4 text-xs font-bold tracking-widest uppercase">

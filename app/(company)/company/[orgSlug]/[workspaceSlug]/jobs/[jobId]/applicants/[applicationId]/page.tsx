@@ -7,6 +7,7 @@ import { ExternalLink, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RichText } from "@/components/rich-text";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -265,7 +266,7 @@ export default function ApplicantDetailPage() {
                       {req.type}
                     </span>
                     <span className="font-medium text-text-primary">
-                      {req.label}
+                      <RichText as="span" text={req.label} />
                     </span>
                   </div>
                   {req.evidence.length > 0 ? (

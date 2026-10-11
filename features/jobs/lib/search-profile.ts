@@ -1,3 +1,5 @@
+import { stripRichTextToPlain } from "@/lib/rich-text";
+
 export const ROLE_FAMILIES = [
   "engineering",
   "design",
@@ -146,7 +148,7 @@ export function jobJdSource(job: JobJdInput): string {
     job.responsibilities ?? "",
     job.qualifications ?? "",
   ]
-    .map((part) => part.trim())
+    .map((part) => stripRichTextToPlain(part))
     .filter(Boolean)
     .join("\n");
 }
@@ -182,7 +184,7 @@ export function heuristicSearchProfile(
 ): JobSearchProfile {
   const source = jobJdSource(job);
   const { roleFamily, confidence } = detectRoleFamily(
-    `${job.title}\n${job.description}`,
+    `${stripRichTextToPlain(job.title)}\n${stripRichTextToPlain(job.description)}`,
   );
   return emptySearchProfile(sourceHash, {
     roleFamily,
