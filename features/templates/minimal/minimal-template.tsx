@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -254,7 +254,6 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
               key={article.id}
               className="rounded-[1.6rem] border border-stone-200/80 bg-[#fffdf9] p-5 shadow-[0_10px_30px_rgba(28,25,23,0.04)]"
             >
-              <ArticleSourceLabel source={article.source} className="mb-2" />
               <h3 className="font-serif text-lg font-semibold text-stone-900">
                 <a
                   href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
@@ -351,7 +350,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                   {formatDateRange(edu.startDate, edu.endDate)}
                 </p>
               )}
-              {edu.gpa && <p className="mt-3 text-xs text-stone-500">{edu.gpa}</p>}
+              {edu.gpa && <p className="mt-3 text-xs text-stone-500">GPA: {edu.gpa}</p>}
             </article>
           ))}
         </CollapsibleList>

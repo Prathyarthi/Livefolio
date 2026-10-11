@@ -12,7 +12,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -196,7 +196,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                             {(edu.startDate || edu.endDate) && (
                               <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
                             )}
-                            {edu.gpa && <span>{edu.gpa}</span>}
+                            {edu.gpa && <span>GPA {edu.gpa}</span>}
                           </div>
                         </article>
                       ))}
@@ -285,7 +285,6 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                 >
                   {articles.map((article) => (
                     <article key={article.id} className="border-t border-[#2c2c2c] pt-4">
-                      <ArticleSourceLabel source={article.source} className="mb-2" />
                       <h3 className="text-xl font-bold mb-2 hover:underline underline-offset-4">
                         <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
                           <RichText text={article.title} />

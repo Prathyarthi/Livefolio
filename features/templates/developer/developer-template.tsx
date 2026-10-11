@@ -301,7 +301,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                           {edu.field && <span className="text-[var(--lf-g-500-70)]"> in <RichText text={edu.field} /></span>}
                         </h3>
                         {edu.gpa && (
-                          <span className="text-xs text-yellow-500/70">{edu.gpa}</span>
+                          <span className="text-xs text-yellow-500/70">GPA: {edu.gpa}</span>
                         )}
                       </div>
                       <p className="mt-1 text-sm text-gray-500">

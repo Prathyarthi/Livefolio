@@ -18,8 +18,6 @@ export interface PortfolioCustomization {
   sectionLayout?: SectionLayoutCustomization;
   /** Accent color hex (e.g. #3b82f6) for templates that support the shared palette. */
   primaryColor?: string;
-  /** Integration platforms the user has turned off for the public portfolio. */
-  hiddenIntegrations?: string[];
   [key: string]: unknown;
 }
 
@@ -81,7 +79,6 @@ export interface PortfolioData {
     tags: string[];
     publishedAt: string | null;
     readTime: number | null;
-    source: string | null;
   }>;
   socialProfiles: Array<{
     platform: string;

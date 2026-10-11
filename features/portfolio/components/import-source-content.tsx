@@ -4,15 +4,8 @@ import { ResumeUploader } from "@/features/resume/components/resume-uploader";
 import { GitHubImporter } from "@/features/profile/components/github-importer";
 import { LeetCodeImporter } from "@/features/profile/components/leetcode-importer";
 import { MediumImporter } from "@/features/profile/components/medium-importer";
-import { DevtoImporter } from "@/features/profile/components/devto-importer";
-import { HashnodeImporter } from "@/features/profile/components/hashnode-importer";
-import { StackOverflowImporter } from "@/features/profile/components/stackoverflow-importer";
-import { CodeforcesImporter } from "@/features/profile/components/codeforces-importer";
 import type { ReactNode } from "react";
-import {
-  IMPORT_SOURCES,
-  type ImportSourceValue,
-} from "@/features/portfolio/constants/import-sources";
+import type { ImportSourceValue } from "@/features/portfolio/constants/import-sources";
 
 type ImportSourceContentProps = {
   source: ImportSourceValue;
@@ -26,11 +19,16 @@ export function ImportSourceContent({
   onToolbarActionsChange,
 }: ImportSourceContentProps) {
   if (!canUseImports) {
-    const label =
-      IMPORT_SOURCES.find((item) => item.value === source)?.label ?? "This";
     return (
       <p className="text-body-sm text-text-secondary">
-        {label} import is locked. Upgrade to Pro to use it.
+        {source === "resume" &&
+          "Resume PDF import is locked. Upgrade to Pro to use AI resume parsing."}
+        {source === "github" &&
+          "GitHub import is locked. Upgrade to Pro to fetch and import repositories."}
+        {source === "medium" &&
+          "Medium import is locked. Upgrade to Pro to fetch and import articles."}
+        {source === "leetcode" &&
+          "LeetCode import is locked. Upgrade to Pro to sync your stats."}
       </p>
     );
   }
@@ -48,18 +46,6 @@ export function ImportSourceContent({
       </div>
       <div hidden={source !== "leetcode"}>
         <LeetCodeImporter />
-      </div>
-      <div hidden={source !== "devto"}>
-        <DevtoImporter />
-      </div>
-      <div hidden={source !== "hashnode"}>
-        <HashnodeImporter />
-      </div>
-      <div hidden={source !== "stackoverflow"}>
-        <StackOverflowImporter />
-      </div>
-      <div hidden={source !== "codeforces"}>
-        <CodeforcesImporter />
       </div>
     </>
   );

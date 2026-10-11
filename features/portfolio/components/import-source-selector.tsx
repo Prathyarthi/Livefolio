@@ -1,56 +1,111 @@
 "use client";
 
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   IMPORT_SOURCES,
   type ImportSourceValue,
 } from "@/features/portfolio/constants/import-sources";
+import { isImportSourceConnected } from "@/features/portfolio/lib/import-source-progress";
 
 type ImportSourceSelectorProps = {
   activeSource: ImportSourceValue;
   onSourceChange: (source: ImportSourceValue) => void;
+  portfolio: Record<string, unknown> | null | undefined;
   disabled?: boolean;
 };
-
-const sourceButtonClass = (isCurrent: boolean) =>
-  cn(
-    "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-left text-sm font-medium transition-colors",
-    "disabled:pointer-events-none disabled:opacity-50",
-    isCurrent
-      ? "border-transparent bg-brand-light text-brand-primary"
-      : "border-border-default text-text-muted hover:bg-surface-sunken hover:text-text-primary"
-  );
 
 export function ImportSourceSelector({
   activeSource,
   onSourceChange,
+  portfolio,
   disabled = false,
 }: ImportSourceSelectorProps) {
   return (
     <nav aria-label="Import sources">
-      <p className="mb-3 text-label font-medium uppercase tracking-wide text-text-muted">
+      <p className="mb-5 text-label font-medium uppercase tracking-wide text-text-muted">
         Import from
       </p>
-      <div className="flex flex-col items-start gap-2">
-        {IMPORT_SOURCES.map((source) => {
+      <ol className="space-y-0">
+        {IMPORT_SOURCES.map((source, index) => {
           const Icon = source.icon;
           const isCurrent = source.value === activeSource;
+          const isConnected = isImportSourceConnected(source.value, portfolio);
 
           return (
-            <button
-              key={source.value}
-              type="button"
-              onClick={() => onSourceChange(source.value)}
-              disabled={disabled}
-              aria-pressed={isCurrent}
-              className={sourceButtonClass(isCurrent)}
-            >
-              <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span>{source.label}</span>
-            </button>
+            <li key={source.value} className="relative">
+              {index < IMPORT_SOURCES.length - 1 ? (
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute left-[1.125rem] top-9 z-0 h-[calc(100%-1rem)] w-0.5 -translate-x-1/2",
+                    isCurrent || isConnected
+                      ? "bg-brand-primary/35"
+                      : "bg-border-default"
+                  )}
+                />
+              ) : null}
+
+              <button
+                type="button"
+                onClick={() => onSourceChange(source.value)}
+                disabled={disabled}
+                aria-current={isCurrent ? "step" : undefined}
+                className={cn(
+                  "group relative z-10 flex w-full items-start gap-2.5 rounded-xl py-2 pr-2 text-left transition-colors",
+                  "hover:bg-surface-sunken/80 disabled:pointer-events-none disabled:opacity-50",
+                  isCurrent && "bg-surface-sunken/60"
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                    isCurrent &&
+                      "border-brand-primary bg-brand-primary text-white shadow-[0_0_0_4px_var(--color-brand-light)]",
+                    isConnected &&
+                      !isCurrent &&
+                      "border-brand-primary bg-brand-light text-brand-primary",
+                    !isConnected &&
+                      !isCurrent &&
+                      "border-border-default bg-surface-base text-text-muted group-hover:border-border-strong"
+                  )}
+                >
+                  {isConnected && !isCurrent ? (
+                    <Check className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                  ) : (
+                    <Icon className="h-4 w-4" aria-hidden />
+                  )}
+                </span>
+
+                <span className="min-w-0 pt-1">
+                  <span
+                    className={cn(
+                      "block text-sm font-medium leading-tight",
+                      isCurrent ? "text-text-primary" : "text-text-secondary"
+                    )}
+                  >
+                    {source.label}
+                  </span>
+                  <span
+                    className={cn(
+                      "mt-0.5 block text-xs",
+                      isCurrent && "text-brand-primary",
+                      isConnected && !isCurrent && "text-text-muted",
+                      !isConnected && !isCurrent && "text-text-muted/80"
+                    )}
+                  >
+                    {isCurrent
+                      ? "Selected"
+                      : isConnected
+                        ? "Connected"
+                        : "Available"}
+                  </span>
+                </span>
+              </button>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </nav>
   );
 }
@@ -72,7 +127,7 @@ export function ImportSourcePicker({
       <p className="mb-3 text-label font-medium uppercase tracking-wide text-text-muted">
         Import from
       </p>
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {IMPORT_SOURCES.map((source) => {
           const Icon = source.icon;
           const isCurrent = source.value === activeSource;
@@ -83,11 +138,17 @@ export function ImportSourcePicker({
               type="button"
               disabled={disabled}
               onClick={() => onSourceChange(source.value)}
-              aria-pressed={isCurrent}
-              className={sourceButtonClass(isCurrent)}
+              aria-current={isCurrent ? "step" : undefined}
+              className={cn(
+                "flex flex-col items-center gap-2 rounded-xl border px-3 py-3 text-center transition-colors",
+                "disabled:pointer-events-none disabled:opacity-50",
+                isCurrent
+                  ? "border-brand-primary bg-brand-light/60 text-brand-primary"
+                  : "border-border-default bg-surface-base text-text-secondary hover:border-border-strong hover:bg-surface-sunken/60"
+              )}
             >
-              <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span>{source.short}</span>
+              <Icon className="h-5 w-5" aria-hidden />
+              <span className="text-xs font-medium">{source.label}</span>
             </button>
           );
         })}

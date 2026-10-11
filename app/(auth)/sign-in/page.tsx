@@ -7,7 +7,7 @@ import { createPageMetadata } from "@/lib/seo";
 export const metadata: Metadata = createPageMetadata({
   title: "Sign In",
   description:
-    "Sign in to Livefolio to edit your portfolio, publish updates, manage billing, and import from your resume or a connected platform.",
+    "Sign in to Livefolio to edit your portfolio, publish updates, manage billing, and import from resume, GitHub, Medium, or LeetCode.",
   path: "/sign-in",
   noIndex: true,
 });

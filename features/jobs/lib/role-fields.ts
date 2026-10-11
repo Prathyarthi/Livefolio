@@ -4,7 +4,6 @@ import {
   parseScreeningQuestions,
   type ScreeningQuestion,
 } from "@/features/jobs/lib/screening-questions";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 
 export const SENIORITY_OPTIONS = [
   "intern",
@@ -138,7 +137,7 @@ export function jobToFormState(job: Job): JobRoleFormState {
 }
 
 export function validateJobRoleForm(state: JobRoleFormState): string | null {
-  if (!stripRichTextToPlain(state.title) || !stripRichTextToPlain(state.description)) {
+  if (!state.title.trim() || !state.description.trim()) {
     return "Title and description are required";
   }
   const screening = normalizeScreeningQuestionsForSave(state.screeningQuestions);

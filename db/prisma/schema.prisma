@@ -312,7 +312,6 @@ model Article {
   tags        String[]
   publishedAt DateTime?
   readTime    Int?
-  source      String?
   sortOrder   Int       @default(0)
 
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)

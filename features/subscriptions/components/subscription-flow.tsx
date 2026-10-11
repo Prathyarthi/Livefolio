@@ -148,7 +148,7 @@ export function SubscriptionFlow() {
       {accessTier === "free" && (
         <p className="rounded-[var(--radius-md)] bg-warning-bg px-4 py-3 text-center text-body-sm text-text-secondary">
           Your free month ended. Free essentials remain active; upgrade to Pro
-          for resume and platform imports, and premium templates.
+          for imports (resume, GitHub, LeetCode) and premium templates.
         </p>
       )}
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Check, ExternalLink, FileText, Columns2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RichText } from "@/components/rich-text";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { ApplicantCard } from "@/features/applications/api/use-applications";
 import { getPortfolioPublicUrl } from "@/lib/domain";
@@ -104,8 +103,7 @@ export function ApplicantCompareView({
         <p className="eyebrow uppercase">Compare</p>
         <h1 className="text-h2 text-text-primary">Evidence comparison</h1>
         <p className="max-w-2xl text-body-sm text-text-secondary">
-          Side-by-side requirement matches for{" "}
-          <RichText as="span" text={jobTitle} /> — grounded in
+          Side-by-side requirement matches for {jobTitle} — grounded in
           portfolio evidence, not keyword scores alone.
         </p>
       </header>
@@ -350,9 +348,7 @@ function RequirementCompareRow({
       <div
         className={`sticky left-0 z-10 border-b border-border-default p-4 ${rowBg}`}
       >
-        <p className="text-body-sm font-medium text-text-primary">
-          <RichText as="span" text={row.label} />
-        </p>
+        <p className="text-body-sm font-medium text-text-primary">{row.label}</p>
         <p className="mt-1 text-xs uppercase tracking-wide text-text-muted">
           {row.type === "required" ? "Required" : "Preferred"}
           {row.category ? ` · ${row.category}` : ""}

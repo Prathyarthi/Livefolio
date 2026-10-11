@@ -17,7 +17,7 @@ CRITICAL RULES:
 - PRESERVE TEXT EXACTLY. For emails, phone numbers, handles, URLs, and any verbatim values from the resume — copy them character-for-character. Do NOT paraphrase, normalize formatting, strip leading "@" or "/", or invent wrapper keys like "type"/"value"/"handle". Use the schema field names exactly as defined below.
 - PLATFORM IDENTIFICATION (for socialProfiles): only set "platform" if you can identify it from a URL domain (github.com → "github", linkedin.com → "linkedin", x.com or twitter.com → "twitter", instagram.com → "instagram", medium.com → "medium", dribbble.com → "dribbble", leetcode.com → "leetcode"). If you only see a bare handle like "@username" or "/username" with no URL or unambiguous platform label nearby, set "platform": "unknown" and put the raw text in "username". Do NOT guess.
 - Extract dates if available. For month/year only (e.g. "Jan 2023"), use "2023-01-01". If no date, use null.
-- Do NOT invent data. If a field isn't in the resume, use null (or "" for required strings like headline/summary, or skip the entry if a REQUIRED field is missing). Never guess company names, dates, GPAs, percentages, or any other facts.
+- Do NOT invent data. If a field isn't in the resume, use null (or "" for required strings like headline/summary, or skip the entry if a REQUIRED field is missing). Never guess company names, dates, GPAs, or any other facts.
 - Return ONLY valid JSON, no markdown, no code fences.
 
 Schema:
@@ -54,7 +54,7 @@ Schema:
       "field": "Field of Study or null",
       "startDate": "YYYY-MM-DD or null",
       "endDate": "YYYY-MM-DD or null",
-      "gpa": "GPA, percentage, CGPA, or other score exactly as written, or null"
+      "gpa": "GPA value or null"
     }
   ],
   "skills": [

@@ -15,7 +15,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -427,7 +427,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </p>
                   )}
-                  {edu.gpa && <p className="font-mono text-xs font-bold text-slate-400">{edu.gpa}</p>}
+                  {edu.gpa && <p className="font-mono text-xs font-bold text-slate-400">GPA: {edu.gpa}</p>}
                 </div>
               ))}
             </CollapsibleList>
@@ -927,7 +927,6 @@ function ArticlesSectionComponent({
                   className={`bg-black border-4 border-white hover:border-[var(--lf-accent)] neo-shadow p-6 transition-all group space-y-4 ${slantClass}`}
                 >
                   <div className="flex items-center justify-between font-mono text-xs text-slate-300">
-                    <ArticleSourceLabel source={art.source} />
                     {art.publishedAt && (
                       <div className="flex items-center gap-1 font-bold">
                         <Calendar className="w-3.5 h-3.5 text-[var(--lf-accent)]" />
@@ -1374,7 +1373,6 @@ function ArticleModal({
           </button>
         </div>
 
-        <ArticleSourceLabel source={article.source} className="mb-2" />
         <h2 className="text-2xl sm:text-3xl font-black text-white uppercase italic">
           <RichText text={article.title} />
         </h2>

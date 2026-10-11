@@ -27,45 +27,12 @@ function RichInline({ text }: { text: string }) {
   return <RichText text={text} />;
 }
 
-export const HERO_PROFILE_PLATFORMS = [
-  "github",
-  "linkedin",
-  "medium",
-  "devto",
-  "hashnode",
-  "leetcode",
-  "codeforces",
-  "stackoverflow",
-] as const;
+export const HERO_PROFILE_PLATFORMS = ["github", "linkedin", "medium", "leetcode"] as const;
 
 const HERO_PROFILE_PLATFORM_SET = new Set<string>(HERO_PROFILE_PLATFORMS);
 
 export function isHeroProfilePlatform(platform: string) {
   return HERO_PROFILE_PLATFORM_SET.has(platform.toLowerCase());
-}
-
-export function ArticleSourceLabel({
-  source,
-  className,
-}: {
-  source?: string | null;
-  className?: string;
-}) {
-  if (!source) return null;
-  const label = getPlatformIcon(source);
-  if (!label) return null;
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider opacity-80",
-        className,
-      )}
-    >
-      <PlatformIcon platform={source} className="h-3 w-3" />
-      <span>{label}</span>
-    </span>
-  );
 }
 
 export function visibleSocialProfiles(

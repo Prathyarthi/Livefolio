@@ -8,7 +8,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Terminal, FolderOpen, FileText, Globe } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -227,7 +227,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                         {(edu.startDate || edu.endDate) && (
                           <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
                         )}
-                        {edu.gpa && <span>{edu.gpa}</span>}
+                        {edu.gpa && <span>GPA: {edu.gpa}</span>}
                       </div>
                     </div>
                   ))}
@@ -303,7 +303,6 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
             >
               {articles.map((article) => (
                 <div key={article.id} className="win95-inset bg-white p-3 text-sm flex flex-col">
-                  <ArticleSourceLabel source={article.source} className="mb-1" />
                   <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="text-[var(--lf-accent)] underline hover:text-[#ff0000] font-bold mb-2">
                     <RichText text={article.title} />
                   </a>

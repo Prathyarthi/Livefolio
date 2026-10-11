@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { ArrowRight } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -233,7 +233,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 {(edu.startDate || edu.endDate) && (
                   <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
                 )}
-                {edu.gpa && <span className="border border-gray-300 px-2 py-1">{edu.gpa}</span>}
+                {edu.gpa && <span className="border border-gray-300 px-2 py-1">GPA {edu.gpa}</span>}
               </div>
             </article>
           ))}
@@ -306,7 +306,6 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         >
           {articles.map((article) => (
             <article key={article.id} className="group flex flex-col">
-              <ArticleSourceLabel source={article.source} className="mb-2" />
               <h3 className="text-2xl font-black uppercase tracking-tighter mb-4 leading-tight">
                 <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="hover:underline underline-offset-4 flex items-start justify-between">
                   <RichText text={article.title} />

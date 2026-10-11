@@ -7,8 +7,8 @@ import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { RichTextEditor } from "@/components/rich-text-editor";
 import {
   useOrganization,
   useUpdateOrganization,
@@ -145,20 +145,19 @@ export default function CompanySettingsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="name">Company name</Label>
-              <RichTextEditor
+              <Input
                 id="name"
-                singleLine
                 value={name}
-                onChange={setName}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">About the company</Label>
-              <RichTextEditor
+              <Textarea
                 id="description"
                 value={description}
-                onChange={setDescription}
-                minHeight="8rem"
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -173,11 +172,10 @@ export default function CompanySettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="location">HQ / location</Label>
-                <RichTextEditor
+                <Input
                   id="location"
-                  singleLine
                   value={location}
-                  onChange={setLocation}
+                  onChange={(e) => setLocation(e.target.value)}
                 />
               </div>
               <div className="space-y-2 sm:col-span-2">

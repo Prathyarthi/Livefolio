@@ -16,7 +16,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -437,7 +437,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     </p>
                   )}
                   {edu.gpa && (
-                    <p className={cn(MUTED, "text-xs mt-1")}>{edu.gpa}</p>
+                    <p className={cn(MUTED, "text-xs mt-1")}>GPA: {edu.gpa}</p>
                   )}
                 </div>
               </div>
@@ -474,15 +474,12 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                 data-lf-track="article"
                 data-lf-label={stripRichTextToPlain(article.title)}
               >
-                <div className="flex items-center justify-between mb-5 @sm:mb-6 gap-3">
-                  <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <ArticleSourceLabel source={article.source} />
-                    {article.tags[0] && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)] text-[var(--lf-accent)] px-3 py-1 rounded-full">
-                        {article.tags[0]}
-                      </span>
-                    )}
-                  </div>
+                <div className="flex items-center justify-between mb-5 @sm:mb-6">
+                  {article.tags[0] && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)] text-[var(--lf-accent)] px-3 py-1 rounded-full">
+                      {article.tags[0]}
+                    </span>
+                  )}
                   <BookOpen className="w-4 h-4 @sm:w-5 @sm:h-5 text-gray-400 group-hover:text-[var(--lf-accent)] transition-colors ml-auto" />
                 </div>
                 <h3 className={cn(INK, "text-base @sm:text-lg @lg:text-xl font-bold mb-3 leading-snug group-hover:text-[var(--lf-accent)] transition-colors")}>

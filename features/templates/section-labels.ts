@@ -14,9 +14,6 @@ export type SectionKey =
   | "openSource"
   | "contact";
 
-/** Optional academic score: GPA, percentage, or similar. */
-export const EDUCATION_SCORE_LABEL = "GPA / Percentage";
-
 export const STANDARD_SECTION_LABELS: Record<SectionKey, string> = {
   about: "About",
   projects: "Projects",

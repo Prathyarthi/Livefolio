@@ -7,9 +7,8 @@ import { Loader2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { RichText } from "@/components/rich-text";
-import { RichTextEditor } from "@/components/rich-text-editor";
 import {
   checkOrganizationSlug,
   useCreateOrganization,
@@ -170,7 +169,7 @@ export function CompanyIndexPage() {
                     />
                     <div className="min-w-0">
                       <p className="truncate font-medium text-text-primary">
-                        <RichText as="span" text={organization.name} />
+                        {organization.name}
                       </p>
                       <p className="text-body-sm text-text-secondary">
                         {role} · {organization._count?.jobs ?? 0} jobs
@@ -203,11 +202,10 @@ export function CompanyIndexPage() {
             <h2 className="text-h3 text-text-primary">New company</h2>
             <div className="space-y-2">
               <Label htmlFor="company-name">Company name</Label>
-              <RichTextEditor
+              <Input
                 id="company-name"
-                singleLine
                 value={name}
-                onChange={setName}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Acme Inc."
               />
             </div>
@@ -238,11 +236,11 @@ export function CompanyIndexPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="company-desc">About</Label>
-              <RichTextEditor
+              <Textarea
                 id="company-desc"
                 value={description}
-                onChange={setDescription}
-                minHeight="7rem"
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
               />
             </div>
             <div className="flex flex-wrap gap-2">

@@ -69,8 +69,8 @@ function getClipRect(el: Element | null): DOMRect | null {
   if (!el || typeof window === "undefined") return null;
   let node = el.parentElement;
   while (node) {
-    const { overflowY } = window.getComputedStyle(node);
-    if (/(auto|scroll|overlay|hidden)/.test(overflowY)) {
+    const { overflow, overflowX, overflowY } = window.getComputedStyle(node);
+    if (/(auto|scroll|overlay|hidden)/.test(`${overflow}${overflowX}${overflowY}`)) {
       return node.getBoundingClientRect();
     }
     node = node.parentElement;
@@ -175,17 +175,20 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
       const selBottom = Math.max(start.bottom, end.bottom);
       const selLeft = Math.min(start.left, end.left);
       const selRight = Math.max(start.right, end.right);
+      const wrap = menu.offsetParent as HTMLElement | null;
+      const wrapRect = wrap?.getBoundingClientRect() ?? { top: 0, left: 0, width: 0 };
       const menuRect = menu.getBoundingClientRect();
       const gap = 8;
-      const placeBelow = selTop < menuRect.height + gap + 8;
+      const placeBelow = selTop - wrapRect.top < menuRect.height + gap;
       const top = placeBelow
-        ? selBottom + gap
-        : selTop - menuRect.height - gap;
-      const rawLeft = (selLeft + selRight) / 2 - menuRect.width / 2;
-      const left = Math.min(
-        Math.max(8, window.innerWidth - menuRect.width - 8),
-        Math.max(8, rawLeft),
+        ? selBottom - wrapRect.top + gap
+        : selTop - wrapRect.top - menuRect.height - gap;
+      const rawLeft = (selLeft + selRight) / 2 - wrapRect.left - menuRect.width / 2;
+      const maxLeft = Math.max(
+        4,
+        (wrap?.clientWidth ?? menuRect.width) - menuRect.width - 4,
       );
+      const left = Math.min(maxLeft, Math.max(4, rawLeft));
       menu.style.top = `${top}px`;
       menu.style.left = `${left}px`;
     } catch {
@@ -216,7 +219,7 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
       ref={menuRef}
       data-rich-text-toolbar=""
       className={cn(
-        "fixed z-50 flex items-center gap-0.5",
+        "absolute z-20 flex items-center gap-0.5",
         "rounded-xl border border-zinc-200/90 bg-white px-1.5 py-1",
         "shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
       )}

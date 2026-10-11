@@ -7,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -250,7 +250,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                               {formatDateRange(edu.startDate, edu.endDate)}
                             </span>
                           )}
-                          {edu.gpa && <span className="text-sm font-medium text-slate-300">{edu.gpa}</span>}
+                          {edu.gpa && <span className="text-sm font-medium text-slate-300">GPA: {edu.gpa}</span>}
                         </div>
                       </article>
                     ))}
@@ -337,7 +337,6 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                     key={article.id}
                     className="rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 p-6 transition-all hover:bg-slate-800/60 hover:-translate-y-1"
                   >
-                    <ArticleSourceLabel source={article.source} className="mb-2" />
                     <h3 className="text-lg font-bold text-white mb-3">
                       <a
                         href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}

@@ -30,7 +30,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -945,7 +945,7 @@ function EducationSection({
                   </div>
                   {edu.gpa && (
                     <div className="@md:col-span-3 @md:text-right">
-                      <span className={cn("font-mono text-[10px] uppercase tracking-[0.2em]", FAINT)}>GPA / %</span>
+                      <span className={cn("font-mono text-[10px] uppercase tracking-[0.2em]", FAINT)}>GPA</span>
                       <p className="font-serif text-4xl leading-none text-[var(--veil-paper)]">{edu.gpa}</p>
                     </div>
                   )}
@@ -1038,7 +1038,6 @@ function ArticlesSection({
                   {art.readTime ? <span className={cn("block", FAINT)}>{art.readTime} min read</span> : null}
                 </div>
                 <div className="min-w-0 space-y-2 @md:col-span-8">
-                  <ArticleSourceLabel source={art.source} />
                   <h3 className="font-serif text-3xl leading-tight tracking-tight text-[var(--veil-paper)] transition-colors group-hover:text-[var(--lf-accent)] [overflow-wrap:anywhere]">
                     {art.title}
                   </h3>

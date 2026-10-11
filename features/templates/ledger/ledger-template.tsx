@@ -13,7 +13,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { ArticleSourceLabel, RichText,
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -668,7 +668,6 @@ export function LedgerTemplate({ data }: AppProps) {
                       id={`article-card-${article.id}`}
                     >
                       <div className="space-y-2">
-                        <ArticleSourceLabel source={article.source} className="mb-1" />
                         <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1 uppercase">
                           <BookOpen className="w-3.5 h-3.5 text-[var(--lf-accent)]" />
                           {article.publishedAt ? `Published ${new Date(article.publishedAt).toLocaleDateString("en-US", {
@@ -749,7 +748,7 @@ export function LedgerTemplate({ data }: AppProps) {
                         )}
                         {edu.gpa && (
                           <span className="px-2 py-0.5 rounded-none bg-slate-900 border border-slate-800 text-[var(--lf-accent)] font-bold">
-                            {edu.gpa}
+                            GPA {edu.gpa}
                           </span>
                         )}
                       </div>

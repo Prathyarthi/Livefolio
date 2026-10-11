@@ -19,7 +19,6 @@ import {
   normalizeHidden,
   normalizeOrder,
 } from "@/features/templates/section-order";
-import { normalizeHiddenIntegrations } from "@/lib/integration-visibility";
 import { sendPublishedPortfolioEmailSafe } from "@/lib/email-published";
 import {
   ContentValidationError,
@@ -330,14 +329,6 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             },
           };
         }
-        if (customization?.hiddenIntegrations !== undefined) {
-          normalizedCustomization = {
-            ...normalizedCustomization,
-            hiddenIntegrations: normalizeHiddenIntegrations(
-              customization.hiddenIntegrations,
-            ),
-          };
-        }
         portfolioFields = {
           ...rest,
           ...(title !== undefined
@@ -513,9 +504,6 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             ),
             primaryColor: t.Optional(
               t.String({ pattern: "^#[0-9a-fA-F]{6}$" }),
-            ),
-            hiddenIntegrations: t.Optional(
-              t.Array(t.String({ maxLength: 32 }), { maxItems: 16 }),
             ),
           }),
         }),
@@ -949,7 +937,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
               ),
               degree: normalizeRequiredLabel(ctx.body.degree, "Degree"),
               field: normalizeOptionalLabel(ctx.body.field, "Field of study"),
-              gpa: normalizeOptionalLabel(ctx.body.gpa, "GPA / Percentage"),
+              gpa: normalizeOptionalLabel(ctx.body.gpa, "GPA"),
               description:
                 ctx.body.description == null
                   ? null
@@ -1039,7 +1027,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
                 );
         }
         if (ctx.body.gpa !== undefined) {
-          data.gpa = normalizeOptionalLabel(ctx.body.gpa, "GPA / Percentage");
+          data.gpa = normalizeOptionalLabel(ctx.body.gpa, "GPA");
         }
         if (startDate !== undefined) {
           data.startDate = startDate

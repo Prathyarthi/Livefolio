@@ -7,11 +7,7 @@ import { integrations, siteConfig } from "@/lib/site";
 const PLATFORM_MARKS: Record<(typeof integrations)[number]["id"], string> = {
   github: "GH",
   medium: "M",
-  devto: "DV",
-  hashnode: "HN",
   leetcode: "LC",
-  stackoverflow: "SO",
-  codeforces: "CF",
 };
 
 function ResumeToPortfolio() {
@@ -46,7 +42,7 @@ function ResumeToPortfolio() {
           <div className="mt-2 space-y-1.5 pb-3">
             <div className="h-2 w-2/3 rounded-full bg-text-primary/80" />
             <div className="h-1.5 w-1/2 rounded-full bg-success" />
-            <div className="mt-2 flex flex-wrap gap-1">
+            <div className="mt-2 flex gap-1">
               {integrations.map((platform) => (
                 <span
                   key={platform.id}

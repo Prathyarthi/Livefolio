@@ -782,7 +782,7 @@ export function ResumeUploader({
                     </p>
                     {edu.gpa && (
                       <p className="text-xs text-muted-foreground">
-                        {edu.gpa}
+                        GPA: {edu.gpa}
                       </p>
                     )}
                   </div>

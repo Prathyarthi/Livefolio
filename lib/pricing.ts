@@ -132,7 +132,7 @@ export const pricingPlans: PricingPlan[] = [
     note: "After your free month ends, you can continue on Minimal template with core editing and publishing. Imports require Pro.",
     features: [
       { label: "Public portfolio at your Livefolio link", included: true },
-      { label: "Resume and platform imports during free month", included: true },
+      { label: "Resume, GitHub, and LeetCode imports during free month", included: true },
       { label: "Editor and publish", included: true },
       { label: "Opt in so recruiters can find you — not shown on your Livefolio", included: true },
       { label: "All templates during free month", included: true },

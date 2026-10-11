@@ -9,13 +9,6 @@ const PLATFORM_HOSTS: Record<string, string> = {
   "medium.com": "medium",
   "dribbble.com": "dribbble",
   "leetcode.com": "leetcode",
-  "www.leetcode.com": "leetcode",
-  "dev.to": "devto",
-  "www.dev.to": "devto",
-  "stackoverflow.com": "stackoverflow",
-  "www.stackoverflow.com": "stackoverflow",
-  "codeforces.com": "codeforces",
-  "www.codeforces.com": "codeforces",
 };
 
 export type SocialProfileInput = {
@@ -48,13 +41,7 @@ function resolvePlatformFromUrl(url: string): {
   try {
     const parsed = new URL(normalizeUrl(url));
     const host = parsed.hostname.toLowerCase();
-    const platform =
-      PLATFORM_HOSTS[host] ??
-      (host.endsWith(".hashnode.dev") ||
-      host === "hashnode.com" ||
-      host === "www.hashnode.com"
-        ? "hashnode"
-        : undefined);
+    const platform = PLATFORM_HOSTS[host];
     if (!platform) return null;
 
     const pathParts = parsed.pathname.split("/").filter(Boolean);
@@ -68,16 +55,6 @@ function resolvePlatformFromUrl(url: string): {
       username = stripAtPrefix(pathParts[0]);
     } else if (platform === "leetcode") {
       username = pathParts[0] === "u" ? (pathParts[1] ?? null) : (pathParts[0] ?? null);
-    } else if (platform === "devto") {
-      username = pathParts[0] ?? null;
-    } else if (platform === "hashnode" && host.endsWith(".hashnode.dev")) {
-      username = host.slice(0, -".hashnode.dev".length);
-    } else if (platform === "hashnode" && pathParts[0]?.startsWith("@")) {
-      username = stripAtPrefix(pathParts[0]);
-    } else if (platform === "stackoverflow" && pathParts[0] === "users") {
-      username = pathParts[2] ?? pathParts[1] ?? null;
-    } else if (platform === "codeforces" && pathParts[0] === "profile") {
-      username = pathParts[1] ?? null;
     }
 
     return {
@@ -145,14 +122,6 @@ function defaultUrlForPlatform(platform: string, username: string | null): strin
       return `https://dribbble.com/${handle}`;
     case "leetcode":
       return `https://leetcode.com/u/${handle}`;
-    case "devto":
-      return `https://dev.to/${handle}`;
-    case "hashnode":
-      return `https://hashnode.com/@${handle}`;
-    case "stackoverflow":
-      return `https://stackoverflow.com/users/${handle}`;
-    case "codeforces":
-      return `https://codeforces.com/profile/${handle}`;
     default:
       return null;
   }

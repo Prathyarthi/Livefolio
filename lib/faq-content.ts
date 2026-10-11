@@ -3,7 +3,7 @@ export const FAQ_ITEMS = [
   {
     question: "How does Livefolio work?",
     answer:
-      "Upload your resume PDF, pick a template, and publish a live portfolio link. You can also import from GitHub, writing platforms, and coding profiles to keep everything in one place.",
+      "Upload your resume PDF, pick a template, and publish a live portfolio link. You can also import from GitHub, Medium, and LeetCode to keep everything in one place.",
   },
   {
     question: "Is there a free plan?",

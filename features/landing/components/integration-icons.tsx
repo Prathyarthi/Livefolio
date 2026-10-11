@@ -1,11 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
 import type { integrations } from "@/lib/site";
-import {
-  CodeforcesIcon,
-  DevtoIcon,
-  HashnodeIcon,
-  StackOverflowIcon,
-} from "@/components/icons";
 
 type IntegrationId = (typeof integrations)[number]["id"];
 
@@ -58,11 +52,7 @@ const INTEGRATION_ICONS: Record<
 > = {
   github: GitHubIcon,
   medium: MediumIcon,
-  devto: DevtoIcon,
-  hashnode: HashnodeIcon,
   leetcode: LeetCodeIcon,
-  stackoverflow: StackOverflowIcon,
-  codeforces: CodeforcesIcon,
 };
 
 const PLATFORM_STYLES: Record<
@@ -79,22 +69,6 @@ const PLATFORM_STYLES: Record<
   },
   leetcode: {
     accent: "bg-[#ffa116]",
-    iconClass: "text-white",
-  },
-  devto: {
-    accent: "bg-[#0a0a0a] dark:bg-white",
-    iconClass: "text-white dark:text-black",
-  },
-  hashnode: {
-    accent: "bg-[#2962ff]",
-    iconClass: "text-white",
-  },
-  stackoverflow: {
-    accent: "bg-[#f48024]",
-    iconClass: "text-white",
-  },
-  codeforces: {
-    accent: "bg-[#1f8acb]",
     iconClass: "text-white",
   },
 };
