@@ -196,7 +196,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                             {(edu.startDate || edu.endDate) && (
                               <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
                             )}
-                            {edu.gpa && <span>GPA {edu.gpa}</span>}
+                            {edu.gpa && <span>{edu.gpa}</span>}
                           </div>
                         </article>
                       ))}

@@ -512,7 +512,7 @@ function EducationSection({ educations, primaryColor, labels }: EducationSection
 
                 {edu.gpa && (
                   <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                    <span className="text-slate-500">GPA</span>
+                    <span className="text-slate-500">GPA / %</span>
                     <div className="flex h-6 items-center gap-1 bg-[#0a0a0a]/85 px-2.5 py-0.5 rounded border border-white/10 text-white font-bold">
                       <Award className="h-3.5 w-3.5 text-amber-500" />
                       <span>{edu.gpa}</span>

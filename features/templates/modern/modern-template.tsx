@@ -352,7 +352,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                   {formatDateRange(edu.startDate, edu.endDate)}
                 </p>
               )}
-              {edu.gpa && <p className="mt-3 text-xs text-zinc-400">GPA: {edu.gpa}</p>}
+              {edu.gpa && <p className="mt-3 text-xs text-zinc-400">{edu.gpa}</p>}
             </article>
           ))}
         </CollapsibleList>

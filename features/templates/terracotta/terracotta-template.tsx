@@ -174,6 +174,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                           </h3>
                           <p className="text-lg font-light italic text-[#3D405B]/60 mt-1"><RichText text={edu.institution} /></p>
                           <p className="mt-2 text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)]">{formatDateRange(edu.startDate, edu.endDate)}</p>
+                          {edu.gpa ? <p className="mt-1 text-sm font-light text-[#3D405B]/60">{edu.gpa}</p> : null}
                         </div>
                       ))}
                     </CollapsibleList>

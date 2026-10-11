@@ -163,6 +163,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                           </h3>
                           <p className="text-lg font-bold text-[var(--lf-accent)] mt-2"><RichText text={edu.institution} /></p>
                           <p className="mt-4 text-sm font-bold tracking-widest text-[#264653]/60 uppercase">{formatDateRange(edu.startDate, edu.endDate)}</p>
+                          {edu.gpa ? <p className="mt-2 text-sm font-bold tracking-widest text-[#264653]/60 uppercase">{edu.gpa}</p> : null}
                         </div>
                       ))}
                     </CollapsibleList>

@@ -427,7 +427,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </p>
                   )}
-                  {edu.gpa && <p className="font-mono text-xs font-bold text-slate-400">GPA: {edu.gpa}</p>}
+                  {edu.gpa && <p className="font-mono text-xs font-bold text-slate-400">{edu.gpa}</p>}
                 </div>
               ))}
             </CollapsibleList>

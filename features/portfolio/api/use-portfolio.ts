@@ -220,6 +220,22 @@ export function useAddEducation() {
   });
 }
 
+export function useUpdateEducation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: any) => {
+      const res = await fetch(`/api/portfolio/education/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) await throwPortfolioApiError(res, "Failed to update education");
+      return res.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["portfolio"] }),
+  });
+}
+
 export function useDeleteEducation() {
   const qc = useQueryClient();
   return useMutation({

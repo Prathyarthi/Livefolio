@@ -253,7 +253,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                           {(edu.startDate || edu.endDate) && (
                             <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
                           )}
-                          {edu.gpa ? <span>GPA {edu.gpa}</span> : null}
+                          {edu.gpa ? <span>{edu.gpa}</span> : null}
                         </div>
                       </article>
                     ))}

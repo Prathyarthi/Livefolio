@@ -246,7 +246,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                         {(edu.startDate || edu.endDate) && (
                           <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
                         )}
-                        {edu.gpa && <span className="text-[var(--lf-accent)]">GPA {edu.gpa}</span>}
+                        {edu.gpa && <span className="text-[var(--lf-accent)]">{edu.gpa}</span>}
                       </div>
                     </article>
                   ))}

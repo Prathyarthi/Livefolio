@@ -242,7 +242,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                         {(edu.startDate || edu.endDate) && (
                           <span>[{formatDateRange(edu.startDate, edu.endDate)}]</span>
                         )}
-                        {edu.gpa && <span className="border border-slate-700 px-2 py-1">GPA: {edu.gpa}</span>}
+                        {edu.gpa && <span className="border border-slate-700 px-2 py-1">{edu.gpa}</span>}
                       </div>
                     </article>
                   ))}
