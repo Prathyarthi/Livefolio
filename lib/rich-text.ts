@@ -1,5 +1,5 @@
-import DOMPurify from "isomorphic-dompurify";
 import MarkdownIt from "markdown-it";
+import sanitizeHtml from "sanitize-html";
 
 const md = new MarkdownIt({
   html: true,
@@ -8,12 +8,8 @@ const md = new MarkdownIt({
 });
 
 /** Tags/attrs allowed when rendering or persisting rich description HTML. */
-const PURIFY_CONFIG: {
-  ALLOWED_TAGS: string[];
-  ALLOWED_ATTR: string[];
-  ALLOW_DATA_ATTR: boolean;
-} = {
-  ALLOWED_TAGS: [
+const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [
     "p",
     "br",
     "strong",
@@ -33,33 +29,18 @@ const PURIFY_CONFIG: {
     "h2",
     "h3",
   ],
-  ALLOWED_ATTR: ["href", "target", "rel", "style", "class"],
-  ALLOW_DATA_ATTR: false,
+  allowedAttributes: {
+    a: ["href", "target", "rel", "class", "style"],
+    "*": ["class", "style"],
+  },
+  allowedStyles: {
+    "*": {
+      // Keep color / font-size; reject expression() and url().
+      color: [/^(?!.*(?:expression|url\s*\())[^;]+$/i],
+      "font-size": [/^(?!.*(?:expression|url\s*\())[^;]+$/i],
+    },
+  },
 };
-
-const STYLE_ALLOW =
-  /^(?:\s*(?:color|font-size)\s*:\s*[^;]+;?\s*)+$/i;
-
-function scrubStyleAttribute(html: string): string {
-  return html.replace(/\sstyle=(["'])(.*?)\1/gi, (_match, quote, style: string) => {
-    const parts = style
-      .split(";")
-      .map((part) => part.trim())
-      .filter(Boolean)
-      .filter((part) => {
-        const [prop, ...rest] = part.split(":");
-        if (!prop || rest.length === 0) return false;
-        const name = prop.trim().toLowerCase();
-        const value = rest.join(":").trim();
-        if (!value || /expression|url\s*\(/i.test(value)) return false;
-        return name === "color" || name === "font-size";
-      });
-    if (parts.length === 0) return "";
-    const cleaned = parts.join("; ");
-    if (!STYLE_ALLOW.test(`${cleaned};`)) return "";
-    return ` style=${quote}${cleaned}${quote}`;
-  });
-}
 
 /** Strip markdown / HTML marks to approximate visible plain text (for length checks). */
 export function stripRichTextToPlain(value: string): string {
@@ -85,7 +66,7 @@ export function stripRichTextToPlain(value: string): string {
 /** Force external links to open in a new tab safely. */
 function withNewTabLinks(html: string): string {
   return html.replace(/<a\b([^>]*)>/gi, (_match, attrs: string) => {
-    let next = attrs
+    const next = attrs
       .replace(/\s*target=(["'])(.*?)\1/gi, "")
       .replace(/\s*rel=(["'])(.*?)\1/gi, "");
     return `<a${next} target="_blank" rel="noopener noreferrer">`;
@@ -93,8 +74,7 @@ function withNewTabLinks(html: string): string {
 }
 
 export function sanitizeRichHtml(html: string): string {
-  const purified = DOMPurify.sanitize(html, PURIFY_CONFIG);
-  return withNewTabLinks(scrubStyleAttribute(purified));
+  return withNewTabLinks(sanitizeHtml(html, SANITIZE_OPTIONS));
 }
 
 /**
