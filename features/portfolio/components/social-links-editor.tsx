@@ -33,7 +33,15 @@ import {
   X,
   Code2,
 } from "lucide-react";
-import { GithubIcon as Github, LinkedinIcon as Linkedin, TwitterIcon as Twitter } from "@/components/icons";
+import {
+  CodeforcesIcon,
+  DevtoIcon,
+  GithubIcon as Github,
+  HashnodeIcon,
+  LinkedinIcon as Linkedin,
+  StackOverflowIcon,
+  TwitterIcon as Twitter,
+} from "@/components/icons";
 import { useEditStepDirty } from "@/features/portfolio/context/edit-dirty-context";
 import { fieldDiffers } from "@/features/portfolio/lib/edit-step-dirty";
 import {
@@ -50,9 +58,11 @@ const PLATFORMS = [
   { value: "twitter", label: "Twitter / X", icon: Twitter, urlPrefix: "https://x.com/" },
   { value: "leetcode", label: "LeetCode", icon: Code2, urlPrefix: "https://leetcode.com/u/" },
   { value: "website", label: "Personal Website", icon: Globe, urlPrefix: "https://" },
-  { value: "devto", label: "Dev.to", icon: Code2, urlPrefix: "https://dev.to/" },
+  { value: "devto", label: "Dev.to", icon: DevtoIcon, urlPrefix: "https://dev.to/" },
   { value: "medium", label: "Medium", icon: Globe, urlPrefix: "https://medium.com/@" },
-  { value: "stackoverflow", label: "Stack Overflow", icon: Code2, urlPrefix: "https://stackoverflow.com/users/" },
+  { value: "hashnode", label: "Hashnode", icon: HashnodeIcon, urlPrefix: "https://hashnode.com/@" },
+  { value: "stackoverflow", label: "Stack Overflow", icon: StackOverflowIcon, urlPrefix: "https://stackoverflow.com/users/" },
+  { value: "codeforces", label: "Codeforces", icon: CodeforcesIcon, urlPrefix: "https://codeforces.com/profile/" },
   { value: "dribbble", label: "Dribbble", icon: Globe, urlPrefix: "https://dribbble.com/" },
   { value: "behance", label: "Behance", icon: Globe, urlPrefix: "https://behance.net/" },
   { value: "youtube", label: "YouTube", icon: Globe, urlPrefix: "https://youtube.com/@" },

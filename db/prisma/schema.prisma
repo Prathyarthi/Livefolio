@@ -312,6 +312,7 @@ model Article {
   tags        String[]
   publishedAt DateTime?
   readTime    Int?
+  source      String?
   sortOrder   Int       @default(0)
 
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
@@ -502,6 +503,8 @@ model Job {
 
   customFields   Json?   @default("[]")
 
+  screeningQuestions Json? @default("[]")
+
   responsibilities String? @db.Text
   qualifications   String? @db.Text
   benefits         String? @db.Text
@@ -564,6 +567,8 @@ model Application {
   shortlistedAt DateTime?
 
   coverNote   String?  @db.Text
+
+  screeningAnswers Json?
   submittedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

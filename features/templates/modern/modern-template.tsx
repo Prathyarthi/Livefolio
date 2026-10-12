@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
 import {
@@ -6,7 +7,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import {
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -27,6 +28,7 @@ import {
   HERO_TITLE_SCALE_7XL,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -118,7 +120,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                 imageUrl={project.imageUrl ?? null}
                 projectId={project.id}
                 livePreviewProjectIds={livePreviewProjectIds}
-                alt={project.title}
+                alt={stripRichTextToPlain(project.title)}
                 loading="lazy"
                accentColor={primaryColor} />
 
@@ -127,7 +129,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                   <div className="min-w-0 flex-1">
                     <div className={PROJECT_CARD_META}>
                       <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-semibold text-white")}>
-                        {project.title}
+                        <RichText text={project.title} />
                       </h3>
                       {project.featured && (
                         <span className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] bg-linear-to-r from-[var(--lf-accent)] to-[var(--lf-accent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-white">
@@ -146,7 +148,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                     <ProjectActions
                       liveUrl={project.liveUrl}
                       sourceUrl={project.sourceUrl}
-                      label={project.title}
+                      label={stripRichTextToPlain(project.title)}
                       projectId={project.id}
                       liveClassName="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-900 transition-colors hover:bg-zinc-200"
                       sourceClassName="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:bg-white/[0.08]"
@@ -211,10 +213,10 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-xl font-semibold text-white">{exp.role}</h3>
-                  <p className="mt-1 text-sm text-[color-mix(in_srgb,var(--lf-accent)_80%,white)]">{exp.company}</p>
+                  <h3 className="text-xl font-semibold text-white"><RichText text={exp.role} /></h3>
+                  <p className="mt-1 text-sm text-[color-mix(in_srgb,var(--lf-accent)_80%,white)]"><RichText text={exp.company} /></p>
                   {exp.location && (
-                    <p className="mt-1 text-sm text-zinc-500">{exp.location}</p>
+                    <p className="mt-1 text-sm text-zinc-500"><RichText text={exp.location} /></p>
                   )}
                 </div>
                 {(exp.startDate || exp.endDate) && (
@@ -253,14 +255,15 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
               key={article.id}
               className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5"
             >
+              <ArticleSourceLabel source={article.source} className="mb-2" />
               <h3 className="text-lg font-semibold text-white">
                 <a
-                  href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
+                  href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-[color-mix(in_srgb,var(--lf-accent)_80%,white)]"
                 >
-                  {article.title}
+                  <RichText text={article.title} />
                 </a>
               </h3>
               {article.description && (
@@ -310,12 +313,11 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {names.map((name) => (
-                  <span
+                  <TechChip
                     key={name}
+                    name={name}
                     className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-sm text-zinc-300"
-                  >
-                    {name}
-                  </span>
+                  />
                 ))}
               </div>
             </div>
@@ -341,16 +343,16 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
               className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5"
             >
               <h3 className="text-lg font-semibold text-white">
-                {edu.degree}
-                {edu.field && <span className="text-zinc-400"> in {edu.field}</span>}
+                <RichText text={edu.degree} />
+                {edu.field && <span className="text-zinc-400"> in <RichText text={edu.field} /></span>}
               </h3>
-              <p className="mt-2 text-sm text-zinc-300">{edu.institution}</p>
+              <p className="mt-2 text-sm text-zinc-300"><RichText text={edu.institution} /></p>
               {(edu.startDate || edu.endDate) && (
                 <p className="mt-2 text-xs uppercase tracking-[0.22em] text-zinc-500">
                   {formatDateRange(edu.startDate, edu.endDate)}
                 </p>
               )}
-              {edu.gpa && <p className="mt-3 text-xs text-zinc-400">GPA: {edu.gpa}</p>}
+              {edu.gpa && <p className="mt-3 text-xs text-zinc-400">{edu.gpa}</p>}
             </article>
           ))}
         </CollapsibleList>
@@ -420,7 +422,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
             >
               <Trophy className="h-4 w-4 text-[var(--lf-accent)] mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white leading-relaxed">{ach.title}</p>
+                <p className="text-sm text-white leading-relaxed"><RichText text={ach.title} /></p>
                 {ach.date && (
                   <p className="mt-1 text-xs text-zinc-500">
                     {new Date(ach.date).toLocaleDateString("en-US", {
@@ -489,11 +491,11 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                     "font-black tracking-tight text-white"
                   )}
                 >
-                  {portfolio.title}
+                  <RichText text={portfolio.title} />
                 </h1>
                 {portfolio.headline && (
                   <p className={cn(HERO_HEADLINE_SCALE, "mt-5 max-w-2xl text-zinc-300/95")}>
-                    {portfolio.headline}
+                    <RichText text={portfolio.headline} />
                   </p>
                 )}
 
@@ -511,11 +513,12 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                   />
                 </div>
 
-                {socialProfiles.length > 0 && (
+                {hasNonHeroSocialProfiles(socialProfiles) && (
                   <div className="mt-6">
                     <SocialPills
                       profiles={socialProfiles}
                       showUsername
+                      excludeHeroPlatforms
                       className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-sm text-zinc-300 transition-colors hover:bg-white/[0.1]"
                     />
                   </div>

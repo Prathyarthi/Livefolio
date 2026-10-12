@@ -229,6 +229,24 @@ export function useCreateOrganization() {
   });
 }
 
+export type OrgSlugCheckResult = {
+  available: boolean;
+  slug?: string;
+  reason?: "invalid" | "taken";
+};
+
+export async function checkOrganizationSlug(
+  slug: string,
+): Promise<OrgSlugCheckResult> {
+  const res = await fetch("/api/organizations/slug/check", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug }),
+  });
+  if (!res.ok) await throwApiError(res, "Failed to check organization slug");
+  return res.json() as Promise<OrgSlugCheckResult>;
+}
+
 export function useUpdateOrganization(slug: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -280,6 +298,79 @@ function invalidateOrgMembers(qc: ReturnType<typeof useQueryClient>, slug: strin
   qc.invalidateQueries({ queryKey: ["organizations", slug, "members"] });
   qc.invalidateQueries({ queryKey: ["organizations"] });
   qc.invalidateQueries({ queryKey: ["organizations", slug] });
+}
+
+function workspaceMembersKey(
+  orgSlug: string,
+  workspaceSlug: string,
+) {
+  return ["organizations", orgSlug, "workspaces", workspaceSlug, "members"] as const;
+}
+
+export function useWorkspaceMembers(
+  orgSlug: string | undefined,
+  workspaceSlug: string | undefined,
+) {
+  return useQuery({
+    queryKey: workspaceMembersKey(orgSlug ?? "", workspaceSlug ?? ""),
+    enabled: Boolean(orgSlug && workspaceSlug),
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/organizations/${orgSlug}/workspaces/${workspaceSlug}/members`,
+        { cache: "no-store" },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to load members");
+      return res.json() as Promise<OrgMember[]>;
+    },
+  });
+}
+
+function invalidateWorkspaceMembers(
+  qc: ReturnType<typeof useQueryClient>,
+  orgSlug: string,
+  workspaceSlug: string,
+) {
+  qc.invalidateQueries({
+    queryKey: workspaceMembersKey(orgSlug, workspaceSlug),
+  });
+  invalidateOrgMembers(qc, orgSlug);
+}
+
+export function useAddWorkspaceMember(orgSlug: string, workspaceSlug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { email: string; role: string }) => {
+      const res = await fetch(
+        `/api/organizations/${orgSlug}/workspaces/${workspaceSlug}/members`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to add member");
+      return res.json() as Promise<OrgMember>;
+    },
+    onSuccess: () => invalidateWorkspaceMembers(qc, orgSlug, workspaceSlug),
+  });
+}
+
+export function useRemoveWorkspaceMember(
+  orgSlug: string,
+  workspaceSlug: string,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (memberId: string) => {
+      const res = await fetch(
+        `/api/organizations/${orgSlug}/workspaces/${workspaceSlug}/members/${memberId}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to remove member");
+      return res.json() as Promise<{ ok: boolean }>;
+    },
+    onSuccess: () => invalidateWorkspaceMembers(qc, orgSlug, workspaceSlug),
+  });
 }
 
 export function useAddOrgMember(slug: string) {

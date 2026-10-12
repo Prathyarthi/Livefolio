@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
 import { resolveSectionLayout } from "../section-order";
@@ -8,7 +9,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy, ArrowUpRight } from "lucide-react";
-import {
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -23,6 +24,7 @@ import {
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_3,
   SocialPills,
+  hasNonHeroSocialProfiles,
   BENTO_GRID,
   SPLIT_CARD_ROW,
   TEMPLATE_CONTAINER,
@@ -88,11 +90,11 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             <div className="absolute top-0 right-0 w-64 h-64 bg-linear-to-br from-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] to-[color-mix(in_srgb,var(--lf-accent)_18%,transparent)] rounded-full blur-3xl -mr-20 -mt-20 transition-transform duration-700 group-hover:scale-110" />
             <div className="relative z-10">
               <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-3xl @md:text-4xl @lg:text-6xl font-bold tracking-tight text-zinc-900 mb-4">
-                {portfolio.title}
+                <RichText text={portfolio.title} />
               </h1>
               {portfolio.headline && (
                 <p className="text-base @md:text-lg @lg:text-2xl text-zinc-500 font-medium max-w-2xl mb-8">
-                  {portfolio.headline}
+                  <RichText text={portfolio.headline} />
                 </p>
               )}
             </div>
@@ -127,7 +129,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {/* Social Links Bento Box */}
-          {socialProfiles.length > 0 && !resolved.isHidden("profiles") && (
+          {hasNonHeroSocialProfiles(socialProfiles) && !resolved.isHidden("profiles") && (
             <div className="col-span-1 @lg:col-span-2 row-span-1 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50 flex flex-col justify-center">
               <h2 className="text-lg font-semibold text-zinc-400 mb-4 flex items-center">
                 <span className="w-2 h-2 rounded-full bg-zinc-300 mr-2" />
@@ -136,6 +138,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-all hover:border-zinc-300 hover:bg-white hover:shadow-sm"
               />
             </div>
@@ -169,7 +172,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                       imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
-                      alt={project.title}
+                      alt={stripRichTextToPlain(project.title)}
                       loading="lazy"
                       containerClassName="overflow-hidden bg-zinc-200"
                       className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
@@ -178,7 +181,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                       <div className={cn(PROJECT_CARD_HEADER, "mb-3")}>
                         <div className="min-w-0 flex-1">
                           <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-bold text-zinc-900 transition-colors group-hover:text-[var(--lf-accent)]")}>
-                            {project.title}
+                            <RichText text={project.title} />
                           </h3>
                           {project.language && (
                             <p className="mt-1 text-xs font-medium uppercase tracking-wider text-zinc-400">
@@ -229,7 +232,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                         <ProjectActions
                           liveUrl={project.liveUrl}
                           sourceUrl={project.sourceUrl}
-                          label={project.title}
+                          label={stripRichTextToPlain(project.title)}
                           projectId={project.id}
                           liveClassName="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-zinc-800"
                           sourceClassName="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900"
@@ -260,7 +263,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                     className="rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-5 transition-all hover:bg-white hover:shadow-sm"
                   >
                     <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-                      <h3 className="font-bold text-zinc-900">{exp.role}</h3>
+                      <h3 className="font-bold text-zinc-900"><RichText text={exp.role} /></h3>
                       {(exp.startDate || exp.endDate) && (
                         <span className="whitespace-nowrap rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-500">
                           {formatDateRange(exp.startDate, exp.endDate)}
@@ -268,8 +271,8 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                       )}
                     </div>
                     <p className="mb-2 text-sm font-medium text-[var(--lf-accent)]">
-                      {exp.company}
-                      {exp.location ? ` · ${exp.location}` : ""}
+                      <RichText text={exp.company} />
+                      {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
                     </p>
                     {exp.description && (
                       <DescriptionBlock
@@ -298,12 +301,11 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {names.map((name) => (
-                        <span
+                        <TechChip
                           key={name}
+                          name={name}
                           className="rounded-xl border border-white/10 bg-white/20 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-                        >
-                          {name}
-                        </span>
+                        />
                       ))}
                     </div>
                   </div>
@@ -327,17 +329,17 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                 {educations.map((edu) => (
                   <article key={edu.id} className="p-4 rounded-2xl bg-zinc-50 border border-zinc-100">
                     <h3 className="font-bold text-zinc-900">
-                      {edu.degree}
-                      {edu.field && <span className="text-zinc-500 font-medium"> in {edu.field}</span>}
+                      <RichText text={edu.degree} />
+                      {edu.field && <span className="text-zinc-500 font-medium"> in <RichText text={edu.field} /></span>}
                     </h3>
-                    <p className="text-sm font-medium text-orange-600 mt-1">{edu.institution}</p>
+                    <p className="text-sm font-medium text-orange-600 mt-1"><RichText text={edu.institution} /></p>
                     <div className="flex items-center justify-between mt-2">
                       {(edu.startDate || edu.endDate) && (
                         <p className="text-xs font-medium text-zinc-500">
                           {formatDateRange(edu.startDate, edu.endDate)}
                         </p>
                       )}
-                      {edu.gpa && <p className="text-xs font-bold text-zinc-700 bg-zinc-200 px-2 py-0.5 rounded">GPA: {edu.gpa}</p>}
+                      {edu.gpa && <p className="text-xs font-bold text-zinc-700 bg-zinc-200 px-2 py-0.5 rounded">{edu.gpa}</p>}
                     </div>
                   </article>
                 ))}
@@ -359,9 +361,10 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
               >
                 {articles.map((article) => (
                   <article key={article.id} className="group">
-                    <a href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-2xl hover:bg-zinc-50 transition-colors border border-transparent hover:border-zinc-200/60">
+                    <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-2xl hover:bg-zinc-50 transition-colors border border-transparent hover:border-zinc-200/60">
+                      <ArticleSourceLabel source={article.source} className="mb-2" />
                       <h3 className="font-bold text-zinc-900 group-hover:text-green-600 transition-colors flex items-center justify-between">
-                        <span className="truncate pr-4">{article.title}</span>
+                        <span className="truncate pr-4"><RichText text={article.title} /></span>
                         <ArrowUpRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-green-600" />
                       </h3>
                       <div className="flex items-center gap-3 mt-2 text-xs font-medium text-zinc-500">
@@ -453,7 +456,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                           <Trophy className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="font-semibold text-zinc-900 text-sm">{ach.title}</p>
+                          <p className="font-semibold text-zinc-900 text-sm"><RichText text={ach.title} /></p>
                           {ach.date && (
                             <p className="text-xs text-zinc-500 mt-0.5">
                               {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { GithubIcon, PlatformIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import {
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -30,11 +31,17 @@ import {
   PROJECT_CARD_TITLE,
   HERO_HEADER_COLUMN,
   HERO_HEADLINE_SCALE,
+  HERO_TITLE_BASE,
+  HERO_TITLE_SCALE_6XL,
+  PROJECTS_GRID_2,
   PROJECTS_GRID_3,
   TEMPLATE_CONTAINER,
   TechChip,
   TechIcon,
   getSectionLabels,
+  SocialPills,
+  hasNonHeroSocialProfiles,
+  visibleSocialProfiles,
 } from "@/features/templates/shared";
 import { CollapsibleList } from "@/features/templates/collapsible-list";
 import { getTemplateSectionLayout } from "@/features/templates/section-layouts";
@@ -50,7 +57,6 @@ import {
   ChevronRight,
   ExternalLink,
   GraduationCap,
-  Mail,
   Menu,
   Trophy,
   X,
@@ -60,7 +66,7 @@ interface AppProps {
   data: PortfolioData;
 }
 
-const SECTION_PAD = "py-12 px-4 sm:px-6 md:px-12";
+const SECTION_PAD = "py-12 px-4 @sm:px-6 @md:px-12";
 const MUTED = "text-gray-500";
 const INK = "text-[#09090b]";
 const CARD =
@@ -71,14 +77,14 @@ const COLLAPSE_BTN =
   "mt-8 w-full py-3 rounded-xl border border-black/10 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-[var(--lf-accent)] hover:border-[var(--lf-accent)] transition-colors";
 
 function getInitials(title: string): string {
-  const parts = title.trim().split(/\s+/).filter(Boolean);
+  const parts = stripRichTextToPlain(title).trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 }
 
 function shellName(title: string): string {
-  const first = title.trim().split(/\s+/).filter(Boolean)[0];
+  const first = stripRichTextToPlain(title).trim().split(/\s+/).filter(Boolean)[0];
   return first ? first.toLowerCase() : "portfolio";
 }
 
@@ -134,11 +140,11 @@ function SectionHeading({
 }) {
   return (
     <div className="mb-8">
-      <h2 className="text-3xl sm:text-4xl font-bold uppercase tracking-tight leading-tight !text-[#09090b]">
+      <h2 className="text-3xl @sm:text-4xl font-bold uppercase tracking-tight leading-tight !text-[#09090b]">
         {children}
       </h2>
       {subtitle && (
-        <p className={cn(MUTED, "mt-3 sm:mt-4 text-base sm:text-lg max-w-2xl leading-relaxed")}>
+        <p className={cn(MUTED, "mt-3 @sm:mt-4 text-base @sm:text-lg max-w-2xl leading-relaxed")}>
           {subtitle}
         </p>
       )}
@@ -186,9 +192,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
   const groupedSkills = groupSkillsByCategory(data.skills);
   const experiences = sortExperiencesNewestFirst(data.experiences);
   const topSkills = data.skills.slice(0, 6).map((s) => s.name).filter(Boolean);
-  const visibleSocials = data.socialProfiles.filter(
-    (profile) => profile.platform.toLowerCase() !== "unknown",
-  );
+  const visibleSocials = visibleSocialProfiles(data.socialProfiles, {
+    excludeHeroPlatforms: true,
+  });
   const navItems = navbarEnabled ? sections : [];
   const navSectionIds = navItems.map((section) => section.id).join(",");
   const navSectionIdsRef = useRef(navSectionIds);
@@ -222,10 +228,10 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         <SectionHeading>
           {labels.skills}
         </SectionHeading>
-        <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-6 @sm:space-y-8">
           {Object.entries(groupedSkills).map(([category, names]) => (
             <div key={category}>
-              <p className="text-xs font-bold text-[var(--lf-accent)] uppercase tracking-widest mb-3 sm:mb-4">
+              <p className="text-xs font-bold text-[var(--lf-accent)] uppercase tracking-widest mb-3 @sm:mb-4">
                 {category}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -234,7 +240,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     key={`${category}-${name}`}
                     className={cn(
                       CARD,
-                      "inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium",
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 @sm:px-4 @sm:py-2 rounded-full text-xs @sm:text-sm font-medium",
                       INK,
                       "hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] hover:shadow-md hover:shadow-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)] hover:-translate-y-0.5 transition-all duration-300 cursor-default",
                     )}
@@ -263,9 +269,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
             return (
               <div
                 key={exp.id}
-                className="relative md:grid md:grid-cols-[160px_1fr] md:gap-12"
+                className="relative @md:grid @md:grid-cols-[160px_1fr] @md:gap-12"
               >
-                <div className="hidden md:block pt-1.5">
+                <div className="hidden @md:block pt-1.5">
                   {dateRange && (
                     <p className="text-xs font-bold text-[var(--lf-accent)] leading-relaxed">
                       {dateRange}
@@ -274,33 +280,33 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                 </div>
                 <div
                   className={cn(
-                    "relative border-l border-black/10 pl-6 sm:pl-8",
-                    isLast ? "pb-0" : "pb-10 sm:pb-12",
+                    "relative border-l border-black/10 pl-6 @sm:pl-8",
+                    isLast ? "pb-0" : "pb-10 @sm:pb-12",
                   )}
                 >
                   <div className="absolute top-1.5 -left-1.5 w-3 h-3 rounded-full bg-[var(--lf-accent)] border-4 border-white" />
                   {dateRange && (
-                    <p className="md:hidden text-xs font-bold text-[var(--lf-accent)] mb-1">
+                    <p className="@md:hidden text-xs font-bold text-[var(--lf-accent)] mb-1">
                       {dateRange}
                     </p>
                   )}
-                  <h3 className={cn(INK, "text-base sm:text-lg lg:text-xl font-bold leading-snug")}>
-                    {exp.role}
+                  <h3 className={cn(INK, "text-base @sm:text-lg @lg:text-xl font-bold leading-snug")}>
+                    <RichText text={exp.role} />
                   </h3>
-                  <p className="text-gray-600 font-medium mb-3 mt-0.5 text-sm sm:text-base">
-                    {exp.company}
+                  <p className="text-gray-600 font-medium mb-3 mt-0.5 text-sm @sm:text-base">
+                    <RichText text={exp.company} />
                     {exp.location && (
                       <span className="text-gray-400 font-normal">
                         {" "}
-                        · {exp.location}
+                        · <RichText text={exp.location} />
                       </span>
                     )}
                   </p>
                   {exp.description && (
                     <DescriptionBlock
                       text={exp.description}
-                      paragraphClassName={cn(MUTED, "leading-relaxed text-sm sm:text-base max-w-2xl")}
-                      listClassName={cn(MUTED, "space-y-1.5 pl-5 leading-relaxed text-sm sm:text-base max-w-2xl marker:text-[var(--lf-accent)]")}
+                      paragraphClassName={cn(MUTED, "leading-relaxed text-sm @sm:text-base max-w-2xl")}
+                      listClassName={cn(MUTED, "space-y-1.5 pl-5 leading-relaxed text-sm @sm:text-base max-w-2xl marker:text-[var(--lf-accent)]")}
                     />
                   )}
                 </div>
@@ -321,9 +327,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
             {labels.projects}
           </SectionHeading>
           <CollapsibleList
-            initial={6}
-            wrapperClassName={cn(PROJECTS_GRID_3, "gap-5 sm:gap-6 md:gap-8")}
-            buttonClassName={cn(COLLAPSE_BTN, "@md:col-span-2 @lg:col-span-3")}
+            initial={4}
+            wrapperClassName={cn(PROJECTS_GRID_2, "gap-5 @sm:gap-6 @md:gap-8")}
+            buttonClassName={cn(COLLAPSE_BTN, "@md:col-span-2")}
           >
             {visibleProjects.map((proj) => (
               <div
@@ -331,28 +337,28 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                 className={cn(
                   PROJECT_CARD,
                   CARD,
-                  "group relative rounded-2xl sm:rounded-3xl hover:shadow-2xl hover:shadow-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)] hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] transition-all duration-500 flex flex-col",
+                  "group relative rounded-2xl @sm:rounded-3xl hover:shadow-2xl hover:shadow-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)] hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] transition-all duration-500 flex flex-col",
                 )}
               >
-                <div className="relative overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
+                <div className="relative overflow-hidden rounded-t-2xl @sm:rounded-t-3xl">
                   <TemplateProjectPreview
                     templateId="synapse"
                     liveUrl={proj.liveUrl}
                     imageUrl={proj.imageUrl}
                     projectId={proj.id}
                     livePreviewProjectIds={livePreviewProjectIds}
-                    alt={proj.title}
+                    alt={stripRichTextToPlain(proj.title)}
                     loading="lazy"
                     accentColor={primaryColor}
                     containerClassName="aspect-[16/10] bg-gray-100"
                     className="transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                <div className={cn(PROJECT_CARD_BODY, "min-w-0 px-5 sm:px-7 pt-5 pb-6 sm:pb-7 space-y-4 flex-1 flex flex-col")}>
+                <div className={cn(PROJECT_CARD_BODY, "min-w-0 px-5 @sm:px-7 pt-5 pb-6 @sm:pb-7 space-y-4 flex-1 flex flex-col")}>
                   <div className={cn(PROJECT_CARD_HEADER, "min-w-0")}>
                     <div className={cn(PROJECT_CARD_META, "min-w-0")}>
-                      <h3 className={cn(PROJECT_CARD_TITLE, INK, "text-lg sm:text-xl lg:text-2xl font-bold leading-tight")}>
-                        {proj.title}
+                      <h3 className={cn(PROJECT_CARD_TITLE, INK, "text-lg @sm:text-xl @lg:text-2xl font-bold leading-tight")}>
+                        <RichText text={proj.title} />
                       </h3>
                     </div>
                     {proj.liveUrl ? (
@@ -389,7 +395,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     <ProjectActions
                       liveUrl={proj.liveUrl}
                       sourceUrl={proj.sourceUrl}
-                      label={proj.title}
+                      label={stripRichTextToPlain(proj.title)}
                       projectId={proj.id}
                       liveClassName="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--lf-accent)] text-white hover:opacity-90 transition-opacity"
                       sourceClassName="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-black/10 bg-white text-[#09090b] hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors"
@@ -413,17 +419,17 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           {data.educations.map((edu) => (
             <div
               key={edu.id}
-              className={cn(CARD, "rounded-2xl p-5 sm:p-6 space-y-2")}
+              className={cn(CARD, "rounded-2xl p-5 @sm:p-6 space-y-2")}
             >
               <div className="flex items-start gap-3">
                 <GraduationCap className="w-5 h-5 text-[var(--lf-accent)] shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <h3 className={cn(INK, "text-lg font-bold leading-snug")}>
-                    {edu.degree}
-                    {edu.field ? ` in ${edu.field}` : ""}
+                    <RichText text={edu.degree} />
+                    {edu.field ? ` in ${stripRichTextToPlain(edu.field)}` : ""}
                   </h3>
                   <p className="text-gray-600 font-medium text-sm mt-1">
-                    {edu.institution}
+                    <RichText text={edu.institution} />
                   </p>
                   {(edu.startDate || edu.endDate) && (
                     <p className="text-xs font-bold text-[var(--lf-accent)] mt-2">
@@ -431,7 +437,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     </p>
                   )}
                   {edu.gpa && (
-                    <p className={cn(MUTED, "text-xs mt-1")}>GPA: {edu.gpa}</p>
+                    <p className={cn(MUTED, "text-xs mt-1")}>{edu.gpa}</p>
                   )}
                 </div>
               </div>
@@ -452,8 +458,8 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           </SectionHeading>
           <CollapsibleList
             initial={6}
-            wrapperClassName="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6"
-            buttonClassName={cn(COLLAPSE_BTN, "sm:col-span-2 md:col-span-3")}
+            wrapperClassName={cn(PROJECTS_GRID_3, "gap-5 @sm:gap-6")}
+            buttonClassName={cn(COLLAPSE_BTN, "@md:col-span-2 @lg:col-span-3")}
           >
             {data.articles.map((article) => (
               <a
@@ -463,26 +469,29 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                 rel="noopener noreferrer"
                 className={cn(
                   CARD,
-                  "group rounded-2xl p-6 sm:p-8 hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] hover:shadow-xl hover:shadow-[color-mix(in_srgb,var(--lf-accent)_8%,transparent)] transition-all duration-300 flex flex-col",
+                  "group rounded-2xl p-6 @sm:p-8 hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] hover:shadow-xl hover:shadow-[color-mix(in_srgb,var(--lf-accent)_8%,transparent)] transition-all duration-300 flex flex-col",
                 )}
                 data-lf-track="article"
-                data-lf-label={article.title}
+                data-lf-label={stripRichTextToPlain(article.title)}
               >
-                <div className="flex items-center justify-between mb-5 sm:mb-6">
-                  {article.tags[0] && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)] text-[var(--lf-accent)] px-3 py-1 rounded-full">
-                      {article.tags[0]}
-                    </span>
-                  )}
-                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-[var(--lf-accent)] transition-colors ml-auto" />
+                <div className="flex items-center justify-between mb-5 @sm:mb-6 gap-3">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <ArticleSourceLabel source={article.source} />
+                    {article.tags[0] && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)] text-[var(--lf-accent)] px-3 py-1 rounded-full">
+                        {article.tags[0]}
+                      </span>
+                    )}
+                  </div>
+                  <BookOpen className="w-4 h-4 @sm:w-5 @sm:h-5 text-gray-400 group-hover:text-[var(--lf-accent)] transition-colors ml-auto" />
                 </div>
-                <h3 className={cn(INK, "text-base sm:text-lg lg:text-xl font-bold mb-3 leading-snug group-hover:text-[var(--lf-accent)] transition-colors")}>
-                  {article.title}
+                <h3 className={cn(INK, "text-base @sm:text-lg @lg:text-xl font-bold mb-3 leading-snug group-hover:text-[var(--lf-accent)] transition-colors")}>
+                  <RichText text={article.title} />
                 </h3>
                 {article.description && (
                   <DescriptionBlock
                     text={article.description}
-                    paragraphClassName={cn(MUTED, "leading-relaxed text-sm mb-5 sm:mb-6 flex-1")}
+                    paragraphClassName={cn(MUTED, "leading-relaxed text-sm mb-5 @sm:mb-6 flex-1")}
                     listClassName={cn(MUTED, "space-y-1.5 pl-5 leading-relaxed text-sm mb-5 marker:text-[var(--lf-accent)]")}
                   />
                 )}
@@ -492,7 +501,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                       {formatDate(article.publishedAt)}
                     </span>
                   )}
-                  <span className="flex items-center gap-1 text-[var(--lf-accent)] font-medium text-xs sm:text-sm ml-auto">
+                  <span className="flex items-center gap-1 text-[var(--lf-accent)] font-medium text-xs @sm:text-sm ml-auto">
                     Read <ExternalLink size={13} />
                   </span>
                 </div>
@@ -500,12 +509,12 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
             ))}
           </CollapsibleList>
           {mediumProfile?.url && (
-            <div className="mt-10 sm:mt-12 text-center">
+            <div className="mt-10 @sm:mt-12 text-center">
               <a
                 href={mediumProfile.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={cn(INK, "inline-flex items-center gap-2 font-medium hover:text-[var(--lf-accent)] transition-colors text-sm sm:text-base")}
+                className={cn(INK, "inline-flex items-center gap-2 font-medium hover:text-[var(--lf-accent)] transition-colors text-sm @sm:text-base")}
                 data-lf-track="social"
                 data-lf-label="medium"
               >
@@ -564,7 +573,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         className={cn(SECTION_PAD, "max-w-5xl mx-auto scroll-mt-24")}
       >
         <SectionHeading>{labels.achievements}</SectionHeading>
-        <div className="md:hidden">
+        <div className="@md:hidden">
         <CollapsibleList
           initial={6}
           wrapperClassName="flex flex-col gap-4"
@@ -575,13 +584,13 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
               key={item.id}
               className={cn(
                 CARD,
-                "flex items-start gap-3 rounded-2xl p-4 sm:p-5 hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] transition-all duration-300",
+                "flex items-start gap-3 rounded-2xl p-4 @sm:p-5 hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] transition-all duration-300",
               )}
             >
               <Trophy className="w-4 h-4 text-[var(--lf-accent)] shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <p className={cn(INK, "font-medium text-sm leading-relaxed")}>
-                  {item.title}
+                  <RichText text={item.title} />
                 </p>
                 {item.date && (
                   <p className="text-xs font-bold text-[var(--lf-accent)] mt-1">
@@ -593,7 +602,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           ))}
         </CollapsibleList>
         </div>
-        <div className="relative hidden md:block">
+        <div className="relative hidden @md:block">
           <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] to-transparent -translate-x-px" />
           <CollapsibleList
             initial={6}
@@ -613,7 +622,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                       <Trophy className="w-5 h-5 text-[var(--lf-accent)] shrink-0 mt-0.5" />
                       <div className="text-left">
                         <p className={cn(INK, "font-medium leading-relaxed")}>
-                          {item.title}
+                          <RichText text={item.title} />
                         </p>
                         {item.date && (
                           <p className="text-xs font-bold text-[var(--lf-accent)] mt-1">
@@ -688,7 +697,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
               {getInitials(data.portfolio.title)}
             </span>
             <span className={cn(INK, "text-xl font-bold tracking-tight group-hover:text-[var(--lf-accent)] transition-colors")}>
-              {data.portfolio.title}
+              <RichText text={data.portfolio.title} />
             </span>
           </a>
 
@@ -779,20 +788,26 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           id="about"
           className="min-h-0 flex items-center pt-8 pb-12 @sm:pt-10 @sm:pb-14 px-4 @sm:px-6 @md:px-12 max-w-7xl mx-auto scroll-mt-24"
         >
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center w-full">
+          <div className="grid @lg:grid-cols-2 gap-10 @lg:gap-16 items-center w-full">
             <div className={cn(HERO_HEADER_COLUMN, "w-full")}>
               {data.portfolio.headline && (
-                <p className="text-xs font-bold text-[var(--lf-accent)] uppercase tracking-widest mb-4 sm:mb-6 leading-relaxed">
-                  {data.portfolio.headline}
+                <p className="text-xs font-bold text-[var(--lf-accent)] uppercase tracking-widest mb-4 @sm:mb-6 leading-relaxed">
+                  <RichText text={data.portfolio.headline} />
                 </p>
               )}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] mb-5 sm:mb-8 !text-[#09090b]">
-                {data.portfolio.title}
+              <h1
+                className={cn(
+                  HERO_TITLE_BASE,
+                  HERO_TITLE_SCALE_6XL,
+                  "mb-5 font-bold leading-[1.1] !text-[#09090b] @sm:mb-8",
+                )}
+              >
+                <RichText text={data.portfolio.title} />
               </h1>
               {!resolved.isHidden("about") && data.portfolio.summary && (
                 <DescriptionBlock
                   text={data.portfolio.summary}
-                  paragraphClassName={cn(MUTED, HERO_HEADLINE_SCALE, "max-w-xl mb-5 sm:mb-6 leading-relaxed")}
+                  paragraphClassName={cn(MUTED, HERO_HEADLINE_SCALE, "max-w-xl mb-5 @sm:mb-6 leading-relaxed")}
                   listClassName={cn(MUTED, "space-y-2 pl-5 max-w-xl mb-5 marker:text-[var(--lf-accent)]")}
                 />
               )}
@@ -800,11 +815,11 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                 portfolio={data.portfolio}
                 chipClassName="px-3 py-1.5 rounded-full bg-white border border-black/10 text-xs font-medium text-gray-600"
               />
-              <div className="flex flex-wrap gap-3 sm:gap-4 items-center mt-6 sm:mt-8">
+              <div className="flex flex-wrap gap-3 @sm:gap-4 items-center mt-6 @sm:mt-8">
                 {visibleProjects.length > 0 && (
                   <a
                     href="#work"
-                    className="px-5 py-3 sm:px-8 sm:py-4 bg-[var(--lf-accent)] text-white rounded-xl font-bold hover:opacity-90 hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] transition-all flex items-center gap-2 text-sm sm:text-base active:scale-[0.98]"
+                    className="px-5 py-3 @sm:px-8 @sm:py-4 bg-[var(--lf-accent)] text-white rounded-xl font-bold hover:opacity-90 hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] transition-all flex items-center gap-2 text-sm @sm:text-base active:scale-[0.98]"
                   >
                     View Projects <ChevronRight size={16} />
                   </a>
@@ -813,10 +828,18 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                   profiles={data.socialProfiles}
                   className="px-3 py-1.5 rounded-full border border-black/10 text-xs font-bold hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors"
                 />
+                {hasNonHeroSocialProfiles(data.socialProfiles) && (
+                  <SocialPills
+                    profiles={data.socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="px-3 py-1.5 rounded-full border border-black/10 text-xs font-bold hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors"
+                  />
+                )}
               </div>
             </div>
 
-            <div className="relative hidden md:block">
+            <div className="relative hidden @md:block">
               <div className="absolute -inset-4 bg-gradient-to-br from-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] to-purple-500/20 rounded-3xl blur-2xl" />
               <div className={cn(CARD, "relative rounded-2xl shadow-2xl overflow-hidden font-mono text-sm")}>
                 <div className="bg-gray-50 px-4 py-3 border-b border-black/5 flex items-center justify-between">
@@ -829,15 +852,15 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     ~/{shellName(data.portfolio.title)}
                   </span>
                 </div>
-                <div className="p-5 lg:p-6 space-y-4">
+                <div className="p-5 @lg:p-6 space-y-4">
                   <div className="flex gap-3">
                     <span className="text-[var(--lf-accent)]">➜</span>
                     <span className="text-purple-600">~</span>
                     <span className={INK}>whoami</span>
                   </div>
-                  <div className={cn(MUTED, "ml-7 text-xs lg:text-sm")}>
-                    {data.portfolio.title}
-                    {data.portfolio.headline ? ` — ${data.portfolio.headline}` : ""}
+                  <div className={cn(MUTED, "ml-7 text-xs @lg:text-sm")}>
+                    <RichText text={data.portfolio.title} />
+                    {data.portfolio.headline ? ` — ${stripRichTextToPlain(data.portfolio.headline)}` : ""}
                   </div>
                   {topSkills.length > 0 && (
                     <>
@@ -846,7 +869,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                         <span className="text-purple-600">~</span>
                         <span className={INK}>shuf -n {topSkills.length} stack.txt</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 ml-7 text-[var(--lf-accent)] text-xs lg:text-sm">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 ml-7 text-[var(--lf-accent)] text-xs @lg:text-sm">
                         {topSkills.map((skill) => (
                           <span key={skill}>{skill.toLowerCase()}</span>
                         ))}
@@ -869,7 +892,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         {data.customSections.length > 0 && (
           <section className={cn(SECTION_PAD, "max-w-5xl mx-auto")}>
             {data.customSections.map((sec) => (
-              <div key={sec.id} className={cn(CARD, "rounded-2xl p-6 sm:p-8 mb-8")}>
+              <div key={sec.id} className={cn(CARD, "rounded-2xl p-6 @sm:p-8 mb-8")}>
                 <SectionHeading>{sec.label}</SectionHeading>
                 <CustomSectionItems
                   items={sec.items}
@@ -883,63 +906,52 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           </section>
         )}
 
-        {(data.portfolio.contactEmail || visibleSocials.length > 0) && (
+        {visibleSocials.length > 0 && (
           <section id="contact" className={cn(SECTION_PAD, "scroll-mt-24")}>
-            <div className="max-w-4xl mx-auto text-center bg-gradient-to-b from-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] to-transparent p-8 sm:p-12 rounded-[32px] sm:rounded-[40px] border border-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)]">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 leading-tight !text-[#09090b]">
+            <div className="max-w-4xl mx-auto text-center bg-gradient-to-b from-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] to-transparent p-8 @sm:p-12 rounded-[32px] @sm:rounded-[40px] border border-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)]">
+              <h2 className="text-3xl @sm:text-4xl font-bold mb-4 @sm:mb-6 leading-tight !text-[#09090b]">
                 Let&apos;s work together
               </h2>
-              <p className={cn(MUTED, "text-base sm:text-lg mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed")}>
+              <p className={cn(MUTED, "text-base @sm:text-lg mb-8 @sm:mb-12 max-w-2xl mx-auto leading-relaxed")}>
                 If you&apos;re building something that needs to ship, let&apos;s talk.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
-                {data.portfolio.contactEmail && (
-                  <a
-                    href={`mailto:${data.portfolio.contactEmail}`}
-                    className="w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 bg-[#09090b] text-white rounded-2xl font-bold text-base sm:text-lg hover:scale-105 hover:bg-[var(--lf-accent)] transition-all flex items-center justify-center gap-3"
-                    data-lf-track="email"
-                  >
-                    <Mail size={19} /> Say Hello
-                  </a>
-                )}
-                {visibleSocials.length > 0 && (
-                  <div className="flex gap-3 sm:gap-4">
-                    {visibleSocials.slice(0, 5).map((profile) => (
-                      <a
-                        key={`${profile.platform}-${profile.url}`}
-                        href={profile.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={profile.platform}
-                        className={cn(
-                          CARD,
-                          ACCENT_HOVER,
-                          "w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] transition-colors",
-                        )}
-                        data-lf-track="social"
-                        data-lf-label={profile.platform}
-                      >
-                        <PlatformIcon
-                          platform={profile.platform}
-                          className="h-5 w-5 text-[#09090b]"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                )}
+              <div className="flex flex-col @sm:flex-row gap-4 @sm:gap-6 justify-center items-center">
+                <div className="flex gap-3 @sm:gap-4">
+                  {visibleSocials.slice(0, 5).map((profile) => (
+                    <a
+                      key={`${profile.platform}-${profile.url}`}
+                      href={profile.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={profile.platform}
+                      className={cn(
+                        CARD,
+                        ACCENT_HOVER,
+                        "w-12 h-12 @sm:w-14 @sm:h-14 rounded-xl @sm:rounded-2xl flex items-center justify-center hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] transition-colors",
+                      )}
+                      data-lf-track="social"
+                      data-lf-label={profile.platform}
+                    >
+                      <PlatformIcon
+                        platform={profile.platform}
+                        className="h-5 w-5 text-[#09090b]"
+                      />
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
         )}
       </main>
 
-      <footer className="py-8 sm:py-12 border-t border-black/5 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6 text-center sm:text-left">
-          <div className={cn(MUTED, "text-xs sm:text-sm")}>
-            © {new Date().getFullYear()} {data.portfolio.title}. Crafted with precision.
+      <footer className="py-8 @sm:py-12 border-t border-black/5 px-4 @sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col @sm:flex-row justify-between items-center gap-4 @sm:gap-6 text-center @sm:text-left">
+          <div className={cn(MUTED, "text-xs @sm:text-sm")}>
+            © {new Date().getFullYear()} <RichText text={data.portfolio.title} />. Crafted with precision.
           </div>
           {visibleSocials.length > 0 && (
-            <div className={cn(MUTED, "flex flex-wrap justify-center gap-5 sm:gap-8 text-xs sm:text-sm font-medium")}>
+            <div className={cn(MUTED, "flex flex-wrap justify-center gap-5 @sm:gap-8 text-xs @sm:text-sm font-medium")}>
               {visibleSocials.map((profile) => (
                 <a
                   key={`${profile.platform}-${profile.url}`}

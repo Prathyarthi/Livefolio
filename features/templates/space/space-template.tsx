@@ -1,4 +1,5 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
 import {
@@ -12,7 +13,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { ArrowUpRight, Star } from "lucide-react";
-import {
+import { ArticleSourceLabel, RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -28,6 +29,7 @@ import {
   PROJECT_CARD_TITLE,
   PROJECTS_GRID_2,
   SocialPills,
+  hasNonHeroSocialProfiles,
   SPLIT_CARD_ROW,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
@@ -107,7 +109,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                             imageUrl={project.imageUrl ?? null}
                             projectId={project.id}
                             livePreviewProjectIds={livePreviewProjectIds}
-                            alt={project.title}
+                            alt={stripRichTextToPlain(project.title)}
                             loading="lazy"
                             containerClassName="overflow-hidden bg-[#030014]"
                             className="h-full w-full object-cover object-top opacity-80 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
@@ -116,12 +118,12 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                         <div className={cn(PROJECT_CARD_BODY, "relative z-20 flex flex-col grow p-8")}>
                           <div className={cn(PROJECT_CARD_HEADER, "mb-4")}>
                             <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-bold text-white group-hover:text-[var(--lf-accent)] transition-colors")}>
-                              {project.title}
+                              <RichText text={project.title} />
                             </h3>
                             <ProjectActions
                               liveUrl={project.liveUrl}
                               sourceUrl={project.sourceUrl}
-                              label={project.title}
+                              label={stripRichTextToPlain(project.title)}
                               projectId={project.id}
                               liveClassName="rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] p-2 text-[var(--lf-accent)] hover:bg-[var(--lf-accent)] hover:text-white transition-colors border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)]"
                               sourceClassName="rounded-full bg-white/5 p-2 text-slate-300 hover:bg-white/20 transition-colors border border-white/10"
@@ -167,11 +169,11 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                           <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                             <div>
                               <h3 className="text-xl font-bold text-white">
-                                {exp.role}
+                                <RichText text={exp.role} />
                               </h3>
                               <p className="text-[var(--lf-accent)] font-medium mt-1">
-                                {exp.company}
-                                {exp.location ? <span className="text-slate-500"> · {exp.location}</span> : ""}
+                                <RichText text={exp.company} />
+                                {exp.location ? <span className="text-slate-500"> · <RichText text={exp.location} /></span> : ""}
                               </p>
                             </div>
                             {(exp.startDate || exp.endDate) && (
@@ -206,17 +208,17 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                             className="rounded-2xl bg-[#0B0F19]/60 backdrop-blur-xl border border-[color-mix(in_srgb,var(--lf-accent)_22%,transparent)] p-6"
                           >
                             <h3 className="text-lg font-bold text-white">
-                              {edu.degree}
-                              {edu.field && <span className="text-slate-400 font-normal"> in {edu.field}</span>}
+                              <RichText text={edu.degree} />
+                              {edu.field && <span className="text-slate-400 font-normal"> in <RichText text={edu.field} /></span>}
                             </h3>
-                            <p className="text-[var(--lf-accent)] mt-1">{edu.institution}</p>
+                            <p className="text-[var(--lf-accent)] mt-1"><RichText text={edu.institution} /></p>
                             <div className="flex items-center justify-between mt-4">
                               {(edu.startDate || edu.endDate) && (
                                 <span className="text-sm text-slate-500">
                                   {formatDateRange(edu.startDate, edu.endDate)}
                                 </span>
                               )}
-                              {edu.gpa && <span className="text-sm font-medium text-slate-300">GPA: {edu.gpa}</span>}
+                              {edu.gpa && <span className="text-sm font-medium text-slate-300">{edu.gpa}</span>}
                             </div>
                           </article>
                         ))}
@@ -235,12 +237,11 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                               </h3>
                               <div className="flex flex-wrap gap-2">
                                 {names.map((name) => (
-                                  <span
+                                  <TechChip
                                     key={name}
+                                    name={name}
                                     className="rounded-xl bg-[#030014] px-4 py-2 text-sm font-medium text-[color-mix(in_srgb,var(--lf-accent)_70%,white)] border border-[color-mix(in_srgb,var(--lf-accent)_35%,transparent)] hover:border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] hover:text-[color-mix(in_srgb,var(--lf-accent)_85%,white)] transition-colors cursor-default shadow-[0_0_10px_rgba(0,0,0,0.5)]"
-                                  >
-                                    {name}
-                                  </span>
+                                  />
                                 ))}
                               </div>
                             </div>
@@ -301,7 +302,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                               <Star className="w-4 h-4" />
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-white leading-relaxed">{ach.title}</p>
+                              <p className="text-sm font-bold text-white leading-relaxed"><RichText text={ach.title} /></p>
                               {ach.date && (
                                 <p className="text-xs text-slate-400 mt-1">
                                   {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -326,14 +327,15 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                         key={article.id}
                         className="rounded-3xl bg-[#0B0F19]/60 backdrop-blur-xl border border-[color-mix(in_srgb,var(--lf-accent)_22%,transparent)] p-6 transition-all hover:border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] hover:shadow-[0_0_20px_color-mix(in srgb, var(--lf-accent) 20%, transparent)] hover:-translate-y-1"
                       >
+                        <ArticleSourceLabel source={article.source} className="mb-2" />
                         <h3 className="text-lg font-bold text-white mb-3">
                           <a
-                            href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id}
+                            href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-[var(--lf-accent)] transition-colors flex items-center justify-between group"
                           >
-                            <span className="truncate pr-4">{article.title}</span>
+                            <span className="truncate pr-4"><RichText text={article.title} /></span>
                             <ArrowUpRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[var(--lf-accent)]" />
                           </a>
                         </h3>
@@ -412,12 +414,12 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
 
         <header className="relative mb-24 flex min-w-0 w-full flex-col items-center text-center">
           <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white to-slate-400 mb-6">
-            {portfolio.title}
+            <RichText text={portfolio.title} />
           </h1>
 
           {portfolio.headline && (
             <p className="text-base @md:text-lg @lg:text-2xl text-[color-mix(in_srgb,var(--lf-accent)_70%,white)]/60 font-medium max-w-3xl mb-10 leading-relaxed">
-              {portfolio.headline}
+              <RichText text={portfolio.headline} />
             </p>
           )}
 
@@ -432,11 +434,12 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
             />
           </div>
 
-          {socialProfiles.length > 0 && (
+          {hasNonHeroSocialProfiles(socialProfiles) && (
             <div className="mt-8">
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
+                excludeHeroPlatforms
                 className="rounded-full border border-white/5 bg-transparent px-4 py-2 text-sm font-medium text-slate-400 transition-all hover:text-[color-mix(in_srgb,var(--lf-accent)_85%,white)] hover:bg-white/5"
               />
             </div>

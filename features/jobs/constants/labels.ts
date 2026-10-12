@@ -1,3 +1,5 @@
+import { stripRichTextToPlain } from "@/lib/rich-text";
+
 export const JOB_STATUS_LABELS: Record<string, string> = {
   draft: "Draft",
   published: "Published",
@@ -63,7 +65,10 @@ export {
 } from "@/features/applications/lib/pipeline";
 
 export function formatJobMeta(parts: Array<string | null | undefined>) {
-  return parts.filter(Boolean).join(" · ");
+  return parts
+    .map((part) => (part ? stripRichTextToPlain(part) : ""))
+    .filter(Boolean)
+    .join(" · ");
 }
 
 export function formatSalaryRange(options: {

@@ -1,5 +1,6 @@
 "use client";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
@@ -11,14 +12,17 @@ import {
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleList } from "../collapsible-list";
-import {
+import { ArticleSourceLabel, RichText,
   DescriptionBlock,
   TechChip,
   TemplateNavbar,
   buildTemplateSections,
   SocialPills,
+  HeroProfileButtons,
+  hasNonHeroSocialProfiles,
   ContactChips,
   CustomSectionItems,
+  ProfileLinksSection,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
   PROJECT_CARD_TITLE,
@@ -48,7 +52,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("airy", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  const { navbarEnabled, sections } = buildTemplateSections(data);
+  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const groupedSkills = groupSkillsByCategory(skills);
 
   const githubProfile = socialProfiles.find((p) => p.platform.toLowerCase() === "github");
@@ -84,13 +88,13 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                           imageUrl={project.imageUrl ?? null}
                           projectId={project.id}
                           livePreviewProjectIds={livePreviewProjectIds}
-                          alt={project.title}
+                          alt={stripRichTextToPlain(project.title)}
                           loading="lazy"
                           containerClassName="overflow-hidden border-b border-slate-50 bg-slate-50"
                           className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                          accentColor={primaryColor} />
                         <div className={PROJECT_CARD_BODY}>
-                          <h3 className={cn(PROJECT_CARD_TITLE, "text-xl font-bold text-slate-800 mb-2")}>{project.title}</h3>
+                          <h3 className={cn(PROJECT_CARD_TITLE, "text-xl font-bold text-slate-800 mb-2")}><RichText text={project.title} /></h3>
                           {project.description && (
                             <DescriptionBlock
                               text={project.description}
@@ -109,12 +113,12 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                           </div>
                           <div className="flex gap-3">
                             {project.liveUrl && (
-                              <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={project.title} data-lf-id={project.id} target="_blank" rel="noreferrer" className="rounded-full bg-[var(--lf-accent)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[color-mix(in_srgb,var(--lf-accent)_85%,black)]">
+                              <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="rounded-full bg-[var(--lf-accent)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[color-mix(in_srgb,var(--lf-accent)_85%,black)]">
                                 View Live
                               </a>
                             )}
                             {project.sourceUrl && (
-                              <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={project.title} data-lf-id={project.id} target="_blank" rel="noreferrer" className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+                              <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
                                 Source
                               </a>
                             )}
@@ -133,8 +137,8 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                       <div key={exp.id} className="rounded-3xl bg-white border border-slate-100 p-8 shadow-xs hover:shadow-sm transition-all">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                           <div>
-                            <h3 className="text-xl font-bold text-slate-800">{exp.role}</h3>
-                            <p className="text-lg text-[var(--lf-accent)] font-medium mt-1">{exp.company}</p>
+                            <h3 className="text-xl font-bold text-slate-800"><RichText text={exp.role} /></h3>
+                            <p className="text-lg text-[var(--lf-accent)] font-medium mt-1"><RichText text={exp.company} /></p>
                           </div>
                           {formatDateRange(exp.startDate, exp.endDate) && (
                             <span className="rounded-full bg-slate-50 border border-slate-100 px-3 py-1 text-sm font-medium text-slate-500">
@@ -157,10 +161,11 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                       {educations.map((edu) => (
                         <div key={edu.id} className="rounded-3xl bg-white border border-slate-100 p-6 shadow-xs">
                           <h3 className="text-lg font-bold text-slate-800">
-                            {edu.degree} {edu.field ? `in ${edu.field}` : ""}
+                            <RichText text={edu.degree} /> {edu.field ? `in ${stripRichTextToPlain(edu.field)}` : ""}
                           </h3>
-                          <p className="text-[var(--lf-accent)] font-medium mt-1">{edu.institution}</p>
+                          <p className="text-[var(--lf-accent)] font-medium mt-1"><RichText text={edu.institution} /></p>
                           <p className="mt-2 text-sm text-slate-500">{formatDateRange(edu.startDate, edu.endDate)}</p>
+                          {edu.gpa ? <p className="mt-1 text-sm text-slate-500">{edu.gpa}</p> : null}
                         </div>
                       ))}
                     </CollapsibleList>
@@ -175,9 +180,11 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                           <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--lf-accent)]">{category}</h3>
                           <div className="flex flex-wrap gap-2">
                             {items.map((skill) => (
-                              <span key={skill} className="rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] hover:text-[var(--lf-accent)] transition-colors cursor-default">
-                                {skill}
-                              </span>
+                              <TechChip
+                                key={skill}
+                                name={skill}
+                                className="rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] hover:text-[var(--lf-accent)] transition-colors cursor-default"
+                              />
                             ))}
                           </div>
                         </div>
@@ -210,7 +217,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                           <div key={ach.id} className="flex gap-4 rounded-2xl bg-white border border-slate-100 p-5 shadow-xs">
                             <Trophy className="h-6 w-6 text-yellow-400 shrink-0" />
                             <div>
-                              <h3 className="font-bold text-slate-800">{ach.title}</h3>
+                              <h3 className="font-bold text-slate-800"><RichText text={ach.title} /></h3>
                               {ach.date && (
                                 <p className="text-sm text-slate-500 mt-1">
                                   {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
@@ -227,8 +234,9 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                   <h2 className="mb-8 text-3xl font-bold text-slate-800 px-2">{labels.articles}</h2>
                   <CollapsibleList initial={3} wrapperClassName="grid gap-6 md:grid-cols-2" buttonClassName="mt-6 mx-auto bg-white border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] text-[var(--lf-accent)] px-6 py-2 rounded-full font-medium hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] transition-colors">
                     {articles.map((article) => (
-                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={article.title} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block rounded-3xl bg-white border border-slate-100 p-6 shadow-xs hover:border-[color-mix(in_srgb,var(--lf-accent)_35%,white)] hover:shadow-md transition-all">
-                        <h3 className="text-xl font-bold text-slate-800 mb-2">{article.title}</h3>
+                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block rounded-3xl bg-white border border-slate-100 p-6 shadow-xs hover:border-[color-mix(in_srgb,var(--lf-accent)_35%,white)] hover:shadow-md transition-all">
+                        <ArticleSourceLabel source={article.source} className="mb-2" />
+                        <h3 className="text-xl font-bold text-slate-800 mb-2"><RichText text={article.title} /></h3>
                         {article.description && <p className="text-slate-600 text-sm mb-4 line-clamp-2">{article.description}</p>}
                         <div className="flex flex-wrap gap-2 mb-4">
                           {article.tags.map(tag => (
@@ -243,6 +251,21 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                       </a>
                     ))}
                   </CollapsibleList>
+                </section>
+              ),
+    profiles: hasProfiles && (
+                <section key="profiles" id="profiles" className="scroll-mt-32">
+                  <h2 className="mb-8 text-3xl font-bold text-slate-800 px-2">{labels.profiles}</h2>
+                  <div className="rounded-3xl bg-white border border-slate-100 p-8 shadow-xs">
+                    <ProfileLinksSection
+                      portfolio={portfolio}
+                      profiles={socialProfiles}
+                      chipClassName="rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-600"
+                      pillClassName="rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] text-[var(--lf-accent)] px-3 py-1.5 text-sm font-medium hover:bg-[color-mix(in_srgb,var(--lf-accent)_20%,white)] transition-colors"
+                      titleClassName="text-sm font-bold text-slate-800"
+                      textClassName="text-sm text-slate-600"
+                    />
+                  </div>
                 </section>
               ),
     github: contributionCalendar && (
@@ -280,7 +303,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
             animate={{ y: 0, opacity: 1 }}
             className="mb-4 min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-3xl @md:text-4xl @lg:text-6xl font-extrabold tracking-tight text-slate-800"
           >
-            {portfolio.title}
+            <RichText text={portfolio.title} />
           </motion.h1>
           {portfolio.headline && (
             <motion.p
@@ -289,13 +312,24 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
               transition={{ delay: 0.1 }}
               className="max-w-2xl text-base @md:text-lg @lg:text-xl text-slate-600 font-medium"
             >
-              {portfolio.headline}
+              <RichText text={portfolio.headline} />
             </motion.p>
           )}
 
           <div className="mt-6 flex flex-col items-center gap-3 sm:mt-8">
             <ContactChips portfolio={portfolio} chipClassName="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full shadow-xs border border-slate-100" />
-            <SocialPills profiles={socialProfiles} className="bg-white hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] text-[var(--lf-accent)] border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] rounded-full px-4 py-2 shadow-xs transition-all" />
+            <HeroProfileButtons
+              profiles={socialProfiles}
+              className="bg-white hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] text-[var(--lf-accent)] border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] rounded-full px-4 py-2 shadow-xs transition-all"
+            />
+            {hasNonHeroSocialProfiles(socialProfiles) && (
+              <SocialPills
+                profiles={socialProfiles}
+                showUsername
+                excludeHeroPlatforms
+                className="bg-white hover:bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] text-[var(--lf-accent)] border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] rounded-full px-4 py-2 shadow-xs transition-all"
+              />
+            )}
           </div>
         </header>
 

@@ -9,7 +9,7 @@ import {
 } from "@/features/portfolio/api/use-portfolio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import { FieldLabel } from "@/features/portfolio/components/field-label";
 import {
   Card,
@@ -383,26 +383,20 @@ export function CustomSectionEditor() {
                 />
               </div>
               <div className="flex-1">
-                {field.value.length > 80 || field.key === "description" ? (
-                  <Textarea
-                    placeholder="Value"
-                    value={field.value}
-                    onChange={(e) => updateFieldValue(fi, e.target.value)}
-                    rows={2}
-                    className="text-sm"
-                    aria-invalid={Boolean(visibleError)}
-                    aria-describedby={visibleError ? errorId : undefined}
-                  />
-                ) : (
-                  <Input
-                    placeholder="Value"
-                    value={field.value}
-                    onChange={(e) => updateFieldValue(fi, e.target.value)}
-                    className="text-sm"
-                    aria-invalid={Boolean(visibleError)}
-                    aria-describedby={visibleError ? errorId : undefined}
-                  />
-                )}
+                <RichTextEditor
+                  value={field.value}
+                  onChange={(value) => updateFieldValue(fi, value)}
+                  placeholder="Value"
+                  singleLine={field.value.length <= 80 && field.key !== "description"}
+                  minHeight={
+                    field.value.length > 80 || field.key === "description"
+                      ? "4.5rem"
+                      : undefined
+                  }
+                  aria-invalid={Boolean(visibleError)}
+                  aria-describedby={visibleError ? errorId : undefined}
+                  className="text-sm"
+                />
               </div>
               {itemFields.length > 1 && (
                 <Button

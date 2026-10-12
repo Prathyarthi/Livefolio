@@ -3,6 +3,7 @@ import type { Prisma } from "@/db/generated/prisma/client";
 import type { PortfolioData } from "@/features/templates/types";
 import {
   ContentValidationError,
+  MAX_ACHIEVEMENT_TITLE_CHARS,
   MAX_CUSTOM_SECTIONS,
   MAX_SECTION_ROWS,
   MAX_SKILL_FIELD_CHARS,
@@ -17,6 +18,7 @@ import {
   sanitizeImportedStringList,
   sanitizeImportedStoredUrl,
 } from "@/lib/content-policy";
+import { resolveArticleSource } from "@/lib/article-source";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -209,6 +211,7 @@ export async function bulkImportPortfolioData(
           MAX_TECH_STACK_ITEMS,
           MAX_TECH_STACK_ITEM_CHARS,
         ),
+        source: resolveArticleSource(url, article.source),
       }];
     });
   const certifications = data.certifications
@@ -227,7 +230,10 @@ export async function bulkImportPortfolioData(
     .slice(0, MAX_SECTION_ROWS)
     .map((achievement) => ({
       ...achievement,
-      title: sanitizeImportedLabel(achievement.title),
+      title: sanitizeImportedLabel(
+        achievement.title,
+        MAX_ACHIEVEMENT_TITLE_CHARS,
+      ),
     }))
     .filter((achievement) => achievement.title);
   const seenSectionTypes = new Set<string>();
@@ -394,6 +400,7 @@ export async function bulkImportPortfolioData(
               tags: article.tags,
               publishedAt: toDateOrNull(article.publishedAt),
               readTime: article.readTime,
+              source: article.source,
               sortOrder: idx,
             },
           })

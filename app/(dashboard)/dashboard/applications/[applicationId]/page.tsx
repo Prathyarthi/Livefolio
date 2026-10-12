@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RichText } from "@/components/rich-text";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMyApplication } from "@/features/applications/api/use-applications";
 import {
@@ -13,6 +14,7 @@ import {
   formatJobMeta,
 } from "@/features/jobs/constants/labels";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { ScreeningAnswersSection } from "@/features/applications/components/screening-answers-section";
 
 export default function ApplicationDetailPage() {
   const params = useParams<{ applicationId: string }>();
@@ -49,7 +51,9 @@ export default function ApplicationDetailPage() {
         <Badge variant="neutral">
           {APPLICATION_STATUS_LABELS[data.status] ?? data.status}
         </Badge>
-        <h1 className="text-h2 text-text-primary">{data.job.title}</h1>
+        <h1 className="text-h2 text-text-primary">
+          <RichText as="span" text={data.job.title} />
+        </h1>
         <p className="text-body-sm text-text-secondary">
           {formatJobMeta([
             data.job.organization.name,
@@ -88,6 +92,11 @@ export default function ApplicationDetailPage() {
           </p>
         </section>
       ) : null}
+
+      <ScreeningAnswersSection
+        answers={data.screeningAnswers}
+        title="Your answers"
+      />
 
       {snapshot && profile ? (
         <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6">

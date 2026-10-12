@@ -1,9 +1,9 @@
 /**
  * Full-height dashboard panel shell (edit, import).
- * Subtracts the sticky header (4rem) and main padding (3rem).
+ * Fills the space under the dashboard header. The form column scrolls inside it.
  */
 export const DASHBOARD_PANEL_PAGE_CLASS =
-  "flex min-h-0 flex-1 flex-col lg:h-[calc(100svh-4rem-3rem)] lg:max-h-[calc(100svh-4rem-3rem)] lg:overflow-hidden";
+  "flex min-h-0 flex-1 flex-col overflow-hidden";
 
 /** Left tracker / edit rail — edit & import progress stepper. */
 export const DASHBOARD_TRACKER_ASIDE_CLASS =
@@ -19,14 +19,14 @@ export const DASHBOARD_FORM_COMPACT_CLASS =
 
 /** Right main column — fills remaining width like the preview canvas area. */
 export const DASHBOARD_MAIN_COLUMN_CLASS =
-  "flex min-h-0 min-w-0 w-full flex-1 flex-col gap-2 lg:overflow-hidden";
+  "flex min-h-0 min-w-0 w-full flex-1 flex-col gap-2 overflow-hidden";
 
 /** Preview-matched content frame (sunken border wrapper). */
 export const DASHBOARD_CONTENT_FRAME_CLASS =
-  "flex min-h-0 flex-1 flex-col rounded-[var(--radius-lg)] border border-border-default bg-surface-sunken p-2 shadow-[var(--shadow-modal)] sm:p-3 lg:overflow-hidden";
+  "flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-sunken p-2 shadow-[var(--shadow-modal)] sm:p-3";
 
 export const DASHBOARD_CONTENT_INNER_CLASS =
-  "min-h-0 w-full flex-1 rounded-[var(--radius-md)] bg-surface-base p-4 pb-6 sm:p-5 sm:pb-8 lg:overflow-y-auto lg:overscroll-contain " +
+  "flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain rounded-[var(--radius-md)] bg-surface-base p-4 pb-6 sm:p-5 sm:pb-8 " +
   DASHBOARD_FORM_COMPACT_CLASS;
 
 /** Import page — natural page scroll instead of a fixed inner scroll region. */

@@ -2,19 +2,28 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Loader2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { RichText } from "@/components/rich-text";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import {
+  checkOrganizationSlug,
   useCreateOrganization,
   useOrganizations,
 } from "@/features/organization/api/use-organization";
-import { sanitizeHiringSlug } from "@/features/jobs/lib/slug";
+import { isValidOrgSlug, sanitizeHiringSlug } from "@/features/jobs/lib/slug";
 import { OrgLogo } from "@/features/organization/components/org-logo";
+
+function getOrgSlugInlineError(slug: string): string | null {
+  if (!slug) return null;
+  if (slug.length < 2) return "Slug must be at least 2 characters";
+  if (!isValidOrgSlug(slug)) return "This slug is invalid or reserved";
+  return null;
+}
 
 export function CompanyIndexPage() {
   const router = useRouter();
@@ -25,11 +34,59 @@ export function CompanyIndexPage() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  const [checkingSlug, setCheckingSlug] = useState(false);
+  const [slugTaken, setSlugTaken] = useState(false);
 
   const slugPreview = useMemo(
     () => slug || (name ? sanitizeHiringSlug(name) : ""),
     [slug, name],
   );
+  const slugFormatError = useMemo(
+    () => getOrgSlugInlineError(slugPreview),
+    [slugPreview],
+  );
+  const slugInlineError =
+    slugFormatError ??
+    (slugTaken ? "This organization slug is already in use" : null);
+  const canCreate =
+    Boolean(name.trim()) &&
+    Boolean(slugPreview) &&
+    !slugFormatError &&
+    !slugTaken &&
+    !checkingSlug &&
+    !createOrg.isPending;
+
+  useEffect(() => {
+    if (!showCreate) return;
+
+    if (!slugPreview || slugFormatError) {
+      setSlugTaken(false);
+      setCheckingSlug(false);
+      return;
+    }
+
+    let cancelled = false;
+    setCheckingSlug(true);
+    setSlugTaken(false);
+
+    const timer = setTimeout(() => {
+      void checkOrganizationSlug(slugPreview)
+        .then((result) => {
+          if (!cancelled) setSlugTaken(!result.available);
+        })
+        .catch(() => {
+          if (!cancelled) setSlugTaken(false);
+        })
+        .finally(() => {
+          if (!cancelled) setCheckingSlug(false);
+        });
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [showCreate, slugPreview, slugFormatError]);
 
   if (isLoading) {
     return (
@@ -44,6 +101,10 @@ export function CompanyIndexPage() {
       toast.error("Company name is required");
       return;
     }
+    if (slugInlineError) {
+      toast.error(slugInlineError);
+      return;
+    }
     try {
       const result = await createOrg.mutateAsync({
         name: name.trim(),
@@ -53,6 +114,12 @@ export function CompanyIndexPage() {
       toast.success("Organization created");
       router.push(`/company/${result.organization.slug}`);
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create company";
+      if (message.toLowerCase().includes("slug is already in use")) {
+        setSlugTaken(true);
+        return;
+      }
       const upgradeSlug =
         error &&
         typeof error === "object" &&
@@ -61,7 +128,7 @@ export function CompanyIndexPage() {
           ? (error as { upgradeOrgSlug: string }).upgradeOrgSlug
           : null;
       toast.error(
-        error instanceof Error ? error.message : "Failed to create company",
+        message,
         upgradeSlug
           ? {
               action: {
@@ -87,12 +154,12 @@ export function CompanyIndexPage() {
         </header>
 
         {orgs && orgs.length > 0 ? (
-          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+          <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
             {orgs.map(({ organization, role }) => (
               <li key={organization.id}>
                 <Link
                   href={`/company/${organization.slug}`}
-                  className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-base"
+                  className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-sunken/50"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <OrgLogo
@@ -103,7 +170,7 @@ export function CompanyIndexPage() {
                     />
                     <div className="min-w-0">
                       <p className="truncate font-medium text-text-primary">
-                        {organization.name}
+                        <RichText as="span" text={organization.name} />
                       </p>
                       <p className="text-body-sm text-text-secondary">
                         {role} · {organization._count?.jobs ?? 0} jobs
@@ -136,10 +203,11 @@ export function CompanyIndexPage() {
             <h2 className="text-h3 text-text-primary">New company</h2>
             <div className="space-y-2">
               <Label htmlFor="company-name">Company name</Label>
-              <Input
+              <RichTextEditor
                 id="company-name"
+                singleLine
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={setName}
                 placeholder="Acme Inc."
               />
             </div>
@@ -150,22 +218,35 @@ export function CompanyIndexPage() {
                 value={slug}
                 onChange={(e) => setSlug(sanitizeHiringSlug(e.target.value))}
                 placeholder={slugPreview || "acme"}
+                aria-invalid={Boolean(slugInlineError)}
               />
               <p className="text-xs text-text-muted">
                 Organization path: /company/{slugPreview || "…"}
               </p>
+              {checkingSlug ? (
+                <p className="text-xs text-text-muted">Checking availability…</p>
+              ) : null}
+              {slugInlineError ? (
+                <p className="text-xs text-destructive">{slugInlineError}</p>
+              ) : null}
+              {!checkingSlug &&
+              !slugInlineError &&
+              slugPreview &&
+              isValidOrgSlug(slugPreview) ? (
+                <p className="text-xs text-emerald-600">Slug is available</p>
+              ) : null}
             </div>
             <div className="space-y-2">
               <Label htmlFor="company-desc">About</Label>
-              <Textarea
+              <RichTextEditor
                 id="company-desc"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
+                onChange={setDescription}
+                minHeight="7rem"
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleCreate} disabled={createOrg.isPending}>
+              <Button onClick={handleCreate} disabled={!canCreate}>
                 Create organization
               </Button>
               <Button variant="ghost" onClick={() => setShowCreate(false)}>

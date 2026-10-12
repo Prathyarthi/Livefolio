@@ -19,6 +19,7 @@ import {
   normalizeHidden,
   normalizeOrder,
 } from "@/features/templates/section-order";
+import { normalizeHiddenIntegrations } from "@/lib/integration-visibility";
 import { sendPublishedPortfolioEmailSafe } from "@/lib/email-published";
 import {
   ContentValidationError,
@@ -26,8 +27,10 @@ import {
   MAX_CUSTOM_SECTIONS,
   MAX_EMAIL_CHARS,
   MAX_LONG_TEXT_CHARS,
+  MAX_LONG_TEXT_RAW_CHARS,
   MAX_PHONE_CHARS,
   MAX_SECTION_ROWS,
+  MAX_ACHIEVEMENT_TITLE_CHARS,
   MAX_SHORT_LABEL_CHARS,
   MAX_SKILL_FIELD_CHARS,
   MAX_SKILLS,
@@ -327,6 +330,14 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             },
           };
         }
+        if (customization?.hiddenIntegrations !== undefined) {
+          normalizedCustomization = {
+            ...normalizedCustomization,
+            hiddenIntegrations: normalizeHiddenIntegrations(
+              customization.hiddenIntegrations,
+            ),
+          };
+        }
         portfolioFields = {
           ...rest,
           ...(title !== undefined
@@ -431,7 +442,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             t.Null(),
           ]),
           summary: t.Union([
-            t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+            t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
             t.Null(),
           ]),
           avatarUrl: t.Union([
@@ -460,7 +471,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             t.Null(),
           ]),
           metaDescription: t.Union([
-            t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+            t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
             t.Null(),
           ]),
           openToWork: t.Boolean(),
@@ -502,6 +513,9 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             ),
             primaryColor: t.Optional(
               t.String({ pattern: "^#[0-9a-fA-F]{6}$" }),
+            ),
+            hiddenIntegrations: t.Optional(
+              t.Array(t.String({ maxLength: 32 }), { maxItems: 16 }),
             ),
           }),
         }),
@@ -785,7 +799,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         company: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
         role: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
         description: t.Optional(
-          t.Union([t.String({ maxLength: MAX_LONG_TEXT_CHARS }), t.Null()]),
+          t.Union([t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }), t.Null()]),
         ),
         startDate: t.Optional(t.Union([t.String(), t.Null()])),
         endDate: t.Optional(t.Union([t.String(), t.Null()])),
@@ -868,7 +882,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         t.Object({
           company: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
           role: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
-          description: t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+          description: t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
           startDate: t.String(),
           endDate: t.Union([t.String(), t.Null()]),
           location: t.Union([
@@ -935,7 +949,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
               ),
               degree: normalizeRequiredLabel(ctx.body.degree, "Degree"),
               field: normalizeOptionalLabel(ctx.body.field, "Field of study"),
-              gpa: normalizeOptionalLabel(ctx.body.gpa, "GPA"),
+              gpa: normalizeOptionalLabel(ctx.body.gpa, "GPA / Percentage"),
               description:
                 ctx.body.description == null
                   ? null
@@ -976,7 +990,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
           ]),
         ),
         description: t.Optional(
-          t.Union([t.String({ maxLength: MAX_LONG_TEXT_CHARS }), t.Null()]),
+          t.Union([t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }), t.Null()]),
         ),
         startDate: t.Optional(t.Union([t.String(), t.Null()])),
         endDate: t.Optional(t.Union([t.String(), t.Null()])),
@@ -1025,7 +1039,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
                 );
         }
         if (ctx.body.gpa !== undefined) {
-          data.gpa = normalizeOptionalLabel(ctx.body.gpa, "GPA");
+          data.gpa = normalizeOptionalLabel(ctx.body.gpa, "GPA / Percentage");
         }
         if (startDate !== undefined) {
           data.startDate = startDate
@@ -1079,7 +1093,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             t.Null(),
           ]),
           description: t.Union([
-            t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+            t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
             t.Null(),
           ]),
           startDate: t.String(),
@@ -1351,7 +1365,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     {
       body: t.Object({
         title: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
-        description: t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+        description: t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
         imageUrl: t.Optional(
           t.Union([
             t.String({ maxLength: MAX_STORED_URL_CHARS }),
@@ -1495,7 +1509,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             minLength: 1,
             maxLength: MAX_SHORT_LABEL_CHARS,
           }),
-          description: t.String({ maxLength: MAX_LONG_TEXT_CHARS }),
+          description: t.String({ maxLength: MAX_LONG_TEXT_RAW_CHARS }),
           imageUrl: t.Union([
             t.String({ maxLength: MAX_STORED_URL_CHARS }),
             t.Null(),
@@ -1847,6 +1861,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
               title: normalizeRequiredLabel(
                 ctx.body.title,
                 "Achievement title",
+                MAX_ACHIEVEMENT_TITLE_CHARS,
               ),
               portfolioId: p.id,
               sortOrder: count,
@@ -1863,7 +1878,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
     {
       body: t.Object({
-        title: t.String({ minLength: 1, maxLength: MAX_SHORT_LABEL_CHARS }),
+        title: t.String({ minLength: 1, maxLength: MAX_ACHIEVEMENT_TITLE_CHARS }),
         date: t.Optional(t.Union([t.String(), t.Null()])),
       }),
     },
@@ -1884,6 +1899,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
           updateData.title = normalizeRequiredLabel(
             ctx.body.title,
             "Achievement title",
+            MAX_ACHIEVEMENT_TITLE_CHARS,
           );
         }
         if (date !== undefined) {
@@ -1918,7 +1934,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         t.Object({
           title: t.String({
             minLength: 1,
-            maxLength: MAX_SHORT_LABEL_CHARS,
+            maxLength: MAX_ACHIEVEMENT_TITLE_CHARS,
           }),
           date: t.Union([t.String(), t.Null()]),
           sortOrder: t.Number(),

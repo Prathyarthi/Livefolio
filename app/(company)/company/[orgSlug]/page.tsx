@@ -9,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ApiRequestError,
   useCreateWorkspace,
   useOrganization,
@@ -26,6 +34,19 @@ export default function OrganizationHomePage() {
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+
+  function openCreateDialog() {
+    setName("");
+    setSlug("");
+    setShowCreate(true);
+  }
+
+  function closeCreateDialog() {
+    if (createWorkspace.isPending) return;
+    setShowCreate(false);
+    setName("");
+    setSlug("");
+  }
 
   if (isLoading) {
     return (
@@ -60,6 +81,7 @@ export default function OrganizationHomePage() {
         slug: slug.trim() || undefined,
       });
       toast.success("Workspace created");
+      setShowCreate(false);
       router.push(`/company/${orgSlug}/${workspace.slug}`);
     } catch (err) {
       const upgradeSlug =
@@ -88,27 +110,33 @@ export default function OrganizationHomePage() {
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href="/company">← Back to companies</Link>
       </Button>
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+      <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
         {org.bannerUrl ? (
-          <div className="relative h-36 md:h-44">
+          <div className="relative h-36 overflow-hidden rounded-t-[var(--radius-lg)] md:h-44">
             <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
           </div>
         ) : null}
-        <header className="flex flex-wrap items-start justify-between gap-4 px-5 py-5 md:px-6">
-          <div
-            className={`flex min-w-0 items-end gap-4 ${
-              org.bannerUrl && org.logoUrl ? "-mt-12" : ""
-            }`}
-          >
+        <header className="flex flex-wrap items-start justify-between gap-4 px-5 pb-5 md:px-6">
+          <div className="flex min-w-0 flex-1 items-start gap-4">
             {org.logoUrl ? (
-              <OrgLogo
-                name={org.name}
-                logoUrl={org.logoUrl}
-                brandColor={org.brandColor}
-                size="lg"
-              />
+              <div
+                className={`relative z-10 shrink-0 ${
+                  org.bannerUrl ? "-mt-10" : "mt-5"
+                }`}
+              >
+                <OrgLogo
+                  name={org.name}
+                  logoUrl={org.logoUrl}
+                  brandColor={org.brandColor}
+                  size="lg"
+                />
+              </div>
             ) : null}
-            <div className="min-w-0 pb-1">
+            <div
+              className={`min-w-0 space-y-1 ${
+                org.bannerUrl || org.logoUrl ? "pt-4" : "pt-5"
+              }`}
+            >
               <p className="eyebrow uppercase">Organization</p>
               <h1 className="text-h2 text-text-primary">{org.name}</h1>
               <p className="max-w-xl text-body-sm text-text-secondary">
@@ -118,10 +146,12 @@ export default function OrganizationHomePage() {
             </div>
           </div>
           {org.permissions.manageOrganization ? (
-            <Button onClick={() => setShowCreate(true)}>
-              <Plus className="h-4 w-4" />
-              New workspace
-            </Button>
+            <div className={org.bannerUrl || org.logoUrl ? "pt-4" : "pt-5"}>
+              <Button onClick={openCreateDialog}>
+                <Plus className="h-4 w-4" />
+                New workspace
+              </Button>
+            </div>
           ) : null}
         </header>
       </div>
@@ -135,12 +165,12 @@ export default function OrganizationHomePage() {
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+        <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
           {workspaces.map((workspace) => (
             <li key={workspace.id}>
               <Link
                 href={`/company/${orgSlug}/${workspace.slug}`}
-                className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-base"
+                className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-surface-sunken/50"
               >
                 <div className="min-w-0">
                   <p className="truncate font-medium text-text-primary">
@@ -157,43 +187,62 @@ export default function OrganizationHomePage() {
         </ul>
       )}
 
-      {showCreate ? (
-        <div className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
-          <h2 className="text-h3 text-text-primary">New workspace</h2>
-          <div className="space-y-2">
-            <Label htmlFor="ws-name">Name</Label>
-            <Input
-              id="ws-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Engineering"
-            />
+      <Dialog
+        open={showCreate}
+        onOpenChange={(open) => {
+          if (open) openCreateDialog();
+          else closeCreateDialog();
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New workspace</DialogTitle>
+            <DialogDescription>
+              Keep hiring for different roles in separate workspaces.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ws-name">Name</Label>
+              <Input
+                id="ws-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Engineering"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ws-slug">Slug</Label>
+              <Input
+                id="ws-slug"
+                value={slug}
+                onChange={(e) => setSlug(sanitizeHiringSlug(e.target.value))}
+                placeholder={sanitizeHiringSlug(name) || "engineering"}
+              />
+              <p className="text-xs text-text-muted">
+                Path: /company/{orgSlug}/
+                {slug || sanitizeHiringSlug(name) || "…"}
+              </p>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="ws-slug">Slug</Label>
-            <Input
-              id="ws-slug"
-              value={slug}
-              onChange={(e) => setSlug(sanitizeHiringSlug(e.target.value))}
-              placeholder="engineering"
-            />
-            <p className="text-xs text-text-muted">
-              Path: /company/{orgSlug}/{slug || sanitizeHiringSlug(name) || "…"}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={closeCreateDialog}
+              disabled={createWorkspace.isPending}
+            >
+              Cancel
+            </Button>
             <Button
               onClick={() => void handleCreate()}
               disabled={createWorkspace.isPending}
             >
               Create workspace
             </Button>
-            <Button variant="ghost" onClick={() => setShowCreate(false)}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      ) : null}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

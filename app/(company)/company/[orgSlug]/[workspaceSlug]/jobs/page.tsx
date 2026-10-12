@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { ExternalLink, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RichText } from "@/components/rich-text";
 import { useOrgJobs } from "@/features/jobs/api/use-jobs";
 import {
   EMPLOYMENT_TYPE_LABELS,
@@ -96,7 +97,7 @@ export default function CompanyJobsPage() {
                     href={`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}`}
                     className="truncate font-medium text-text-primary hover:underline"
                   >
-                    {job.title}
+                    <RichText as="span" text={job.title} />
                   </Link>
                   <Badge
                     variant={

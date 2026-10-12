@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FieldLabel } from "@/features/portfolio/components/field-label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/rich-text-editor";
+import { RichText } from "@/components/rich-text";
 import {
   Card,
   CardContent,
@@ -299,11 +300,14 @@ export function ExperienceForm() {
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   Company
                 </FieldLabel>
-                <Input
+                <RichTextEditor
                   id="company"
-                  name="company"
+                  singleLine
                   value={form.company}
-                  onChange={handleChange}
+                  onChange={(company) => {
+                    setForm((prev) => ({ ...prev, company }));
+                    setFieldErrors((prev) => ({ ...prev, company: undefined }));
+                  }}
                   onBlur={() => handleBlur("company")}
                   aria-invalid={Boolean(currentErrors.company)}
                   placeholder="Google"
@@ -315,11 +319,14 @@ export function ExperienceForm() {
                   <Briefcase className="h-4 w-4 text-muted-foreground" />
                   Role
                 </FieldLabel>
-                <Input
+                <RichTextEditor
                   id="role"
-                  name="role"
+                  singleLine
                   value={form.role}
-                  onChange={handleChange}
+                  onChange={(role) => {
+                    setForm((prev) => ({ ...prev, role }));
+                    setFieldErrors((prev) => ({ ...prev, role: undefined }));
+                  }}
                   onBlur={() => handleBlur("role")}
                   aria-invalid={Boolean(currentErrors.role)}
                   placeholder="Senior Software Engineer"
@@ -365,11 +372,14 @@ export function ExperienceForm() {
                   <MapPin className="h-4 w-4 text-muted-foreground" />
                   Location
                 </FieldLabel>
-                <Input
+                <RichTextEditor
                   id="exp-location"
-                  name="location"
+                  singleLine
                   value={form.location}
-                  onChange={handleChange}
+                  onChange={(location) => {
+                    setForm((prev) => ({ ...prev, location }));
+                    setFieldErrors((prev) => ({ ...prev, location: undefined }));
+                  }}
                   onBlur={() => handleBlur("location")}
                   aria-invalid={Boolean(currentErrors.location)}
                   placeholder="San Francisco, CA"
@@ -382,15 +392,17 @@ export function ExperienceForm() {
               <FieldLabel htmlFor="description" unsaved={isFieldUnsaved("description")}>
                 Description
               </FieldLabel>
-              <Textarea
+              <RichTextEditor
                 id="description"
-                name="description"
                 value={form.description}
-                onChange={handleChange}
+                onChange={(description) => {
+                  setForm((prev) => ({ ...prev, description }));
+                  setFieldErrors((prev) => ({ ...prev, description: undefined }));
+                }}
                 onBlur={() => handleBlur("description")}
                 aria-invalid={Boolean(currentErrors.description)}
                 placeholder="Describe your responsibilities, achievements, and impact..."
-                rows={4}
+                minHeight="7rem"
               />
               <FieldError error={fieldErrors.description} />
             </div>
@@ -450,11 +462,14 @@ export function ExperienceForm() {
                         <Building2 className="h-4 w-4 text-muted-foreground" />
                         Company
                       </FieldLabel>
-                      <Input
+                      <RichTextEditor
                         id={`company-${exp.id}`}
-                        name="company"
+                        singleLine
                         value={form.company}
-                        onChange={handleChange}
+                        onChange={(company) => {
+                          setForm((prev) => ({ ...prev, company }));
+                          setFieldErrors((prev) => ({ ...prev, company: undefined }));
+                        }}
                         onBlur={() => handleBlur("company")}
                         aria-invalid={Boolean(currentErrors.company)}
                         placeholder="Google"
@@ -466,11 +481,14 @@ export function ExperienceForm() {
                         <Briefcase className="h-4 w-4 text-muted-foreground" />
                         Role
                       </FieldLabel>
-                      <Input
+                      <RichTextEditor
                         id={`role-${exp.id}`}
-                        name="role"
+                        singleLine
                         value={form.role}
-                        onChange={handleChange}
+                        onChange={(role) => {
+                          setForm((prev) => ({ ...prev, role }));
+                          setFieldErrors((prev) => ({ ...prev, role: undefined }));
+                        }}
                         onBlur={() => handleBlur("role")}
                         aria-invalid={Boolean(currentErrors.role)}
                         placeholder="Senior Software Engineer"
@@ -511,11 +529,14 @@ export function ExperienceForm() {
                         <MapPin className="h-4 w-4 text-muted-foreground" />
                         Location
                       </FieldLabel>
-                      <Input
+                      <RichTextEditor
                         id={`exp-location-${exp.id}`}
-                        name="location"
+                        singleLine
                         value={form.location}
-                        onChange={handleChange}
+                        onChange={(location) => {
+                          setForm((prev) => ({ ...prev, location }));
+                          setFieldErrors((prev) => ({ ...prev, location: undefined }));
+                        }}
                         onBlur={() => handleBlur("location")}
                         aria-invalid={Boolean(currentErrors.location)}
                         placeholder="San Francisco, CA"
@@ -528,15 +549,20 @@ export function ExperienceForm() {
                     <FieldLabel htmlFor={`description-${exp.id}`} unsaved={isFieldUnsaved("description")}>
                       Description
                     </FieldLabel>
-                    <Textarea
+                    <RichTextEditor
                       id={`description-${exp.id}`}
-                      name="description"
                       value={form.description}
-                      onChange={handleChange}
+                      onChange={(description) => {
+                        setForm((prev) => ({ ...prev, description }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          description: undefined,
+                        }));
+                      }}
                       onBlur={() => handleBlur("description")}
                       aria-invalid={Boolean(currentErrors.description)}
                       placeholder="Describe your responsibilities, achievements, and impact..."
-                      rows={4}
+                      minHeight="7rem"
                     />
                     <FieldError error={fieldErrors.description} />
                   </div>
@@ -563,15 +589,17 @@ export function ExperienceForm() {
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-base">{exp.role}</h4>
+                    <h4 className="font-semibold text-base">
+                      <RichText text={exp.role} />
+                    </h4>
                     <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                       <Building2 className="h-3.5 w-3.5" />
-                      {exp.company}
+                      <RichText text={exp.company} />
                       {exp.location && (
                         <>
                           <span className="mx-1">--</span>
                           <MapPin className="h-3.5 w-3.5" />
-                          {exp.location}
+                          <RichText text={exp.location} />
                         </>
                       )}
                     </p>
@@ -586,9 +614,9 @@ export function ExperienceForm() {
                     {exp.description && (
                       <>
                         <Separator className="my-3" />
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                          {exp.description}
-                        </p>
+                        <div className="text-sm text-muted-foreground">
+                          <RichText text={exp.description} as="p" />
+                        </div>
                       </>
                     )}
                   </div>

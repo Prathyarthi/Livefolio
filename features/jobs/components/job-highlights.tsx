@@ -10,6 +10,7 @@ import {
   Building2,
   Info,
 } from "lucide-react";
+import { RichText } from "@/components/rich-text";
 import type { Job } from "@/features/jobs/api/use-jobs";
 import type { CustomFieldDraft } from "@/features/jobs/lib/role-fields";
 import {
@@ -100,25 +101,55 @@ function highlightItems(job: Job): Highlight[] {
   return items;
 }
 
-export function JobHighlights({ job }: { job: Job }) {
+export function JobHighlights({
+  job,
+  compact = false,
+}: {
+  job: Job;
+  compact?: boolean;
+}) {
   const items = highlightItems(job);
   if (items.length === 0) return null;
 
   return (
-    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <ul
+      className={
+        compact
+          ? "grid gap-2"
+          : "grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      }
+    >
       {items.map((item) => (
         <li
           key={`${item.label}-${item.value}`}
-          className="flex items-start gap-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]"
+          className={
+            compact
+              ? "flex items-start gap-2.5 rounded-[var(--radius-md)] border border-border-default bg-surface-raised p-3"
+              : "flex items-start gap-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]"
+          }
         >
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-brand-light text-brand-primary">
+          <span
+            className={
+              compact
+                ? "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-brand-light text-brand-primary [&_svg]:h-3.5 [&_svg]:w-3.5"
+                : "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-brand-light text-brand-primary"
+            }
+          >
             {item.icon}
           </span>
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-muted">
-              {item.label}
+              <RichText as="span" text={item.label} />
             </p>
-            <p className="mt-0.5 font-medium text-text-primary">{item.value}</p>
+            <p
+              className={
+                compact
+                  ? "mt-0.5 text-sm font-medium text-text-primary"
+                  : "mt-0.5 font-medium text-text-primary"
+              }
+            >
+              <RichText as="span" text={item.value} />
+            </p>
           </div>
         </li>
       ))}
@@ -128,6 +159,17 @@ export function JobHighlights({ job }: { job: Job }) {
 
 export function JobPerkPills({ job }: { job: Job }) {
   const perks: string[] = [];
+  if (job.workplaceType) {
+    perks.push(WORKPLACE_TYPE_LABELS[job.workplaceType] ?? job.workplaceType);
+  }
+  if (job.employmentType) {
+    perks.push(
+      EMPLOYMENT_TYPE_LABELS[job.employmentType] ?? job.employmentType,
+    );
+  }
+  if (job.department?.trim()) {
+    perks.push(job.department.trim());
+  }
   if (perks.length === 0) return null;
   return (
     <div className="flex flex-wrap gap-2">
@@ -136,7 +178,7 @@ export function JobPerkPills({ job }: { job: Job }) {
           key={perk}
           className="rounded-full border border-brand-primary/20 bg-brand-light px-3 py-1 text-xs font-medium text-brand-dark"
         >
-          {perk}
+          <RichText as="span" text={perk} />
         </span>
       ))}
     </div>

@@ -16,7 +16,6 @@ import {
   LogOut,
   User,
   PanelLeft,
-  FileCheck2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,7 +45,8 @@ const NAV = [
   { title: "Templates", href: "/dashboard/templates", icon: Palette },
   { title: "Import", href: "/dashboard/import", icon: Download },
   { title: "Preview", href: "/dashboard/preview", icon: Eye },
-  { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
+  // Applications hidden until the job applications product is ready.
+  // { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { title: "Billing", href: "/dashboard/billing", icon: CreditCard },
   { title: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -76,19 +76,24 @@ function AppSidebar() {
             />
           </button>
         ) : (
-          <Link
-            href="/dashboard"
-            onClick={() => {
-              if (isMobile) setOpenMobile(false);
-            }}
-            className="flex h-8 items-center gap-2 overflow-hidden px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-            aria-label={`${siteConfig.name} home`}
-          >
-            <LogoMark className="h-8 w-8 shrink-0 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8" />
-            <span className="font-display text-lg font-bold text-brand-primary group-data-[collapsible=icon]:hidden">
-              {siteConfig.name}
-            </span>
-          </Link>
+          <div className="flex min-w-0 items-center gap-1 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+            <Link
+              href="/dashboard"
+              onClick={() => {
+                if (isMobile) setOpenMobile(false);
+              }}
+              className="flex h-8 min-w-0 flex-1 items-center gap-2 overflow-hidden"
+              aria-label={`${siteConfig.name} home`}
+            >
+              <LogoMark className="h-8 w-8 shrink-0" />
+              <span className="font-display text-lg font-bold text-brand-primary group-data-[collapsible=icon]:hidden">
+                {siteConfig.name}
+              </span>
+            </Link>
+            {!isMobile ? (
+              <SidebarTrigger className="size-8 shrink-0" />
+            ) : null}
+          </div>
         )}
       </SidebarHeader>
 
@@ -204,14 +209,11 @@ function DashboardNavAutoCollapse() {
 }
 
 function DashboardHeader() {
-  const { state, isMobile } = useSidebar();
-  const isCollapsed = state === "collapsed";
-
   return (
-    <header className="glass-nav sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4">
-      {(isMobile || !isCollapsed) && <SidebarTrigger className="size-9" />}
-      <Logo href="/dashboard" className="md:hidden" />
-      <div className="ml-auto flex items-center gap-1 md:hidden">
+    <header className="glass-nav sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4 md:hidden">
+      <SidebarTrigger className="size-9" />
+      <Logo href="/dashboard" />
+      <div className="ml-auto flex items-center gap-1">
         <ThemeToggle className="size-9" />
       </div>
     </header>
@@ -242,7 +244,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <SidebarInset
         className={
           fullHeightPanel
-            ? "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-surface-base lg:h-svh lg:max-h-svh lg:overflow-hidden"
+            ? "relative flex h-dvh max-h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface-base"
             : "relative min-w-0 overflow-x-hidden bg-surface-base"
         }
       >
@@ -250,7 +252,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <main
           className={
             fullHeightPanel
-              ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)] lg:overflow-hidden"
+              ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-[var(--space-5)]"
               : "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)]"
           }
         >

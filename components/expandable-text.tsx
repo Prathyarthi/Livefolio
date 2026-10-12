@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Children, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const LINE_CLAMP: Record<number, string> = {
@@ -30,8 +30,18 @@ export default function ExpandableText({
   const containerRef = useRef<HTMLDivElement>(null);
   const contentId = useId();
   const clampClass = LINE_CLAMP[initialLines] ?? "line-clamp-3";
+  const listItems = Tag === "ul" ? Children.toArray(children) : null;
+  const listCanExpand = Boolean(listItems && listItems.length > initialLines);
+  const visibleChildren =
+    listItems && !expanded && listCanExpand
+      ? listItems.slice(0, initialLines)
+      : children;
 
   useEffect(() => {
+    if (Tag === "ul") {
+      setCanExpand(listCanExpand);
+      return;
+    }
     if (expanded) return;
 
     const content = containerRef.current?.firstElementChild;
@@ -45,15 +55,15 @@ export default function ExpandableText({
     const observer = new ResizeObserver(checkOverflow);
     observer.observe(content);
     return () => observer.disconnect();
-  }, [children, expanded, initialLines]);
+  }, [Tag, children, expanded, initialLines, listCanExpand]);
 
   return (
     <div ref={containerRef}>
       <Tag
         id={contentId}
-        className={cn(className, !expanded && clampClass)}
+        className={cn(className, Tag !== "ul" && !expanded && clampClass)}
       >
-        {children}
+        {visibleChildren}
       </Tag>
       {canExpand && (
         <button

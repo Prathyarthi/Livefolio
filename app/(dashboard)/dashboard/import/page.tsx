@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { FlowFooter } from "@/features/dashboard/components/flow-footer";
 import {
   DASHBOARD_IMPORT_CONTENT_FRAME_CLASS,
@@ -13,7 +15,10 @@ import {
   DASHBOARD_IMPORT_PAGE_CLASS,
   DASHBOARD_IMPORT_TRACKER_ASIDE_CLASS,
 } from "@/features/dashboard/constants/panel-layout";
-import { usePortfolio } from "@/features/portfolio/api/use-portfolio";
+import {
+  usePortfolio,
+  useUpdatePortfolio,
+} from "@/features/portfolio/api/use-portfolio";
 import { ImportSourceContent } from "@/features/portfolio/components/import-source-content";
 import {
   ImportSourcePicker,
@@ -23,18 +28,34 @@ import {
   IMPORT_SOURCES,
   type ImportSourceValue,
 } from "@/features/portfolio/constants/import-sources";
+import { getHiddenIntegrations } from "@/lib/integration-visibility";
 
 export default function ImportPage() {
   const router = useRouter();
   const { data: portfolio } = usePortfolio();
+  const updatePortfolio = useUpdatePortfolio();
   const [canUseImports, setCanUseImports] = useState(true);
   const [activeSource, setActiveSource] = useState<ImportSourceValue>("resume");
   const [toolbarActions, setToolbarActions] = useState<ReactNode>(null);
+  const [hiddenIntegrations, setHiddenIntegrations] = useState<string[]>([]);
 
   const currentSource = useMemo(
     () => IMPORT_SOURCES.find((source) => source.value === activeSource)!,
     [activeSource]
   );
+
+  useEffect(() => {
+    if (updatePortfolio.isPending) return;
+    setHiddenIntegrations(
+      getHiddenIntegrations(
+        portfolio?.customization &&
+          typeof portfolio.customization === "object" &&
+          !Array.isArray(portfolio.customization)
+          ? portfolio.customization
+          : null,
+      ),
+    );
+  }, [portfolio, updatePortfolio.isPending]);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +79,34 @@ export default function ImportPage() {
     };
   }, []);
 
+  const toggleIntegrationVisibility = (
+    source: ImportSourceValue,
+    shown: boolean,
+  ) => {
+    if (source === "resume" || !portfolio) return;
+    const next = shown
+      ? hiddenIntegrations.filter((id) => id !== source)
+      : [...hiddenIntegrations, source];
+    setHiddenIntegrations(next);
+    updatePortfolio.mutate(
+      { customization: { hiddenIntegrations: next } },
+      {
+        onError: (error) => {
+          setHiddenIntegrations(
+            getHiddenIntegrations(
+              portfolio.customization &&
+                typeof portfolio.customization === "object" &&
+                !Array.isArray(portfolio.customization)
+                ? portfolio.customization
+                : null,
+            ),
+          );
+          toast.error(error.message);
+        },
+      },
+    );
+  };
+
   return (
     <div className={DASHBOARD_IMPORT_PAGE_CLASS}>
       <div className="shrink-0 space-y-6">
@@ -76,7 +125,7 @@ export default function ImportPage() {
             </p>
             <p className="mt-2 text-text-secondary">
               After the trial, you can still edit and publish on the Minimal
-              template — upgrade to import from resume, GitHub, Medium, or LeetCode
+              template — upgrade to import from a resume or a connected platform
               again.
             </p>
             <Button asChild className="mt-4" variant="secondary">
@@ -108,7 +157,6 @@ export default function ImportPage() {
           <ImportSourceSelector
             activeSource={activeSource}
             onSourceChange={setActiveSource}
-            portfolio={portfolio}
             disabled={!canUseImports}
           />
         </aside>
@@ -131,6 +179,28 @@ export default function ImportPage() {
             <p className="mt-1 text-body-sm text-text-secondary">
               {currentSource.description}
             </p>
+            {activeSource !== "resume" ? (
+              <div className="mt-4 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-base px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-text-primary">
+                    Show on portfolio
+                  </p>
+                  <p className="mt-0.5 text-xs text-text-muted">
+                    {hiddenIntegrations.includes(activeSource)
+                      ? `${currentSource.label} stays imported, and is hidden from your public portfolio.`
+                      : `${currentSource.label} appears on your public portfolio.`}
+                  </p>
+                </div>
+                <Switch
+                  checked={!hiddenIntegrations.includes(activeSource)}
+                  disabled={!portfolio || updatePortfolio.isPending}
+                  onCheckedChange={(shown) =>
+                    toggleIntegrationVisibility(activeSource, shown)
+                  }
+                  aria-label={`Show ${currentSource.label} on portfolio`}
+                />
+              </div>
+            ) : null}
           </div>
 
           <div className={DASHBOARD_IMPORT_CONTENT_FRAME_CLASS}>

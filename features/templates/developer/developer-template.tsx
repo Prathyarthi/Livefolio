@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import {
   formatDateRange,
   groupSkillsByCategory,
@@ -18,12 +19,13 @@ import {
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import {
+import { RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
+  TechIcon,
   HeroProfileButtons,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -33,6 +35,9 @@ import {
   PROJECTS_GRID_2,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
+  SocialPills,
+  hasNonHeroSocialProfiles,
+  visibleSocialProfiles,
 } from "@/features/templates/shared";
 import { CollapsibleList } from "@/features/templates/collapsible-list";
 
@@ -59,6 +64,9 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
     githubStats?.contributionCalendar
   );
   const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const extraSocials = visibleSocialProfiles(socialProfiles, {
+    excludeHeroPlatforms: true,
+  });
 
   const resolved = resolveSectionLayout(
     getTemplateSectionLayout("developer"),
@@ -125,7 +133,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                         imageUrl={project.imageUrl ?? null}
                         projectId={project.id}
                         livePreviewProjectIds={livePreviewProjectIds}
-                        alt={project.title}
+                        alt={stripRichTextToPlain(project.title)}
                         loading="lazy"
                         accentColor={primaryColor}
                         containerClassName="bg-gray-950/80 border-b border-[var(--lf-g-900-40)]"
@@ -135,7 +143,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                           <div className="min-w-0 flex-1">
                             <div className={PROJECT_CARD_META}>
                               <h3 className={cn(PROJECT_CARD_TITLE, "text-base font-semibold text-[var(--lf-g-300)] group-hover:text-[var(--lf-g-200)] transition-colors")}>
-                                {project.title}
+                                <RichText text={project.title} />
                               </h3>
                               {project.featured && (
                                 <span className="shrink-0 rounded border border-yellow-700/50 bg-yellow-900/20 px-1.5 py-0.5 text-[10px] text-yellow-500 uppercase tracking-wider">
@@ -201,7 +209,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                         <div className="mt-4 flex items-center gap-4">
                           {project.sourceUrl && (
                             <a
-                              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={project.title} data-lf-id={project.id}
+                              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-xs text-[var(--lf-g-600)] underline decoration-[var(--lf-g-900)] hover:text-[var(--lf-g-400)] transition-colors"
@@ -211,7 +219,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                           )}
                           {project.liveUrl && (
                             <a
-                              href={project.liveUrl} data-lf-track="project_live" data-lf-label={project.title} data-lf-id={project.id}
+                              href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-xs text-[var(--lf-g-600)] underline decoration-[var(--lf-g-900)] hover:text-[var(--lf-g-400)] transition-colors"
@@ -252,12 +260,12 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                             )}
                           </div>
                           <h3 className="mt-2 text-lg font-semibold text-[var(--lf-g-300)]">
-                            {exp.role}
+                            <RichText text={exp.role} />
                           </h3>
                           <p className="text-sm text-[var(--lf-g-600)]">
-                            @ {exp.company}
+                            @ <RichText text={exp.company} />
                             {exp.location && (
-                              <span className="text-gray-600"> ({exp.location})</span>
+                              <span className="text-gray-600"> (<RichText text={exp.location} />)</span>
                             )}
                           </p>
                           {exp.description && (
@@ -289,15 +297,15 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                     >
                       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                         <h3 className="text-[var(--lf-g-300)] font-semibold">
-                          {edu.degree}
-                          {edu.field && <span className="text-[var(--lf-g-500-70)]"> in {edu.field}</span>}
+                          <RichText text={edu.degree} />
+                          {edu.field && <span className="text-[var(--lf-g-500-70)]"> in <RichText text={edu.field} /></span>}
                         </h3>
                         {edu.gpa && (
-                          <span className="text-xs text-yellow-500/70">GPA: {edu.gpa}</span>
+                          <span className="text-xs text-yellow-500/70">{edu.gpa}</span>
                         )}
                       </div>
                       <p className="mt-1 text-sm text-gray-500">
-                        {edu.institution}
+                        <RichText text={edu.institution} />
                         {(edu.startDate || edu.endDate) && (
                           <>
                             <span className="text-gray-700"> | </span>
@@ -345,6 +353,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                             return (
                               <span key={skill}>
                                 <span className="text-gray-600">{"  "}</span>
+                                <TechIcon name={skill} className="mr-1.5 inline h-3.5 w-3.5 align-[-2px]" />
                                 <span className="text-[var(--lf-g-300)]">
                                   &quot;{skill}&quot;
                                 </span>
@@ -415,7 +424,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                     <div key={ach.id} className="flex items-start gap-3 rounded border border-[var(--lf-g-900-40)] bg-gray-900/40 px-4 py-3">
                       <Trophy className="h-4 w-4 text-[var(--lf-g-400)] mt-0.5 shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-300 leading-relaxed">{ach.title}</p>
+                        <p className="text-sm text-gray-300 leading-relaxed"><RichText text={ach.title} /></p>
                         {ach.date && (
                           <p className="mt-1 text-xs text-gray-600">
                             {new Date(ach.date).toLocaleDateString("en-US", {
@@ -448,9 +457,9 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                       chipClassName="rounded border border-[var(--lf-g-900-40)] bg-gray-950 px-3 py-1.5 text-sm text-gray-400"
                     />
                   </div>
-                  {socialProfiles.length > 0 && (
+                  {extraSocials.length > 0 && (
                     <div className="mt-5 flex flex-wrap gap-3">
-                      {socialProfiles.map((profile) => (
+                      {extraSocials.map((profile) => (
                         <a
                           key={`${profile.platform}-${profile.url}`}
                           href={profile.url}
@@ -535,11 +544,11 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                 $ whoami
               </p>
               <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-xl @sm:text-2xl @md:text-3xl @lg:text-5xl font-bold text-[var(--lf-g-300)]">
-                {portfolio.title}
+                <RichText text={portfolio.title} />
               </h1>
               <p className="mt-3 text-lg text-[var(--lf-g-500-80)]">
                 <span className="text-gray-600">{"// "}</span>
-                {portfolio.headline}
+                <RichText text={portfolio.headline} />
               </p>
               {portfolio.location && (
                 <p className="mt-2 text-sm text-gray-500">
@@ -557,11 +566,19 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                   </a>
                 </p>
               )}
-              <div className="mt-4">
+              <div className="mt-4 space-y-3">
                 <HeroProfileButtons
                   profiles={socialProfiles}
                   className="rounded border border-[var(--lf-g-900-40)] bg-gray-900/70 px-3 py-1.5 text-sm text-[var(--lf-g-400-80)] transition-colors hover:text-[var(--lf-g-300)]"
                 />
+                {hasNonHeroSocialProfiles(socialProfiles) && (
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="rounded border border-[var(--lf-g-900-40)] bg-gray-900/70 px-3 py-1.5 text-sm text-[var(--lf-g-400-80)] transition-colors hover:text-[var(--lf-g-300)]"
+                  />
+                )}
               </div>
               <div className="mt-4 inline-block h-5 w-2.5 animate-pulse bg-[var(--lf-g-400)]" />
             </div>
@@ -610,7 +627,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             guest@portfolio:~$ cat .social-links
           </p>
           <div className="space-y-2">
-            {socialProfiles.map((profile) => (
+            {extraSocials.map((profile) => (
               <div key={profile.platform} className="text-sm">
                 <span className="text-[var(--lf-g-700)]">$</span>{" "}
                 <span className="text-gray-500">open</span>{" "}
