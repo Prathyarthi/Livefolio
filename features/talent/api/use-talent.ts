@@ -1,6 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import type { SearchFacets } from "@/features/search/lib/facets";
+import type { ProofKind } from "@/features/search/lib/proof";
+import type { InterpretedSearchQuery, SearchSort } from "@/features/search/lib/query";
 
 async function throwApiError(
   response: Response,
@@ -26,33 +29,56 @@ export type TalentPerson = {
   avatarUrl: string | null;
   skills: string[];
   recentRole: { role: string; company: string } | null;
+  yearsExperience: number | null;
+  proof: ProofKind[];
+  score: number;
+  reasons: string[];
   livefolioUrl: string;
 };
 
 export type TalentSearchResult = {
   total: number;
+  truncated: boolean;
   page: number;
   pageSize: number;
   pageCount: number;
+  sort: SearchSort;
+  job: { id: string; title: string } | null;
+  interpreted: InterpretedSearchQuery;
+  facets: SearchFacets;
   people: TalentPerson[];
+};
+
+export type TalentSearchOptions = {
+  q?: string;
+  location?: string;
+  skill?: string;
+  proof?: ProofKind;
+  minExperience?: number;
+  maxExperience?: number;
+  jobId?: string;
+  sort?: SearchSort;
+  page?: number;
+  pageSize?: number;
 };
 
 export function useTalentSearch(
   orgSlug: string | undefined,
   workspaceSlug: string | undefined,
-  options?: {
-    q?: string;
-    location?: string;
-    skill?: string;
-    page?: number;
-    pageSize?: number;
-  },
+  options?: TalentSearchOptions,
 ) {
-  const q = options?.q;
-  const location = options?.location;
-  const skill = options?.skill;
-  const page = options?.page ?? 1;
-  const pageSize = options?.pageSize ?? 20;
+  const {
+    q,
+    location,
+    skill,
+    proof,
+    minExperience,
+    maxExperience,
+    jobId,
+    sort = "relevance",
+    page = 1,
+    pageSize = 20,
+  } = options ?? {};
 
   return useQuery({
     queryKey: [
@@ -62,6 +88,11 @@ export function useTalentSearch(
       q ?? "",
       location ?? "",
       skill ?? "",
+      proof ?? "",
+      minExperience ?? "",
+      maxExperience ?? "",
+      jobId ?? "",
+      sort,
       page,
       pageSize,
     ],
@@ -71,6 +102,11 @@ export function useTalentSearch(
       if (q) params.set("q", q);
       if (location) params.set("location", location);
       if (skill) params.set("skill", skill);
+      if (proof) params.set("proof", proof);
+      if (minExperience != null) params.set("minExperience", String(minExperience));
+      if (maxExperience != null) params.set("maxExperience", String(maxExperience));
+      if (jobId) params.set("jobId", jobId);
+      params.set("sort", sort);
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));
       const qs = params.toString();
