@@ -572,6 +572,21 @@ model Application {
   submittedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  /// Search index, derived from the immutable snapshot so the pool can be paged in SQL.
+  /// Stale when it differs from the job's current ranking version, profile hash and requirements.
+  searchKey           String?
+  rankScore           Int      @default(0)
+  rankReasons         String[] @default([])
+  searchText          String?  @db.Text
+  searchSummary       Json?
+  searchEvidence      Json?
+  /// "type|label" of every requirement this applicant meets, for the pool gap report
+  matchedRequirements String[] @default([])
+  yearsExperience     Int?
+  proofKinds          String[] @default([])
+  skillNames          String[] @default([])
+  locationLabel       String?
+
   job      Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
   user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   snapshot ApplicationSnapshot?
@@ -582,6 +597,10 @@ model Application {
   @@index([jobId, stage])
   @@index([jobId, status])
   @@index([jobId, shortlisted])
+  @@index([jobId, rankScore])
+  @@index([jobId, submittedAt])
+  @@index([jobId, searchKey])
+  @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
   @@map("applications")
 }
 

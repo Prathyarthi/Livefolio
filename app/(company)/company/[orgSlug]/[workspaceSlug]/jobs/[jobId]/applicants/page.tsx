@@ -16,8 +16,16 @@ import {
   useToggleShortlist,
   useUpdateApplicationStage,
   type ApplicantCard,
-  type InterpretedApplicantQuery,
 } from "@/features/applications/api/use-applications";
+import {
+  FacetPanel,
+  SortToggle,
+  experienceBandRange,
+  type FacetKind,
+} from "@/features/search/components/search-refiners";
+import type { FacetBucket } from "@/features/search/lib/facets";
+import type { ProofKind } from "@/features/search/lib/proof";
+import type { InterpretedSearchQuery, SearchSort } from "@/features/search/lib/query";
 import {
   CompareSelectionBar,
   MAX_COMPARE_CANDIDATES,
@@ -52,6 +60,9 @@ export default function JobApplicantsPage() {
   const [role, setRole] = useState("");
   const [education, setEducation] = useState("");
   const [minExperience, setMinExperience] = useState("");
+  const [experience, setExperience] = useState<string | undefined>();
+  const [proof, setProof] = useState<ProofKind | undefined>();
+  const [sort, setSort] = useState<SearchSort>("relevance");
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -62,7 +73,7 @@ export default function JobApplicantsPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [tab, q, location, skill, role, education, minExperience]);
+  }, [tab, q, location, skill, role, education, minExperience, experience, proof, sort]);
 
   const poolQuery = useApplicantPool(jobId, {
     stage: tab !== "all" ? tab : undefined,
@@ -72,6 +83,9 @@ export default function JobApplicantsPage() {
     role: role.trim() || undefined,
     education: education.trim() || undefined,
     minExperience: minExperience ? Number(minExperience) : undefined,
+    ...experienceBandRange(experience),
+    proof,
+    sort,
     page,
     pageSize: DEFAULT_PAGE_SIZE,
   });
@@ -81,7 +95,7 @@ export default function JobApplicantsPage() {
   const data = poolQuery.data;
   const counts = data?.stageCounts;
   const hasActiveFilters = Boolean(
-    q || location || skill || role || education || minExperience,
+    q || location || skill || role || education || minExperience || experience || proof,
   );
 
   const selectedApplicants = useMemo(
@@ -109,6 +123,18 @@ export default function JobApplicantsPage() {
     setRole("");
     setEducation("");
     setMinExperience("");
+    setExperience(undefined);
+    setProof(undefined);
+  }
+
+  function selectFacet(kind: FacetKind, bucket: FacetBucket | null) {
+    if (kind === "skill") setSkill(bucket?.label ?? "");
+    if (kind === "location") setLocation(bucket?.label ?? "");
+    if (kind === "experience") {
+      setExperience(bucket?.id);
+      setMinExperience("");
+    }
+    if (kind === "proof") setProof((bucket?.id as ProofKind | undefined) ?? undefined);
   }
 
   function toggleSelected(applicant: ApplicantCard) {
@@ -182,7 +208,7 @@ export default function JobApplicantsPage() {
             </h1>
             <p className="text-body-sm text-text-secondary">
               {hasActiveFilters
-                ? `${data?.matchedCount ?? 0} matching · ${counts?.all ?? 0} total in this job`
+                ? `${data?.matchedCount ?? 0}${data?.truncated ? "+" : ""} matching · ${counts?.all ?? 0} total in this job`
                 : `${counts?.all ?? 0} applicants · select 2–${MAX_COMPARE_CANDIDATES} to compare evidence`}
             </p>
           </div>
@@ -202,20 +228,40 @@ export default function JobApplicantsPage() {
         {q && data?.interpreted ? (
           <InterpretedQueryChips interpreted={data.interpreted} />
         ) : null}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            variant={showFilters ? "default" : "outline"}
-            onClick={() => setShowFilters((v) => !v)}
-          >
-            Filters
-          </Button>
-          {hasActiveFilters ? (
-            <Button size="sm" variant="ghost" onClick={clearFilters}>
-              <X className="h-3.5 w-3.5" />
-              Clear
+        {data && data.indexing.pending > 0 ? (
+          <p className="text-xs text-text-muted">
+            Updating match scores for {data.indexing.pending} applicant
+            {data.indexing.pending === 1 ? "" : "s"}… results refresh automatically.
+          </p>
+        ) : null}
+        {data?.truncated ? (
+          <p className="text-xs text-text-muted">
+            Ranked the 500 strongest matches for this search. Add a filter to
+            narrow it further.
+          </p>
+        ) : null}
+        <FacetPanel
+          facets={data?.facets}
+          active={{ skill, location, experience, proof }}
+          onSelect={selectFacet}
+        />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant={showFilters ? "default" : "outline"}
+              onClick={() => setShowFilters((v) => !v)}
+            >
+              Filters
             </Button>
-          ) : null}
+            {hasActiveFilters ? (
+              <Button size="sm" variant="ghost" onClick={clearFilters}>
+                <X className="h-3.5 w-3.5" />
+                Clear
+              </Button>
+            ) : null}
+          </div>
+          <SortToggle value={sort} onChange={setSort} />
         </div>
         {showFilters ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -250,7 +296,10 @@ export default function JobApplicantsPage() {
                 type="number"
                 min={0}
                 value={minExperience}
-                onChange={(e) => setMinExperience(e.target.value)}
+                onChange={(e) => {
+                  setMinExperience(e.target.value);
+                  setExperience(undefined);
+                }}
                 placeholder="5"
               />
             </div>
@@ -544,7 +593,7 @@ export default function JobApplicantsPage() {
 function InterpretedQueryChips({
   interpreted,
 }: {
-  interpreted: InterpretedApplicantQuery;
+  interpreted: InterpretedSearchQuery;
 }) {
   const chips = [
     interpreted.minExperience != null
@@ -552,6 +601,7 @@ function InterpretedQueryChips({
       : null,
     interpreted.location,
     ...interpreted.keywords,
+    ...(interpreted.exclude ?? []).map((term) => `not ${term}`),
   ].filter((value): value is string => Boolean(value));
 
   if (chips.length === 0) {
@@ -565,7 +615,9 @@ function InterpretedQueryChips({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-xs text-text-muted">Understood as</span>
+      <span className="text-xs text-text-muted">
+        {interpreted.matchAny ? "Any of" : "Understood as"}
+      </span>
       {chips.map((chip) => (
         <span
           key={chip}

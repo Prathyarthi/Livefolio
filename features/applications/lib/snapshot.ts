@@ -4,7 +4,7 @@ import type { ApplicationSnapshotData } from "@/features/applications/lib/types"
 
 export type { ApplicationSnapshotData };
 
-const snapshotInclude = {
+export const applicationSnapshotInclude = {
   experiences: { orderBy: { sortOrder: "asc" as const } },
   educations: { orderBy: { sortOrder: "asc" as const } },
   skills: { orderBy: { sortOrder: "asc" as const } },
@@ -25,12 +25,22 @@ export async function buildApplicationSnapshot(
 ): Promise<{ portfolioId: string; data: ApplicationSnapshotData } | null> {
   const portfolio = await prisma.portfolio.findUnique({
     where: { userId },
-    include: snapshotInclude,
+    include: applicationSnapshotInclude,
   });
 
   if (!portfolio) return null;
 
-  const data: ApplicationSnapshotData = {
+  return { portfolioId: portfolio.id, data: portfolioToSnapshot(portfolio) };
+}
+
+export type SnapshotPortfolio = Prisma.PortfolioGetPayload<{
+  include: typeof applicationSnapshotInclude;
+}>;
+
+export function portfolioToSnapshot(
+  portfolio: SnapshotPortfolio,
+): ApplicationSnapshotData {
+  return {
     version: 1,
     capturedAt: new Date().toISOString(),
     profile: {
@@ -101,8 +111,6 @@ export async function buildApplicationSnapshot(
       items: c.items,
     })),
   };
-
-  return { portfolioId: portfolio.id, data };
 }
 
 export function snapshotAsJson(
