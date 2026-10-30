@@ -32,6 +32,12 @@ export const EDIT_STEPS = [
 
 export type EditStepValue = (typeof EDIT_STEPS)[number]["value"];
 
+export function isEditStepValue(
+  value: string | null | undefined,
+): value is EditStepValue {
+  return EDIT_STEPS.some((step) => step.value === value);
+}
+
 export const EDIT_STEP_DESCRIPTIONS: Record<EditStepValue, string> = {
   basic: "Your name, headline, summary, and how people can reach you.",
   experience: "Roles, companies, and what you accomplished in each job.",

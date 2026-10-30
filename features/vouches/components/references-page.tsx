@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Handshake } from "lucide-react";
+import { ArrowLeft, Handshake } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -188,9 +188,15 @@ export function ReferencesPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-[var(--space-6)] py-2">
+      <Button variant="ghost" size="sm" asChild className="-ml-2 w-fit">
+        <Link href="/dashboard/edit?step=references">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Edit
+        </Link>
+      </Button>
       <header className="space-y-1">
         <p className="eyebrow uppercase">References</p>
-        <h1 className="text-h2 text-text-primary">Ask people who know your work</h1>
+        <h1 className="text-h2 text-text-primary">Manage requests</h1>
         <p className="text-body-sm text-text-secondary">
           Named vouches beat a polished CV. Recruiters see them when they
           review you - they are not shown on your public Livefolio.
@@ -292,6 +298,10 @@ export function ReferencesPage() {
 
       <FlowFooter
         message="Ask people who have seen you work — not a crowd."
+        previous={{
+          href: "/dashboard/edit?step=references",
+          label: "Back to Edit",
+        }}
         next={{ href: "/dashboard/preview", label: "Preview portfolio" }}
       />
     </div>

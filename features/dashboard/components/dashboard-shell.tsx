@@ -13,7 +13,6 @@ import {
   Settings,
   BarChart3,
   CreditCard,
-  Handshake,
   LogOut,
   User,
   PanelLeft,
@@ -46,7 +45,6 @@ const NAV = [
   { title: "Templates", href: "/dashboard/templates", icon: Palette },
   { title: "Import", href: "/dashboard/import", icon: Download },
   { title: "Preview", href: "/dashboard/preview", icon: Eye },
-  { title: "References", href: "/dashboard/references", icon: Handshake },
   // Applications hidden until the job applications product is ready.
   // { title: "Applications", href: "/dashboard/applications", icon: FileCheck2 },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
