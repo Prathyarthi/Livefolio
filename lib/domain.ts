@@ -159,6 +159,7 @@ export const APP_ROUTE_PREFIXES = [
   "/sign-in",
   "/sign-up",
   "/vouch",
+  "/invite",
   "/pricing",
   "/recruiters",
   "/company",

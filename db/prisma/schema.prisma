@@ -42,6 +42,7 @@ model User {
   billingPayments         BillingPayment[]
 
   organizationMembers OrganizationMember[]
+  organizationInvitesSent OrganizationInvite[] @relation("OrgInvitesSent")
   workspaceMembers    WorkspaceMember[]
   jobsCreated         Job[]
   applications        Application[]
@@ -421,6 +422,7 @@ model Organization {
   subscriptionCurrentPeriodEnd  DateTime?
 
   members              OrganizationMember[]
+  invites              OrganizationInvite[]
   verification         OrganizationVerification?
   workspaces           Workspace[]
   jobs                 Job[]
@@ -470,6 +472,31 @@ model OrganizationMember {
   @@unique([organizationId, userId])
   @@index([userId])
   @@map("organization_members")
+}
+
+/// Email invite to join an organization. Membership is created only after accept.
+model OrganizationInvite {
+  id             String   @id @default(uuid())
+  token          String   @unique
+  organizationId String
+  email          String
+  /// admin | recruiter | hiring_manager
+  role           String
+  workspaceIds   Json     @default("[]")
+  invitedById    String
+  /// pending | accepted | revoked
+  status         String   @default("pending")
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("OrgInvitesSent", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([email, status])
+  @@map("organization_invites")
 }
 
 /// Hiring space inside an organization (e.g. Engineering vs Marketing).
@@ -728,7 +755,7 @@ model EmailSendLog {
   id         String   @id @default(uuid())
   userId     String?
   toEmail    String
-  /// welcome | no_portfolio | unpublished | published | blast | vouch_request | vouch_received | company_verification
+  /// welcome | no_portfolio | unpublished | published | blast | vouch_request | vouch_received | company_verification | org_invite
   type       String
   campaignId String?
   resendId   String?

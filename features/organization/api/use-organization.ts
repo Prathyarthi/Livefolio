@@ -297,8 +297,31 @@ export function useOrgMembers(slug: string | undefined) {
 
 function invalidateOrgMembers(qc: ReturnType<typeof useQueryClient>, slug: string) {
   qc.invalidateQueries({ queryKey: ["organizations", slug, "members"] });
+  qc.invalidateQueries({ queryKey: ["organizations", slug, "invites"] });
   qc.invalidateQueries({ queryKey: ["organizations"] });
   qc.invalidateQueries({ queryKey: ["organizations", slug] });
+}
+
+export type OrgInvite = {
+  id: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  expiresAt: string;
+};
+
+export function useOrgInvites(slug: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ["organizations", slug, "invites"],
+    enabled: Boolean(slug) && enabled,
+    queryFn: async () => {
+      const res = await fetch(`/api/organizations/${slug}/invites`, {
+        cache: "no-store",
+      });
+      if (!res.ok) await throwApiError(res, "Failed to load invites");
+      return res.json() as Promise<OrgInvite[]>;
+    },
+  });
 }
 
 function workspaceMembersKey(
@@ -350,7 +373,10 @@ export function useAddWorkspaceMember(orgSlug: string, workspaceSlug: string) {
         },
       );
       if (!res.ok) await throwApiError(res, "Failed to add member");
-      return res.json() as Promise<OrgMember>;
+      return res.json() as Promise<
+        | OrgMember
+        | { invited: true; id: string; email: string; role: string }
+      >;
     },
     onSuccess: () => invalidateWorkspaceMembers(qc, orgSlug, workspaceSlug),
   });
@@ -387,10 +413,31 @@ export function useAddOrgMember(slug: string) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) await throwApiError(res, "Failed to add member");
-      return res.json() as Promise<OrgMember>;
+      if (!res.ok) await throwApiError(res, "Failed to send invite");
+      return res.json() as Promise<{
+        invited: true;
+        id: string;
+        email: string;
+        role: string;
+      }>;
     },
     onSuccess: () => invalidateOrgMembers(qc, slug),
+  });
+}
+
+export function useRevokeOrgInvite(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (inviteId: string) => {
+      const res = await fetch(
+        `/api/organizations/${slug}/invites/${inviteId}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) await throwApiError(res, "Failed to revoke invite");
+      return res.json() as Promise<{ ok: boolean }>;
+    },
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["organizations", slug, "invites"] }),
   });
 }
 

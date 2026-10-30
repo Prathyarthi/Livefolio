@@ -338,6 +338,32 @@ export function companyVerificationEmailHtml(input: {
   };
 }
 
+export function orgInviteEmailHtml(input: {
+  inviterName: string;
+  organizationName: string;
+  roleLabel: string;
+  inviteUrl: string;
+}): { subject: string; html: string } {
+  const inviter = input.inviterName.trim() || "A teammate";
+  const organization = input.organizationName.trim() || "a company";
+  return {
+    subject: `${inviter} invited you to ${organization} on ${siteConfig.name}`,
+    html: emailShell({
+      title: `Join ${organization}`,
+      preheader: `Accept to join ${organization} as ${input.roleLabel}.`,
+      bodyHtml: `
+        ${paragraph(`<strong>${escapeHtml(inviter)}</strong> invited you to <strong>${escapeHtml(organization)}</strong> on ${siteConfig.name}.`)}
+        ${paragraph(`You'll join as ${escapeHtml(input.roleLabel)}. Sign in with this email address, then accept the invite.`, true)}
+        ${ctaButton(input.inviteUrl, "Accept invite")}
+      `,
+      footerHtml: `<p style="font-size:12px;color:${brand.muted};margin:0;">
+        You're receiving this because ${escapeHtml(inviter)} invited this address to ${escapeHtml(organization)} on ${siteConfig.name}.
+        If this wasn't meant for you, you can ignore it.
+      </p>`,
+    }),
+  };
+}
+
 export type AutomatedEmailDemo = {
   id:
     | "welcome"

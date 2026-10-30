@@ -71,11 +71,11 @@ export function WorkspaceTeamSection({
       return;
     }
     try {
-      await addMember.mutateAsync({
+      const result = await addMember.mutateAsync({
         email: email.trim(),
         role,
       });
-      toast.success("Member added");
+      toast.success("invited" in result ? "Invite sent" : "Member added");
       setEmail("");
       setRole("recruiter");
     } catch (error) {
@@ -131,8 +131,8 @@ export function WorkspaceTeamSection({
         <p className="text-body-sm text-text-secondary">
           People who can access this workspace. Owners and admins can enter
           every workspace. Removing someone here takes them out of this
-          workspace, not the company. New members must already have a
-          Livefolio account.
+          workspace, not the company. Someone new joins the company only
+          after they accept the email invite.
         </p>
       </div>
 
@@ -271,9 +271,8 @@ export function WorkspaceTeamSection({
             </div>
           </div>
           <p className="text-xs text-text-muted">
-            That email must already have a Livefolio account. If they already
-            belong to the company, they&apos;ll be added to this workspace
-            with their current role.
+            Someone already on the company is added to this workspace now.
+            Anyone else gets an email and joins after they accept.
           </p>
         </div>
       ) : null}
