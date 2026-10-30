@@ -430,6 +430,8 @@ export const applications = new Elysia({ prefix: "/applications" })
         ? ctx.query.stage
         : undefined;
     const searchFilters = parseSearchFilters(ctx.query);
+    const includeReferences =
+      ctx.query.references === "1" || ctx.query.references === "true";
     const sort = parseSearchSort(ctx.query.sort);
     const { page: requestedPage, pageSize } = parsePageParams(ctx.query);
 
@@ -446,6 +448,7 @@ export const applications = new Elysia({ prefix: "/applications" })
         profile: searchProfile,
         stage: stageFilter,
         filters: searchFilters,
+        includeReferences,
         sort,
         page: requestedPage,
         pageSize,

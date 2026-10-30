@@ -9,6 +9,7 @@ import {
   snapshotSearchBlob,
   tokenize,
 } from "@/features/search/lib/match";
+import { appendReferenceText, type ReferenceForSearch } from "@/features/search/lib/references";
 import { interpretSearchQuery } from "@/features/search/lib/query";
 import {
   matchesStructuredFilters,
@@ -110,19 +111,33 @@ export function filterApplicantsBySearch<
   T extends {
     snapshot: ApplicationSnapshotData | null;
     submittedAt: Date | string;
-    user?: { name?: string; email?: string };
+    user?: { id?: string; name?: string; email?: string };
     coverNote?: string | null;
   },
->(items: T[], filters: ApplicantSearchFilters): T[] {
+>(
+  items: T[],
+  filters: ApplicantSearchFilters,
+  referencesByUserId?: ReadonlyMap<string, ReferenceForSearch[]>,
+): T[] {
   const interpreted = interpretSearchQuery(filters.q);
   const resolved = mergeInterpretedFilters(filters);
   return items.filter((item) => {
-    const blob = snapshotSearchBlob(item.snapshot, {
-      name: item.user?.name,
-      email: item.user?.email,
-      coverNote: item.coverNote,
-    });
+    const references = item.user?.id
+      ? referencesByUserId?.get(item.user.id)
+      : undefined;
+    const blob = appendReferenceText(
+      snapshotSearchBlob(item.snapshot, {
+        name: item.user?.name,
+        email: item.user?.email,
+        coverNote: item.coverNote,
+      }),
+      references,
+    );
     if (!matchesInterpretedQuery(blob, interpreted)) return false;
-    return matchesStructuredFilters(item.snapshot, resolved, item.submittedAt);
+    return matchesStructuredFilters(item.snapshot, resolved, item.submittedAt, {
+      skillText: references?.length
+        ? references.map((ref) => ref.story).join(" ")
+        : undefined,
+    });
   });
 }

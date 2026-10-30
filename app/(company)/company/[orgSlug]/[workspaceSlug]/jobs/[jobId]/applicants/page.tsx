@@ -19,6 +19,7 @@ import {
 } from "@/features/applications/api/use-applications";
 import {
   FacetPanel,
+  ReferencesToggle,
   SortToggle,
   experienceBandRange,
   type FacetKind,
@@ -31,6 +32,7 @@ import {
   MAX_COMPARE_CANDIDATES,
 } from "@/features/applications/components/applicant-compare-view";
 import { ApplicantPoolGapReport } from "@/features/applications/components/applicant-pool-gap-report";
+import { ApplicationStageSelect } from "@/features/applications/components/application-stage-select";
 import {
   PIPELINE_STAGE_LABELS,
   PIPELINE_STAGES,
@@ -63,6 +65,7 @@ export default function JobApplicantsPage() {
   const [experience, setExperience] = useState<string | undefined>();
   const [proof, setProof] = useState<ProofKind | undefined>();
   const [sort, setSort] = useState<SearchSort>("relevance");
+  const [includeReferences, setIncludeReferences] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -73,7 +76,7 @@ export default function JobApplicantsPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [tab, q, location, skill, role, education, minExperience, experience, proof, sort]);
+  }, [tab, q, location, skill, role, education, minExperience, experience, proof, sort, includeReferences]);
 
   const poolQuery = useApplicantPool(jobId, {
     stage: tab !== "all" ? tab : undefined,
@@ -86,6 +89,7 @@ export default function JobApplicantsPage() {
     ...experienceBandRange(experience),
     proof,
     sort,
+    includeReferences,
     page,
     pageSize: DEFAULT_PAGE_SIZE,
   });
@@ -245,7 +249,7 @@ export default function JobApplicantsPage() {
           active={{ skill, location, experience, proof }}
           onSelect={selectFacet}
         />
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-3">
           <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
@@ -261,7 +265,13 @@ export default function JobApplicantsPage() {
               </Button>
             ) : null}
           </div>
-          <SortToggle value={sort} onChange={setSort} />
+          <div className="flex flex-wrap items-center gap-2">
+            <ReferencesToggle
+              checked={includeReferences}
+              onChange={setIncludeReferences}
+            />
+            <SortToggle value={sort} onChange={setSort} />
+          </div>
         </div>
         {showFilters ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -553,21 +563,11 @@ export default function JobApplicantsPage() {
                       />
                       {applicant.shortlisted ? "Unshortlist" : "Shortlist"}
                     </Button>
-                    <select
-                      className="h-9 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-2 text-sm text-text-primary"
+                    <ApplicationStageSelect
                       value={applicant.stage}
-                      onChange={(e) =>
-                        handleStage(applicant.id, e.target.value)
-                      }
+                      onChange={(stage) => handleStage(applicant.id, stage)}
                       disabled={updateStage.isPending}
-                      aria-label="Move stage"
-                    >
-                      {PIPELINE_STAGES.map((stage) => (
-                        <option key={stage} value={stage}>
-                          {PIPELINE_STAGE_LABELS[stage]}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </div>
               </li>
