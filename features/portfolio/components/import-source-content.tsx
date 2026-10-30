@@ -8,6 +8,7 @@ import { DevtoImporter } from "@/features/profile/components/devto-importer";
 import { HashnodeImporter } from "@/features/profile/components/hashnode-importer";
 import { StackOverflowImporter } from "@/features/profile/components/stackoverflow-importer";
 import { CodeforcesImporter } from "@/features/profile/components/codeforces-importer";
+import { LinkedInImporter } from "@/features/profile/components/linkedin-importer";
 import type { ReactNode } from "react";
 import {
   IMPORT_SOURCES,
@@ -60,6 +61,10 @@ export function ImportSourceContent({
       </div>
       <div hidden={source !== "codeforces"}>
         <CodeforcesImporter />
+      </div>
+      <div hidden={source !== "linkedin"}>
+        {/* Pro gating (locked state) is handled inside the importer. */}
+        {source === "linkedin" ? <LinkedInImporter /> : null}
       </div>
     </>
   );

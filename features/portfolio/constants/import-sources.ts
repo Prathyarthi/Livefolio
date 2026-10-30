@@ -4,6 +4,7 @@ import {
   DevtoIcon,
   GithubIcon as Github,
   HashnodeIcon,
+  LinkedinIcon,
   MediumIcon as Medium,
   StackOverflowIcon,
 } from "@/components/icons";
@@ -64,6 +65,13 @@ export const IMPORT_SOURCES = [
     short: "CF",
     icon: CodeforcesIcon as LucideIcon,
     description: "Sync contest rating, rank, and solved problems.",
+  },
+  {
+    value: "linkedin",
+    label: "LinkedIn",
+    short: "IN",
+    icon: LinkedinIcon as LucideIcon,
+    description: "Pro: fetch profile details and recent posts, then pick what to showcase.",
   },
 ] as const satisfies ReadonlyArray<{
   value: string;
