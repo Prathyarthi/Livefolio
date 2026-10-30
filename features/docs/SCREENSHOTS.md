@@ -15,26 +15,17 @@ save as PNG with the exact file name below, then set `available: true`.
 - pricing.png — `/pricing`
 - contact.png — `/contact`
 
-## Still needed (require a signed-in account with a portfolio)
+## Captured (signed-in dashboard)
 
-| File | Page / state |
-| --- | --- |
-| dashboard-overview.png | `/dashboard` with a portfolio |
-| dashboard-create-portfolio.png | `/dashboard` for a new account (Create portfolio button) |
-| import-resume.png | `/dashboard/import`, Resume selected |
-| import-integrations.png | `/dashboard/import`, GitHub selected |
-| edit-basic-info.png | `/dashboard/edit?step=basic` |
-| edit-experience.png | `/dashboard/edit?step=experience` |
-| edit-projects.png | `/dashboard/edit?step=projects` |
-| edit-custom-sections.png | `/dashboard/edit?step=custom` |
-| edit-social.png | `/dashboard/edit?step=social` |
-| edit-publish-step.png | `/dashboard/edit?step=publish` |
-| templates.png | `/dashboard/templates` |
-| preview.png | `/dashboard/preview` |
-| preview-sections.png | `/dashboard/preview` with editor panel on the Sections tab |
-| publish-dialog.png | `/dashboard/preview` → Publish dialog open |
-| share-dialog.png | Share dialog open |
-| references.png | `/dashboard/references` |
-| analytics.png | `/dashboard/analytics` |
-| billing.png | `/dashboard/billing` |
-| settings.png | `/dashboard/settings` |
+dashboard-overview, import-resume (shows the locked-imports state of the
+capturing account), edit-basic-info, edit-experience, edit-projects,
+edit-custom-sections, edit-social, edit-publish-step, share-dialog, templates,
+preview, preview-sections, references, analytics, billing, settings.
+
+## Still needed
+
+| File | Page / state | Why it was skipped |
+| --- | --- | --- |
+| dashboard-create-portfolio.png | `/dashboard` for an account with no portfolio | Capturing account already has a portfolio |
+| import-integrations.png | `/dashboard/import`, GitHub selected | Imports are locked on the capturing account, so sources cannot be selected |
+| publish-dialog.png | `/dashboard/preview` → Publish dialog | Capturing account is already published; the toolbar button would unpublish |
