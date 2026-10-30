@@ -36,6 +36,7 @@ import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { getTemplateSectionLayout } from "../section-layouts";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 import {
   renderSections,
   resolveSectionLayout,
@@ -535,6 +536,24 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
         <div className="mt-8 space-y-8 md:mt-10 md:space-y-10">
           {renderSections(resolved, "full", blocks)}
         </div>
+
+        {data.linkedin ? (
+          <div className="mt-8 md:mt-10">
+            <LinkedInSection
+              data={data.linkedin}
+              heading={<SectionHeading>LinkedIn</SectionHeading>}
+              classes={{
+                section: "rounded-[1.75rem] border border-stone-200/80 bg-white/70 p-8",
+                card: "rounded-2xl border border-stone-200/80 bg-white p-5",
+                title: "font-medium text-stone-900",
+                text: "text-sm text-stone-600",
+                muted: "text-xs text-stone-400",
+                chip: "rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_28%,white)] bg-white px-2.5 py-1 text-xs text-stone-500",
+                link: "text-sm text-stone-600 underline-offset-4 hover:text-stone-900 hover:underline",
+              }}
+            />
+          </div>
+        ) : null}
 
         {customSections.length > 0 && (
           <div className="mt-8 grid gap-8 md:mt-10 md:gap-10 md:grid-cols-2">
