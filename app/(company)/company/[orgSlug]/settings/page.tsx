@@ -16,6 +16,7 @@ import {
 import { CompanyTeamSection } from "@/features/organization/components/company-team-section";
 import { OrgBrandingImageField } from "@/features/organization/components/org-branding-field";
 import { useOrgJobs } from "@/features/jobs/api/use-jobs";
+import { CompanyVerificationSection } from "@/features/verification/components/company-verification-section";
 
 export default function CompanySettingsPage() {
   const params = useParams<{ orgSlug: string }>();
@@ -213,6 +214,11 @@ export default function CompanySettingsPage() {
               </Button>
             ) : null}
           </div>
+          <CompanyVerificationSection
+            orgSlug={orgSlug}
+            websiteUrl={org.websiteUrl}
+            verified={org.verified === true}
+          />
         </div>
       )}
 

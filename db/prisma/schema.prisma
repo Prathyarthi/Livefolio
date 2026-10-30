@@ -411,6 +411,9 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  /// Company badge. Earned by confirming an email on the company website's domain.
+  verified Boolean @default(false)
+
   /// none | pending | active — Org Pro is `active`.
   subscriptionStatus String @default("none")
   razorpaySubscriptionId String?
@@ -418,6 +421,7 @@ model Organization {
   subscriptionCurrentPeriodEnd  DateTime?
 
   members              OrganizationMember[]
+  verification         OrganizationVerification?
   workspaces           Workspace[]
   jobs                 Job[]
   billingSubscriptions BillingSubscription[]
@@ -426,6 +430,29 @@ model Organization {
 
   @@index([slug])
   @@map("organizations")
+}
+
+/// Work-email proof that an organization controls its website domain. The address stays private.
+model OrganizationVerification {
+  id             String    @id @default(uuid())
+  organizationId String    @unique
+  email          String
+  domain         String
+  /// pending | verified
+  status         String    @default("pending")
+  codeHash       String?
+  codeSalt       String?
+  codeExpiresAt  DateTime?
+  attempts       Int       @default(0)
+  lastSentAt     DateTime?
+  verifiedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([email, status])
+  @@map("organization_verifications")
 }
 
 model OrganizationMember {
@@ -701,7 +728,7 @@ model EmailSendLog {
   id         String   @id @default(uuid())
   userId     String?
   toEmail    String
-  /// welcome | no_portfolio | unpublished | published | blast | vouch_request | vouch_received
+  /// welcome | no_portfolio | unpublished | published | blast | vouch_request | vouch_received | company_verification
   type       String
   campaignId String?
   resendId   String?

@@ -1,5 +1,6 @@
 "use client";
 
+import { BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichText } from "@/components/rich-text";
 import {
@@ -29,6 +30,7 @@ type PreviewOrg = Pick<
   | "description"
   | "websiteUrl"
   | "location"
+  | "verified"
 >;
 
 function formToPreviewJob(form: JobRoleFormState, org: PreviewOrg): Job {
@@ -70,6 +72,7 @@ function formToPreviewJob(form: JobRoleFormState, org: PreviewOrg): Job {
       description: org.description,
       websiteUrl: org.websiteUrl,
       location: org.location,
+      verified: org.verified,
     },
     requirements: input.requirements ?? [],
   };
@@ -131,8 +134,11 @@ export function JobCandidatePreview({
               </div>
             ) : null}
             <div className="min-w-0 pt-1">
-              <p className="font-medium text-text-primary">
+              <p className="flex items-center gap-1.5 font-medium text-text-primary">
                 <RichText as="span" text={org.name} />
+                {org.verified ? (
+                  <BadgeCheck className="size-4 shrink-0 text-sky-500" aria-label="Verified company" />
+                ) : null}
               </p>
               
               {org.location ? (

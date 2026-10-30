@@ -316,6 +316,28 @@ export function vouchReceivedEmailHtml(input: {
   };
 }
 
+export function companyVerificationEmailHtml(input: {
+  company: string;
+  code: string;
+}): { subject: string; html: string } {
+  const company = input.company.trim() || "your company";
+  return {
+    subject: `${input.code} is your ${siteConfig.name} company code`,
+    html: emailShell({
+      title: "Verify your company",
+      preheader: `Enter this code to verify ${company}.`,
+      bodyHtml: `
+        ${paragraph(`Use this code to verify <strong>${escapeHtml(company)}</strong> on ${siteConfig.name}.`)}
+        <p style="font-size:32px;letter-spacing:8px;font-weight:700;color:${brand.heading};margin:0 0 16px;text-align:center;">${escapeHtml(input.code)}</p>
+        ${paragraph("The code expires in 10 minutes. If you didn't ask to verify this company, you can ignore this email.", true)}
+      `,
+      footerHtml: `<p style="font-size:12px;color:${brand.muted};margin:0;">
+        You're receiving this because someone entered this address to verify a company on ${siteConfig.name}.
+      </p>`,
+    }),
+  };
+}
+
 export type AutomatedEmailDemo = {
   id:
     | "welcome"

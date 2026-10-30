@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { LayoutGrid, Plus } from "lucide-react";
+import { BadgeCheck, LayoutGrid, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,7 +138,12 @@ export default function OrganizationHomePage() {
               }`}
             >
               <p className="eyebrow uppercase">Organization</p>
-              <h1 className="text-h2 text-text-primary">{org.name}</h1>
+              <h1 className="flex items-center gap-2 text-h2 text-text-primary">
+                <span className="min-w-0 truncate">{org.name}</span>
+                {org.verified ? (
+                  <BadgeCheck className="size-5 shrink-0 text-sky-500" aria-label="Verified company" />
+                ) : null}
+              </h1>
               <p className="max-w-xl text-body-sm text-text-secondary">
                 {org.description ||
                   "Workspaces keep hiring for different roles separate. Billing stays on this organization."}

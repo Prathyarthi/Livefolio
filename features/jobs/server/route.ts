@@ -113,6 +113,7 @@ const jobPublicInclude = {
       description: true,
       websiteUrl: true,
       location: true,
+      verified: true,
     },
   },
   workspace: {

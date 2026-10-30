@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePublicJob } from "@/features/jobs/api/use-jobs";
@@ -96,8 +96,11 @@ export default function PublicJobPage() {
               />
             ) : null}
             <div className="min-w-0">
-              <p className="font-medium text-text-primary">
+              <p className="flex items-center gap-1.5 font-medium text-text-primary">
                 <RichText as="span" text={org.name} />
+                {org.verified ? (
+                  <BadgeCheck className="size-4 shrink-0 text-sky-500" aria-label="Verified company" />
+                ) : null}
               </p>
               {org.location ? (
                 <p className="text-body-sm text-text-secondary">

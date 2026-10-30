@@ -28,6 +28,7 @@ import {
   withUserLock,
 } from "@/lib/org-entitlements";
 import { normalizeOAuthEmail } from "@/lib/oauth-users";
+import { domainMatchesWebsite } from "@/features/verification/lib/work-email";
 import { deleteOrgBrandFiles } from "@/features/uploads/server/stored-files";
 
 function optionalTrim(value?: string | null) {
@@ -151,6 +152,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
             bannerUrl: true,
             brandColor: true,
             description: true,
+            verified: true,
             _count: { select: { jobs: true, members: true, workspaces: true } },
             workspaces: {
               select: {
@@ -446,31 +448,53 @@ export const organization = new Elysia({ prefix: "/organizations" })
         await deleteOrgBrandFiles(org.id, "org_banner");
       }
 
-      const updated = await prisma.organization.update({
-        where: { id: org.id },
-        data: {
-          ...(ctx.body.name !== undefined
-            ? { name: ctx.body.name.trim() }
-            : {}),
-          ...(ctx.body.description !== undefined
-            ? { description: optionalTrim(ctx.body.description) }
-            : {}),
-          ...(ctx.body.websiteUrl !== undefined
-            ? { websiteUrl: optionalTrim(ctx.body.websiteUrl) }
-            : {}),
-          ...(ctx.body.location !== undefined
-            ? { location: optionalTrim(ctx.body.location) }
-            : {}),
-          ...(ctx.body.logoUrl !== undefined
-            ? { logoUrl: optionalTrim(ctx.body.logoUrl) }
-            : {}),
-          ...(ctx.body.bannerUrl !== undefined
-            ? { bannerUrl: optionalTrim(ctx.body.bannerUrl) }
-            : {}),
-          ...(ctx.body.brandColor !== undefined
-            ? { brandColor: optionalTrim(ctx.body.brandColor) }
-            : {}),
-        },
+      const nextWebsite =
+        ctx.body.websiteUrl !== undefined
+          ? optionalTrim(ctx.body.websiteUrl)
+          : undefined;
+
+      const updated = await prisma.$transaction(async (tx) => {
+        const saved = await tx.organization.update({
+          where: { id: org.id },
+          data: {
+            ...(ctx.body.name !== undefined
+              ? { name: ctx.body.name.trim() }
+              : {}),
+            ...(ctx.body.description !== undefined
+              ? { description: optionalTrim(ctx.body.description) }
+              : {}),
+            ...(nextWebsite !== undefined ? { websiteUrl: nextWebsite } : {}),
+            ...(ctx.body.location !== undefined
+              ? { location: optionalTrim(ctx.body.location) }
+              : {}),
+            ...(ctx.body.logoUrl !== undefined
+              ? { logoUrl: optionalTrim(ctx.body.logoUrl) }
+              : {}),
+            ...(ctx.body.bannerUrl !== undefined
+              ? { bannerUrl: optionalTrim(ctx.body.bannerUrl) }
+              : {}),
+            ...(ctx.body.brandColor !== undefined
+              ? { brandColor: optionalTrim(ctx.body.brandColor) }
+              : {}),
+          },
+        });
+
+        if (nextWebsite === undefined) return saved;
+
+        const proof = await tx.organizationVerification.findUnique({
+          where: { organizationId: org.id },
+        });
+        if (
+          proof?.status === "verified" &&
+          !domainMatchesWebsite(proof.domain, nextWebsite)
+        ) {
+          await tx.organizationVerification.delete({ where: { id: proof.id } });
+          return tx.organization.update({
+            where: { id: org.id },
+            data: { verified: false },
+          });
+        }
+        return saved;
       });
 
       return updated;

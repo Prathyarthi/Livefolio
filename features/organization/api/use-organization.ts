@@ -53,6 +53,7 @@ export type OrganizationSummary = {
   bannerUrl: string | null;
   brandColor: string | null;
   description: string | null;
+  verified?: boolean;
   _count?: { jobs: number; members: number; workspaces?: number };
   workspaces?: Array<{
     id: string;

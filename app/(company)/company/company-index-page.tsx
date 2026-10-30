@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Building2 } from "lucide-react";
+import { BadgeCheck, Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ import {
 } from "@/features/organization/api/use-organization";
 import { isValidOrgSlug, sanitizeHiringSlug } from "@/features/jobs/lib/slug";
 import { OrgLogo } from "@/features/organization/components/org-logo";
-
 function getOrgSlugInlineError(slug: string): string | null {
   if (!slug) return null;
   if (slug.length < 2) return "Slug must be at least 2 characters";
@@ -169,8 +168,13 @@ export function CompanyIndexPage() {
                       size="sm"
                     />
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-text-primary">
-                        <RichText as="span" text={organization.name} />
+                      <p className="flex min-w-0 items-center gap-1.5 font-medium text-text-primary">
+                        <span className="truncate">
+                          <RichText as="span" text={organization.name} />
+                        </span>
+                        {organization.verified ? (
+                          <BadgeCheck className="size-4 shrink-0 text-sky-500" aria-label="Verified company" />
+                        ) : null}
                       </p>
                       <p className="text-body-sm text-text-secondary">
                         {role} · {organization._count?.jobs ?? 0} jobs
