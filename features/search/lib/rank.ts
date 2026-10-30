@@ -23,6 +23,11 @@ import {
   platformScore,
   provenScore,
 } from "@/features/search/lib/rank-signals";
+import {
+  applyReferenceRank,
+  referenceMatchTerms,
+  type ReferenceForSearch,
+} from "@/features/search/lib/references";
 
 export type CandidateRank = {
   score: number;
@@ -210,14 +215,17 @@ export function rankCandidate(
     jobProfile?: JobSearchProfile | null;
     query?: InterpretedSearchQuery | null;
     extras?: RankExtras;
+    /** Set only when the recruiter has opted in. Adds points; never lowers a score. */
+    references?: ReferenceForSearch[];
   },
 ): CandidateRank {
   const { jobProfile, query, extras } = options;
   const hasQuery = Boolean(query && (query.keywords.length > 0 || query.minExperience));
+  let rank: CandidateRank;
   if (jobProfile && query && hasQuery) {
     const job = rankAgainstJob(snapshot, jobProfile, extras);
     const byQuery = rankAgainstQuery(snapshot, query, extras);
-    return {
+    rank = {
       score: Math.round(job.score * 0.7 + byQuery.score * 0.3),
       overlap: job.overlap * 0.7 + byQuery.overlap * 0.3,
       proven: Math.max(job.proven, byQuery.proven),
@@ -226,8 +234,24 @@ export function rankCandidate(
       freshness: job.freshness,
       reasons: [...new Set([...byQuery.reasons, ...job.reasons])].slice(0, 4),
     };
+  } else if (jobProfile) {
+    rank = rankAgainstJob(snapshot, jobProfile, extras);
+  } else if (query) {
+    rank = rankAgainstQuery(snapshot, query, extras);
+  } else {
+    rank = emptyRank(freshnessScore(extras?.freshnessAt));
   }
-  if (jobProfile) return rankAgainstJob(snapshot, jobProfile, extras);
-  if (query) return rankAgainstQuery(snapshot, query, extras);
-  return emptyRank(freshnessScore(extras?.freshnessAt));
+
+  if (!options.references?.length) return rank;
+  const applied = applyReferenceRank(
+    rank.score,
+    rank.reasons,
+    options.references,
+    referenceMatchTerms({
+      keywords: query?.keywords,
+      mustHaves: jobProfile?.mustHaves,
+      niceToHaves: jobProfile?.niceToHaves,
+    }),
+  );
+  return { ...rank, score: applied.score, reasons: applied.reasons };
 }

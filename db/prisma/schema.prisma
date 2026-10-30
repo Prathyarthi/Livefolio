@@ -792,7 +792,7 @@ model Vouch {
   /// pending | completed | cancelled
   status String @default("pending")
 
-  /// manager | peer | founder | report | classmate | collaborator
+  /// manager | peer | founder | report | collaborator | other
   relationship String?
   /// One specific story (short)
   story String? @db.Text
