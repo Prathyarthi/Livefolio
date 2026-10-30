@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { SearchFacets } from "@/features/search/lib/facets";
 import type { ProofKind } from "@/features/search/lib/proof";
 import type { InterpretedSearchQuery, SearchSort } from "@/features/search/lib/query";
+import type { NamedVouch } from "@/features/vouches/lib/public";
 
 async function throwApiError(
   response: Response,
@@ -34,6 +35,7 @@ export type TalentPerson = {
   score: number;
   reasons: string[];
   livefolioUrl: string;
+  vouches: NamedVouch[];
 };
 
 export type TalentSearchResult = {

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { siteConfig } from "@/lib/site";
 import { OAuthSignInButtons } from "@/features/auth/components/oauth-sign-in-buttons";
+import { safeCallbackPath } from "@/lib/auth-callback";
 
 const AUTH_ERRORS: Record<string, string> = {
   OAuthAccountNotLinked:
@@ -39,6 +40,9 @@ export function SignInForm({ githubEnabled, googleEnabled }: SignInFormProps) {
   const authError = queryError
     ? AUTH_ERRORS[queryError] ?? "Sign in failed. Please try again."
     : "";
+  const callbackUrl =
+    safeCallbackPath(searchParams.get("callbackUrl")) ?? "/dashboard";
+  const signUpHref = `/sign-up?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   return (
     <Card>
@@ -50,6 +54,7 @@ export function SignInForm({ githubEnabled, googleEnabled }: SignInFormProps) {
         <OAuthSignInButtons
           googleEnabled={googleEnabled}
           githubEnabled={githubEnabled}
+          callbackUrl={callbackUrl}
         />
 
         {authError ? (
@@ -65,7 +70,7 @@ export function SignInForm({ githubEnabled, googleEnabled }: SignInFormProps) {
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="text-primary hover:underline">
+          <Link href={signUpHref} className="text-primary hover:underline">
             Sign up
           </Link>
         </p>

@@ -1,4 +1,8 @@
 import { templateCatalog } from "@/features/templates/template-catalog";
+import {
+  FREE_VOUCH_REQUESTS,
+  PRO_VOUCH_REQUESTS,
+} from "@/features/vouches/lib/constants";
 import { isAnyBillingReady } from "@/lib/billing";
 
 const FREE_TRIAL_DAYS = 30;
@@ -41,6 +45,7 @@ export interface AccessSnapshot {
   canUseAnalytics: boolean;
   allowedTemplateIds: string[];
   maxProjectThumbnails: number;
+  maxVouchRequests: number;
 }
 
 export function isProSubscription(
@@ -87,10 +92,12 @@ export function resolveAccessForUser(
   const allowedTemplateIds = canUsePremiumTemplates
     ? [...FREE_TEMPLATE_IDS, ...PREMIUM_TEMPLATE_IDS]
     : [...FREE_TEMPLATE_IDS];
-  const maxProjectThumbnails =
-    paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess)
-      ? PRO_PROJECT_THUMBNAILS
-      : FREE_PROJECT_THUMBNAILS;
+  const unlocked =
+    paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
+  const maxProjectThumbnails = unlocked
+    ? PRO_PROJECT_THUMBNAILS
+    : FREE_PROJECT_THUMBNAILS;
+  const maxVouchRequests = unlocked ? PRO_VOUCH_REQUESTS : FREE_VOUCH_REQUESTS;
 
   return {
     tier,
@@ -101,6 +108,7 @@ export function resolveAccessForUser(
     canUseAnalytics,
     allowedTemplateIds,
     maxProjectThumbnails,
+    maxVouchRequests,
   };
 }
 

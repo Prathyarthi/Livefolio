@@ -15,12 +15,7 @@ import {
 } from "@/lib/content-policy";
 import { exceedsRequestBodyLimit } from "@/lib/request-body-limit";
 import { shouldUseSecureCookies } from "@/lib/auth-cookies";
-
-/** Safe internal path only — blocks open redirects. */
-function safeCallbackPath(value: string | null): string | null {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
-  return value;
-}
+import { safeCallbackPath } from "@/lib/auth-callback";
 
 function redirectToPortfolioSubdomain(request: NextRequest, slug: string) {
   const rootDomain = getPortfolioRootDomain();

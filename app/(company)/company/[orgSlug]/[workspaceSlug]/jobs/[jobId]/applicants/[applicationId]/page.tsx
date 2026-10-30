@@ -25,6 +25,7 @@ import {
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import { ScreeningAnswersSection } from "@/features/applications/components/screening-answers-section";
 import { getPortfolioPublicUrl } from "@/lib/domain";
+import { NamedReferences } from "@/features/vouches/components/named-references";
 
 export default function ApplicantDetailPage() {
   const params = useParams<{
@@ -212,6 +213,15 @@ export default function ApplicantDetailPage() {
       ) : null}
 
       <ScreeningAnswersSection answers={data.screeningAnswers} />
+
+      {data.vouches.length > 0 ? (
+        <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 shadow-[var(--shadow-card)] md:p-6">
+          <NamedReferences
+            vouches={data.vouches}
+            description="People who put their Livefolio account behind this candidate. Not shown on the public Livefolio."
+          />
+        </section>
+      ) : null}
 
       {data.evidence &&
       (data.evidence.requirementMatches.length > 0 ||

@@ -11,6 +11,7 @@ import type {
 import type { SearchFacets } from "@/features/search/lib/facets";
 import type { ProofKind } from "@/features/search/lib/proof";
 import type { InterpretedSearchQuery, SearchSort } from "@/features/search/lib/query";
+import type { NamedVouch } from "@/features/vouches/lib/public";
 
 async function throwApiError(
   response: Response,
@@ -222,6 +223,7 @@ export type ApplicantCard = {
   };
   evidence: ApplicantEvidenceSummary;
   resumeFileId: string | null;
+  vouchCount?: number;
 };
 
 export type ApplicantPoolFilters = {
@@ -306,6 +308,7 @@ export type CompanyApplicationDetail = {
   snapshotData: ApplicationSnapshotData | null;
   evidence: ApplicantEvidenceSummary;
   resumeFileId: string | null;
+  vouches: NamedVouch[];
   requirements?: Array<{
     id: string;
     type: string;

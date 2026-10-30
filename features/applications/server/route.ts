@@ -30,6 +30,7 @@ import { isProofKind } from "@/features/search/lib/proof";
 import { interpretSearchQuery, parseSearchSort } from "@/features/search/lib/query";
 import { RANKING_VERSION, rankAgainstJob } from "@/features/search/lib/rank";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
+import { listNamedVouchesForUser } from "@/features/vouches/lib/public";
 import { parseJobSearchProfile } from "@/features/jobs/lib/search-profile";
 import { parsePageParams } from "@/lib/pagination";
 
@@ -549,7 +550,10 @@ export const applications = new Elysia({ prefix: "/applications" })
       rank,
     );
 
-    const resumeByUser = await latestResumeIdsByUserId([application.user.id]);
+    const [resumeByUser, vouches] = await Promise.all([
+      latestResumeIdsByUserId([application.user.id]),
+      listNamedVouchesForUser(application.user.id),
+    ]);
 
     return {
       id: application.id,
@@ -577,6 +581,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       },
       snapshotData: snapshot,
       evidence,
+      vouches,
     };
   })
 

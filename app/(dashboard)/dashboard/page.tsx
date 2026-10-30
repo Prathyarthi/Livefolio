@@ -13,6 +13,7 @@ import { getPortfolioPublicUrl } from "@/lib/domain";
 
 const secondaryLinks = [
   { href: "/dashboard/preview", label: "Preview" },
+  { href: "/dashboard/references", label: "References" },
   { href: "/dashboard/analytics", label: "Analytics" },
   { href: "/dashboard/templates", label: "Templates" },
   { href: "/dashboard/import", label: "Import" },

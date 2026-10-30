@@ -21,6 +21,7 @@ import { isProofKind, proofKindsOf } from "@/features/search/lib/proof";
 import { interpretSearchQuery, parseSearchSort } from "@/features/search/lib/query";
 import { RANKING_VERSION, rankCandidate } from "@/features/search/lib/rank";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
+import { listNamedVouchesByUserIds } from "@/features/vouches/lib/public";
 
 const QUERY_MAX = 120;
 /** Ranking runs in memory, so recall is capped to the most recently updated matches. */
@@ -165,6 +166,9 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       });
 
     const paged = paginateSlice(matched, requestedPage, pageSize);
+    const vouchesByUser = await listNamedVouchesByUserIds(
+      paged.items.map((item) => item.row.userId),
+    );
 
     return {
       total: paged.total,
@@ -195,6 +199,7 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
           score: rank.score,
           reasons: rank.reasons,
           livefolioUrl: getPortfolioPublicUrl(slug),
+          vouches: vouchesByUser.get(row.userId) ?? [],
         };
       }),
     };
