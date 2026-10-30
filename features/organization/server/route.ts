@@ -27,7 +27,10 @@ import {
   withOrganizationLock,
   withUserLock,
 } from "@/lib/org-entitlements";
+import { randomBytes } from "node:crypto";
 import { normalizeOAuthEmail } from "@/lib/oauth-users";
+import { domainMatchesWebsite } from "@/features/verification/lib/work-email";
+import { sendOrgInviteEmail } from "@/features/organization/lib/invite-email";
 import { deleteOrgBrandFiles } from "@/features/uploads/server/stored-files";
 
 function optionalTrim(value?: string | null) {
@@ -106,6 +109,84 @@ async function assignUserToWorkspaces(
   return ids;
 }
 
+async function emailOrganizationInvite(input: {
+  organizationId: string;
+  email: string;
+  role: string;
+  workspaceIds: string[];
+  invitedById: string;
+  inviterName: string;
+}) {
+  const pending = await prisma.organizationInvite.findFirst({
+    where: {
+      organizationId: input.organizationId,
+      email: input.email,
+      status: "pending",
+    },
+  });
+  const createdNew = !pending;
+  const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+  const invite = pending
+    ? await prisma.organizationInvite.update({
+        where: { id: pending.id },
+        data: {
+          role: input.role,
+          workspaceIds: input.workspaceIds,
+          invitedById: input.invitedById,
+          expiresAt,
+        },
+      })
+    : await prisma.organizationInvite.create({
+        data: {
+          token: randomBytes(24).toString("hex"),
+          organizationId: input.organizationId,
+          email: input.email,
+          role: input.role,
+          workspaceIds: input.workspaceIds,
+          invitedById: input.invitedById,
+          expiresAt,
+        },
+      });
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: input.organizationId },
+    select: { name: true },
+  });
+  const sent = await sendOrgInviteEmail({
+    inviteId: invite.id,
+    userId: input.invitedById,
+    toEmail: input.email,
+    inviterName: input.inviterName,
+    organizationName: organization?.name || "your company",
+    role: invite.role,
+    token: invite.token,
+  });
+  if (!sent.sent) {
+    if (createdNew) {
+      await prisma.organizationInvite.delete({ where: { id: invite.id } });
+    }
+    return {
+      ok: false as const,
+      error: sent.error ?? "Could not send the invite email.",
+    };
+  }
+
+  return {
+    ok: true as const,
+    invite: {
+      invited: true as const,
+      id: invite.id,
+      email: invite.email,
+      role: invite.role,
+    },
+  };
+}
+
+function storedWorkspaceIds(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((id): id is string => typeof id === "string");
+}
+
 async function getWorkspaceIdsForUser(organizationId: string, userId: string) {
   const rows = await prisma.workspaceMember.findMany({
     where: { userId, workspace: { organizationId } },
@@ -151,6 +232,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
             bannerUrl: true,
             brandColor: true,
             description: true,
+            verified: true,
             _count: { select: { jobs: true, members: true, workspaces: true } },
             workspaces: {
               select: {
@@ -446,31 +528,53 @@ export const organization = new Elysia({ prefix: "/organizations" })
         await deleteOrgBrandFiles(org.id, "org_banner");
       }
 
-      const updated = await prisma.organization.update({
-        where: { id: org.id },
-        data: {
-          ...(ctx.body.name !== undefined
-            ? { name: ctx.body.name.trim() }
-            : {}),
-          ...(ctx.body.description !== undefined
-            ? { description: optionalTrim(ctx.body.description) }
-            : {}),
-          ...(ctx.body.websiteUrl !== undefined
-            ? { websiteUrl: optionalTrim(ctx.body.websiteUrl) }
-            : {}),
-          ...(ctx.body.location !== undefined
-            ? { location: optionalTrim(ctx.body.location) }
-            : {}),
-          ...(ctx.body.logoUrl !== undefined
-            ? { logoUrl: optionalTrim(ctx.body.logoUrl) }
-            : {}),
-          ...(ctx.body.bannerUrl !== undefined
-            ? { bannerUrl: optionalTrim(ctx.body.bannerUrl) }
-            : {}),
-          ...(ctx.body.brandColor !== undefined
-            ? { brandColor: optionalTrim(ctx.body.brandColor) }
-            : {}),
-        },
+      const nextWebsite =
+        ctx.body.websiteUrl !== undefined
+          ? optionalTrim(ctx.body.websiteUrl)
+          : undefined;
+
+      const updated = await prisma.$transaction(async (tx) => {
+        const saved = await tx.organization.update({
+          where: { id: org.id },
+          data: {
+            ...(ctx.body.name !== undefined
+              ? { name: ctx.body.name.trim() }
+              : {}),
+            ...(ctx.body.description !== undefined
+              ? { description: optionalTrim(ctx.body.description) }
+              : {}),
+            ...(nextWebsite !== undefined ? { websiteUrl: nextWebsite } : {}),
+            ...(ctx.body.location !== undefined
+              ? { location: optionalTrim(ctx.body.location) }
+              : {}),
+            ...(ctx.body.logoUrl !== undefined
+              ? { logoUrl: optionalTrim(ctx.body.logoUrl) }
+              : {}),
+            ...(ctx.body.bannerUrl !== undefined
+              ? { bannerUrl: optionalTrim(ctx.body.bannerUrl) }
+              : {}),
+            ...(ctx.body.brandColor !== undefined
+              ? { brandColor: optionalTrim(ctx.body.brandColor) }
+              : {}),
+          },
+        });
+
+        if (nextWebsite === undefined) return saved;
+
+        const proof = await tx.organizationVerification.findUnique({
+          where: { organizationId: org.id },
+        });
+        if (
+          proof?.status === "verified" &&
+          !domainMatchesWebsite(proof.domain, nextWebsite)
+        ) {
+          await tx.organizationVerification.delete({ where: { id: proof.id } });
+          return tx.organization.update({
+            where: { id: org.id },
+            data: { verified: false },
+          });
+        }
+        return saved;
       });
 
       return updated;
@@ -874,23 +978,18 @@ export const organization = new Elysia({ prefix: "/organizations" })
         where: { email },
         select: memberUserSelect,
       });
-      if (!user) {
-        ctx.set.status = 404;
-        return {
-          error:
-            "No Livefolio account found for that email. They need to sign up first.",
-        };
-      }
 
-      const existing = await prisma.organizationMember.findUnique({
-        where: {
-          organizationId_userId: {
-            organizationId: org.id,
-            userId: user.id,
-          },
-        },
-        include: { user: { select: memberUserSelect } },
-      });
+      const existing = user
+        ? await prisma.organizationMember.findUnique({
+            where: {
+              organizationId_userId: {
+                organizationId: org.id,
+                userId: user.id,
+              },
+            },
+            include: { user: { select: memberUserSelect } },
+          })
+        : null;
 
       if (existing) {
         if (canManageOrganization(existing.role)) {
@@ -904,7 +1003,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
           where: {
             workspaceId_userId: {
               workspaceId: workspace.id,
-              userId: user.id,
+              userId: existing.userId,
             },
           },
           select: { id: true },
@@ -914,27 +1013,33 @@ export const organization = new Elysia({ prefix: "/organizations" })
           return { error: "That person is already a member of this workspace." };
         }
 
-        await addUserToWorkspace(workspace.id, user.id);
+        await addUserToWorkspace(workspace.id, existing.userId);
         return serializeMember({
           ...existing,
-          workspaceIds: await getWorkspaceIdsForUser(org.id, user.id),
+          workspaceIds: await getWorkspaceIdsForUser(org.id, existing.userId),
         });
       }
 
-      const member = await prisma.organizationMember.create({
-        data: {
-          organizationId: org.id,
-          userId: user.id,
-          role: ctx.body.role,
-        },
-        include: { user: { select: memberUserSelect } },
+      const pending = await prisma.organizationInvite.findFirst({
+        where: { organizationId: org.id, email, status: "pending" },
+        select: { workspaceIds: true },
       });
-
-      const workspaceIds = await assignUserToWorkspaces(org.id, user.id, [
-        workspace.id,
-      ]);
-
-      return serializeMember({ ...member, workspaceIds });
+      const workspaceIds = [
+        ...new Set([...storedWorkspaceIds(pending?.workspaceIds), workspace.id]),
+      ];
+      const invited = await emailOrganizationInvite({
+        organizationId: org.id,
+        email,
+        role: ctx.body.role,
+        workspaceIds,
+        invitedById: session.userId,
+        inviterName: session.name?.trim() || "A teammate",
+      });
+      if (!invited.ok) {
+        ctx.set.status = 502;
+        return { error: invited.error };
+      }
+      return invited.invite;
     },
     {
       body: t.Object({
@@ -1065,7 +1170,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
     );
   })
 
-  // Add member
+  // Email an invite. Membership is created only after they accept.
   .post(
     "/:slug/members",
     async (ctx) => {
@@ -1101,48 +1206,50 @@ export const organization = new Elysia({ prefix: "/organizations" })
         return { error: "A valid email is required" };
       }
 
-      const user = await prisma.user.findUnique({
+      const existingUser = await prisma.user.findUnique({
         where: { email },
-        select: memberUserSelect,
-      });
-      if (!user) {
-        ctx.set.status = 404;
-        return {
-          error:
-            "No Livefolio account found for that email. They need to sign up first.",
-        };
-      }
-
-      const existing = await prisma.organizationMember.findUnique({
-        where: {
-          organizationId_userId: {
-            organizationId: org.id,
-            userId: user.id,
-          },
-        },
         select: { id: true },
       });
-      if (existing) {
-        ctx.set.status = 409;
-        return { error: "That person is already a member of this company." };
+      if (existingUser) {
+        const alreadyMember = await prisma.organizationMember.findUnique({
+          where: {
+            organizationId_userId: {
+              organizationId: org.id,
+              userId: existingUser.id,
+            },
+          },
+          select: { id: true },
+        });
+        if (alreadyMember) {
+          ctx.set.status = 409;
+          return { error: "That person is already a member of this company." };
+        }
       }
 
-      const member = await prisma.organizationMember.create({
-        data: {
-          organizationId: org.id,
-          userId: user.id,
-          role: ctx.body.role,
-        },
-        include: { user: { select: memberUserSelect } },
+      const orgWorkspaces = await prisma.workspace.findMany({
+        where: { organizationId: org.id },
+        select: { id: true },
       });
+      const allowed = new Set(orgWorkspaces.map((ws) => ws.id));
+      const workspaceIds = (
+        ctx.body.workspaceIds && ctx.body.workspaceIds.length > 0
+          ? ctx.body.workspaceIds
+          : orgWorkspaces.map((ws) => ws.id)
+      ).filter((id) => allowed.has(id));
 
-      const workspaceIds = await assignUserToWorkspaces(
-        org.id,
-        user.id,
-        ctx.body.workspaceIds,
-      );
-
-      return serializeMember({ ...member, workspaceIds });
+      const invited = await emailOrganizationInvite({
+        organizationId: org.id,
+        email,
+        role: ctx.body.role,
+        workspaceIds,
+        invitedById: session.userId,
+        inviterName: session.name?.trim() || "A teammate",
+      });
+      if (!invited.ok) {
+        ctx.set.status = 502;
+        return { error: invited.error };
+      }
+      return invited.invite;
     },
     {
       body: t.Object({
@@ -1301,4 +1408,184 @@ export const organization = new Elysia({ prefix: "/organizations" })
 
     await prisma.organizationMember.delete({ where: { id: target.id } });
     return { ok: true };
+  })
+
+  .get("/:slug/invites", async (ctx) => {
+    const session = await getSession(ctx.request);
+    if (!session) {
+      ctx.set.status = 401;
+      return { error: "Unauthorized" };
+    }
+
+    const org = await prisma.organization.findUnique({
+      where: { slug: ctx.params.slug },
+      select: { id: true },
+    });
+    if (!org) {
+      ctx.set.status = 404;
+      return { error: "Organization not found" };
+    }
+
+    const actor = await requireOrgAdmin(org.id, session.userId);
+    if (!actor) {
+      ctx.set.status = 403;
+      return { error: "Forbidden" };
+    }
+
+    const invites = await prisma.organizationInvite.findMany({
+      where: { organizationId: org.id, status: "pending" },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        expiresAt: true,
+      },
+    });
+    return invites;
+  })
+
+  .delete("/:slug/invites/:inviteId", async (ctx) => {
+    const session = await getSession(ctx.request);
+    if (!session) {
+      ctx.set.status = 401;
+      return { error: "Unauthorized" };
+    }
+
+    const org = await prisma.organization.findUnique({
+      where: { slug: ctx.params.slug },
+      select: { id: true },
+    });
+    if (!org) {
+      ctx.set.status = 404;
+      return { error: "Organization not found" };
+    }
+
+    const actor = await requireOrgAdmin(org.id, session.userId);
+    if (!actor) {
+      ctx.set.status = 403;
+      return { error: "Forbidden" };
+    }
+
+    const invite = await prisma.organizationInvite.findFirst({
+      where: {
+        id: ctx.params.inviteId,
+        organizationId: org.id,
+        status: "pending",
+      },
+      select: { id: true },
+    });
+    if (!invite) {
+      ctx.set.status = 404;
+      return { error: "Invite not found" };
+    }
+
+    await prisma.organizationInvite.update({
+      where: { id: invite.id },
+      data: { status: "revoked" },
+    });
+    return { ok: true };
+  })
+
+  .get("/join/:token", async (ctx) => {
+    const invite = await prisma.organizationInvite.findUnique({
+      where: { token: ctx.params.token },
+      include: { organization: { select: { name: true, slug: true } } },
+    });
+    if (!invite || invite.status === "revoked") {
+      ctx.set.status = 404;
+      return { error: "This invite is no longer available." };
+    }
+    if (invite.status === "accepted") {
+      return {
+        status: "accepted",
+        organizationName: invite.organization.name,
+        organizationSlug: invite.organization.slug,
+        email: invite.email,
+        role: invite.role,
+      };
+    }
+    if (invite.expiresAt.getTime() < Date.now()) {
+      ctx.set.status = 410;
+      return { error: "This invite has expired." };
+    }
+    return {
+      status: "pending",
+      organizationName: invite.organization.name,
+      organizationSlug: invite.organization.slug,
+      email: invite.email,
+      role: invite.role,
+    };
+  })
+
+  .post("/join/:token", async (ctx) => {
+    const session = await getSession(ctx.request);
+    if (!session?.email) {
+      ctx.set.status = 401;
+      return { error: "Sign in to accept this invite." };
+    }
+
+    const invite = await prisma.organizationInvite.findUnique({
+      where: { token: ctx.params.token },
+    });
+    if (!invite || invite.status !== "pending") {
+      ctx.set.status = 404;
+      return { error: "This invite is no longer available." };
+    }
+    if (invite.expiresAt.getTime() < Date.now()) {
+      ctx.set.status = 410;
+      return { error: "This invite has expired." };
+    }
+
+    const sessionEmail = normalizeOAuthEmail(session.email);
+    if (sessionEmail !== invite.email) {
+      ctx.set.status = 403;
+      return {
+        error: `Sign in as ${invite.email} to accept this invite.`,
+      };
+    }
+
+    const workspaceIds = Array.isArray(invite.workspaceIds)
+      ? invite.workspaceIds.filter((id): id is string => typeof id === "string")
+      : [];
+
+    await prisma.$transaction(async (tx) => {
+      const existing = await tx.organizationMember.findUnique({
+        where: {
+          organizationId_userId: {
+            organizationId: invite.organizationId,
+            userId: session.userId,
+          },
+        },
+        select: { id: true },
+      });
+      if (!existing) {
+        await tx.organizationMember.create({
+          data: {
+            organizationId: invite.organizationId,
+            userId: session.userId,
+            role: invite.role,
+          },
+        });
+      }
+      await tx.organizationInvite.update({
+        where: { id: invite.id },
+        data: { status: "accepted", acceptedAt: new Date() },
+      });
+    });
+
+    if (workspaceIds.length > 0) {
+      await assignUserToWorkspaces(
+        invite.organizationId,
+        session.userId,
+        workspaceIds,
+      );
+    }
+
+    const organization = await prisma.organization.findUnique({
+      where: { id: invite.organizationId },
+      select: { slug: true },
+    });
+    return { ok: true, organizationSlug: organization?.slug ?? null };
   });

@@ -22,8 +22,10 @@ import {
 import {
   useAddOrgMember,
   useOrganization,
+  useOrgInvites,
   useOrgMembers,
   useRemoveOrgMember,
+  useRevokeOrgInvite,
   useUpdateOrgMemberRole,
   type OrgMember,
 } from "@/features/organization/api/use-organization";
@@ -54,7 +56,9 @@ export function CompanyTeamSection({
   const viewerUserId = session?.user?.id;
   const { data: org } = useOrganization(orgSlug);
   const { data: members, isLoading } = useOrgMembers(orgSlug);
+  const { data: invites } = useOrgInvites(orgSlug, canManage);
   const addMember = useAddOrgMember(orgSlug);
+  const revokeInvite = useRevokeOrgInvite(orgSlug);
   const updateRole = useUpdateOrgMemberRole(orgSlug);
   const removeMember = useRemoveOrgMember(orgSlug);
   const workspaces = org?.workspaces ?? [];
@@ -77,13 +81,13 @@ export function CompanyTeamSection({
             ? workspaceIds
             : workspaces.map((ws) => ws.id),
       });
-      toast.success("Member added");
+      toast.success("Invite sent");
       setEmail("");
       setRole("recruiter");
       setWorkspaceIds([]);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to add member",
+        error instanceof Error ? error.message : "Failed to send invite",
       );
     }
   }
@@ -132,8 +136,8 @@ export function CompanyTeamSection({
         <h2 className="text-h3 text-text-primary">Team</h2>
         <p className="text-body-sm text-text-secondary">
           People in this organization. Recruiters and hiring managers only
-          see the workspaces you assign. New members must already have a
-          Livefolio account.
+          see the workspaces you assign. Someone appears here after they
+          accept the email invite.
         </p>
       </div>
 
@@ -248,10 +252,53 @@ export function CompanyTeamSection({
         </ul>
       )}
 
+      {canManage && (invites?.length ?? 0) > 0 ? (
+        <div className="space-y-2">
+          <p className="text-body-sm font-medium text-text-primary">
+            Waiting to accept
+          </p>
+          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-dashed border-border-default">
+            {invites?.map((invite) => (
+              <li
+                key={invite.id}
+                className="flex flex-wrap items-center gap-3 px-4 py-3"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-body-sm text-text-primary">
+                    {invite.email}
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    {ROLE_LABELS[invite.role] ?? invite.role} · invite sent
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={revokeInvite.isPending}
+                  onClick={() => {
+                    void revokeInvite.mutateAsync(invite.id).then(
+                      () => toast.success("Invite revoked"),
+                      (error: unknown) =>
+                        toast.error(
+                          error instanceof Error
+                            ? error.message
+                            : "Failed to revoke invite",
+                        ),
+                    );
+                  }}
+                >
+                  Revoke
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       {canManage ? (
         <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]">
           <p className="text-body-sm font-medium text-text-primary">
-            Add teammate
+            Invite teammate
           </p>
           <div className="grid gap-3 sm:grid-cols-[1fr_160px_auto]">
             <div className="space-y-2">
@@ -291,7 +338,7 @@ export function CompanyTeamSection({
                 disabled={addMember.isPending}
                 onClick={() => void handleAdd()}
               >
-                Add
+                Send invite
               </Button>
             </div>
           </div>
@@ -331,7 +378,7 @@ export function CompanyTeamSection({
             </div>
           ) : null}
           <p className="text-xs text-text-muted">
-            That email must already have a Livefolio account.
+            They get an email and join the team after they accept.
           </p>
         </div>
       ) : null}

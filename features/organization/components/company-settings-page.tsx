@@ -11,6 +11,7 @@ import {
   useOrganization,
   useUpdateOrganization,
 } from "@/features/organization/api/use-organization";
+import { CompanyVerificationSection } from "@/features/verification/components/company-verification-section";
 
 export default function CompanySettingsPage() {
   const params = useParams<{ orgSlug: string }>();
@@ -131,6 +132,11 @@ export default function CompanySettingsPage() {
           <Button onClick={handleSave} disabled={updateOrg.isPending}>
             Save changes
           </Button>
+          <CompanyVerificationSection
+            orgSlug={orgSlug}
+            websiteUrl={org.websiteUrl}
+            verified={org.verified === true}
+          />
         </div>
       )}
     </div>

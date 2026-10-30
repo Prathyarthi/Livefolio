@@ -15,6 +15,7 @@ import {
   Plus,
   CreditCard,
   Users,
+  BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,7 +39,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useOrganization } from "@/features/organization/api/use-organization";
 import { OrgLogo } from "@/features/organization/components/org-logo";
-
 function CompanySidebar({
   orgSlug,
   workspaceSlug,
@@ -144,11 +144,14 @@ function CompanySidebar({
                 <LogoMark className="h-8 w-8 shrink-0" />
               )}
               <span className="min-w-0 group-data-[collapsible=icon]:hidden">
-                <span className="block truncate font-display text-sm font-bold text-brand-primary">
-                  {org?.name ?? "Company"}
+                <span className="flex min-w-0 items-center gap-1 font-display text-sm font-bold text-brand-primary">
+                  <span className="truncate">{org?.name ?? "Company"}</span>
+                  {org?.verified ? (
+                    <BadgeCheck className="size-3.5 shrink-0 text-sky-500" aria-label="Verified company" />
+                  ) : null}
                 </span>
                 <span className="block text-[11px] text-text-muted">
-                  {org?.name ? "Organization" : "Hiring"}
+                  {org?.verified ? "Verified company" : org?.name ? "Organization" : "Hiring"}
                 </span>
               </span>
             </Link>
