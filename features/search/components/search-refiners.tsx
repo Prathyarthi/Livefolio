@@ -1,6 +1,8 @@
 "use client";
 
+import { useId } from "react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   EXPERIENCE_BANDS,
   type FacetBucket,
@@ -39,7 +41,7 @@ export function SortToggle({
 }) {
   return (
     <div
-      className="inline-flex rounded-[var(--radius-md)] border border-border-default p-0.5"
+      className="inline-flex h-8 items-center rounded-[var(--radius-md)] border border-border-default bg-surface-base p-0.5"
       role="group"
       aria-label="Sort results"
     >
@@ -56,6 +58,31 @@ export function SortToggle({
         </Button>
       ))}
     </div>
+  );
+}
+
+export function ReferencesToggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  const id = useId();
+  return (
+    <label
+      htmlFor={id}
+      className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-2.5 text-body-sm text-text-secondary"
+      title="Use named reference stories when matching and ranking"
+    >
+      <Switch
+        id={id}
+        size="sm"
+        checked={checked}
+        onCheckedChange={onChange}
+      />
+      Include references
+    </label>
   );
 }
 
@@ -107,8 +134,9 @@ export function FacetPanel({
   return (
     <div className="space-y-2">
       {groups.map(({ kind, key, label }) => (
-        <div key={kind} className="flex flex-wrap items-center gap-1.5">
-          <span className="w-28 shrink-0 text-xs text-text-muted">{label}</span>
+        <div key={kind} className="flex items-start gap-1.5">
+          <span className="w-28 shrink-0 pt-1 text-xs text-text-muted">{label}</span>
+          <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
           {facets[key].map((bucket) => {
             const on = isActive(kind, bucket, active);
             return (
@@ -128,6 +156,7 @@ export function FacetPanel({
               </button>
             );
           })}
+          </div>
         </div>
       ))}
     </div>

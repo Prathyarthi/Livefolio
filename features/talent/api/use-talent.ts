@@ -60,6 +60,7 @@ export type TalentSearchOptions = {
   maxExperience?: number;
   jobId?: string;
   sort?: SearchSort;
+  includeReferences?: boolean;
   page?: number;
   pageSize?: number;
 };
@@ -78,6 +79,7 @@ export function useTalentSearch(
     maxExperience,
     jobId,
     sort = "relevance",
+    includeReferences = false,
     page = 1,
     pageSize = 20,
   } = options ?? {};
@@ -95,6 +97,7 @@ export function useTalentSearch(
       maxExperience ?? "",
       jobId ?? "",
       sort,
+      includeReferences ? "references" : "",
       page,
       pageSize,
     ],
@@ -108,6 +111,7 @@ export function useTalentSearch(
       if (minExperience != null) params.set("minExperience", String(minExperience));
       if (maxExperience != null) params.set("maxExperience", String(maxExperience));
       if (jobId) params.set("jobId", jobId);
+      if (includeReferences) params.set("references", "1");
       params.set("sort", sort);
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));
