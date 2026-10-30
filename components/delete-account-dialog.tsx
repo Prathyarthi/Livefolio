@@ -47,6 +47,7 @@ export function DeleteAccountDialog({
               <li>Your portfolio and all published content</li>
               <li>Imported resume and platform data</li>
               <li>Analytics and subscription access</li>
+              <li>References you asked for or wrote</li>
               <li>Your account and login credentials</li>
             </ul>
           </div>

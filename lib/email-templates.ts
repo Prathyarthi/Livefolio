@@ -253,8 +253,77 @@ export function publishedPortfolioEmailHtml(
   };
 }
 
+export function vouchRequestEmailHtml(input: {
+  refereeName?: string | null;
+  requesterName: string;
+  personalNote?: string | null;
+  vouchUrl: string;
+}): { subject: string; html: string } {
+  const requester = input.requesterName.trim() || "A Livefolio member";
+  const firstName =
+    input.refereeName?.trim().split(/\s+/)[0] || "there";
+  const note = input.personalNote?.trim();
+
+  return {
+    subject: `${requester} asked you to vouch for them on ${siteConfig.name}`,
+    html: emailShell({
+      title: `Vouch for ${requester}`,
+      preheader: "Two short questions. Under a minute.",
+      bodyHtml: `
+        ${paragraph(`Hey ${escapeHtml(firstName)},`)}
+        ${paragraph(
+          `<strong>${escapeHtml(requester)}</strong> asked you to vouch for them on ${siteConfig.name}.`,
+        )}
+        ${
+          note
+            ? `<blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid ${brand.coral};background:${brand.footer};color:${brand.text};font-size:15px;line-height:1.6;">${escapeHtml(note)}</blockquote>`
+            : ""
+        }
+        ${paragraph("It takes under a minute: how you know them, and one specific thing they are great at. Sign in to Livefolio with this email.", true)}
+        ${ctaButton(input.vouchUrl, `Vouch for ${requester}`)}
+      `,
+      footerHtml: `<p style="font-size:12px;color:${brand.muted};margin:0;">
+        You're receiving this because ${escapeHtml(requester)} asked you to vouch on ${siteConfig.name}.
+        If this wasn't meant for you, you can ignore it.
+      </p>`,
+    }),
+  };
+}
+
+export function vouchReceivedEmailHtml(input: {
+  requesterName: string;
+  refereeName: string;
+  story: string;
+  dashboardUrl: string;
+}): { subject: string; html: string } {
+  const firstName = input.requesterName.trim().split(/\s+/)[0] || "there";
+  const referee = input.refereeName.trim() || "Someone";
+
+  return {
+    subject: `${referee} vouched for you on ${siteConfig.name}`,
+    html: emailShell({
+      title: `${referee} vouched for you`,
+      preheader: "A named reference is ready for recruiters to see.",
+      bodyHtml: `
+        ${paragraph(`Hey ${escapeHtml(firstName)},`)}
+        ${paragraph(`<strong>${escapeHtml(referee)}</strong> just vouched for you on ${siteConfig.name}.`)}
+        <blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid ${brand.coral};background:${brand.footer};color:${brand.text};font-size:15px;line-height:1.6;">${escapeHtml(input.story)}</blockquote>
+        ${paragraph("Recruiters can see this when they review you. It is not shown on your public Livefolio.", true)}
+        ${ctaButton(input.dashboardUrl, "See your references")}
+        ${founderSignOff()}
+      `,
+    }),
+  };
+}
+
 export type AutomatedEmailDemo = {
-  id: "welcome" | "no_portfolio" | "unpublished" | "published";
+  id:
+    | "welcome"
+    | "no_portfolio"
+    | "unpublished"
+    | "published"
+    | "vouch_request"
+    | "vouch_received";
   label: string;
   description: string;
   subject: string;
@@ -269,6 +338,19 @@ export function getAutomatedEmailDemos(
   const noPortfolio = noPortfolioReminderEmailHtml(name, options);
   const unpublished = unpublishedReminderEmailHtml(name, options);
   const published = publishedPortfolioEmailHtml(name, "alex", options);
+  const vouchRequest = vouchRequestEmailHtml({
+    refereeName: name,
+    requesterName: "Sam Rivera",
+    personalNote: "Would you vouch for the billing rewrite we shipped together?",
+    vouchUrl: absoluteUrl("/vouch/preview"),
+  });
+  const vouchReceived = vouchReceivedEmailHtml({
+    requesterName: name,
+    refereeName: "Sam Rivera",
+    story:
+      "Shipped the billing rewrite with me and owned the edge cases without dropping the ball.",
+    dashboardUrl: absoluteUrl("/dashboard/references"),
+  });
 
   return [
     {
@@ -300,6 +382,20 @@ export function getAutomatedEmailDemos(
         "Sent once when the user first publishes a live portfolio.",
       subject: published.subject,
       html: published.html,
+    },
+    {
+      id: "vouch_request",
+      label: "Reference request",
+      description: "Sent when someone asks a person to vouch for them.",
+      subject: vouchRequest.subject,
+      html: vouchRequest.html,
+    },
+    {
+      id: "vouch_received",
+      label: "Reference received",
+      description: "Sent to the candidate when a vouch is submitted.",
+      subject: vouchReceived.subject,
+      html: vouchReceived.html,
     },
   ];
 }

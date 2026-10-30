@@ -419,6 +419,12 @@ export default function JobApplicantsPage() {
                           {applicant.evidence.totalRequired} required
                         </Badge>
                       ) : null}
+                      {(applicant.vouchCount ?? 0) > 0 ? (
+                        <Badge variant="success">
+                          {applicant.vouchCount}{" "}
+                          {applicant.vouchCount === 1 ? "reference" : "references"}
+                        </Badge>
+                      ) : null}
                     </div>
 
                     {applicant.summary.headline ? (

@@ -24,6 +24,7 @@ import type { SearchSort } from "@/features/search/lib/query";
 import { ListPagination } from "@/components/list-pagination";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import { stripRichTextToPlain } from "@/lib/rich-text";
+import { NamedReferences } from "@/features/vouches/components/named-references";
 
 export default function CompanyTalentPage() {
   const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
@@ -254,6 +255,17 @@ export default function CompanyTalentPage() {
                       </div>
                     ) : null}
                     <ProofBadges proof={person.proof} />
+                    {person.vouches.length > 0 ? (
+                      <div className="pt-1">
+                        <NamedReferences
+                          vouches={person.vouches}
+                          title={`${person.vouches.length} named ${
+                            person.vouches.length === 1 ? "reference" : "references"
+                          }`}
+                          description="Visible to hiring teams only."
+                        />
+                      </div>
+                    ) : null}
                     {ranked && person.reasons.length > 0 ? (
                       <ul className="space-y-0.5 text-body-sm text-text-secondary">
                         {person.reasons.slice(0, 3).map((reason) => (

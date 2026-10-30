@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -10,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { OAuthSignInButtons } from "@/features/auth/components/oauth-sign-in-buttons";
+import { safeCallbackPath } from "@/lib/auth-callback";
 
 type SignUpFormProps = {
   githubEnabled: boolean;
@@ -17,6 +19,11 @@ type SignUpFormProps = {
 };
 
 export function SignUpForm({ githubEnabled, googleEnabled }: SignUpFormProps) {
+  const searchParams = useSearchParams();
+  const callbackUrl =
+    safeCallbackPath(searchParams.get("callbackUrl")) ?? "/dashboard";
+  const signInHref = `/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+
   return (
     <Card>
       <CardHeader className="text-center">
@@ -27,6 +34,7 @@ export function SignUpForm({ githubEnabled, googleEnabled }: SignUpFormProps) {
         <OAuthSignInButtons
           googleEnabled={googleEnabled}
           githubEnabled={githubEnabled}
+          callbackUrl={callbackUrl}
         />
 
         {/* Email/password registration disabled — OAuth only.
@@ -38,7 +46,7 @@ export function SignUpForm({ githubEnabled, googleEnabled }: SignUpFormProps) {
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/sign-in" className="text-primary hover:underline">
+          <Link href={signInHref} className="text-primary hover:underline">
             Sign in
           </Link>
         </p>

@@ -26,6 +26,11 @@ export const FAQ_ITEMS = [
       "Pro renews automatically. Cancellation takes effect at the end of the current paid cycle, and payments are non-refundable.",
   },
   {
+    question: "How do references work?",
+    answer:
+      "Ask people who have actually worked with you. They sign in to Livefolio and answer two short questions - under a minute. Completed vouches are visible to recruiters and in your editor, not on your public Livefolio. Free accounts can ask 3 people; Pro can ask 15.",
+  },
+  {
     question: "How do I get help?",
     answer:
       "Email team@livefolio.me or visit our contact page. We typically respond within one business day.",

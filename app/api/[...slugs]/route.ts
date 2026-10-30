@@ -9,6 +9,7 @@ import { jobs } from "@/features/jobs/server/route";
 import { applications } from "@/features/applications/server/route";
 import { uploads } from "@/features/uploads/server/route";
 import { talent } from "@/features/talent/server/route";
+import { vouches } from "@/features/vouches/server/route";
 
 export const maxDuration = 300;
 
@@ -22,7 +23,8 @@ const app = new Elysia({ prefix: "/api" })
   .use(jobs)
   .use(applications)
   .use(uploads)
-  .use(talent);
+  .use(talent)
+  .use(vouches);
 
 export const GET = app.fetch;
 export const POST = app.fetch;

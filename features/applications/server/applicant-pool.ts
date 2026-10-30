@@ -20,6 +20,7 @@ import { interpretSearchQuery, type SearchSort } from "@/features/search/lib/que
 import { rankCandidate } from "@/features/search/lib/rank";
 import { latestResumeIdsByUserId } from "@/features/uploads/server/stored-files";
 import { paginateSlice } from "@/lib/pagination";
+import { countNamedVouchesByUserIds } from "@/features/vouches/lib/public";
 
 /** Text searches re-rank in memory, so they read at most this many snapshots. */
 export const POOL_RECALL_CAP = 500;
@@ -58,6 +59,7 @@ function toCard(
   requirements: JobRequirementInput[],
   resumeFileId: string | null,
   evidenceOverride?: ApplicantEvidenceSummary,
+  vouchCount = 0,
 ) {
   const summary =
     (row.searchSummary as ApplicantSummary | null) ?? summarizeSnapshot(null);
@@ -77,6 +79,7 @@ function toCard(
     user: row.user,
     resumeFileId,
     evidence,
+    vouchCount,
     summary: {
       ...summary,
       name: summary.name !== "Candidate" ? summary.name : row.user.name || "Candidate",
@@ -127,7 +130,10 @@ export async function loadApplicantPoolPage(input: {
     });
     const byId = new Map(rows.map((row) => [row.id, row]));
     const ordered = ids.map((id) => byId.get(id)).filter((row): row is CardRow => Boolean(row));
-    const resumes = await resumesFor(ordered);
+    const [resumes, vouchCounts] = await Promise.all([
+      resumesFor(ordered),
+      countNamedVouchesByUserIds(ordered.map((row) => row.user.id)),
+    ]);
 
     return {
       matchedCount: matches.length,
@@ -141,7 +147,13 @@ export async function loadApplicantPoolPage(input: {
         job.requirements,
       ),
       applicants: ordered.map((row) =>
-        toCard(row, job.requirements, resumes.get(row.user.id) ?? null),
+        toCard(
+          row,
+          job.requirements,
+          resumes.get(row.user.id) ?? null,
+          undefined,
+          vouchCounts.get(row.user.id) ?? 0,
+        ),
       ),
     };
   }
@@ -183,7 +195,10 @@ export async function loadApplicantPoolPage(input: {
 
   const paged = paginateSlice(matched, page, pageSize);
   const pageRows = paged.items.map((item) => item.row);
-  const resumes = await resumesFor(pageRows);
+  const [resumes, vouchCounts] = await Promise.all([
+    resumesFor(pageRows),
+    countNamedVouchesByUserIds(pageRows.map((row) => row.user.id)),
+  ]);
 
   return {
     matchedCount: matched.length,
@@ -205,6 +220,7 @@ export async function loadApplicantPoolPage(input: {
         job.requirements,
         resumes.get(row.user.id) ?? null,
         attachRank(stored, rank),
+        vouchCounts.get(row.user.id) ?? 0,
       );
     }),
   };

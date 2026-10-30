@@ -48,6 +48,8 @@ model User {
   recruiterNotes      RecruiterNote[]
   emailSendLogs        EmailSendLog[]
   storedFiles          StoredFile[]
+  vouchesRequested     Vouch[] @relation("VouchesRequested")
+  vouchesGiven         Vouch[] @relation("VouchesGiven")
 
   @@map("users")
 }
@@ -188,6 +190,7 @@ model Portfolio {
   views          PortfolioView[]
   clicks         PortfolioClick[]
   storedFiles    StoredFile[]
+  vouches        Vouch[]
 
   @@index([slug])
   @@index([openToWork, isPublished])
@@ -698,7 +701,7 @@ model EmailSendLog {
   id         String   @id @default(uuid())
   userId     String?
   toEmail    String
-  /// welcome | no_portfolio | unpublished | published | blast
+  /// welcome | no_portfolio | unpublished | published | blast | vouch_request | vouch_received
   type       String
   campaignId String?
   resendId   String?
@@ -714,4 +717,49 @@ model EmailSendLog {
   @@index([toEmail, createdAt])
   @@index([campaignId])
   @@map("email_send_logs")
+}
+
+// ============================================================
+// REFERENCES / VOUCHES
+// ============================================================
+
+model Vouch {
+  id          String  @id @default(uuid())
+  token       String  @unique
+  requesterId String
+  portfolioId String?
+
+  inviteEmail  String
+  inviteName   String?
+  personalNote String? @db.Text
+
+  refereeId String?
+
+  /// pending | completed | cancelled
+  status String @default("pending")
+
+  /// manager | peer | founder | report | classmate | collaborator
+  relationship String?
+  /// One specific story (short)
+  story String? @db.Text
+  /// yes | with_caveats
+  wouldWorkAgain String?
+
+  lastEmailedAt DateTime?
+  emailCount    Int       @default(0)
+
+  completedAt DateTime?
+  cancelledAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requester User       @relation("VouchesRequested", fields: [requesterId], references: [id], onDelete: Cascade)
+  referee   User?      @relation("VouchesGiven", fields: [refereeId], references: [id], onDelete: Cascade)
+  portfolio Portfolio? @relation(fields: [portfolioId], references: [id], onDelete: SetNull)
+
+  @@index([requesterId, status])
+  @@index([refereeId, status])
+  @@index([inviteEmail, status])
+  @@index([portfolioId, status])
+  @@map("vouches")
 }

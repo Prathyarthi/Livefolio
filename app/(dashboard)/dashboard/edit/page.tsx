@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, Share2, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,15 +26,42 @@ import { ShareDialog } from "@/features/portfolio/components/share-dialog";
 import {
   EDIT_STEP_DESCRIPTIONS,
   EDIT_STEPS,
+  isEditStepValue,
   type EditStepValue,
 } from "@/features/portfolio/constants/edit-steps";
 
 function EditPortfolioPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const stepFromUrl = searchParams.get("step");
   const { data: portfolio, isLoading } = usePortfolio();
-  const [activeStep, setActiveStep] = useState<EditStepValue>("basic");
+  const [activeStep, setActiveStepState] = useState<EditStepValue>(() =>
+    isEditStepValue(stepFromUrl) ? stepFromUrl : "basic",
+  );
   const currentStep =
     EDIT_STEPS.find((step) => step.value === activeStep) ?? EDIT_STEPS[0];
+
+  useEffect(() => {
+    const next = isEditStepValue(stepFromUrl) ? stepFromUrl : "basic";
+    setActiveStepState(next);
+  }, [stepFromUrl]);
+
+  const setActiveStep = useCallback(
+    (step: EditStepValue) => {
+      setActiveStepState(step);
+      const params = new URLSearchParams(searchParams.toString());
+      if (step === "basic") {
+        params.delete("step");
+      } else {
+        params.set("step", step);
+      }
+      const query = params.toString();
+      router.replace(query ? `/dashboard/edit?${query}` : "/dashboard/edit", {
+        scroll: false,
+      });
+    },
+    [router, searchParams],
+  );
 
   if (isLoading) {
     return (
@@ -162,4 +189,20 @@ function EditPortfolioPageContent() {
   );
 }
 
-export default EditPortfolioPageContent;
+function EditPortfolioFallback() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-112 w-full max-w-3xl rounded-[2rem]" />
+      <Skeleton className="h-14 w-full max-w-3xl rounded-2xl" />
+      <Skeleton className="h-112 w-full max-w-3xl rounded-[2rem]" />
+    </div>
+  );
+}
+
+export default function EditPortfolioPage() {
+  return (
+    <Suspense fallback={<EditPortfolioFallback />}>
+      <EditPortfolioPageContent />
+    </Suspense>
+  );
+}
