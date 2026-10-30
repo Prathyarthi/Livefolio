@@ -75,6 +75,24 @@ describe("scrapeLinkedInProfile (mocked ScrapeGraphAI)", () => {
   });
 });
 
+describe("fetch config fallback", () => {
+  it("retries without stealth on fetch_provider_config and never sends mode js", async () => {
+    process.env.SGAI_API_KEY = "test";
+    const configs: unknown[] = [];
+    let call = 0;
+    const fetchImpl = (async (_url: string, init: RequestInit) => {
+      configs.push(JSON.parse(String(init.body)).fetchConfig);
+      call++;
+      return call === 1
+        ? new Response(JSON.stringify({ error: { type: "fetch_provider_config", message: "no provider" } }), { status: 400 })
+        : new Response(JSON.stringify({ json: sample }), { status: 200 });
+    }) as unknown as typeof fetch;
+    const result = await scrapeLinkedInProfile("https://www.linkedin.com/in/ada", fetchImpl);
+    expect(result.profile.name).toBe("Ada Lovelace");
+    expect(configs).toEqual([{ stealth: true }, {}]);
+  });
+});
+
 describe("buildLinkedInShowcase", () => {
   it("only includes selected fields and posts", async () => {
     process.env.SGAI_API_KEY = "test";

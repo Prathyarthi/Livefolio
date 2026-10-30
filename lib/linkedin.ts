@@ -251,6 +251,40 @@ export function isLinkedInScrapingConfigured() {
   return Boolean(process.env.SGAI_API_KEY?.trim());
 }
 
+type SgaiResponse = {
+  json?: unknown;
+  error?: { type?: string; message?: string; details?: unknown };
+};
+
+async function callExtract(
+  fetchImpl: typeof fetch,
+  apiKey: string,
+  profileUrl: string,
+  fetchConfig: Record<string, unknown>,
+): Promise<{ res: Response; body: SgaiResponse | null }> {
+  let res: Response;
+  try {
+    res = await fetchImpl(SGAI_EXTRACT_URL, {
+      method: "POST",
+      headers: { "SGAI-APIKEY": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: profileUrl,
+        prompt: PROMPT,
+        schema: z.toJSONSchema(linkedInScrapeSchema),
+        fetchConfig,
+      }),
+      signal: AbortSignal.timeout(SCRAPE_TIMEOUT_MS),
+    });
+  } catch (error) {
+    if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+      throw new LinkedInScrapeError("TIMEOUT", "LinkedIn took too long to respond. Please try again.", 504);
+    }
+    throw new LinkedInScrapeError("SCRAPE_FAILED", "Couldn't reach the LinkedIn import service.", 502);
+  }
+  const body = (await res.json().catch(() => null)) as SgaiResponse | null;
+  return { res, body };
+}
+
 export async function scrapeLinkedInProfile(profileUrl: string, fetchImpl: typeof fetch = fetch) {
   const apiKey = process.env.SGAI_API_KEY?.trim();
   if (!apiKey) {
@@ -261,40 +295,36 @@ export async function scrapeLinkedInProfile(profileUrl: string, fetchImpl: typeo
     );
   }
 
-  let res: Response;
-  try {
-    res = await fetchImpl(SGAI_EXTRACT_URL, {
-      method: "POST",
-      headers: { "SGAI-APIKEY": apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        url: profileUrl,
-        prompt: PROMPT,
-        schema: z.toJSONSchema(linkedInScrapeSchema),
-        fetchConfig: { mode: "js", stealth: true, timeout: 60_000 },
-      }),
-      signal: AbortSignal.timeout(SCRAPE_TIMEOUT_MS),
+  // `mode: "js"` + `stealth` has no matching fetch provider (400 fetch_provider_config),
+  // so use auto mode with stealth, and retry once without stealth if that's rejected too.
+  const attempts: Array<Record<string, unknown>> = [{ stealth: true }, {}];
+  let res: Response | null = null;
+  let body: SgaiResponse | null = null;
+  for (const [index, fetchConfig] of attempts.entries()) {
+    ({ res, body } = await callExtract(fetchImpl, apiKey, profileUrl, fetchConfig));
+    if (res.ok) break;
+    const type = body?.error?.type;
+    console.error("[linkedin.scrape] ScrapeGraphAI error", {
+      status: res.status,
+      type,
+      message: body?.error?.message,
+      details: body?.error?.details,
+      fetchConfig,
     });
-  } catch (error) {
-    if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
-      throw new LinkedInScrapeError("TIMEOUT", "LinkedIn took too long to respond. Please try again.", 504);
-    }
-    throw new LinkedInScrapeError("SCRAPE_FAILED", "Couldn't reach the LinkedIn import service.", 502);
+    const isLast = index === attempts.length - 1;
+    if (type !== "fetch_provider_config" || isLast) break;
   }
 
-  const body = (await res.json().catch(() => null)) as
-    | { json?: unknown; error?: { type?: string; message?: string } }
-    | null;
-
-  if (!res.ok) {
+  if (!res || !res.ok) {
+    const status = res?.status ?? 502;
     const type = body?.error?.type;
-    console.error("[linkedin.scrape] ScrapeGraphAI error", res.status, type);
-    if (res.status === 429 || type === "rate_limited") {
+    if (status === 429 || type === "rate_limited") {
       throw new LinkedInScrapeError("RATE_LIMITED", "LinkedIn import is busy right now. Try again in a few minutes.", 429);
     }
-    if (res.status === 401 || res.status === 402 || res.status === 403) {
+    if (status === 401 || status === 402 || status === 403) {
       throw new LinkedInScrapeError("NOT_CONFIGURED", "LinkedIn import is temporarily unavailable.", 503);
     }
-    if (res.status === 504 || res.status === 408) {
+    if (status === 504 || status === 408) {
       throw new LinkedInScrapeError("TIMEOUT", "LinkedIn took too long to respond. Please try again.", 504);
     }
     throw new LinkedInScrapeError("SCRAPE_FAILED", "We couldn't read that LinkedIn profile. Please try again later.", 502);
