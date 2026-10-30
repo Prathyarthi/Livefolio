@@ -142,8 +142,33 @@ export function LinkedInImporter() {
     return <p className="text-sm text-destructive">{query.error.message}</p>;
   }
 
-  const cooldownLeftMs = state?.nextSyncAt ? new Date(state.nextSyncAt).getTime() - now : 0;
-  const onCooldown = cooldownLeftMs > 0;
+  const quota = query.data?.quota;
+  // A block lapses on its own once nextAvailableAt passes (UTC midnight / month start).
+  const blocked = Boolean(
+    quota?.nextAvailableAt && new Date(quota.nextAvailableAt).getTime() > now,
+  );
+  const monthlyBlocked = blocked && quota?.blockedBy === "monthly";
+  const unlockLabel = quota?.nextAvailableAt
+    ? monthlyBlocked
+      ? new Date(quota.nextAvailableAt).toLocaleDateString(undefined, { dateStyle: "medium" })
+      : new Date(quota.nextAvailableAt).toLocaleString(undefined, {
+          weekday: "short",
+          hour: "numeric",
+          minute: "2-digit",
+        })
+    : null;
+  const monthResetLabel = quota
+    ? new Date(quota.resetsAt).toLocaleDateString(undefined, { dateStyle: "medium" })
+    : null;
+  const remaining =
+    quota && new Date(quota.resetsAt).getTime() <= now ? quota.limit : (quota?.remaining ?? null);
+  const quotaText = !quota
+    ? null
+    : monthlyBlocked
+      ? `No syncs left this month · resets ${monthResetLabel}`
+      : blocked
+        ? `${remaining} of ${quota.limit} syncs left this month · next sync available tomorrow (${unlockLabel})`
+        : `${remaining} of ${quota.limit} syncs left this month`;
 
   const handleSync = async () => {
     if (!normalizeLinkedInProfileUrl(url)) {
@@ -215,14 +240,14 @@ export function LinkedInImporter() {
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter" && !onCooldown) void handleSync();
+                  if (event.key === "Enter" && !blocked) void handleSync();
                 }}
                 disabled={sync.isPending}
               />
             </div>
             <Button
               onClick={() => void handleSync()}
-              disabled={sync.isPending || !url.trim() || onCooldown}
+              disabled={sync.isPending || !url.trim() || blocked}
             >
               {sync.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -231,17 +256,25 @@ export function LinkedInImporter() {
               ) : (
                 <Search className="mr-2 h-4 w-4" />
               )}
-              {state ? "Re-sync" : "Fetch"}
+              {blocked
+                ? monthlyBlocked
+                  ? `Available ${unlockLabel}`
+                  : "Available tomorrow"
+                : state
+                  ? "Re-sync"
+                  : "Fetch"}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
             {sync.isPending
               ? "Fetching your profile — this can take up to a minute."
-              : state?.lastSyncedAt
-                ? `Last synced ${formatWhen(state.lastSyncedAt)}${
-                    onCooldown ? ` · next sync in ${Math.ceil(cooldownLeftMs / 60000)} min` : ""
-                  }`
-                : "Only public profile information is fetched."}
+              : [
+                  state?.lastSyncedAt ? `Last synced ${formatWhen(state.lastSyncedAt)}` : null,
+                  quotaText,
+                  state ? null : "Only public profile information is fetched.",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
           </p>
         </CardContent>
       </Card>

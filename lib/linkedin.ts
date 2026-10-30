@@ -302,3 +302,73 @@ export async function scrapeLinkedInProfile(profileUrl: string, fetchImpl: typeo
 
   return normalizeScrapeResult(body?.json);
 }
+
+// ── Sync quota ─────────────────────────────────────────────
+
+/** Successful syncs allowed per user per calendar month (UTC). */
+export const LINKEDIN_MONTHLY_SYNC_LIMIT = 3;
+/** Successful syncs allowed per user per UTC day. */
+export const LINKEDIN_DAILY_SYNC_LIMIT = 1;
+/** Failed attempts allowed per user per UTC day (abuse guard; failures never use the quota). */
+export const LINKEDIN_DAILY_FAILURE_LIMIT = 5;
+
+/** UTC calendar month containing `now`: key like "2026-10" and the reset instant. */
+export function linkedInMonthWindow(now: Date = new Date()) {
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  return {
+    key: `${year}-${String(month + 1).padStart(2, "0")}`,
+    resetsAt: new Date(Date.UTC(year, month + 1, 1)),
+  };
+}
+
+/** UTC day containing `now`: key like "2026-10-31" and the next UTC midnight. */
+export function linkedInDayWindow(now: Date = new Date()) {
+  const start = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return {
+    key: new Date(start).toISOString().slice(0, 10),
+    resetsAt: new Date(start + 86_400_000),
+  };
+}
+
+export interface LinkedInSyncQuota {
+  limit: number;
+  used: number;
+  remaining: number;
+  /** Start of next UTC month. */
+  resetsAt: string;
+  dailyLimit: number;
+  usedToday: number;
+  /** When the next sync becomes possible, or null if one is available now. */
+  nextAvailableAt: string | null;
+  /** Which limit is blocking, if any. */
+  blockedBy: "monthly" | "daily" | null;
+}
+
+export function toLinkedInQuota(
+  usedThisMonth: number,
+  usedToday: number,
+  now: Date = new Date(),
+): LinkedInSyncQuota {
+  const month = linkedInMonthWindow(now);
+  const day = linkedInDayWindow(now);
+  const used = Math.max(0, Math.min(usedThisMonth, LINKEDIN_MONTHLY_SYNC_LIMIT));
+  const today = Math.max(0, Math.min(usedToday, LINKEDIN_DAILY_SYNC_LIMIT));
+  const blockedBy =
+    used >= LINKEDIN_MONTHLY_SYNC_LIMIT ? "monthly" : today >= LINKEDIN_DAILY_SYNC_LIMIT ? "daily" : null;
+  return {
+    limit: LINKEDIN_MONTHLY_SYNC_LIMIT,
+    used,
+    remaining: LINKEDIN_MONTHLY_SYNC_LIMIT - used,
+    resetsAt: month.resetsAt.toISOString(),
+    dailyLimit: LINKEDIN_DAILY_SYNC_LIMIT,
+    usedToday: today,
+    nextAvailableAt:
+      blockedBy === "monthly"
+        ? month.resetsAt.toISOString()
+        : blockedBy === "daily"
+          ? day.resetsAt.toISOString()
+          : null,
+    blockedBy,
+  };
+}

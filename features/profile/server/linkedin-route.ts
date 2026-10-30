@@ -7,6 +7,12 @@ import { resolveAccessForUser } from "@/lib/entitlements";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import {
   DEFAULT_LINKEDIN_SELECTION,
+  LINKEDIN_DAILY_FAILURE_LIMIT,
+  LINKEDIN_DAILY_SYNC_LIMIT,
+  LINKEDIN_MONTHLY_SYNC_LIMIT,
+  linkedInDayWindow,
+  linkedInMonthWindow,
+  toLinkedInQuota,
   LinkedInScrapeError,
   isLinkedInScrapingConfigured,
   linkedInSelectionSchema,
@@ -16,12 +22,6 @@ import {
   parseStoredProfile,
   scrapeLinkedInProfile,
 } from "@/lib/linkedin";
-
-/** Minimum gap between syncs for one portfolio. */
-export const LINKEDIN_SYNC_COOLDOWN_MS = 15 * 60 * 1000;
-/** Hard cap on scrape attempts per user per day (failed attempts count too). */
-const LINKEDIN_DAILY_LIMIT = 5;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 const PRO_REQUIRED_MESSAGE = "LinkedIn import is a Pro feature. Upgrade to Pro to use it.";
 
@@ -45,23 +45,88 @@ async function requireLinkedInEntitlement(request: Request) {
   return { ok: true as const, session };
 }
 
-/** Counts a scrape attempt in the shared RateLimitBucket table. */
-async function consumeDailyScrape(userId: string) {
-  const now = Date.now();
-  const windowStart = Math.floor(now / DAY_MS) * DAY_MS;
-  const expiresAt = new Date(windowStart + DAY_MS);
+type BucketKind = "month" | "day" | "fail";
+
+function bucketKey(kind: BucketKind, userId: string, window: string) {
   const digest = createHash("sha256").update(userId).digest("hex");
-  const key = `linkedin:sync:user:${digest}:${windowStart}`;
+  return `linkedin:sync:${kind}:user:${digest}:${window}`;
+}
+
+async function readBucket(key: string) {
+  const bucket = await prisma.rateLimitBucket.findUnique({ where: { key }, select: { count: true } });
+  return bucket?.count ?? 0;
+}
+
+async function readQuota(userId: string, now = new Date()) {
+  const [month, today] = await Promise.all([
+    readBucket(bucketKey("month", userId, linkedInMonthWindow(now).key)),
+    readBucket(bucketKey("day", userId, linkedInDayWindow(now).key)),
+  ]);
+  return toLinkedInQuota(month, today, now);
+}
+
+/** Atomically increments a bucket; rolls back and returns false if it would exceed `limit`. */
+async function reserve(key: string, limit: number, expiresAt: Date) {
   const bucket = await prisma.rateLimitBucket.upsert({
     where: { key },
     create: { key, count: 1, expiresAt },
     update: { count: { increment: 1 }, expiresAt },
     select: { count: true },
   });
-  return {
-    allowed: bucket.count <= LINKEDIN_DAILY_LIMIT,
-    retryAfterSec: Math.max(1, Math.ceil((expiresAt.getTime() - now) / 1000)),
-  };
+  if (bucket.count <= limit) return true;
+  await release(key);
+  return false;
+}
+
+async function release(key: string) {
+  await prisma.rateLimitBucket
+    .update({ where: { key }, data: { count: { decrement: 1 } } })
+    .catch((error) => console.error("[linkedin.sync] failed to release quota", error));
+}
+
+/**
+ * Reserves one daily + one monthly sync slot up front (so concurrent requests
+ * can't overshoot). Slots are released if the scrape fails, so only successful
+ * syncs count.
+ */
+async function reserveSync(userId: string, now = new Date()) {
+  const day = linkedInDayWindow(now);
+  const month = linkedInMonthWindow(now);
+  const dayKey = bucketKey("day", userId, day.key);
+  const monthKey = bucketKey("month", userId, month.key);
+  if (!(await reserve(monthKey, LINKEDIN_MONTHLY_SYNC_LIMIT, month.resetsAt))) {
+    return { ok: false as const, blockedBy: "monthly" as const };
+  }
+  if (!(await reserve(dayKey, LINKEDIN_DAILY_SYNC_LIMIT, day.resetsAt))) {
+    await release(monthKey);
+    return { ok: false as const, blockedBy: "daily" as const };
+  }
+  return { ok: true as const, keys: [dayKey, monthKey] };
+}
+
+async function recordFailure(userId: string, now = new Date()) {
+  const day = linkedInDayWindow(now);
+  const key = bucketKey("fail", userId, day.key);
+  await prisma.rateLimitBucket
+    .upsert({
+      where: { key },
+      create: { key, count: 1, expiresAt: day.resetsAt },
+      update: { count: { increment: 1 } },
+    })
+    .catch((error) => console.error("[linkedin.sync] failed to record failure", error));
+}
+
+function formatUtcDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function retryAfterSeconds(at: Date) {
+  return String(Math.max(1, Math.ceil((at.getTime() - Date.now()) / 1000)));
 }
 
 function toPayload(
@@ -75,9 +140,6 @@ function toPayload(
   } | null,
 ) {
   if (!row) return null;
-  const nextSyncAt = row.lastSyncedAt
-    ? new Date(row.lastSyncedAt.getTime() + LINKEDIN_SYNC_COOLDOWN_MS).toISOString()
-    : null;
   return {
     profileUrl: row.profileUrl,
     profile: parseStoredProfile(row.profileData),
@@ -85,7 +147,6 @@ function toPayload(
     selection: parseLinkedInSelection(row.selection),
     showOnPortfolio: row.showOnPortfolio,
     lastSyncedAt: row.lastSyncedAt?.toISOString() ?? null,
-    nextSyncAt,
   };
 }
 
@@ -104,6 +165,7 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
       success: true,
       configured: isLinkedInScrapingConfigured(),
       data: toPayload(row),
+      quota: await readQuota(gate.session.userId),
     };
   })
 
@@ -130,26 +192,38 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
         where: { portfolioId: portfolio.id },
       });
 
-      if (existing?.lastSyncedAt) {
-        const waitMs =
-          existing.lastSyncedAt.getTime() + LINKEDIN_SYNC_COOLDOWN_MS - Date.now();
-        if (waitMs > 0) {
+      const userId = gate.session.userId;
+      let reservedKeys: string[];
+      try {
+        const day = linkedInDayWindow();
+        const failures = await readBucket(bucketKey("fail", userId, day.key));
+        if (failures >= LINKEDIN_DAILY_FAILURE_LIMIT) {
           ctx.set.status = 429;
-          ctx.set.headers["Retry-After"] = String(Math.ceil(waitMs / 1000));
+          ctx.set.headers["Retry-After"] = retryAfterSeconds(day.resetsAt);
           return {
-            error: `You synced recently. Try again in ${Math.ceil(waitMs / 60000)} min.`,
-            code: "COOLDOWN",
+            error: "Too many failed LinkedIn syncs today. Try again tomorrow.",
+            code: "SYNC_FAILURE_LIMIT",
+            nextAvailableAt: day.resetsAt.toISOString(),
+            quota: await readQuota(userId),
           };
         }
-      }
-
-      try {
-        const limit = await consumeDailyScrape(gate.session.userId);
-        if (!limit.allowed) {
+        const reservation = await reserveSync(userId);
+        if (!reservation.ok) {
+          const quota = await readQuota(userId);
+          const monthly = reservation.blockedBy === "monthly";
+          const unlocksAt = monthly ? new Date(quota.resetsAt) : day.resetsAt;
           ctx.set.status = 429;
-          ctx.set.headers["Retry-After"] = String(limit.retryAfterSec);
-          return { error: "Daily LinkedIn sync limit reached. Try again tomorrow.", code: "DAILY_LIMIT" };
+          ctx.set.headers["Retry-After"] = retryAfterSeconds(unlocksAt);
+          return {
+            error: monthly
+              ? `You've used all ${LINKEDIN_MONTHLY_SYNC_LIMIT} LinkedIn syncs this month. Syncing resets on ${formatUtcDate(unlocksAt)}.`
+              : `You can sync LinkedIn once per day. Next sync available ${unlocksAt.toISOString().replace(".000Z", "Z")} (00:00 UTC).`,
+            code: monthly ? "MONTHLY_SYNC_LIMIT" : "DAILY_SYNC_LIMIT",
+            nextAvailableAt: unlocksAt.toISOString(),
+            quota,
+          };
         }
+        reservedKeys = reservation.keys;
       } catch (error) {
         console.error("[linkedin.sync] rate limiter failed", error);
         ctx.set.status = 503;
@@ -181,8 +255,11 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
           update: data,
           create: { portfolioId: portfolio.id, ...data },
         });
-        return { success: true, data: toPayload(row) };
+        return { success: true, data: toPayload(row), quota: await readQuota(userId) };
       } catch (error) {
+        // Failed syncs never use the quota; they count toward the daily failure cap instead.
+        await Promise.all(reservedKeys.map(release));
+        await recordFailure(userId);
         if (error instanceof LinkedInScrapeError) {
           ctx.set.status = error.status;
           return { error: error.message, code: error.code };

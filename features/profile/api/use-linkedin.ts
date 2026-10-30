@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
+  LinkedInSyncQuota,
   LinkedInPost,
   LinkedInProfileData,
   LinkedInSelection,
@@ -14,11 +15,15 @@ export interface LinkedInImportState {
   selection: LinkedInSelection;
   showOnPortfolio: boolean;
   lastSyncedAt: string | null;
-  nextSyncAt: string | null;
 }
 
 export class LinkedInApiError extends Error {
-  constructor(message: string, public status: number, public code?: string) {
+  constructor(
+    message: string,
+    public status: number,
+    public code?: string,
+    public quota?: LinkedInSyncQuota,
+  ) {
     super(message);
   }
 }
@@ -29,17 +34,24 @@ async function readError(res: Response, fallback: string) {
     typeof json.error === "string" && json.error ? json.error : fallback,
     res.status,
     typeof json.code === "string" ? json.code : undefined,
+    json.quota && typeof json.quota === "object" ? (json.quota as LinkedInSyncQuota) : undefined,
   );
 }
 
 const KEY = ["linkedin-import"] as const;
+
+export interface LinkedInImportResponse {
+  configured: boolean;
+  data: LinkedInImportState | null;
+  quota?: LinkedInSyncQuota;
+}
 
 export function useLinkedInImport(enabled = true) {
   return useQuery({
     queryKey: KEY,
     enabled,
     retry: false,
-    queryFn: async (): Promise<{ configured: boolean; data: LinkedInImportState | null }> => {
+    queryFn: async (): Promise<LinkedInImportResponse> => {
       const res = await fetch("/api/profile/linkedin", { credentials: "include" });
       if (!res.ok) throw await readError(res, "Failed to load LinkedIn import");
       return res.json();
@@ -53,18 +65,28 @@ function useLinkedInMutation<T>(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: T): Promise<LinkedInImportState | null> => {
+    mutationFn: async (
+      input: T,
+    ): Promise<{ data: LinkedInImportState | null; quota?: LinkedInSyncQuota }> => {
       const res = await request(input);
       if (!res.ok) throw await readError(res, fallback);
       const json = await res.json();
-      return json.data ?? null;
+      return { data: json.data ?? null, quota: json.quota };
     },
-    onSuccess: (data) => {
-      qc.setQueryData(KEY, (prev: { configured: boolean } | undefined) => ({
+    onSuccess: ({ data, quota }) => {
+      qc.setQueryData(KEY, (prev: LinkedInImportResponse | undefined) => ({
         configured: prev?.configured ?? true,
+        quota: quota ?? prev?.quota,
         data,
       }));
       void qc.invalidateQueries({ queryKey: ["portfolio"] });
+    },
+    onError: (error) => {
+      if (!(error instanceof LinkedInApiError) || !error.quota) return;
+      const quota = error.quota;
+      qc.setQueryData(KEY, (prev: LinkedInImportResponse | undefined) =>
+        prev ? { ...prev, quota } : prev,
+      );
     },
   });
 }

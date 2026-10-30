@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it } from "bun:test";
 import {
   LinkedInScrapeError,
   buildLinkedInShowcase,
+  linkedInDayWindow,
+  linkedInMonthWindow,
+  toLinkedInQuota,
   normalizeLinkedInProfileUrl,
   scrapeLinkedInProfile,
 } from "./linkedin";
@@ -88,5 +91,27 @@ describe("buildLinkedInShowcase", () => {
     expect(
       buildLinkedInShowcase({ profileUrl: "x", profileData: profile, posts, selection: {}, showOnPortfolio: false }),
     ).toBeNull();
+  });
+});
+
+describe("sync quota", () => {
+  const now = new Date("2026-12-31T23:30:00Z");
+  it("uses UTC calendar month and day windows", () => {
+    expect(linkedInMonthWindow(now)).toEqual({ key: "2026-12", resetsAt: new Date("2027-01-01T00:00:00Z") });
+    expect(linkedInDayWindow(now)).toEqual({ key: "2026-12-31", resetsAt: new Date("2027-01-01T00:00:00Z") });
+    expect(linkedInMonthWindow(new Date("2026-10-31T23:59:59Z")).key).toBe("2026-10");
+  });
+  it("is available with nothing used", () => {
+    const q = toLinkedInQuota(0, 0, now);
+    expect(q).toMatchObject({ limit: 3, remaining: 3, dailyLimit: 1, blockedBy: null, nextAvailableAt: null });
+  });
+  it("blocks until next UTC midnight after a sync today", () => {
+    const q = toLinkedInQuota(1, 1, new Date("2026-10-15T10:00:00Z"));
+    expect(q).toMatchObject({ remaining: 2, blockedBy: "daily", nextAvailableAt: "2026-10-16T00:00:00.000Z" });
+  });
+  it("blocks until next month once 3 are used (monthly wins over daily)", () => {
+    const q = toLinkedInQuota(3, 1, new Date("2026-10-15T10:00:00Z"));
+    expect(q).toMatchObject({ remaining: 0, blockedBy: "monthly", nextAvailableAt: "2026-11-01T00:00:00.000Z" });
+    expect(toLinkedInQuota(5, 0, now).remaining).toBe(0);
   });
 });
