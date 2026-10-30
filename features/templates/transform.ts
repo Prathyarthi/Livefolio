@@ -3,6 +3,7 @@ import { formatSectionLabel } from "./section-labels";
 import { normalizeSocialProfiles } from "@/lib/social-profile";
 import { applyHiddenIntegrations } from "@/lib/integration-visibility";
 import { resolveArticleSource } from "@/lib/article-source";
+import { buildLinkedInShowcase } from "@/lib/linkedin";
 
 export function portfolioToTemplateData(portfolio: any): PortfolioData {
   const data = {
@@ -132,6 +133,7 @@ export function portfolioToTemplateData(portfolio: any): PortfolioData {
     livePreviewProjectIds: Array.isArray(portfolio.livePreviewProjectIds)
       ? portfolio.livePreviewProjectIds
       : [],
+    linkedin: buildLinkedInShowcase(portfolio.linkedinImport),
   };
 
   const articles = data.articles.map((article: PortfolioData["articles"][number]) => ({

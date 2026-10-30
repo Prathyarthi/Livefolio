@@ -43,6 +43,8 @@ export interface AccessSnapshot {
   canUsePremiumTemplates: boolean;
   canUseImports: boolean;
   canUseAnalytics: boolean;
+  /** Paid Pro only (not the free trial): LinkedIn import spends scrape credits. */
+  canUseLinkedInImport: boolean;
   allowedTemplateIds: string[];
   maxProjectThumbnails: number;
   maxVouchRequests: number;
@@ -89,6 +91,8 @@ export function resolveAccessForUser(
     paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
   const canUseAnalytics =
     paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
+  const canUseLinkedInImport =
+    paidPro || (!billingConfigured && allowUnconfiguredBillingAccess);
   const allowedTemplateIds = canUsePremiumTemplates
     ? [...FREE_TEMPLATE_IDS, ...PREMIUM_TEMPLATE_IDS]
     : [...FREE_TEMPLATE_IDS];
@@ -106,6 +110,7 @@ export function resolveAccessForUser(
     canUsePremiumTemplates,
     canUseImports,
     canUseAnalytics,
+    canUseLinkedInImport,
     allowedTemplateIds,
     maxProjectThumbnails,
     maxVouchRequests,

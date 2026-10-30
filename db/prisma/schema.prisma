@@ -192,6 +192,7 @@ model Portfolio {
   clicks         PortfolioClick[]
   storedFiles    StoredFile[]
   vouches        Vouch[]
+  linkedinImport LinkedInImport?
 
   @@index([slug])
   @@index([openToWork, isPublished])
@@ -338,6 +339,30 @@ model SocialProfile {
 
   @@unique([portfolioId, platform])
   @@map("social_profiles")
+}
+
+/// Pro-only LinkedIn import (scraped via ScrapeGraphAI). One per portfolio.
+model LinkedInImport {
+  id          String @id @default(uuid())
+  portfolioId String @unique
+  profileUrl  String
+
+  /// Last scraped profile details (see lib/linkedin.ts LinkedInProfileData).
+  profileData Json @default("{}")
+  /// Last scraped posts (see lib/linkedin.ts LinkedInPost[]).
+  posts       Json @default("[]")
+  /// Which fields/posts the user chose to showcase (LinkedInSelection).
+  selection   Json @default("{}")
+  /// Master toggle for the public portfolio section.
+  showOnPortfolio Boolean @default(true)
+
+  lastSyncedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@map("linkedin_imports")
 }
 
 model Certification {
