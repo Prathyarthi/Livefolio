@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { resolveAccessForUser } from "@/lib/entitlements";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
+import { syncLinkedInArticles } from "@/lib/linkedin-articles";
 import {
   DEFAULT_LINKEDIN_SELECTION,
   LINKEDIN_DAILY_FAILURE_LIMIT,
@@ -21,6 +22,7 @@ import {
   parseStoredPosts,
   parseStoredProfile,
   scrapeLinkedInProfile,
+  selectedLinkedInPosts,
 } from "@/lib/linkedin";
 
 const PRO_REQUIRED_MESSAGE = "LinkedIn import is a Pro feature. Upgrade to Pro to use it.";
@@ -127,6 +129,22 @@ function formatUtcDate(date: Date) {
 
 function retryAfterSeconds(at: Date) {
   return String(Math.max(1, Math.ceil((at.getTime() - Date.now()) / 1000)));
+}
+
+/** Mirror selected posts into Articles (or clear them when the section is hidden). */
+async function syncArticlesFor(row: {
+  portfolioId: string;
+  posts: unknown;
+  selection: unknown;
+  showOnPortfolio: boolean;
+  lastSyncedAt: Date | null;
+}) {
+  const posts = row.showOnPortfolio ? selectedLinkedInPosts(row.posts, row.selection) : [];
+  try {
+    await syncLinkedInArticles(row.portfolioId, posts, row.lastSyncedAt ?? new Date());
+  } catch (error) {
+    console.error("[linkedin] failed to sync LinkedIn posts into articles", error);
+  }
 }
 
 function toPayload(
@@ -255,6 +273,7 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
           update: data,
           create: { portfolioId: portfolio.id, ...data },
         });
+        await syncArticlesFor(row);
         return { success: true, data: toPayload(row), quota: await readQuota(userId) };
       } catch (error) {
         // Failed syncs never use the quota; they count toward the daily failure cap instead.
@@ -307,6 +326,7 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
             : { showOnPortfolio: ctx.body.showOnPortfolio }),
         },
       });
+      await syncArticlesFor(row);
       return { success: true, data: toPayload(row) };
     },
     {
@@ -325,5 +345,6 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
     }
     const portfolio = await ensureUserPortfolio(gate.session.userId);
     await prisma.linkedInImport.deleteMany({ where: { portfolioId: portfolio.id } });
+    await syncLinkedInArticles(portfolio.id, []);
     return { success: true };
   });

@@ -15,7 +15,8 @@ export type LinkedInSectionClasses = {
 
 /**
  * Shared, template-agnostic LinkedIn showcase. Templates pass their own
- * class names; only the fields/posts the owner selected are in `data`.
+ * class names; only the fields the owner selected are in `data`. Selected
+ * posts render in the Articles section (source "linkedin"), not here.
  */
 export function LinkedInSection({
   data,
@@ -29,7 +30,7 @@ export function LinkedInSection({
   id?: string;
 }) {
   if (!data) return null;
-  const { profile, posts } = data;
+  const { profile } = data;
   const hasIntro =
     profile.name || profile.headline || profile.currentPosition || profile.location || profile.profileImageUrl;
 
@@ -103,26 +104,6 @@ export function LinkedInSection({
             <span key={skill} className={classes.chip}>
               {skill}
             </span>
-          ))}
-        </div>
-      ) : null}
-
-      {posts.length ? (
-        <div className="grid gap-4 @md:grid-cols-2">
-          {posts.map((post) => (
-            <article key={post.id} className={cn("flex flex-col gap-3", classes.card)}>
-              <p className={cn("line-clamp-6 whitespace-pre-line", classes.text)}>{post.text}</p>
-              <div className={cn("mt-auto flex flex-wrap items-center gap-x-3 gap-y-1", classes.muted)}>
-                {post.date ? <span>{post.date}</span> : null}
-                {post.reactions != null ? <span>{post.reactions} reactions</span> : null}
-                {post.comments != null ? <span>{post.comments} comments</span> : null}
-                {post.url ? (
-                  <a href={post.url} target="_blank" rel="noopener noreferrer" className={classes.link}>
-                    View on LinkedIn
-                  </a>
-                ) : null}
-              </div>
-            </article>
           ))}
         </div>
       ) : null}

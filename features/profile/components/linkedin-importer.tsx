@@ -343,6 +343,9 @@ export function LinkedInImporter() {
                   ({selection.postIds.length} of {state.posts.length} selected)
                 </span>
               </p>
+              <p className="mb-2 px-2 text-xs text-muted-foreground">
+                Selected posts are added to your Articles section, labeled LinkedIn.
+              </p>
               {state.posts.length === 0 ? (
                 <p className="px-2 text-xs text-muted-foreground">
                   No public posts were found on this profile.

@@ -128,6 +128,12 @@ export function parseStoredProfile(value: unknown): LinkedInProfileData | null {
   return parsed.success ? parsed.data : null;
 }
 
+/** Posts the user selected, in scrape order. */
+export function selectedLinkedInPosts(posts: unknown, selection: unknown): LinkedInPost[] {
+  const ids = new Set(parseLinkedInSelection(selection).postIds);
+  return parseStoredPosts(posts).filter((post) => ids.has(post.id));
+}
+
 export function parseStoredPosts(value: unknown): LinkedInPost[] {
   const parsed = z
     .array(linkedInPostSchema.extend({ id: z.string() }))
@@ -135,11 +141,13 @@ export function parseStoredPosts(value: unknown): LinkedInPost[] {
   return parsed.success ? parsed.data : [];
 }
 
-/** What a public portfolio renders: only the selected fields and posts. */
+/**
+ * What the LinkedIn section renders: only the selected profile fields.
+ * Selected posts are rendered in the Articles section instead (source "linkedin").
+ */
 export interface LinkedInShowcase {
   profileUrl: string;
   profile: Partial<LinkedInProfileData>;
-  posts: LinkedInPost[];
 }
 
 export function buildLinkedInShowcase(
@@ -147,7 +155,6 @@ export function buildLinkedInShowcase(
     | {
         profileUrl: string;
         profileData: unknown;
-        posts: unknown;
         selection: unknown;
         showOnPortfolio: boolean;
       }
@@ -165,10 +172,8 @@ export function buildLinkedInShowcase(
       (picked as Record<string, unknown>)[field] = value;
     }
   }
-  const selectedIds = new Set(selection.postIds);
-  const posts = parseStoredPosts(row.posts).filter((post) => selectedIds.has(post.id));
-  if (Object.keys(picked).length === 0 && posts.length === 0) return null;
-  return { profileUrl: row.profileUrl, profile: picked, posts };
+  if (Object.keys(picked).length === 0) return null;
+  return { profileUrl: row.profileUrl, profile: picked };
 }
 
 // ── Scraping ───────────────────────────────────────────────
