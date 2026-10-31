@@ -152,7 +152,7 @@ export function useMarkNotificationRead() {
 
 export function useMarkAllNotificationsRead() {
   return useOptimisticNotificationMutation(
-    (_: void) => request("/api/notifications/read-all", { method: "POST" }, "Failed to mark all as read"),
+    () => request("/api/notifications/read-all", { method: "POST" }, "Failed to mark all as read"),
     (_input, list) => {
       const now = new Date().toISOString();
       return { list: mapItems(list, (item) => (item.readAt ? item : { ...item, readAt: now })), count: 0 };
