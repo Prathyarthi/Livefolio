@@ -128,7 +128,8 @@ export function LinkedInImporter() {
     );
   }, [state, selection]);
 
-  if (query.isLoading) {
+  // Only block the UI on the very first load; background refetches keep showing data.
+  if (query.isPending && !query.data) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" /> Loading LinkedIn import…
@@ -138,7 +139,7 @@ export function LinkedInImporter() {
   if (query.error instanceof LinkedInApiError && query.error.status === 403) {
     return <LinkedInLocked />;
   }
-  if (query.error) {
+  if (query.error && !query.data) {
     return <p className="text-sm text-destructive">{query.error.message}</p>;
   }
 

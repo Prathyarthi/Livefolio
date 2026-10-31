@@ -50,7 +50,13 @@ export function useLinkedInImport(enabled = true) {
   return useQuery({
     queryKey: KEY,
     enabled,
-    retry: false,
+    // Status only changes via our own mutations (which update the cache), so
+    // don't refetch on focus; retry transient failures once, never 4xx.
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    retry: (failureCount, error) =>
+      failureCount < 1 &&
+      !(error instanceof LinkedInApiError && error.status >= 400 && error.status < 500),
     queryFn: async (): Promise<LinkedInImportResponse> => {
       const res = await fetch("/api/profile/linkedin", { credentials: "include" });
       if (!res.ok) throw await readError(res, "Failed to load LinkedIn import");
