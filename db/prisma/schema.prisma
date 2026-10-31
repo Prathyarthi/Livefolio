@@ -51,6 +51,8 @@ model User {
   storedFiles          StoredFile[]
   vouchesRequested     Vouch[] @relation("VouchesRequested")
   vouchesGiven         Vouch[] @relation("VouchesGiven")
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
 
   @@map("users")
 }
@@ -841,4 +843,41 @@ model Vouch {
   @@index([inviteEmail, status])
   @@index([portfolioId, status])
   @@map("vouches")
+}
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  /// See NOTIFICATION_TYPES in lib/notifications.ts
+  type      String
+  title     String
+  body      String?
+  href      String?
+  metadata  Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+/// Absent row = channel default (in-app on).
+model NotificationPreference {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  channel   String
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, channel])
+  @@map("notification_preferences")
 }
