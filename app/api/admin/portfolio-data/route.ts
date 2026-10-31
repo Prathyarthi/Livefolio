@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import {
-  consumeExportAttempt,
-  credentialsMatch,
-  exportCorsHeaders,
-  exportCredentialsConfigured,
-  isAllowedExportOrigin,
-  requestOrigin,
-} from "@/lib/portfolio-export-guard";
+import { requireAdmin } from "@/lib/admin";
+import { csvFilename, portfoliosToCsv } from "@/lib/portfolio-export-csv";
 
 export const dynamic = "force-dynamic";
 
@@ -31,101 +25,54 @@ const sectionInclude = {
   customSections: { orderBy: { sortOrder: "asc" as const } },
 } as const;
 
-function json(
-  origin: string | null,
-  body: unknown,
-  status: number,
-  extraHeaders?: HeadersInit,
-) {
-  const headers = new Headers(extraHeaders);
-  if (origin && isAllowedExportOrigin(origin)) {
-    const cors = exportCorsHeaders(origin);
-    for (const [key, value] of Object.entries(cors)) {
-      headers.set(key, value);
-    }
-  }
-  return NextResponse.json(body, { status, headers });
+function parsePublishedFilter(
+  value: string | null,
+): "all" | "true" | "false" | null {
+  if (value == null || value === "" || value === "all") return "all";
+  if (value === "true") return "true";
+  if (value === "false") return "false";
+  return null;
 }
 
-export async function OPTIONS(request: Request) {
-  const origin = requestOrigin(request);
-  if (!exportCredentialsConfigured()) {
-    return json(origin, { error: "Portfolio export is not configured." }, 503);
-  }
-  if (!isAllowedExportOrigin(origin)) {
-    return json(null, { error: "Origin not allowed." }, 403);
-  }
-  return new NextResponse(null, { status: 204, headers: exportCorsHeaders(origin) });
-}
-
-export async function POST(request: Request) {
-  const origin = requestOrigin(request);
-
-  if (!exportCredentialsConfigured()) {
-    return json(origin, { error: "Portfolio export is not configured." }, 503);
+export async function GET(request: Request) {
+  const admin = await requireAdmin();
+  if (!admin.ok) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
-  if (!isAllowedExportOrigin(origin)) {
-    return json(null, { error: "Origin not allowed." }, 403);
-  }
-
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return json(origin, { error: "Invalid JSON body." }, 400);
-  }
-
-  const username =
-    body && typeof body === "object" && "username" in body && typeof body.username === "string"
-      ? body.username.trim()
-      : "";
-  const password =
-    body && typeof body === "object" && "password" in body && typeof body.password === "string"
-      ? body.password
-      : "";
-
-  const credentialsAreValid =
-    username.length > 0 &&
-    username.length <= 256 &&
-    password.length > 0 &&
-    password.length <= 256 &&
-    credentialsMatch(username, password);
-
-  if (!credentialsAreValid) {
-    const attempt = await consumeExportAttempt(request);
-    if (!attempt.ok) {
-      if ("unavailable" in attempt) {
-        return json(origin, { error: "Portfolio export is temporarily unavailable." }, 503);
-      }
-      return json(origin, { error: "Too many attempts. Try again later." }, 429, {
-        "Retry-After": String(attempt.retryAfter),
-      });
-    }
-    return json(origin, { error: "Invalid username or password." }, 401);
-  }
-
-  const isPublished =
-    body &&
-    typeof body === "object" &&
-    "isPublished" in body &&
-    typeof body.isPublished === "boolean"
-      ? body.isPublished
-      : null;
-
-  if (isPublished === null) {
-    return json(origin, { error: "isPublished must be true or false." }, 400);
+  const filter = parsePublishedFilter(
+    new URL(request.url).searchParams.get("isPublished"),
+  );
+  if (!filter) {
+    return NextResponse.json(
+      { error: "isPublished must be true, false, or all." },
+      { status: 400 },
+    );
   }
 
   const rows = await prisma.portfolio.findMany({
-    where: { isPublished },
+    where:
+      filter === "all"
+        ? undefined
+        : { isPublished: filter === "true" },
     orderBy: { updatedAt: "desc" },
     include: sectionInclude,
   });
 
   const portfolios = rows.map((portfolio) => {
-    const { user, experiences, educations, skills, projects, articles, socialProfiles, certifications, achievements, customSections, ...profile } =
-      portfolio;
+    const {
+      user,
+      experiences,
+      educations,
+      skills,
+      projects,
+      articles,
+      socialProfiles,
+      certifications,
+      achievements,
+      customSections,
+      ...profile
+    } = portfolio;
     return {
       owner: user,
       profile,
@@ -141,5 +88,15 @@ export async function POST(request: Request) {
     };
   });
 
-  return json(origin, { count: portfolios.length, isPublished, portfolios }, 200);
+  const csv = portfoliosToCsv(portfolios);
+  const filename = csvFilename(filter);
+
+  return new NextResponse(csv, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-store",
+    },
+  });
 }
