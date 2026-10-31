@@ -12,6 +12,7 @@ import { talent } from "@/features/talent/server/route";
 import { vouches } from "@/features/vouches/server/route";
 import { organizationVerification } from "@/features/verification/server/route";
 import { notifications } from "@/features/notifications/server/route";
+import { badges } from "@/features/badges/server/route";
 
 export const maxDuration = 300;
 
@@ -28,7 +29,8 @@ const app = new Elysia({ prefix: "/api" })
   .use(talent)
   .use(vouches)
   .use(organizationVerification)
-  .use(notifications);
+  .use(notifications)
+  .use(badges);
 
 export const GET = app.fetch;
 export const POST = app.fetch;
