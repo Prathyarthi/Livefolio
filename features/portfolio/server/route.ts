@@ -1,5 +1,6 @@
 import Elysia, { t } from "elysia";
 import type { Prisma } from "@/db/generated/prisma/client";
+import { awardBadge } from "@/lib/badges";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
@@ -626,6 +627,10 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         ctx.body.isPublished &&
         !portfolio.isPublished &&
         !portfolio.user.publishedCongratsSentAt;
+
+      if (updated.isPublished) {
+        void awardBadge(session.userId, "portfolio_published");
+      }
 
       if (firstPublish) {
         void sendPublishedPortfolioEmailSafe({

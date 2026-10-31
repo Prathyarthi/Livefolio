@@ -7,6 +7,7 @@ import { resolveAccessForUser } from "@/lib/entitlements";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import { syncLinkedInArticles } from "@/lib/linkedin-articles";
 import { notify } from "@/lib/notifications";
+import { awardIntegrationBadge } from "@/lib/badges";
 import {
   DEFAULT_LINKEDIN_SELECTION,
   LINKEDIN_DAILY_FAILURE_LIMIT,
@@ -286,6 +287,7 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
           href: "/dashboard/import",
           metadata: { postCount: posts.length, hasWarning: Boolean(warning) },
         });
+        void awardIntegrationBadge(userId, "linkedin");
         return { success: true, data: toPayload(row), quota: await readQuota(userId), warning };
       } catch (error) {
         // Failed syncs never use the quota; they count toward the daily failure cap instead.
