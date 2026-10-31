@@ -1,5 +1,6 @@
 import type { SectionKey } from "./section-labels";
 import type { SectionLayoutCustomization } from "./section-order";
+import type { LinkedInShowcase } from "@/lib/linkedin";
 
 export type TemplateSectionId = "about" | "work" | "experience" | "profiles";
 
@@ -109,6 +110,8 @@ export interface PortfolioData {
   }>;
   /** Project IDs stored in DB for Microlink live previews. */
   livePreviewProjectIds: string[];
+  /** Pro LinkedIn import: only the fields/posts the user selected. */
+  linkedin?: LinkedInShowcase | null;
 }
 
 export interface TemplateMeta {

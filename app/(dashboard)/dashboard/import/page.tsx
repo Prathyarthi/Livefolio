@@ -83,7 +83,7 @@ export default function ImportPage() {
     source: ImportSourceValue,
     shown: boolean,
   ) => {
-    if (source === "resume" || !portfolio) return;
+    if (source === "resume" || source === "linkedin" || !portfolio) return;
     const next = shown
       ? hiddenIntegrations.filter((id) => id !== source)
       : [...hiddenIntegrations, source];
@@ -179,7 +179,8 @@ export default function ImportPage() {
             <p className="mt-1 text-body-sm text-text-secondary">
               {currentSource.description}
             </p>
-            {activeSource !== "resume" ? (
+            {/* LinkedIn has its own show-on-portfolio toggle in its importer. */}
+            {activeSource !== "resume" && activeSource !== "linkedin" ? (
               <div className="mt-4 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-base px-4 py-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-text-primary">

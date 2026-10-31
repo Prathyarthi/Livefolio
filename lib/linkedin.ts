@@ -1,0 +1,409 @@
+import { z } from "zod";
+
+/**
+ * LinkedIn import via ScrapeGraphAI v2 Extract (server-side only).
+ * Docs: https://docs.scrapegraphai.com/api-reference/endpoint/extract
+ */
+
+const SGAI_EXTRACT_URL = "https://v2-api.scrapegraphai.com/api/extract";
+const SCRAPE_TIMEOUT_MS = 90_000;
+export const MAX_LINKEDIN_POSTS = 10;
+
+// ── URL validation ─────────────────────────────────────────
+
+/** Returns a canonical https://www.linkedin.com/in/<handle> URL, or null. */
+export function normalizeLinkedInProfileUrl(input: string): string | null {
+  const raw = input.trim();
+  if (!raw) return null;
+  let url: URL;
+  try {
+    url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+  const host = url.hostname.toLowerCase();
+  if (host !== "linkedin.com" && !host.endsWith(".linkedin.com")) return null;
+  const parts = url.pathname.split("/").filter(Boolean);
+  if (parts[0]?.toLowerCase() !== "in" || !parts[1]) return null;
+  let handle: string;
+  try {
+    handle = decodeURIComponent(parts[1]);
+  } catch {
+    return null;
+  }
+  if (!/^[\p{L}\p{N}_-]{3,100}$/u.test(handle)) return null;
+  return `https://www.linkedin.com/in/${encodeURIComponent(handle)}`;
+}
+
+// ── Output schema (also sent to ScrapeGraphAI as JSON Schema) ──
+
+const nullableString = z.string().nullable();
+
+export const linkedInExperienceSchema = z.object({
+  title: z.string().describe("Job title"),
+  company: z.string().describe("Company name"),
+  location: nullableString.describe("Job location, if shown"),
+  startDate: nullableString.describe("Start date as shown, e.g. 'Jan 2022'"),
+  endDate: nullableString.describe("End date as shown, or 'Present'"),
+  description: nullableString.describe("Role description, if shown"),
+});
+
+export const linkedInEducationSchema = z.object({
+  school: z.string().describe("School or university name"),
+  degree: nullableString.describe("Degree"),
+  field: nullableString.describe("Field of study"),
+  startDate: nullableString,
+  endDate: nullableString,
+});
+
+export const linkedInPostSchema = z.object({
+  text: z.string().describe("Full post text"),
+  date: nullableString.describe("Post date or relative age as shown, e.g. '2w' or '2026-10-01'"),
+  url: nullableString.describe("Absolute link to the post, if available"),
+  reactions: z.number().int().nullable().describe("Number of reactions/likes, if shown"),
+  comments: z.number().int().nullable().describe("Number of comments, if shown"),
+  imageUrl: nullableString.describe("Image attached to the post, if any"),
+});
+
+export const linkedInScrapeSchema = z.object({
+  profileAvailable: z
+    .boolean()
+    .describe("false if the page is a login wall, private, or not a LinkedIn profile"),
+  name: nullableString.describe("Full name"),
+  headline: nullableString.describe("Profile headline"),
+  location: nullableString.describe("Location"),
+  about: nullableString.describe("About / summary section"),
+  profileImageUrl: nullableString.describe("Profile photo URL"),
+  currentPosition: nullableString.describe("Current position, e.g. 'Engineer at Acme'"),
+  experience: z.array(linkedInExperienceSchema),
+  education: z.array(linkedInEducationSchema),
+  skills: z.array(z.string()),
+  posts: z.array(linkedInPostSchema).describe("Most recent posts/activity, newest first"),
+});
+
+export type LinkedInScrapeResult = z.infer<typeof linkedInScrapeSchema>;
+export type LinkedInPost = z.infer<typeof linkedInPostSchema> & { id: string };
+export type LinkedInProfileData = Omit<LinkedInScrapeResult, "posts" | "profileAvailable">;
+
+// ── Selection ──────────────────────────────────────────────
+
+export const LINKEDIN_FIELDS = [
+  "name",
+  "headline",
+  "location",
+  "about",
+  "profileImageUrl",
+  "currentPosition",
+  "experience",
+  "education",
+  "skills",
+] as const;
+export type LinkedInField = (typeof LINKEDIN_FIELDS)[number];
+
+export const linkedInSelectionSchema = z.object({
+  fields: z.array(z.enum(LINKEDIN_FIELDS)).max(LINKEDIN_FIELDS.length),
+  postIds: z.array(z.string().max(64)).max(MAX_LINKEDIN_POSTS),
+});
+export type LinkedInSelection = z.infer<typeof linkedInSelectionSchema>;
+
+export const DEFAULT_LINKEDIN_SELECTION: LinkedInSelection = {
+  fields: ["headline", "about", "currentPosition", "experience", "skills"],
+  postIds: [],
+};
+
+export function parseLinkedInSelection(value: unknown): LinkedInSelection {
+  const parsed = linkedInSelectionSchema.safeParse(value);
+  if (!parsed.success) return DEFAULT_LINKEDIN_SELECTION;
+  return {
+    fields: [...new Set(parsed.data.fields)],
+    postIds: [...new Set(parsed.data.postIds)],
+  };
+}
+
+export function parseStoredProfile(value: unknown): LinkedInProfileData | null {
+  const parsed = linkedInScrapeSchema
+    .omit({ posts: true, profileAvailable: true })
+    .safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+/** Posts the user selected, in scrape order. */
+export function selectedLinkedInPosts(posts: unknown, selection: unknown): LinkedInPost[] {
+  const ids = new Set(parseLinkedInSelection(selection).postIds);
+  return parseStoredPosts(posts).filter((post) => ids.has(post.id));
+}
+
+export function parseStoredPosts(value: unknown): LinkedInPost[] {
+  const parsed = z
+    .array(linkedInPostSchema.extend({ id: z.string() }))
+    .safeParse(value);
+  return parsed.success ? parsed.data : [];
+}
+
+/**
+ * What the LinkedIn section renders: only the selected profile fields.
+ * Selected posts are rendered in the Articles section instead (source "linkedin").
+ */
+export interface LinkedInShowcase {
+  profileUrl: string;
+  profile: Partial<LinkedInProfileData>;
+}
+
+export function buildLinkedInShowcase(
+  row:
+    | {
+        profileUrl: string;
+        profileData: unknown;
+        selection: unknown;
+        showOnPortfolio: boolean;
+      }
+    | null
+    | undefined,
+): LinkedInShowcase | null {
+  if (!row || !row.showOnPortfolio) return null;
+  const profile = parseStoredProfile(row.profileData);
+  if (!profile) return null;
+  const selection = parseLinkedInSelection(row.selection);
+  const picked: Partial<LinkedInProfileData> = {};
+  for (const field of selection.fields) {
+    const value = profile[field];
+    if (Array.isArray(value) ? value.length > 0 : Boolean(value)) {
+      (picked as Record<string, unknown>)[field] = value;
+    }
+  }
+  if (Object.keys(picked).length === 0) return null;
+  return { profileUrl: row.profileUrl, profile: picked };
+}
+
+// ── Scraping ───────────────────────────────────────────────
+
+export type LinkedInScrapeErrorCode =
+  | "NOT_CONFIGURED"
+  | "PROFILE_UNAVAILABLE"
+  | "RATE_LIMITED"
+  | "TIMEOUT"
+  | "SCRAPE_FAILED";
+
+export class LinkedInScrapeError extends Error {
+  constructor(
+    public code: LinkedInScrapeErrorCode,
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = "LinkedInScrapeError";
+  }
+}
+
+const PROMPT = `Extract this public LinkedIn profile. Return name, headline, location, about/summary, profile photo URL, current position, experience, education, skills, and up to ${MAX_LINKEDIN_POSTS} most recent posts (text, date, link, reaction and comment counts). Use null for anything not visible. Do not invent data. If the page is a sign-in/auth wall, an error page, or not a person's profile, set profileAvailable to false.`;
+
+function cleanUrl(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+function postId(post: z.infer<typeof linkedInPostSchema>, index: number): string {
+  const basis = post.url ?? `${post.date ?? ""}:${post.text.slice(0, 120)}:${index}`;
+  let hash = 0;
+  for (let i = 0; i < basis.length; i++) hash = (hash * 31 + basis.charCodeAt(i)) | 0;
+  return `p_${(hash >>> 0).toString(36)}`;
+}
+
+export function normalizeScrapeResult(json: unknown): {
+  profile: LinkedInProfileData;
+  posts: LinkedInPost[];
+} {
+  const parsed = linkedInScrapeSchema.safeParse(json);
+  if (!parsed.success) {
+    throw new LinkedInScrapeError(
+      "SCRAPE_FAILED",
+      "LinkedIn returned data we couldn't read. Please try again later.",
+      502,
+    );
+  }
+  const { posts, profileAvailable, ...profile } = parsed.data;
+  if (!profileAvailable || !profile.name) {
+    throw new LinkedInScrapeError(
+      "PROFILE_UNAVAILABLE",
+      "This LinkedIn profile is private or not publicly visible. Make your profile public and try again.",
+      422,
+    );
+  }
+  const seen = new Set<string>();
+  const normalizedPosts = posts
+    .filter((post) => post.text.trim())
+    .slice(0, MAX_LINKEDIN_POSTS)
+    .map((post, index) => ({
+      ...post,
+      url: cleanUrl(post.url),
+      imageUrl: cleanUrl(post.imageUrl),
+      id: postId(post, index),
+    }))
+    .filter((post) => (seen.has(post.id) ? false : (seen.add(post.id), true)));
+  return {
+    profile: { ...profile, profileImageUrl: cleanUrl(profile.profileImageUrl) },
+    posts: normalizedPosts,
+  };
+}
+
+export function isLinkedInScrapingConfigured() {
+  return Boolean(process.env.SGAI_API_KEY?.trim());
+}
+
+type SgaiResponse = {
+  json?: unknown;
+  error?: { type?: string; message?: string; details?: unknown };
+};
+
+async function callExtract(
+  fetchImpl: typeof fetch,
+  apiKey: string,
+  profileUrl: string,
+  fetchConfig: Record<string, unknown>,
+): Promise<{ res: Response; body: SgaiResponse | null }> {
+  let res: Response;
+  try {
+    res = await fetchImpl(SGAI_EXTRACT_URL, {
+      method: "POST",
+      headers: { "SGAI-APIKEY": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: profileUrl,
+        prompt: PROMPT,
+        schema: z.toJSONSchema(linkedInScrapeSchema),
+        fetchConfig,
+      }),
+      signal: AbortSignal.timeout(SCRAPE_TIMEOUT_MS),
+    });
+  } catch (error) {
+    if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+      throw new LinkedInScrapeError("TIMEOUT", "LinkedIn took too long to respond. Please try again.", 504);
+    }
+    throw new LinkedInScrapeError("SCRAPE_FAILED", "Couldn't reach the LinkedIn import service.", 502);
+  }
+  const body = (await res.json().catch(() => null)) as SgaiResponse | null;
+  return { res, body };
+}
+
+export async function scrapeLinkedInProfile(profileUrl: string, fetchImpl: typeof fetch = fetch) {
+  const apiKey = process.env.SGAI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new LinkedInScrapeError(
+      "NOT_CONFIGURED",
+      "LinkedIn import isn't configured yet. Please try again later.",
+      503,
+    );
+  }
+
+  // `mode: "js"` + `stealth` has no matching fetch provider (400 fetch_provider_config),
+  // so use auto mode with stealth, and retry once without stealth if that's rejected too.
+  const attempts: Array<Record<string, unknown>> = [{ stealth: true }, {}];
+  let res: Response | null = null;
+  let body: SgaiResponse | null = null;
+  for (const [index, fetchConfig] of attempts.entries()) {
+    ({ res, body } = await callExtract(fetchImpl, apiKey, profileUrl, fetchConfig));
+    if (res.ok) break;
+    const type = body?.error?.type;
+    console.error("[linkedin.scrape] ScrapeGraphAI error", {
+      status: res.status,
+      type,
+      message: body?.error?.message,
+      details: body?.error?.details,
+      fetchConfig,
+    });
+    const isLast = index === attempts.length - 1;
+    if (type !== "fetch_provider_config" || isLast) break;
+  }
+
+  if (!res || !res.ok) {
+    const status = res?.status ?? 502;
+    const type = body?.error?.type;
+    if (status === 429 || type === "rate_limited") {
+      throw new LinkedInScrapeError("RATE_LIMITED", "LinkedIn import is busy right now. Try again in a few minutes.", 429);
+    }
+    if (status === 401 || status === 402 || status === 403) {
+      throw new LinkedInScrapeError("NOT_CONFIGURED", "LinkedIn import is temporarily unavailable.", 503);
+    }
+    if (status === 504 || status === 408) {
+      throw new LinkedInScrapeError("TIMEOUT", "LinkedIn took too long to respond. Please try again.", 504);
+    }
+    throw new LinkedInScrapeError("SCRAPE_FAILED", "We couldn't read that LinkedIn profile. Please try again later.", 502);
+  }
+
+  return normalizeScrapeResult(body?.json);
+}
+
+// ── Sync quota ─────────────────────────────────────────────
+
+/** Successful syncs allowed per user per calendar month (UTC). */
+export const LINKEDIN_MONTHLY_SYNC_LIMIT = 3;
+/** Successful syncs allowed per user per UTC day. */
+export const LINKEDIN_DAILY_SYNC_LIMIT = 1;
+/** Failed attempts allowed per user per UTC day (abuse guard; failures never use the quota). */
+export const LINKEDIN_DAILY_FAILURE_LIMIT = 5;
+
+/** UTC calendar month containing `now`: key like "2026-10" and the reset instant. */
+export function linkedInMonthWindow(now: Date = new Date()) {
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  return {
+    key: `${year}-${String(month + 1).padStart(2, "0")}`,
+    resetsAt: new Date(Date.UTC(year, month + 1, 1)),
+  };
+}
+
+/** UTC day containing `now`: key like "2026-10-31" and the next UTC midnight. */
+export function linkedInDayWindow(now: Date = new Date()) {
+  const start = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return {
+    key: new Date(start).toISOString().slice(0, 10),
+    resetsAt: new Date(start + 86_400_000),
+  };
+}
+
+export interface LinkedInSyncQuota {
+  limit: number;
+  used: number;
+  remaining: number;
+  /** Start of next UTC month. */
+  resetsAt: string;
+  dailyLimit: number;
+  usedToday: number;
+  /** When the next sync becomes possible, or null if one is available now. */
+  nextAvailableAt: string | null;
+  /** Which limit is blocking, if any. */
+  blockedBy: "monthly" | "daily" | null;
+}
+
+export function toLinkedInQuota(
+  usedThisMonth: number,
+  usedToday: number,
+  now: Date = new Date(),
+): LinkedInSyncQuota {
+  const month = linkedInMonthWindow(now);
+  const day = linkedInDayWindow(now);
+  const used = Math.max(0, Math.min(usedThisMonth, LINKEDIN_MONTHLY_SYNC_LIMIT));
+  const today = Math.max(0, Math.min(usedToday, LINKEDIN_DAILY_SYNC_LIMIT));
+  const blockedBy =
+    used >= LINKEDIN_MONTHLY_SYNC_LIMIT ? "monthly" : today >= LINKEDIN_DAILY_SYNC_LIMIT ? "daily" : null;
+  return {
+    limit: LINKEDIN_MONTHLY_SYNC_LIMIT,
+    used,
+    remaining: LINKEDIN_MONTHLY_SYNC_LIMIT - used,
+    resetsAt: month.resetsAt.toISOString(),
+    dailyLimit: LINKEDIN_DAILY_SYNC_LIMIT,
+    usedToday: today,
+    nextAvailableAt:
+      blockedBy === "monthly"
+        ? month.resetsAt.toISOString()
+        : blockedBy === "daily"
+          ? day.resetsAt.toISOString()
+          : null,
+    blockedBy,
+  };
+}

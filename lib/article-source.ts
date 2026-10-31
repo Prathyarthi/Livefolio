@@ -3,6 +3,7 @@ export const ARTICLE_SOURCES = [
   "devto",
   "hashnode",
   "stackoverflow",
+  "linkedin",
 ] as const;
 
 export type ArticleSource = (typeof ARTICLE_SOURCES)[number];
@@ -14,6 +15,7 @@ const PLATFORM_HOSTS: Record<ArticleSource, readonly string[]> = {
   devto: ["dev.to"],
   hashnode: ["hashnode.com", "hashnode.dev"],
   stackoverflow: ["stackoverflow.com"],
+  linkedin: ["linkedin.com"],
 };
 
 function hostnameOf(url: string | null | undefined): string | null {

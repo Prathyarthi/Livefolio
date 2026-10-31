@@ -142,6 +142,7 @@ const portfolioInclude = {
   certifications: { orderBy: { sortOrder: "asc" } },
   achievements: { orderBy: { sortOrder: "asc" } },
   customSections: { orderBy: { sortOrder: "asc" } },
+  linkedinImport: true,
 } as const;
 
 export const portfolio = new Elysia({ prefix: "/portfolio" })

@@ -1,5 +1,6 @@
 import Elysia from "elysia";
 import { prisma } from "@/lib/prisma";
+import { buildLinkedInShowcase } from "@/lib/linkedin";
 import { canUseTemplate, isProSubscription, resolveAccessForUser } from "@/lib/entitlements";
 
 export const publicPortfolio = new Elysia({ prefix: "/public" })
@@ -19,6 +20,7 @@ export const publicPortfolio = new Elysia({ prefix: "/public" })
         certifications: { orderBy: { sortOrder: "asc" } },
         achievements: { orderBy: { sortOrder: "asc" } },
         customSections: { orderBy: { sortOrder: "asc" } },
+        linkedinImport: true,
       },
     });
 
@@ -39,6 +41,7 @@ export const publicPortfolio = new Elysia({ prefix: "/public" })
       resumeUrl: _resumeUrl,
       livePreviewProjectIds,
       openToWork: _openToWork,
+      linkedinImport,
       ...publicData
     } = portfolio;
     const access = resolveAccessForUser(user);
@@ -49,6 +52,10 @@ export const publicPortfolio = new Elysia({ prefix: "/public" })
     return {
       ...publicData,
       templateId,
+      // Only selected LinkedIn items, and only for Pro owners.
+      linkedin: access.canUseLinkedInImport
+        ? buildLinkedInShowcase(linkedinImport)
+        : null,
       livePreviewProjectIds: isProSubscription(user.subscriptionStatus)
         ? livePreviewProjectIds ?? []
         : [],

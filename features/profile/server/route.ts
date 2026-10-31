@@ -34,6 +34,7 @@ import {
   type ReorderableSectionKey,
 } from "@/features/templates/section-order";
 import type { PortfolioCustomization } from "@/features/templates/types";
+import { linkedin } from "./linkedin-route";
 
 async function requireImportEntitlement(request: Request) {
   const session = await getSession(request);
@@ -194,6 +195,7 @@ function hashnodeProfileUrl(username: string, profileUrl?: string) {
 }
 
 export const profile = new Elysia({ prefix: "/profile" })
+  .use(linkedin)
 
   // ── GitHub ──────────────────────────────────────────────
   .post(
