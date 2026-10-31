@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Pencil, FileText } from "lucide-react";
 import { usePortfolio } from "@/features/portfolio/api/use-portfolio";
 import { CreatePortfolioPrompt } from "@/features/portfolio/components/create-portfolio-prompt";
+import { BadgeShelf } from "@/features/badges/components/badge-shelf";
 import { FlowFooter } from "@/features/dashboard/components/flow-footer";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 
@@ -143,6 +144,8 @@ export default function DashboardPage() {
           </div>
         ) : null}
       </div>
+
+      <BadgeShelf />
 
       <FlowFooter
         message="Import your resume first — then tweak sections and preview before you publish."

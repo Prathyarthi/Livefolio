@@ -53,6 +53,7 @@ model User {
   vouchesGiven         Vouch[] @relation("VouchesGiven")
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
+  badges                  UserBadge[]
 
   @@map("users")
 }
@@ -880,4 +881,22 @@ model NotificationPreference {
 
   @@unique([userId, type, channel])
   @@map("notification_preferences")
+}
+
+// ============================================================
+// BADGES (catalog lives in code: lib/badges-catalog.ts)
+// ============================================================
+
+model UserBadge {
+  id              String   @id @default(uuid())
+  userId          String
+  badgeKey        String
+  awardedAt       DateTime @default(now())
+  showOnPortfolio Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeKey])
+  @@index([userId, showOnPortfolio])
+  @@map("user_badges")
 }

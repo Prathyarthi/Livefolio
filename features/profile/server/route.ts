@@ -16,6 +16,7 @@ import { normalizeArticleSource } from "@/lib/article-source";
 import { fetchLeetCodeStats } from "@/lib/leetcode";
 import { fetchMediumArticles } from "@/lib/medium";
 import { getPlanLimitMessage, resolveAccessForUser } from "@/lib/entitlements";
+import { awardIntegrationBadge } from "@/lib/badges";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import {
   MAX_SECTION_ROWS,
@@ -360,6 +361,7 @@ export const profile = new Elysia({ prefix: "/profile" })
         });
       }
 
+      void awardIntegrationBadge(gate.session.userId, "github");
       return { success: true, imported: result.count };
     },
     {
@@ -462,6 +464,7 @@ export const profile = new Elysia({ prefix: "/profile" })
         },
       });
 
+      void awardIntegrationBadge(gate.session.userId, "leetcode");
       return { success: true, profile: result };
     },
     {
@@ -584,6 +587,7 @@ export const profile = new Elysia({ prefix: "/profile" })
         });
       }
 
+      void awardIntegrationBadge(gate.session.userId, "medium");
       return { success: true, imported: result.count };
     },
     {
@@ -649,6 +653,7 @@ export const profile = new Elysia({ prefix: "/profile" })
           username,
         );
       }
+      void awardIntegrationBadge(gate.session.userId, "devto");
       return { success: true, imported: result.count };
     },
     {
@@ -705,6 +710,7 @@ export const profile = new Elysia({ prefix: "/profile" })
           username,
         );
       }
+      void awardIntegrationBadge(gate.session.userId, "hashnode");
       return { success: true, imported: result.count };
     },
     {
@@ -773,6 +779,7 @@ export const profile = new Elysia({ prefix: "/profile" })
           },
         );
       }
+      void awardIntegrationBadge(gate.session.userId, "stackoverflow");
       return { success: true, imported: result.count };
     },
     {
@@ -845,6 +852,7 @@ export const profile = new Elysia({ prefix: "/profile" })
         },
       );
 
+      void awardIntegrationBadge(gate.session.userId, "codeforces");
       return { success: true };
     },
     {
