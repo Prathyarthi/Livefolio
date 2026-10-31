@@ -11,6 +11,13 @@ async function requireUser(request: Request) {
 const ROW_SELECT = { badgeKey: true, awardedAt: true, showOnPortfolio: true } as const;
 
 export const badges = new Elysia({ prefix: "/badges" })
+  // Log unexpected failures with a clear prefix; keep validation/404 responses as-is.
+  .onError(({ code, error, request, set }) => {
+    if (code === "VALIDATION" || code === "NOT_FOUND" || code === "PARSE") return;
+    console.error(`[badges] ${request.method} ${new URL(request.url).pathname} failed`, error);
+    set.status = 500;
+    return { error: "Something went wrong. Please try again." };
+  })
   .get("/", async (ctx) => {
     const userId = await requireUser(ctx.request);
     if (!userId) {
