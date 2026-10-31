@@ -39,6 +39,7 @@ async function readError(res: Response, fallback: string) {
 }
 
 const KEY = ["linkedin-import"] as const;
+const SYNC_CLIENT_TIMEOUT_MS = 4 * 60 * 1000;
 
 export interface LinkedInImportResponse {
   configured: boolean;
@@ -74,7 +75,15 @@ function useLinkedInMutation<T>(
     mutationFn: async (
       input: T,
     ): Promise<{ data: LinkedInImportState | null; quota?: LinkedInSyncQuota }> => {
-      const res = await request(input);
+      let res: Response;
+      try {
+        res = await request(input);
+      } catch (error) {
+        if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+          throw new LinkedInApiError("This is taking too long. Check back in a few minutes; your sync may still finish.", 408);
+        }
+        throw new LinkedInApiError("Network error. Check your connection and try again.", 0);
+      }
       if (!res.ok) throw await readError(res, fallback);
       const json = await res.json();
       return { data: json.data ?? null, quota: json.quota };
@@ -102,6 +111,8 @@ export function useSyncLinkedIn() {
     (url: string) =>
       fetch("/api/profile/linkedin/sync", {
         method: "POST",
+        // Scrapes can take ~1–3 min server-side; give up client-side after 4 min.
+        signal: AbortSignal.timeout(SYNC_CLIENT_TIMEOUT_MS),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
         credentials: "include",

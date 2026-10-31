@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Lock, RefreshCw, Save, Search, Trash2 } from "lucide-react";
+import { Clock, Loader2, Lock, RefreshCw, Save, Search, Trash2 } from "lucide-react";
 import { LinkedinIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -250,20 +250,25 @@ export function LinkedInImporter() {
               onClick={() => void handleSync()}
               disabled={sync.isPending || !url.trim() || blocked}
             >
+              {/* A running sync wins over quota state: the server claims the slot before scraping. */}
               {sync.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : blocked ? (
+                <Clock className="mr-2 h-4 w-4" />
               ) : state ? (
                 <RefreshCw className="mr-2 h-4 w-4" />
               ) : (
                 <Search className="mr-2 h-4 w-4" />
               )}
-              {blocked
-                ? monthlyBlocked
-                  ? `Available ${unlockLabel}`
-                  : "Available tomorrow"
-                : state
-                  ? "Re-sync"
-                  : "Fetch"}
+              {sync.isPending
+                ? "Syncing…"
+                : blocked
+                  ? monthlyBlocked
+                    ? `Available ${unlockLabel}`
+                    : "Available tomorrow"
+                  : state
+                    ? "Re-sync"
+                    : "Fetch"}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
