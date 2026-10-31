@@ -8,6 +8,8 @@ import { PortfolioViewTracker } from "@/features/analytics/components/portfolio-
 import { PortfolioClickTracker } from "@/features/analytics/components/portfolio-click-tracker";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 import { siteConfig } from "@/lib/site";
+import { publicBadges } from "@/lib/badges-catalog";
+import { PortfolioBadges } from "@/features/badges/components/portfolio-badges";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -61,7 +63,14 @@ export default async function PortfolioPage({ params }: Props) {
   const portfolio = await prisma.portfolio.findUnique({
     where: { slug, isPublished: true },
     include: {
-      user: true,
+      user: {
+        include: {
+          badges: {
+            where: { showOnPortfolio: true },
+            select: { badgeKey: true, awardedAt: true, showOnPortfolio: true },
+          },
+        },
+      },
       experiences: { orderBy: { sortOrder: "asc" } },
       educations: { orderBy: { sortOrder: "asc" } },
       skills: { orderBy: { sortOrder: "asc" } },
@@ -94,6 +103,7 @@ export default async function PortfolioPage({ params }: Props) {
       <PortfolioViewTracker slug={slug} />
       <PortfolioClickTracker slug={slug} />
       <TemplateComponent data={data} />
+      <PortfolioBadges badges={publicBadges(portfolio.user.badges)} />
     </>
   );
 }
