@@ -6,6 +6,7 @@ import { getSession } from "@/lib/session";
 import { resolveAccessForUser } from "@/lib/entitlements";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import { syncLinkedInArticles } from "@/lib/linkedin-articles";
+import { notify } from "@/lib/notifications";
 import {
   DEFAULT_LINKEDIN_SELECTION,
   LINKEDIN_DAILY_FAILURE_LIMIT,
@@ -277,11 +278,30 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
           create: { portfolioId: portfolio.id, ...data },
         });
         const warning = await syncArticlesFor(row);
+        void notify({
+          userId,
+          type: "linkedin.sync_succeeded",
+          title: "LinkedIn profile synced",
+          body: warning ?? `Imported ${posts.length} post${posts.length === 1 ? "" : "s"} from LinkedIn.`,
+          href: "/dashboard/import",
+          metadata: { postCount: posts.length, hasWarning: Boolean(warning) },
+        });
         return { success: true, data: toPayload(row), quota: await readQuota(userId), warning };
       } catch (error) {
         // Failed syncs never use the quota; they count toward the daily failure cap instead.
         await Promise.all(reservedKeys.map(release));
         await recordFailure(userId);
+        void notify({
+          userId,
+          type: "linkedin.sync_failed",
+          title: "LinkedIn sync failed",
+          body:
+            error instanceof LinkedInScrapeError
+              ? error.message
+              : "We couldn't sync your LinkedIn profile. Your quota wasn't used; try again later.",
+          href: "/dashboard/import",
+          metadata: { code: error instanceof LinkedInScrapeError ? error.code : "UNKNOWN" },
+        });
         if (error instanceof LinkedInScrapeError) {
           ctx.set.status = error.status;
           return { error: error.message, code: error.code };
