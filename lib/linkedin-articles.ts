@@ -82,37 +82,44 @@ export async function syncLinkedInArticles(
     .filter((article): article is NonNullable<typeof article> => Boolean(article));
   const wantedUrls = [...new Set(prepared.map((article) => article.url))];
 
-  return prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`
-      SELECT "id" FROM "portfolios" WHERE "id" = ${portfolioId} FOR UPDATE
-    `;
-    const removed = await tx.article.deleteMany({
+  // Reads happen outside any transaction (slow round-trips to the pooled DB
+  // previously blew the 5s interactive-transaction timeout).
+  const [existing, total, maxOrder] = await Promise.all([
+    prisma.article.findMany({
+      where: { portfolioId, source: LINKEDIN_ARTICLE_SOURCE },
+      select: { url: true },
+    }),
+    prisma.article.count({ where: { portfolioId } }),
+    prisma.article.aggregate({ where: { portfolioId }, _max: { sortOrder: true } }),
+  ]);
+  const have = new Set(existing.map((row) => row.url));
+  const toRemove = existing.filter((row) => !wantedUrls.includes(row.url)).length;
+  const seen = new Set<string>();
+  const toCreate = prepared
+    .filter((article) => !have.has(article.url) && !seen.has(article.url) && seen.add(article.url))
+    .slice(0, Math.max(0, MAX_SECTION_ROWS - (total - toRemove)))
+    .map((article, index) => ({
+      ...article,
+      portfolioId,
+      sortOrder: (maxOrder._max.sortOrder ?? -1) + 1 + index,
+    }));
+
+  if (toRemove === 0 && toCreate.length === 0) return { added: 0, removed: 0 };
+
+  // Writes go in one non-interactive batch (single round-trip, atomic).
+  // Deleting the to-be-created URLs first keeps it idempotent if two saves race.
+  const [removed] = await prisma.$transaction([
+    prisma.article.deleteMany({
+      where: { portfolioId, source: LINKEDIN_ARTICLE_SOURCE, url: { notIn: wantedUrls } },
+    }),
+    prisma.article.deleteMany({
       where: {
         portfolioId,
         source: LINKEDIN_ARTICLE_SOURCE,
-        url: { notIn: wantedUrls },
+        url: { in: toCreate.map((article) => article.url) },
       },
-    });
-    const existing = await tx.article.findMany({
-      where: { portfolioId, source: LINKEDIN_ARTICLE_SOURCE },
-      select: { url: true },
-    });
-    const have = new Set(existing.map((row) => row.url));
-    const total = await tx.article.count({ where: { portfolioId } });
-    const maxOrder = await tx.article.aggregate({
-      where: { portfolioId },
-      _max: { sortOrder: true },
-    });
-    const seen = new Set<string>();
-    const toCreate = prepared
-      .filter((article) => !have.has(article.url) && !seen.has(article.url) && seen.add(article.url))
-      .slice(0, Math.max(0, MAX_SECTION_ROWS - total))
-      .map((article, index) => ({
-        ...article,
-        portfolioId,
-        sortOrder: (maxOrder._max.sortOrder ?? -1) + 1 + index,
-      }));
-    if (toCreate.length > 0) await tx.article.createMany({ data: toCreate });
-    return { added: toCreate.length, removed: removed.count };
-  });
+    }),
+    prisma.article.createMany({ data: toCreate }),
+  ]);
+  return { added: toCreate.length, removed: removed.count };
 }

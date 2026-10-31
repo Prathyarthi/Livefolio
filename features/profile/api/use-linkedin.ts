@@ -74,7 +74,11 @@ function useLinkedInMutation<T>(
   return useMutation({
     mutationFn: async (
       input: T,
-    ): Promise<{ data: LinkedInImportState | null; quota?: LinkedInSyncQuota }> => {
+    ): Promise<{
+      data: LinkedInImportState | null;
+      quota?: LinkedInSyncQuota;
+      warning?: string | null;
+    }> => {
       let res: Response;
       try {
         res = await request(input);
@@ -86,7 +90,7 @@ function useLinkedInMutation<T>(
       }
       if (!res.ok) throw await readError(res, fallback);
       const json = await res.json();
-      return { data: json.data ?? null, quota: json.quota };
+      return { data: json.data ?? null, quota: json.quota, warning: json.warning ?? null };
     },
     onSuccess: ({ data, quota }) => {
       qc.setQueryData(KEY, (prev: LinkedInImportResponse | undefined) => ({
@@ -132,6 +136,45 @@ export function useSaveLinkedInSelection() {
       }),
     "Failed to save LinkedIn selection",
   );
+}
+
+/** Optimistic "Show on portfolio" toggle: flips the cached flag immediately, rolls back on error. */
+export function useToggleLinkedInVisibility() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { selection: LinkedInSelection; showOnPortfolio: boolean }) => {
+      const res = await fetch("/api/profile/linkedin/selection", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+        credentials: "include",
+      });
+      if (!res.ok) throw await readError(res, "Failed to update visibility");
+      const json = await res.json();
+      return { data: (json.data ?? null) as LinkedInImportState | null, warning: (json.warning ?? null) as string | null };
+    },
+    onMutate: async ({ showOnPortfolio }) => {
+      await qc.cancelQueries({ queryKey: KEY });
+      const previous = qc.getQueryData<LinkedInImportResponse>(KEY);
+      if (previous?.data) {
+        qc.setQueryData<LinkedInImportResponse>(KEY, {
+          ...previous,
+          data: { ...previous.data, showOnPortfolio },
+        });
+      }
+      return { previous };
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previous) qc.setQueryData(KEY, context.previous);
+    },
+    onSuccess: ({ data }) => {
+      // Only sync the flag; keep any unsaved local selection edits intact.
+      qc.setQueryData<LinkedInImportResponse>(KEY, (prev) =>
+        prev?.data && data ? { ...prev, data: { ...prev.data, showOnPortfolio: data.showOnPortfolio } } : prev,
+      );
+      void qc.invalidateQueries({ queryKey: ["portfolio"] });
+    },
+  });
 }
 
 export function useRemoveLinkedIn() {

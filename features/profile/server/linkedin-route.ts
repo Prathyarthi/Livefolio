@@ -142,8 +142,11 @@ async function syncArticlesFor(row: {
   const posts = row.showOnPortfolio ? selectedLinkedInPosts(row.posts, row.selection) : [];
   try {
     await syncLinkedInArticles(row.portfolioId, posts, row.lastSyncedAt ?? new Date());
+    return null;
   } catch (error) {
+    // Non-fatal: the selection is saved; report so the UI can warn.
     console.error("[linkedin] failed to sync LinkedIn posts into articles", error);
+    return "Saved, but your Articles section couldn't be updated. Save again to retry.";
   }
 }
 
@@ -273,8 +276,8 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
           update: data,
           create: { portfolioId: portfolio.id, ...data },
         });
-        await syncArticlesFor(row);
-        return { success: true, data: toPayload(row), quota: await readQuota(userId) };
+        const warning = await syncArticlesFor(row);
+        return { success: true, data: toPayload(row), quota: await readQuota(userId), warning };
       } catch (error) {
         // Failed syncs never use the quota; they count toward the daily failure cap instead.
         await Promise.all(reservedKeys.map(release));
@@ -326,8 +329,8 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
             : { showOnPortfolio: ctx.body.showOnPortfolio }),
         },
       });
-      await syncArticlesFor(row);
-      return { success: true, data: toPayload(row) };
+      const warning = await syncArticlesFor(row);
+      return { success: true, data: toPayload(row), warning };
     },
     {
       body: t.Object({

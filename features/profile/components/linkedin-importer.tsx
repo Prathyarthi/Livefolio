@@ -25,6 +25,7 @@ import {
   useRemoveLinkedIn,
   useSaveLinkedInSelection,
   useSyncLinkedIn,
+  useToggleLinkedInVisibility,
 } from "@/features/profile/api/use-linkedin";
 import {
   LINKEDIN_FIELDS,
@@ -97,6 +98,7 @@ export function LinkedInImporter() {
   const query = useLinkedInImport();
   const sync = useSyncLinkedIn();
   const save = useSaveLinkedInSelection();
+  const toggleVisibility = useToggleLinkedInVisibility();
   const remove = useRemoveLinkedIn();
 
   const state = query.data?.data ?? null;
@@ -177,8 +179,9 @@ export function LinkedInImporter() {
       return;
     }
     try {
-      await sync.mutateAsync(url.trim());
-      toast.success("LinkedIn profile synced. Choose what to showcase below.");
+      const { warning } = await sync.mutateAsync(url.trim());
+      if (warning) toast.warning(warning);
+      else toast.success("LinkedIn profile synced. Choose what to showcase below.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to sync LinkedIn profile");
     }
@@ -187,8 +190,9 @@ export function LinkedInImporter() {
   const handleSave = async () => {
     if (!selection) return;
     try {
-      await save.mutateAsync({ selection });
-      toast.success("LinkedIn selection saved");
+      const { warning } = await save.mutateAsync({ selection });
+      if (warning) toast.warning(warning);
+      else toast.success("LinkedIn selection saved");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to save selection");
     }
@@ -303,11 +307,15 @@ export function LinkedInImporter() {
                   <Switch
                     id="linkedin-show"
                     checked={state.showOnPortfolio}
-                    disabled={save.isPending}
                     onCheckedChange={(showOnPortfolio) =>
-                      save.mutate(
+                      toggleVisibility.mutate(
                         { selection: state.selection, showOnPortfolio },
-                        { onError: (error) => toast.error(error.message) },
+                        {
+                          onSuccess: ({ warning }) => {
+                            if (warning) toast.warning(warning);
+                          },
+                          onError: (error) => toast.error(error.message),
+                        },
                       )
                     }
                   />
