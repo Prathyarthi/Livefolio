@@ -37,6 +37,8 @@ import { ArticleSourceLabel, RichText,
 import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function SpaceTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +76,22 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("space"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+          card: "rounded-3xl bg-[#0B0F19]/60 backdrop-blur-xl border border-[color-mix(in_srgb,var(--lf-accent)_22%,transparent)] p-6",
+          title: "font-semibold text-white",
+          text: "text-sm leading-relaxed text-slate-300",
+          muted: "text-xs text-slate-500",
+          chip: "rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_35%,transparent)] bg-[#030014] px-3 py-1 text-xs text-[color-mix(in_srgb,var(--lf-accent)_70%,white)]",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
                 <section key="about" id="about" className="scroll-mt-32">
@@ -447,7 +465,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <div className="space-y-24">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
           {customSections.length > 0 && customSections.map((cs) => (
             <section key={cs.id} className="scroll-mt-32">

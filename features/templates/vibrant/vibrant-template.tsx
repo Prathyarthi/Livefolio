@@ -37,6 +37,8 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function VibrantTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +76,22 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="text-3xl font-bold text-white">LinkedIn</h2>}
+      classes={{
+          card: "rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6",
+          title: "font-semibold text-white",
+          text: "text-sm leading-relaxed text-slate-300",
+          muted: "text-xs text-slate-500",
+          chip: "rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -462,7 +480,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <div className="space-y-24 md:space-y-32">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
           {customSections.length > 0 && customSections.map((cs) => (
             <section key={cs.id} className="scroll-mt-32">

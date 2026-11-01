@@ -38,6 +38,8 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
@@ -75,6 +77,22 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+          card: "border border-[var(--lf-accent)]/60 bg-[#0b132b] p-6",
+          title: "font-serif text-lg tracking-wide text-[var(--lf-accent)]",
+          text: "text-sm leading-relaxed text-slate-300",
+          muted: "text-xs text-slate-500",
+          chip: "border border-[var(--lf-accent)] px-3 py-1 text-xs uppercase tracking-widest text-[var(--lf-accent)]",
+          link: "text-sm uppercase tracking-widest text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -461,7 +479,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-32">

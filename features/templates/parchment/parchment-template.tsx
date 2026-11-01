@@ -33,6 +33,8 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function ParchmentTemplate({ data }: { data: PortfolioData }) {
@@ -62,6 +64,22 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("parchment"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<div className="mb-4 flex items-center gap-6"><h2 className="text-3xl font-black uppercase tracking-widest whitespace-nowrap">LinkedIn</h2><div className="h-px w-full bg-[#2B2B2B]" /></div>}
+      classes={{
+          card: "border-2 border-[#2B2B2B] bg-white p-6",
+          title: "font-black uppercase tracking-wide text-[#2B2B2B]",
+          text: "text-sm leading-relaxed text-[#2B2B2B]/80",
+          muted: "text-xs uppercase tracking-widest text-[#2B2B2B]/50",
+          chip: "border border-[#2B2B2B] px-3 py-1 text-xs font-bold uppercase",
+          link: "text-sm font-bold uppercase tracking-widest text-[#2B2B2B] hover:underline",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
                 <section key="about" id="about" className="scroll-mt-32">
@@ -364,7 +382,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
         )}
 
         <main className="space-y-32">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
           {customSections.map((cs) => (
                 <section key={cs.id}>

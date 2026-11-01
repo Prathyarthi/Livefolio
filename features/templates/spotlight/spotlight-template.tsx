@@ -40,6 +40,8 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { LivePreviewImage } from "@/components/live-preview-image";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 const MADE_TOMMY_LINK_ID = "made-tommy-spotlight-font";
 export function SpotlightTemplate({ data }: { data: PortfolioData }) {
@@ -146,6 +148,22 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("spotlight"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SpotlightSectionHeading title="LinkedIn" />}
+      classes={{
+          card: "rounded-lg border border-gray-200 bg-white p-6",
+          title: "font-semibold text-gray-900",
+          text: "text-sm leading-relaxed text-gray-600",
+          muted: "text-xs text-gray-400",
+          chip: "rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "container mx-auto mb-16 scroll-mt-24 px-0",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary?.trim() && (
                 <section key="about" className="container mx-auto mb-16 px-0" id="about">
@@ -574,7 +592,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             </section>
           </div>
 
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
           {customSections.map((section) => (
             <section

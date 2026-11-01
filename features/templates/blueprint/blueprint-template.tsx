@@ -37,6 +37,8 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function BlueprintTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +76,22 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading number="IN">LinkedIn</SectionHeading>}
+      classes={{
+          card: "border-2 border-white/50 bg-[#003366]/80 p-6",
+          title: "font-bold uppercase tracking-widest text-white",
+          text: "text-sm leading-relaxed text-white/80",
+          muted: "text-xs font-mono text-white/50",
+          chip: "border border-white/50 px-3 py-1 font-mono text-xs uppercase text-white",
+          link: "font-mono text-xs uppercase tracking-widest text-white hover:underline",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -470,7 +488,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
 
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
         {customSections.length > 0 && customSections.map((cs, idx) => (
           <section key={cs.id} className="scroll-mt-32">

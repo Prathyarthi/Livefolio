@@ -38,6 +38,8 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function PastelTemplate({ data }: { data: PortfolioData }) {
@@ -75,6 +77,22 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="text-3xl font-extrabold text-slate-800">LinkedIn</h2>}
+      classes={{
+          card: "rounded-[2rem] bg-white p-6 shadow-lg",
+          title: "font-semibold text-slate-900",
+          text: "text-sm leading-relaxed text-slate-600",
+          muted: "text-xs text-slate-400",
+          chip: "rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_18%,white)] px-3 py-1 text-xs font-semibold text-slate-700",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -436,7 +454,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-32">

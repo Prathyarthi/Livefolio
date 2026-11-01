@@ -64,6 +64,8 @@ import {
 import { resolveAccentColor } from "@/features/templates/template-accent-palettes";
 import { DitherVeil } from "./dither-veil";
 import styles from "./veil-template.module.css";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 type PortfolioMeta = PortfolioData["portfolio"];
 type Experience = PortfolioData["experiences"][number];
@@ -1218,11 +1220,35 @@ export function VeilTemplate({ data }: AppProps) {
     achievements: achievements.length > 0,
     profiles: hasProfiles,
   };
+  const hasLinkedIn = Boolean(data.linkedin);
   const numbered = resolved.order.full.filter(
-    (key) => present[key] && !resolved.isHidden(key),
+    (key) => (present[key] || (key === "profiles" && hasLinkedIn)) && !resolved.isHidden(key),
   );
-  // Hero is (01); body sections continue from (02).
-  const num = (key: ReorderableSectionKey) => numbered.indexOf(key) + 2;
+  // Hero is (01); body sections continue from (02). LinkedIn sits just before
+  // Profiles and takes its own number, shifting Profiles and later sections by one.
+  const linkedinAt = hasLinkedIn ? numbered.indexOf("profiles") : -1;
+  const num = (key: ReorderableSectionKey) => {
+    const i = numbered.indexOf(key);
+    return i + 2 + (linkedinAt >= 0 && i >= linkedinAt ? 1 : 0);
+  };
+  const linkedinSection = data.linkedin ? (
+    <section id="linkedin" className="scroll-mt-20 py-14 @md:py-20">
+      <div className={SHELL}>
+        <LinkedInSection
+          data={data.linkedin}
+          heading={<SectionHeading index={linkedinAt + 2}>LinkedIn</SectionHeading>}
+          classes={{
+            card: cn("rounded-[4px] border bg-[var(--veil-ink-raised)] p-6", LINE),
+            title: "font-serif text-xl text-[var(--veil-paper)]",
+            text: "text-sm leading-relaxed text-[var(--veil-muted)]",
+            muted: "font-mono text-[11px] tracking-[0.12em] text-[var(--veil-faint)]",
+            chip: cn("rounded-full border px-3 py-1 text-xs text-[var(--veil-muted)]", LINE),
+            link: "font-mono text-xs tracking-[0.12em] text-[var(--lf-accent)] hover:underline",
+          }}
+        />
+      </div>
+    </section>
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: null,
@@ -1345,7 +1371,7 @@ export function VeilTemplate({ data }: AppProps) {
           {present.skills && <SkillMarquee skills={skills} primaryColor={primaryColor} />}
           <StatStripe stats={stats} />
 
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
           {customSections.length > 0 && (
             <section className="py-14 @md:py-20">

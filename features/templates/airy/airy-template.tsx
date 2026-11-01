@@ -34,6 +34,8 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function AiryTemplate({ data }: { data: PortfolioData }) {
@@ -63,6 +65,22 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("airy"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="mb-8 text-3xl font-bold text-slate-800 px-2">LinkedIn</h2>}
+      classes={{
+          card: "rounded-3xl bg-white border border-slate-100 p-8 shadow-xs",
+          title: "font-semibold text-slate-900",
+          text: "text-sm leading-relaxed text-slate-600",
+          muted: "text-xs text-slate-400",
+          chip: "rounded-full bg-slate-50 border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-600",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
                 <section key="about" id="about" className="scroll-mt-32">
@@ -334,7 +352,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <main className="space-y-24">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
           {customSections.map((cs) => (
                 <section key={cs.id} className="rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-xs">

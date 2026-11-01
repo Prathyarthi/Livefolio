@@ -42,6 +42,8 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export default function CreativeTemplate({ data }: { data: PortfolioData }) {
@@ -67,6 +69,22 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("creative"),
     portfolio.customization,
   );
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading accent="fuchsia">LinkedIn</SectionHeading>}
+      classes={{
+          card: "rounded-2xl border border-fuchsia-100 bg-white p-5",
+          title: "font-semibold text-slate-900",
+          text: "text-sm leading-relaxed text-slate-600",
+          muted: "text-xs text-slate-400",
+          chip: "rounded-full border border-fuchsia-200 bg-fuchsia-50 px-3 py-1 text-xs text-fuchsia-700",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -524,7 +542,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
           )}
 
           <div className="mt-8 space-y-8">
-            {renderSections(resolved, "full", blocks)}
+            {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
           </div>
 
           {customSections.length > 0 && (

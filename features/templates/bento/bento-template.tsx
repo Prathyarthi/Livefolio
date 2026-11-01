@@ -34,6 +34,7 @@ import { ArticleSourceLabel, RichText,
 import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function BentoTemplate({ data }: { data: PortfolioData }) {
@@ -486,6 +487,29 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
               />
             </section>
           ))}
+
+          {data.linkedin && !resolved.isHidden("profiles") && (
+            <div className="col-span-1 @md:col-span-3 @lg:col-span-4 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
+              <LinkedInSection
+                data={data.linkedin}
+                heading={
+                  <h2 className="text-xl font-bold text-zinc-900 flex items-center">
+                    <span className="w-3 h-3 rounded-full bg-[#0a66c2] mr-3" />
+                    LinkedIn
+                  </h2>
+                }
+                classes={{
+                  section: "scroll-mt-24",
+                  card: "rounded-2xl border border-zinc-200 bg-zinc-50 p-5",
+                  title: "font-semibold text-zinc-900",
+                  text: "text-sm leading-relaxed text-zinc-600",
+                  muted: "text-xs text-zinc-400",
+                  chip: "rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600",
+                  link: "text-sm font-medium text-[var(--lf-accent)] hover:underline",
+                }}
+              />
+            </div>
+          )}
 
           {hasProfiles && !resolved.isHidden("profiles") && (
             <section

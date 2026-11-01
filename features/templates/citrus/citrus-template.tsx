@@ -32,6 +32,8 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function CitrusTemplate({ data }: { data: PortfolioData }) {
@@ -61,6 +63,22 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("citrus"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="mb-10 text-4xl font-black text-[#264653] uppercase tracking-tight">LinkedIn</h2>}
+      classes={{
+          card: "bg-white border-4 border-[#264653] p-6 rounded-xl shadow-[8px_8px_0_0_var(--lf-accent)]",
+          title: "font-black text-[#264653]",
+          text: "text-sm text-[#264653]/80",
+          muted: "text-xs text-slate-400",
+          chip: "rounded bg-[#264653] px-3 py-1.5 text-xs font-bold text-white",
+          link: "text-sm font-black uppercase tracking-widest text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-32 max-w-4xl",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
                 <section key="about" id="about" className="scroll-mt-32 max-w-4xl relative">
@@ -335,7 +353,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <main className="space-y-32">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
           {customSections.map((cs) => (
                 <section key={cs.id}>

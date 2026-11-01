@@ -43,6 +43,8 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 export function ModernTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -78,6 +80,22 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("modern"),
     portfolio.customization,
   );
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+          card: "rounded-2xl border border-white/10 bg-white/5 p-5",
+          title: "font-semibold text-white",
+          text: "text-sm leading-relaxed text-slate-300",
+          muted: "text-xs text-slate-500",
+          chip: "rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-24 rounded-[1.85rem] border border-white/10 bg-white/[0.045] p-6 md:p-8",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -538,7 +556,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
           )}
 
           <div className="mt-8 min-w-0 space-y-8 md:mt-10 md:space-y-10">
-            {renderSections(resolved, "full", blocks)}
+            {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
           </div>
 
           {customSections.length > 0 && (

@@ -37,6 +37,8 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +76,22 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+          card: "border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] p-6",
+          title: "font-bold uppercase tracking-widest text-[var(--lf-accent)]",
+          text: "text-sm leading-relaxed text-slate-300",
+          muted: "text-xs text-slate-500",
+          chip: "border border-[var(--lf-accent)] px-3 py-1 text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)]",
+          link: "text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-24",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -453,7 +471,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-24">

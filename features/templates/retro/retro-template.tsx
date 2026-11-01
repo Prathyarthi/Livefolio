@@ -41,6 +41,8 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function RetroTemplate({ data }: { data: PortfolioData }) {
@@ -77,6 +79,22 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("retro"),
     portfolio.customization,
   );
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+          card: "border-4 border-black bg-[color-mix(in_srgb,var(--lf-accent)_25%,white)] p-5",
+          title: "font-black uppercase text-black",
+          text: "text-sm font-medium text-black/80",
+          muted: "text-xs font-bold uppercase text-black/60",
+          chip: "border-2 border-black bg-white px-3 py-1 text-xs font-black uppercase",
+          link: "text-sm font-black uppercase text-black underline",
+          section: "scroll-mt-24 border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:p-8",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -546,7 +564,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
         )}
 
         <div className="mt-10 space-y-10">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
         </div>
 
         {customSections.length > 0 && (

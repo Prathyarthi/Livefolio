@@ -61,6 +61,8 @@ import {
   Trophy,
   X,
 } from "lucide-react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 interface AppProps {
   data: PortfolioData;
@@ -220,6 +222,22 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+          card: "rounded-2xl bg-white border border-black/10 p-5",
+          title: "text-sm font-bold text-gray-900",
+          text: "text-sm leading-relaxed text-slate-600",
+          muted: "text-xs text-slate-400",
+          chip: "px-3 py-1.5 rounded-full bg-white border border-black/10 text-xs font-medium text-gray-600",
+          link: "text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] hover:opacity-80",
+          section: "max-w-5xl mx-auto scroll-mt-24 py-16 px-6",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: null,
@@ -887,7 +905,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           </div>
         </section>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
         {data.customSections.length > 0 && (
           <section className={cn(SECTION_PAD, "max-w-5xl mx-auto")}>

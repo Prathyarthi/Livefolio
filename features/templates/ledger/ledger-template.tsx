@@ -66,6 +66,8 @@ import {
   FileCheck,
   Filter,
 } from "lucide-react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 interface AppProps {
   data: PortfolioData;
@@ -187,6 +189,22 @@ export function LedgerTemplate({ data }: AppProps) {
       return matchesSearch && matchesTech;
     });
   }, [visibleProjects, projectSearch, selectedTech]);
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<div className="border-l-2 border-[var(--lf-accent)] pl-4"><SectionHeading>LinkedIn</SectionHeading></div>}
+      classes={{
+          card: "bg-[#111418] border border-slate-800 p-5 rounded-none",
+          title: "font-mono text-sm font-semibold text-slate-100",
+          text: "text-sm leading-relaxed text-slate-300",
+          muted: "text-xs text-slate-500",
+          chip: "border border-slate-700 px-2 py-0.5 font-mono text-[11px] text-slate-400",
+          link: "font-mono text-xs text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-20",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, ReactNode>> = {
     about: null,
@@ -965,7 +983,7 @@ export function LedgerTemplate({ data }: AppProps) {
           </div>
         </section>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
 
         {customSections.length > 0 && (
           <div className="space-y-12">
