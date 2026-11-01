@@ -69,6 +69,10 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<h2 className="mb-4 flex items-center gap-4 text-3xl font-medium text-[var(--lf-accent)]">LinkedIn <span className="h-px flex-1 bg-[#3D405B]/10" /></h2>}
       classes={{
+            aboutList: "space-y-2 pl-5 text-xl font-light text-[#3D405B]/90 marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-xl leading-loose text-[#3D405B]/90 font-light",
+            postList: "list-disc space-y-2 pl-5 text-xl font-medium text-[#3D405B]",
+            postParagraph: "text-xl font-medium text-[#3D405B]",
             descriptionParagraph: "text-lg leading-relaxed font-light text-[#3D405B]/80",
             descriptionList: "space-y-2 pl-5 text-lg leading-relaxed font-light text-[#3D405B]/80 marker:text-[var(--lf-accent)]",
           card: "bg-white p-6 rounded-3xl shadow-xs border border-[#3D405B]/5",

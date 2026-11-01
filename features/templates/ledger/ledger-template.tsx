@@ -195,6 +195,10 @@ export function LedgerTemplate({ data }: AppProps) {
       data={data.linkedin}
       heading={<div className="border-l-2 border-[var(--lf-accent)] pl-4"><SectionHeading>LinkedIn</SectionHeading></div>}
       classes={{
+            aboutList: "space-y-2 pl-5 text-base @sm:text-lg text-slate-400 leading-relaxed marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-base @sm:text-lg text-slate-400 leading-relaxed",
+            postList: "list-disc space-y-2 pl-5 font-mono font-bold text-white text-sm @sm:text-base uppercase tracking-wide",
+            postParagraph: "font-mono font-bold text-white text-sm @sm:text-base uppercase tracking-wide",
             descriptionParagraph: "text-sm text-slate-300 leading-relaxed",
             descriptionList: "space-y-3 text-sm text-slate-300 leading-relaxed",
           card: "bg-[#111418] border border-slate-800 p-5 rounded-none",

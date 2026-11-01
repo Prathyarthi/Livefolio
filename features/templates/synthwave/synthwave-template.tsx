@@ -83,6 +83,10 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<h2 className="text-3xl font-black text-white uppercase tracking-widest drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">LinkedIn</h2>}
       classes={{
+            aboutList: "space-y-3 pl-6 text-lg md:text-xl leading-relaxed text-[#e0e0e0] font-medium marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-lg md:text-xl leading-relaxed text-[#e0e0e0] font-medium",
+            postList: "list-disc space-y-2 pl-5 text-sm font-black text-white uppercase tracking-wider leading-snug",
+            postParagraph: "text-sm font-black text-white uppercase tracking-wider leading-snug",
             descriptionParagraph: "text-[#b0b0b0] leading-relaxed font-medium",
             descriptionList: "space-y-2 pl-5 text-[#b0b0b0] leading-relaxed font-medium marker:text-[var(--lf-accent)]",
           card: "bg-[#1a0b2e]/90 border-2 border-[var(--lf-accent)] p-6 shadow-[0_0_20px_rgba(255,0,127,0.25)]",

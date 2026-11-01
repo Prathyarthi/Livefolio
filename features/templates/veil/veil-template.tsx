@@ -1238,6 +1238,10 @@ export function VeilTemplate({ data }: AppProps) {
           data={data.linkedin}
           heading={<SectionHeading index={linkedinAt + 2}>LinkedIn</SectionHeading>}
           classes={{
+            aboutList: "list-disc space-y-2 pl-5 text-base leading-relaxed text-[var(--veil-muted)] marker:text-[var(--veil-faint)] @sm:text-lg",
+            aboutParagraph: "text-base leading-relaxed text-[var(--veil-muted)] @sm:text-lg",
+            postList: "list-disc space-y-2 pl-5 font-serif text-2xl leading-snug text-[var(--veil-paper)]",
+            postParagraph: "font-serif text-2xl leading-snug text-[var(--veil-paper)]",
             descriptionParagraph: "text-[15px] leading-relaxed text-[var(--veil-muted)]",
             descriptionList: "list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-[var(--veil-muted)] marker:text-[var(--lf-accent)]",
             card: cn("rounded-[4px] border bg-[var(--veil-ink-raised)] p-6", LINE),

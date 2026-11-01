@@ -83,6 +83,10 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<h2 className="text-3xl font-extrabold text-slate-800">LinkedIn</h2>}
       classes={{
+            aboutList: "space-y-3 pl-6 text-lg md:text-xl leading-relaxed text-[#666] font-medium marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-lg md:text-xl leading-relaxed text-[#666] font-medium",
+            postList: "list-disc space-y-2 pl-5 text-base font-extrabold text-[#2d2d2d] leading-snug",
+            postParagraph: "text-base font-extrabold text-[#2d2d2d] leading-snug",
             descriptionParagraph: "text-[#888] leading-relaxed font-medium",
             descriptionList: "space-y-2 pl-5 text-[#888] leading-relaxed font-medium marker:text-[var(--lf-accent)]",
           card: "rounded-[2rem] bg-white p-6 shadow-lg",

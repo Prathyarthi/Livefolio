@@ -81,6 +81,10 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading className="mb-12">LinkedIn</SectionHeading>}
       classes={{
+            aboutList: "space-y-4 pl-8 text-2xl md:text-3xl leading-snug font-medium text-black marker:text-black",
+            aboutParagraph: "text-2xl md:text-3xl leading-snug font-medium text-black",
+            postList: "list-disc space-y-2 pl-5 text-lg font-bold uppercase tracking-tight leading-snug",
+            postParagraph: "text-lg font-bold uppercase tracking-tight leading-snug",
             descriptionParagraph: "text-gray-600 leading-relaxed",
             descriptionList: "space-y-2 pl-5 text-gray-600 leading-relaxed marker:text-black",
           card: "border border-[var(--lf-accent)] p-6",

@@ -85,6 +85,10 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            aboutList: "space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-stone-300",
+            aboutParagraph: "text-base leading-8 text-stone-600",
+            postList: "list-disc space-y-2 pl-5 text-sm text-stone-900 leading-relaxed",
+            postParagraph: "text-sm text-stone-900 leading-relaxed",
             descriptionParagraph: "text-sm leading-7 text-stone-600",
             descriptionList: "space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-stone-300",
           section: "scroll-mt-24 rounded-[1.75rem] border border-stone-200/80 bg-white/70 p-8",

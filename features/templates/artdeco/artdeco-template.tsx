@@ -83,6 +83,10 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            aboutList: "space-y-4 pl-0 text-lg md:text-xl leading-loose text-[#c0c0c0] font-serif font-light list-none",
+            aboutParagraph: "text-lg md:text-xl leading-loose text-[#c0c0c0] font-serif font-light",
+            postList: "list-disc space-y-2 pl-5 text-sm font-serif text-[var(--lf-accent)] uppercase tracking-wider leading-snug",
+            postParagraph: "text-sm font-serif text-[var(--lf-accent)] uppercase tracking-wider leading-snug",
             descriptionParagraph: "text-[#a0a0a0] leading-relaxed font-light",
             descriptionList: "space-y-2 pl-5 text-[#a0a0a0] leading-relaxed font-light marker:text-[var(--lf-accent)]",
           card: "border border-[var(--lf-accent)]/60 bg-[#0b132b] p-6",

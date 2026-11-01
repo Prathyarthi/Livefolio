@@ -228,6 +228,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            aboutParagraph: cn(MUTED, "leading-relaxed text-sm @sm:text-base"),
+            postList: cn("list-disc space-y-2 pl-5", INK, "font-medium text-sm leading-relaxed"),
+            postParagraph: cn(INK, "font-medium text-sm leading-relaxed"),
             descriptionParagraph: cn(MUTED, "leading-relaxed text-sm @sm:text-base max-w-2xl"),
             descriptionList: cn(MUTED, "space-y-1.5 pl-5 leading-relaxed text-sm @sm:text-base max-w-2xl marker:text-[var(--lf-accent)]"),
           card: "rounded-2xl bg-white border border-black/10 p-5",

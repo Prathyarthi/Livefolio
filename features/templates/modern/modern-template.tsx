@@ -86,6 +86,10 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            aboutList: "space-y-3 pl-5 text-base leading-8 text-zinc-300 marker:text-zinc-600",
+            aboutParagraph: "text-base leading-8 text-zinc-300",
+            postList: "list-disc space-y-2 pl-5 text-sm text-white leading-relaxed",
+            postParagraph: "text-sm text-white leading-relaxed",
             descriptionParagraph: "text-sm leading-7 text-zinc-300",
             descriptionList: "space-y-2 pl-5 text-sm leading-7 text-zinc-300 marker:text-zinc-600",
           card: "rounded-2xl border border-white/10 bg-white/5 p-5",

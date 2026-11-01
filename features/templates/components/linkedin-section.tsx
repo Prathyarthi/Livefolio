@@ -15,6 +15,12 @@ export type LinkedInSectionClasses = {
   /** Paragraph/list classes for long text (about, posts); mirror the template's project description. */
   descriptionParagraph?: string;
   descriptionList?: string;
+  /** Post body text; mirror the template's achievement/card body text. */
+  postParagraph?: string;
+  postList?: string;
+  /** LinkedIn "About" text; mirror the template's own About/summary paragraph. */
+  aboutParagraph?: string;
+  aboutList?: string;
   /** Wrapper around the posts list (defaults to a responsive grid). */
   posts?: string;
   post?: string;
@@ -76,8 +82,8 @@ export function LinkedInSection({
               <div className="pt-2">
                 <DescriptionBlock
                   text={profile.about}
-                  paragraphClassName={classes.descriptionParagraph ?? classes.text}
-                  listClassName={classes.descriptionList ?? classes.text}
+                  paragraphClassName={classes.aboutParagraph ?? classes.descriptionParagraph ?? classes.text}
+                  listClassName={classes.aboutList ?? classes.aboutParagraph ?? classes.descriptionList ?? classes.text}
                 />
               </div>
             ) : null}
@@ -135,8 +141,8 @@ export function LinkedInSection({
               <div className="min-w-0 [overflow-wrap:anywhere]">
                 <DescriptionBlock
                   text={post.text}
-                  paragraphClassName={classes.descriptionParagraph ?? classes.text}
-                  listClassName={classes.descriptionList ?? classes.text}
+                  paragraphClassName={classes.postParagraph ?? classes.descriptionParagraph ?? classes.text}
+                  listClassName={classes.postList ?? classes.descriptionList ?? classes.text}
                 />
               </div>
               <div className={cn("mt-auto flex flex-wrap items-center gap-x-3 gap-y-1", classes.muted)}>

@@ -84,6 +84,10 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
           data={data.linkedin}
           heading={null}
           classes={{
+            aboutList: "space-y-1 pl-4 font-mono text-sm leading-relaxed text-black",
+            aboutParagraph: "font-mono text-sm leading-relaxed text-black",
+            postList: "list-disc space-y-2 pl-5 font-bold",
+            postParagraph: "font-bold",
             descriptionParagraph: "text-xs",
             descriptionList: "space-y-1 pl-4 text-xs",
             section: "space-y-4",

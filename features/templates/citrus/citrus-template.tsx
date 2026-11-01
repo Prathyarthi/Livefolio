@@ -68,6 +68,10 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<h2 className="mb-10 text-4xl font-black text-[#264653] uppercase tracking-tight">LinkedIn</h2>}
       classes={{
+            aboutList: "space-y-2 pl-5 text-xl font-medium text-[#264653]/80 marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-xl leading-relaxed text-[#264653]/80 font-medium",
+            postList: "list-disc space-y-2 pl-5 text-lg font-black text-[#264653] uppercase",
+            postParagraph: "text-lg font-black text-[#264653] uppercase",
             descriptionParagraph: "text-lg text-[#264653]/80",
             descriptionList: "space-y-2 pl-5 text-lg text-[#264653]/80 marker:text-[var(--lf-accent)]",
           card: "bg-white border-4 border-[#264653] p-6 rounded-xl shadow-[8px_8px_0_0_var(--lf-accent)]",

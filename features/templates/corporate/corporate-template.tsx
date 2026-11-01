@@ -85,6 +85,10 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            aboutList: "space-y-3 pl-5 text-base leading-8 text-slate-600 marker:text-slate-300",
+            aboutParagraph: "text-base leading-8 text-slate-600",
+            postList: "list-disc space-y-2 pl-5 text-sm text-slate-900 leading-relaxed",
+            postParagraph: "text-sm text-slate-900 leading-relaxed",
             descriptionParagraph: "text-sm leading-7 text-slate-600",
             descriptionList: "space-y-2 pl-5 text-sm leading-7 text-slate-600 marker:text-slate-300",
           card: "rounded-2xl border border-slate-200 bg-slate-50/60 p-5",

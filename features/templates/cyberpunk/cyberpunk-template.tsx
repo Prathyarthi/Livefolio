@@ -82,6 +82,10 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            aboutList: "space-y-2 pl-5 text-sm md:text-base leading-relaxed text-slate-300 marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]",
+            aboutParagraph: "text-sm md:text-base leading-relaxed text-slate-300",
+            postList: "list-disc space-y-2 pl-5 text-sm font-bold text-white uppercase tracking-wider",
+            postParagraph: "text-sm font-bold text-white uppercase tracking-wider",
             descriptionParagraph: "text-sm text-slate-400 leading-relaxed",
             descriptionList: "space-y-2 pl-5 text-sm text-slate-400 leading-relaxed marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]",
           card: "border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] p-6",

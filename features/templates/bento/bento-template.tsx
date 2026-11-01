@@ -499,6 +499,10 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                   </h2>
                 }
                 classes={{
+            aboutList: "list-disc space-y-2 pl-5 text-sm leading-relaxed text-zinc-600",
+            aboutParagraph: "text-sm leading-relaxed text-zinc-600",
+            postList: "list-disc space-y-2 pl-5 font-semibold text-zinc-900 text-sm",
+            postParagraph: "font-semibold text-zinc-900 text-sm",
             descriptionParagraph: "text-sm leading-relaxed text-zinc-500",
             descriptionList: "space-y-1 pl-4 text-sm leading-relaxed text-zinc-500 marker:text-zinc-400",
                   section: "scroll-mt-24",

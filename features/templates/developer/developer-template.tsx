@@ -79,6 +79,10 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<p className="text-sm text-gray-600">guest@portfolio:~$ cat linkedin.json</p>}
       classes={{
+            aboutList: "space-y-2 pl-5 text-[var(--lf-g-300-90)] leading-relaxed marker:text-[var(--lf-g-700)]",
+            aboutParagraph: "text-[var(--lf-g-300-90)] leading-relaxed",
+            postList: "list-disc space-y-2 pl-5 text-sm text-gray-300 leading-relaxed",
+            postParagraph: "text-sm text-gray-300 leading-relaxed",
             descriptionParagraph: "text-sm text-gray-400 leading-relaxed",
             descriptionList: "space-y-2 pl-5 text-sm text-gray-400 leading-relaxed marker:text-[var(--lf-g-900)]",
           card: "rounded-lg border border-[var(--lf-g-900-40)] bg-gray-900/50 p-5",
