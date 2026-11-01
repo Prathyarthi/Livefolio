@@ -66,7 +66,6 @@ import {
   FileCheck,
   Filter,
 } from "lucide-react";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 interface AppProps {
   data: PortfolioData;
@@ -928,7 +927,6 @@ export function LedgerTemplate({ data }: AppProps) {
                   <RichText text={portfolio.headline} />
                 </p>
               )}
-              <ProfileBadges badges={data.badges} />
 
               {portfolio.customization?.heroTagline && (
                 <p id="hero-tagline" className="text-lg @sm:text-xl text-white font-semibold">

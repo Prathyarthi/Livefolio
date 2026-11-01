@@ -32,7 +32,6 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function CitrusTemplate({ data }: { data: PortfolioData }) {
@@ -314,7 +313,6 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                   <RichText text={portfolio.headline} />
                 </motion.p>
               )}
-              <ProfileBadges badges={data.badges} />
 
               <div className="mt-8 flex flex-col gap-4">
                 <ContactChips portfolio={portfolio} chipClassName="text-sm font-bold text-[#264653] bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)]/30 px-3 py-1.5 rounded" />

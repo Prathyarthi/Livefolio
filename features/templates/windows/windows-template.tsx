@@ -37,7 +37,6 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function WindowsTemplate({ data }: { data: PortfolioData }) {
@@ -367,7 +366,6 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
               {portfolio.headline && (
                 <p className="text-sm mb-4"><RichText text={portfolio.headline} /></p>
               )}
-              <ProfileBadges badges={data.badges} />
 
               <div className="flex flex-wrap gap-2 mb-4">
                 <ContactChips

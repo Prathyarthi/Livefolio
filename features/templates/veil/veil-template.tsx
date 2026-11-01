@@ -64,7 +64,6 @@ import {
 import { resolveAccentColor } from "@/features/templates/template-accent-palettes";
 import { DitherVeil } from "./dither-veil";
 import styles from "./veil-template.module.css";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 type PortfolioMeta = PortfolioData["portfolio"];
 type Experience = PortfolioData["experiences"][number];
@@ -443,11 +442,10 @@ interface HeroProps {
   portfolio: PortfolioMeta;
   socialProfiles: SocialProfile[];
   primaryColor: string;
-  badges?: PortfolioData["badges"];
   showSummary: boolean;
 }
 
-function Hero({ portfolio, socialProfiles, primaryColor, badges, showSummary }: HeroProps) {
+function Hero({ portfolio, socialProfiles, primaryColor, showSummary }: HeroProps) {
   const { lead, tail } = splitName(portfolio.title);
   const tagline = portfolio.customization?.heroTagline?.trim();
   const year = new Date().getFullYear();
@@ -532,7 +530,6 @@ function Hero({ portfolio, socialProfiles, primaryColor, badges, showSummary }: 
                 <RichText text={portfolio.headline} />
               </motion.p>
             )}
-            <ProfileBadges badges={badges} />
 
             {showSummary && portfolio.summary && (
               <motion.div {...rise(0.26)} className="max-w-2xl">
@@ -1342,7 +1339,6 @@ export function VeilTemplate({ data }: AppProps) {
             portfolio={portfolio}
             socialProfiles={socialProfiles}
             primaryColor={primaryColor}
-            badges={data.badges}
             showSummary={!resolved.isHidden("about")}
           />
 

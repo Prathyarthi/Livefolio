@@ -34,7 +34,6 @@ import { ArticleSourceLabel, RichText,
 import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function BentoTemplate({ data }: { data: PortfolioData }) {
@@ -98,7 +97,6 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                   <RichText text={portfolio.headline} />
                 </p>
               )}
-              <ProfileBadges badges={data.badges} />
             </div>
             <div className="relative z-10 flex flex-wrap items-center gap-4 mt-auto">
               <ContactChips

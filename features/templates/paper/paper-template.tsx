@@ -33,7 +33,6 @@ import { ArticleSourceLabel, RichText,
 import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function PaperTemplate({ data }: { data: PortfolioData }) {
@@ -362,7 +361,6 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
               <RichText text={portfolio.headline} />
             </p>
           )}
-          <ProfileBadges badges={data.badges} />
 
           <div className="flex flex-col items-center gap-4 mt-8 pt-8 border-t border-[#2c2c2c]/30">
             <ContactChips

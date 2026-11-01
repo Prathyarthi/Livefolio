@@ -38,7 +38,6 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function PastelTemplate({ data }: { data: PortfolioData }) {
@@ -413,7 +412,6 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
               <RichText text={portfolio.headline} />
             </p>
           )}
-          <ProfileBadges badges={data.badges} />
 
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <ContactChips

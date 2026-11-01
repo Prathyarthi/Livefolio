@@ -41,7 +41,6 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function CorporateTemplate({ data }: { data: PortfolioData }) {
@@ -499,7 +498,6 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                   <RichText text={portfolio.headline} />
                 </p>
               )}
-              <ProfileBadges badges={data.badges} />
 
               <div className="mt-6">
                 <ContactChips

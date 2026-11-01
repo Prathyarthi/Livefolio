@@ -33,7 +33,6 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function TerracottaTemplate({ data }: { data: PortfolioData }) {
@@ -322,7 +321,6 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
                 <RichText text={portfolio.headline} />
               </motion.p>
             )}
-            <ProfileBadges badges={data.badges} />
 
             <div className="mt-8 flex flex-col items-start gap-4">
               <ContactChips portfolio={portfolio} chipClassName="text-sm uppercase tracking-widest text-[var(--lf-accent)]" />

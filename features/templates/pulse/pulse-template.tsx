@@ -75,7 +75,6 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 // ==========================================
 // 1. TYPES (derived from the shared PortfolioData contract)
@@ -269,11 +268,10 @@ interface HeroProps {
   portfolio: PortfolioMeta;
   socialProfiles: SocialProfile[];
   primaryColor: string;
-  badges?: PortfolioData["badges"];
   showSummary?: boolean;
 }
 
-function Hero({ portfolio, socialProfiles, primaryColor, badges, showSummary = true }: HeroProps) {
+function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: HeroProps) {
   return (
     <section className="relative overflow-hidden px-0 pt-8 pb-10 @sm:pt-10 @sm:pb-12 @md:py-16 scroll-mt-20" id="about">
       {/* Absolute Ambient Glow */}
@@ -314,7 +312,6 @@ function Hero({ portfolio, socialProfiles, primaryColor, badges, showSummary = t
                   <RichText text={portfolio.headline} />
                 </h2>
               )}
-              <ProfileBadges badges={badges} />
 
               {showSummary && portfolio.summary && (
                 <DescriptionBlock
@@ -1114,7 +1111,6 @@ export function PulseTemplate({ data }: AppProps) {
           portfolio={portfolio}
           socialProfiles={socialProfiles}
           primaryColor={primaryColor}
-          badges={data.badges}
           showSummary={!resolved.isHidden("about")}
         />
 

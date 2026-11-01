@@ -61,7 +61,6 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 interface AppProps {
   data: PortfolioData;
@@ -796,7 +795,6 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                   <RichText text={data.portfolio.headline} />
                 </p>
               )}
-              <ProfileBadges badges={data.badges} />
               <h1
                 className={cn(
                   HERO_TITLE_BASE,

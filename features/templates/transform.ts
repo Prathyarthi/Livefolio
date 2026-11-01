@@ -4,7 +4,6 @@ import { normalizeSocialProfiles } from "@/lib/social-profile";
 import { applyHiddenIntegrations } from "@/lib/integration-visibility";
 import { resolveArticleSource } from "@/lib/article-source";
 import { buildLinkedInShowcase } from "@/lib/linkedin";
-import { toPublicBadges } from "@/lib/badges-catalog";
 
 export function portfolioToTemplateData(portfolio: any): PortfolioData {
   const data = {
@@ -135,7 +134,6 @@ export function portfolioToTemplateData(portfolio: any): PortfolioData {
       ? portfolio.livePreviewProjectIds
       : [],
     linkedin: buildLinkedInShowcase(portfolio.linkedinImport),
-    badges: toPublicBadges(portfolio.badges ?? portfolio.user?.badges),
   };
 
   const articles = data.articles.map((article: PortfolioData["articles"][number]) => ({

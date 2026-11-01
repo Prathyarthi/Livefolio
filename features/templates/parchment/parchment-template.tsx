@@ -33,7 +33,6 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function ParchmentTemplate({ data }: { data: PortfolioData }) {
@@ -335,7 +334,6 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                 <RichText text={portfolio.headline} />
               </motion.p>
             )}
-            <ProfileBadges badges={data.badges} />
 
             <div className="mt-10 flex flex-col items-center gap-6">
               <ContactChips portfolio={portfolio} chipClassName="text-sm font-semibold tracking-widest uppercase border-b border-[#2B2B2B] pb-1" />

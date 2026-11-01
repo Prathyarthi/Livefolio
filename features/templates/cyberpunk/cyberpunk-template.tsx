@@ -37,7 +37,6 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
-import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
@@ -424,7 +423,6 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                   &gt; <RichText text={portfolio.headline} />_
                 </p>
               )}
-              <ProfileBadges badges={data.badges} />
 
               <div className="flex flex-wrap gap-4 mb-6">
                 <ContactChips
