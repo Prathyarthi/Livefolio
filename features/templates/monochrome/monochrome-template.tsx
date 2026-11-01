@@ -37,6 +37,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export function MonochromeTemplate({ data }: { data: PortfolioData }) {
@@ -388,6 +389,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 <RichText text={portfolio.headline} />
               </p>
             )}
+            <ProfileBadges badges={data.badges} />
           </div>
 
           <div className="min-w-0 @lg:col-span-4 flex flex-col items-start @lg:items-end gap-8">

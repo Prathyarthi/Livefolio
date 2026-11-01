@@ -1,6 +1,7 @@
 import type { SectionKey } from "./section-labels";
 import type { SectionLayoutCustomization } from "./section-order";
 import type { LinkedInShowcase } from "@/lib/linkedin";
+import type { PublicBadge } from "@/lib/badges-catalog";
 
 export type TemplateSectionId = "about" | "work" | "experience" | "profiles";
 
@@ -112,6 +113,8 @@ export interface PortfolioData {
   livePreviewProjectIds: string[];
   /** Pro LinkedIn import: only the fields/posts the user selected. */
   linkedin?: LinkedInShowcase | null;
+  /** Opted-in public badges, shown as "Achievements" in the profile header. */
+  badges?: PublicBadge[];
 }
 
 export interface TemplateMeta {

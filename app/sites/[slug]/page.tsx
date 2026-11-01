@@ -8,8 +8,6 @@ import { PortfolioViewTracker } from "@/features/analytics/components/portfolio-
 import { PortfolioClickTracker } from "@/features/analytics/components/portfolio-click-tracker";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 import { siteConfig } from "@/lib/site";
-import { publicBadges } from "@/lib/badges-catalog";
-import { PortfolioBadges } from "@/features/badges/components/portfolio-badges";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -65,10 +63,8 @@ export default async function PortfolioPage({ params }: Props) {
     include: {
       user: {
         include: {
-          badges: {
-            where: { showOnPortfolio: true },
-            select: { badgeKey: true, awardedAt: true, showOnPortfolio: true },
-          },
+          // All earned badges; toPublicBadges (in the transform) keeps public-eligible ones.
+          badges: { select: { badgeKey: true, awardedAt: true } },
         },
       },
       experiences: { orderBy: { sortOrder: "asc" } },
@@ -103,7 +99,6 @@ export default async function PortfolioPage({ params }: Props) {
       <PortfolioViewTracker slug={slug} />
       <PortfolioClickTracker slug={slug} />
       <TemplateComponent data={data} />
-      <PortfolioBadges badges={publicBadges(portfolio.user.badges)} />
     </>
   );
 }

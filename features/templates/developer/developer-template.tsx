@@ -43,6 +43,7 @@ import { CollapsibleList } from "@/features/templates/collapsible-list";
 
 // import { getPreviewImage } from "@/lib/link-preview-code";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 
 export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
@@ -550,6 +551,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                 <span className="text-gray-600">{"// "}</span>
                 <RichText text={portfolio.headline} />
               </p>
+              <ProfileBadges badges={data.badges} className="text-[var(--lf-g-300)]" />
               {portfolio.location && (
                 <p className="mt-2 text-sm text-gray-500">
                   <span className="text-[var(--lf-g-700)]">location:</span> {portfolio.location}

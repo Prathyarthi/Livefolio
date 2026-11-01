@@ -40,6 +40,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { LivePreviewImage } from "@/components/live-preview-image";
+import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 const MADE_TOMMY_LINK_ID = "made-tommy-spotlight-font";
 export function SpotlightTemplate({ data }: { data: PortfolioData }) {
@@ -535,6 +536,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                   ) : null}
                 </p>
               </div>
+              <ProfileBadges badges={data.badges} className="flex flex-col items-center text-gray-900" />
 
               <div className="space-y-3">
                 <HeroProfileButtons

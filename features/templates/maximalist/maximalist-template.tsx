@@ -69,6 +69,7 @@ import {
   CornerDownLeft,
   FileText,
 } from "lucide-react";
+import { ProfileBadges } from "@/features/templates/components/profile-badges";
 
 type Article = PortfolioData["articles"][number];
 
@@ -683,6 +684,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                     <RichText text={data.portfolio.headline} />
                   </p>
                 )}
+                <ProfileBadges badges={data.badges} />
               </div>
 
               {/* Summary Text */}

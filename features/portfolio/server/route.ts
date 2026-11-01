@@ -166,15 +166,22 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         return { error: "Portfolio not found" };
       }
 
-      const owner = await prisma.user.findUnique({
-        where: { id: session.userId },
-        select: { subscriptionStatus: true },
-      });
+      const [owner, badges] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: session.userId },
+          select: { subscriptionStatus: true },
+        }),
+        // Earned badges for the dashboard preview's profile "Achievements" row.
+        prisma.userBadge.findMany({
+          where: { userId: session.userId },
+          select: { badgeKey: true, awardedAt: true },
+        }),
+      ]);
       if (!isProSubscriptionStatus(owner?.subscriptionStatus)) {
-        return { ...existing, livePreviewProjectIds: [] };
+        return { ...existing, badges, livePreviewProjectIds: [] };
       }
 
-      return existing;
+      return { ...existing, badges };
     } catch (error) {
       console.error("[GET /api/portfolio] error", error);
       ctx.set.status = 500;
