@@ -7,7 +7,7 @@
 export const BADGE_CATEGORIES = ["onboarding", "milestone", "integration"] as const;
 export type BadgeCategory = (typeof BADGE_CATEGORIES)[number];
 
-/** Lucide icon names; mapped to components in features/badges/components/badge-icon.tsx. */
+/** Semantic icon name (fallback/metadata); the medallion art lives in features/badges/components/badge-art.ts. */
 export type BadgeIcon =
   | "sparkles"
   | "rocket"
@@ -26,7 +26,7 @@ export interface BadgeDefinition {
   description: string;
   icon: BadgeIcon;
   category: BadgeCategory;
-  /** Only meaningful, verifiable achievements may be shown on a public portfolio. */
+  /** Earned public-eligible badges always show on the public profile; others stay private. */
   publicEligible: boolean;
   unlockHint: string;
 }
@@ -106,6 +106,7 @@ export function isBadgeKey(key: unknown): key is BadgeKey {
   return typeof key === "string" && BY_KEY.has(key);
 }
 
+/** Whether an earned badge appears on the public profile (Welcome stays private). */
 export function canShowOnPortfolio(key: string): boolean {
   return getBadge(key)?.publicEligible === true;
 }
@@ -136,7 +137,6 @@ export function qualifiedBadgeKeys(facts: BadgeFacts): BadgeKey[] {
 export interface EarnedBadgeRow {
   badgeKey: string;
   awardedAt: Date;
-  showOnPortfolio: boolean;
 }
 
 /** Full shelf: every catalog badge with earned state, in catalog order. Unknown rows are dropped. */
@@ -148,17 +148,16 @@ export function buildBadgeShelf(rows: EarnedBadgeRow[]) {
       ...badge,
       earned: Boolean(row),
       awardedAt: row?.awardedAt.toISOString() ?? null,
-      showOnPortfolio: Boolean(row?.showOnPortfolio && badge.publicEligible),
     };
   });
   const next = shelf.find((b) => !b.earned) ?? null;
   return { badges: shelf, nextBadgeKey: next?.key ?? null };
 }
 
-/** Public badges for a portfolio: earned, opted-in, and eligible only. */
+/** Public badges: every earned, public-eligible badge (no per-badge opt-in). */
 export function publicBadges(rows: EarnedBadgeRow[]): BadgeDefinition[] {
-  const shown = new Set(rows.filter((r) => r.showOnPortfolio).map((r) => r.badgeKey));
-  return BADGES.filter((b) => b.publicEligible && shown.has(b.key));
+  const earned = new Set(rows.map((r) => r.badgeKey));
+  return BADGES.filter((b) => b.publicEligible && earned.has(b.key));
 }
 
 export interface BadgeAwarderDeps {
@@ -199,4 +198,36 @@ export function createBadgeAwarder(deps: BadgeAwarderDeps) {
       return false;
     }
   };
+}
+
+/** Serializable public badge for templates (profile "Achievements" row). */
+export interface PublicBadge {
+  key: string;
+  name: string;
+  description: string;
+  icon: BadgeIcon;
+  awardedAt: string | null;
+}
+
+/**
+ * Earned rows (from Prisma or a JSON API response) → public badges in catalog
+ * order. Tolerates string dates and junk input; only public-eligible badges pass.
+ */
+export function toPublicBadges(rows: unknown): PublicBadge[] {
+  if (!Array.isArray(rows)) return [];
+  const shown = new Map<string, string | null>();
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const { badgeKey, awardedAt } = row as Record<string, unknown>;
+    if (typeof badgeKey !== "string") continue;
+    const date = awardedAt instanceof Date ? awardedAt : typeof awardedAt === "string" ? new Date(awardedAt) : null;
+    shown.set(badgeKey, date && !Number.isNaN(date.getTime()) ? date.toISOString() : null);
+  }
+  return BADGES.filter((b) => b.publicEligible && shown.has(b.key)).map((b) => ({
+    key: b.key,
+    name: b.name,
+    description: b.description,
+    icon: b.icon,
+    awardedAt: shown.get(b.key) ?? null,
+  }));
 }

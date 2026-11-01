@@ -9,6 +9,7 @@ import {
   integrationBadgeKey,
   publicBadges,
   qualifiedBadgeKeys,
+  toPublicBadges,
   type BadgeKey,
 } from "./badges-catalog";
 import { NOTIFICATION_TYPES } from "./notifications-core";
@@ -45,24 +46,23 @@ describe("eligibility", () => {
     expect(canShowOnPortfolio("nope")).toBe(false);
   });
 
-  it("filters public badges to eligible, opted-in rows", () => {
+  it("shows every earned public-eligible badge, never Welcome", () => {
     const at = new Date();
     const shown = publicBadges([
-      { badgeKey: "welcome", awardedAt: at, showOnPortfolio: true },
-      { badgeKey: "integration.github", awardedAt: at, showOnPortfolio: true },
-      { badgeKey: "integration.medium", awardedAt: at, showOnPortfolio: false },
+      { badgeKey: "welcome", awardedAt: at },
+      { badgeKey: "integration.medium", awardedAt: at },
+      { badgeKey: "integration.github", awardedAt: at },
     ]);
-    expect(shown.map((b) => b.key)).toEqual(["integration.github"]);
+    expect(shown.map((b) => b.key)).toEqual(["integration.github", "integration.medium"]);
   });
 
   it("builds a shelf with locked badges and a next hint", () => {
     const shelf = buildBadgeShelf([
-      { badgeKey: "welcome", awardedAt: new Date(), showOnPortfolio: true },
+      { badgeKey: "welcome", awardedAt: new Date() },
     ]);
     expect(shelf.badges).toHaveLength(BADGES.length);
     const welcome = shelf.badges.find((b) => b.key === "welcome");
     expect(welcome?.earned).toBe(true);
-    expect(welcome?.showOnPortfolio).toBe(false);
     expect(shelf.nextBadgeKey).toBe("portfolio_published");
   });
 });
@@ -122,5 +122,26 @@ describe("createBadgeAwarder", () => {
     const invalid = setup();
     expect(await invalid.award("u1", "bogus" as BadgeKey)).toBe(false);
     expect(await invalid.award("", "welcome")).toBe(false);
+  });
+});
+
+describe("toPublicBadges", () => {
+  it("keeps earned eligible badges in catalog order with ISO dates", () => {
+    const out = toPublicBadges([
+      { badgeKey: "integration.medium", showOnPortfolio: true, awardedAt: "2026-10-01T00:00:00.000Z" },
+      { badgeKey: "welcome", showOnPortfolio: true, awardedAt: new Date() },
+      { badgeKey: "integration.github", showOnPortfolio: true, awardedAt: new Date("2026-09-01T00:00:00Z") },
+      { badgeKey: "integration.devto", showOnPortfolio: false, awardedAt: new Date() },
+    ]);
+    // showOnPortfolio is ignored: every earned eligible badge is public.
+    expect(out.map((b) => b.key)).toEqual(["integration.github", "integration.medium", "integration.devto"]);
+    expect(out[0].awardedAt).toBe("2026-09-01T00:00:00.000Z");
+  });
+
+  it("tolerates junk", () => {
+    expect(toPublicBadges(undefined)).toEqual([]);
+    expect(toPublicBadges([null, { badgeKey: 1 }, { badgeKey: "integration.github", showOnPortfolio: true, awardedAt: "bad" }])).toEqual([
+      expect.objectContaining({ key: "integration.github", awardedAt: null }),
+    ]);
   });
 });
