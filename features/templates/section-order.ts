@@ -166,6 +166,23 @@ export function renderSections(
     });
 }
 
+/**
+ * Puts the LinkedIn section immediately before the Profiles section (it shares
+ * the "profiles" slot, so it follows that slot's order). Renders LinkedIn even
+ * when the template has no profiles to show.
+ */
+export function withLinkedInBeforeProfiles(
+  blocks: Partial<Record<ReorderableSectionKey, ReactNode>>,
+  linkedin: ReactNode,
+): Partial<Record<ReorderableSectionKey, ReactNode>> {
+  if (!linkedin) return blocks;
+  const profiles = blocks.profiles;
+  return {
+    ...blocks,
+    profiles: createElement(Fragment, null, linkedin, profiles || null),
+  };
+}
+
 /** Build a SectionLayoutCustomization payload from resolved draft state. */
 export function toSectionLayoutPayload(
   order: ReorderableSectionKey[],
@@ -188,6 +205,7 @@ function hasGithubActivity(data: PortfolioData): boolean {
 
 function hasProfilesSection(data: PortfolioData): boolean {
   return (
+    Boolean(data.linkedin) ||
     data.socialProfiles.length > 0 ||
     Boolean(
       data.portfolio.contactEmail ||

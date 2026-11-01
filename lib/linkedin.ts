@@ -142,12 +142,14 @@ export function parseStoredPosts(value: unknown): LinkedInPost[] {
 }
 
 /**
- * What the LinkedIn section renders: only the selected profile fields.
- * Selected posts are rendered in the Articles section instead (source "linkedin").
+ * What the LinkedIn section renders: the selected profile fields plus the
+ * selected posts. Posts live only here (on LinkedInImport.posts); they are no
+ * longer mirrored into the Articles section.
  */
 export interface LinkedInShowcase {
   profileUrl: string;
   profile: Partial<LinkedInProfileData>;
+  posts: LinkedInPost[];
 }
 
 export function buildLinkedInShowcase(
@@ -155,6 +157,7 @@ export function buildLinkedInShowcase(
     | {
         profileUrl: string;
         profileData: unknown;
+        posts?: unknown;
         selection: unknown;
         showOnPortfolio: boolean;
       }
@@ -172,8 +175,9 @@ export function buildLinkedInShowcase(
       (picked as Record<string, unknown>)[field] = value;
     }
   }
-  if (Object.keys(picked).length === 0) return null;
-  return { profileUrl: row.profileUrl, profile: picked };
+  const posts = selectedLinkedInPosts(row.posts, row.selection);
+  if (Object.keys(picked).length === 0 && posts.length === 0) return null;
+  return { profileUrl: row.profileUrl, profile: picked, posts };
 }
 
 // ── Scraping ───────────────────────────────────────────────

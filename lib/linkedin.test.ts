@@ -95,19 +95,39 @@ describe("fetch config fallback", () => {
 });
 
 describe("buildLinkedInShowcase", () => {
-  it("only includes selected fields; posts are selected separately", async () => {
+  it("includes only selected fields and selected posts", async () => {
     process.env.SGAI_API_KEY = "test";
     const { profile, posts } = await scrapeLinkedInProfile("https://www.linkedin.com/in/ada", mockFetch(200, { json: sample }));
     const showcase = buildLinkedInShowcase({
       profileUrl: "https://www.linkedin.com/in/ada",
       profileData: profile,
+      posts,
       selection: { fields: ["headline", "education"], postIds: [posts[0].id] },
       showOnPortfolio: true,
     });
-    expect(showcase).toEqual({ profileUrl: "https://www.linkedin.com/in/ada", profile: { headline: "Engineer" } });
+    expect(showcase?.profileUrl).toBe("https://www.linkedin.com/in/ada");
+    expect(showcase?.profile).toEqual({ headline: "Engineer" });
+    expect(showcase?.posts.map((p) => p.text)).toEqual(["Hello"]);
     expect(selectedLinkedInPosts(posts, { fields: [], postIds: [posts[0].id] }).map((p) => p.text)).toEqual(["Hello"]);
     expect(
       buildLinkedInShowcase({ profileUrl: "x", profileData: profile, selection: {}, showOnPortfolio: false }),
+    ).toBeNull();
+  });
+
+  it("renders a posts-only showcase and nothing when empty", async () => {
+    process.env.SGAI_API_KEY = "test";
+    const { profile, posts } = await scrapeLinkedInProfile("https://www.linkedin.com/in/ada", mockFetch(200, { json: sample }));
+    const postsOnly = buildLinkedInShowcase({
+      profileUrl: "u",
+      profileData: profile,
+      posts,
+      selection: { fields: [], postIds: [posts[0].id] },
+      showOnPortfolio: true,
+    });
+    expect(postsOnly?.profile).toEqual({});
+    expect(postsOnly?.posts).toHaveLength(1);
+    expect(
+      buildLinkedInShowcase({ profileUrl: "u", profileData: profile, posts, selection: { fields: [], postIds: [] }, showOnPortfolio: true }),
     ).toBeNull();
   });
 });

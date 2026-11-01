@@ -11,12 +11,15 @@ export type LinkedInSectionClasses = {
   muted?: string;
   chip?: string;
   link?: string;
+  /** Wrapper around the posts list (defaults to a responsive grid). */
+  posts?: string;
+  post?: string;
 };
 
 /**
  * Shared, template-agnostic LinkedIn showcase. Templates pass their own
- * class names; only the fields the owner selected are in `data`. Selected
- * posts render in the Articles section (source "linkedin"), not here.
+ * class names; only the fields and posts the owner selected are in `data`.
+ * Every template renders it right before its Profiles section.
  */
 export function LinkedInSection({
   data,
@@ -104,6 +107,33 @@ export function LinkedInSection({
             <span key={skill} className={classes.chip}>
               {skill}
             </span>
+          ))}
+        </div>
+      ) : null}
+
+      {data.posts.length ? (
+        <div className={cn("grid gap-4 @md:grid-cols-2", classes.posts)}>
+          {data.posts.map((post) => (
+            <article key={post.id} className={cn("flex min-w-0 flex-col gap-2", classes.card, classes.post)}>
+              <p className={cn("line-clamp-6 whitespace-pre-line [overflow-wrap:anywhere]", classes.text)}>
+                {post.text}
+              </p>
+              <div className={cn("mt-auto flex flex-wrap items-center gap-x-3 gap-y-1", classes.muted)}>
+                {post.date ? <span>{post.date}</span> : null}
+                {post.reactions ? <span>{post.reactions} reactions</span> : null}
+                {post.comments ? <span>{post.comments} comments</span> : null}
+                {post.url ? (
+                  <a
+                    href={post.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn("ml-auto", classes.link)}
+                  >
+                    Read on LinkedIn →
+                  </a>
+                ) : null}
+              </div>
+            </article>
           ))}
         </div>
       ) : null}
