@@ -59,7 +59,14 @@ export function LinkedInSection({
           ) : null}
           <div className="min-w-0 space-y-1">
             {profile.name ? <p className={classes.title}>{profile.name}</p> : null}
-            {profile.headline ? <p className={classes.text}>{profile.headline}</p> : null}
+            {profile.headline ? (
+              // Same read-more pattern as the bio/posts; never truncated to one line.
+              <DescriptionBlock
+                text={profile.headline}
+                paragraphClassName={classes.descriptionParagraph ?? classes.text}
+                listClassName={classes.descriptionList ?? classes.text}
+              />
+            ) : null}
             {profile.currentPosition || profile.location ? (
               <p className={classes.muted}>
                 {[profile.currentPosition, profile.location].filter(Boolean).join(" · ")}

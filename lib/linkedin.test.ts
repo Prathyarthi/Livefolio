@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import {
   LinkedInScrapeError,
   buildLinkedInShowcase,
+  stripSeeMoreMarker,
   selectedLinkedInPosts,
   linkedInDayWindow,
   linkedInMonthWindow,
@@ -151,5 +152,14 @@ describe("sync quota", () => {
     const q = toLinkedInQuota(3, 1, new Date("2026-10-15T10:00:00Z"));
     expect(q).toMatchObject({ remaining: 0, blockedBy: "monthly", nextAvailableAt: "2026-11-01T00:00:00.000Z" });
     expect(toLinkedInQuota(5, 0, now).remaining).toBe(0);
+  });
+});
+
+describe("stripSeeMoreMarker", () => {
+  it("removes LinkedIn see-more markers but keeps real ellipses", () => {
+    expect(stripSeeMoreMarker("Great launch today. ...more")).toBe("Great launch today.");
+    expect(stripSeeMoreMarker("Great launch …see more")).toBe("Great launch");
+    expect(stripSeeMoreMarker("Full Stack Developer | Chess…")).toBe("Full Stack Developer | Chess…");
+    expect(stripSeeMoreMarker("Nothing to strip")).toBe("Nothing to strip");
   });
 });
