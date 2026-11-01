@@ -81,6 +81,8 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            descriptionParagraph: "text-slate-400 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-slate-400 leading-relaxed marker:text-[var(--lf-accent)]",
           card: "rounded-3xl bg-[#0B0F19]/60 backdrop-blur-xl border border-[color-mix(in_srgb,var(--lf-accent)_22%,transparent)] p-6",
           title: "font-semibold text-white",
           text: "text-sm leading-relaxed text-slate-300",

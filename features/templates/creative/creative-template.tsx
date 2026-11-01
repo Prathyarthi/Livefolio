@@ -75,6 +75,8 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading accent="fuchsia">LinkedIn</SectionHeading>}
       classes={{
+            descriptionParagraph: "text-sm leading-7 text-stone-600",
+            descriptionList: "space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-[var(--lf-accent)]",
           card: "rounded-2xl border border-fuchsia-100 bg-white p-5",
           title: "font-semibold text-slate-900",
           text: "text-sm leading-relaxed text-slate-600",

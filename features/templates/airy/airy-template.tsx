@@ -70,6 +70,8 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<h2 className="mb-8 text-3xl font-bold text-slate-800 px-2">LinkedIn</h2>}
       classes={{
+            descriptionParagraph: "text-sm leading-relaxed text-slate-600",
+            descriptionList: "space-y-2 pl-5 text-sm leading-relaxed text-slate-600 marker:text-[var(--lf-accent)]",
           card: "rounded-3xl bg-white border border-slate-100 p-8 shadow-xs",
           title: "font-semibold text-slate-900",
           text: "text-sm leading-relaxed text-slate-600",

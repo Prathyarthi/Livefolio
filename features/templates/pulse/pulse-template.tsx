@@ -978,6 +978,8 @@ export function PulseTemplate({ data }: AppProps) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            descriptionParagraph: "font-sans text-sm text-slate-400 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 font-sans text-sm text-slate-400 leading-relaxed marker:text-slate-600",
           section: "mx-auto max-w-7xl px-4 py-12 @sm:px-6 @lg:px-8",
           card: "rounded-2xl border border-white/10 bg-white/5 p-5",
           title: "font-display text-base font-bold text-white",

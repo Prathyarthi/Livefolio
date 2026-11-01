@@ -153,6 +153,8 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SpotlightSectionHeading title="LinkedIn" />}
       classes={{
+            descriptionParagraph: "text-sm leading-relaxed text-gray-600",
+            descriptionList: "space-y-2 pl-5 text-sm leading-relaxed text-gray-600 marker:text-gray-300",
           card: "rounded-lg border border-gray-200 bg-white p-6",
           title: "font-semibold text-gray-900",
           text: "text-sm leading-relaxed text-gray-600",

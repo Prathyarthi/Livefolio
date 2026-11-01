@@ -85,6 +85,8 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            descriptionParagraph: "text-sm leading-7 text-stone-600",
+            descriptionList: "space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-stone-300",
           section: "scroll-mt-24 rounded-[1.75rem] border border-stone-200/80 bg-white/70 p-8",
           card: "rounded-2xl border border-stone-200/80 bg-white p-5",
           title: "font-medium text-stone-900",

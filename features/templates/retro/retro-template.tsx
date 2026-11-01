@@ -85,6 +85,8 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            descriptionParagraph: "text-sm font-medium leading-7 text-black",
+            descriptionList: "space-y-2 pl-5 text-sm font-medium leading-7 text-black marker:text-black",
           card: "border-4 border-black bg-[color-mix(in_srgb,var(--lf-accent)_25%,white)] p-5",
           title: "font-black uppercase text-black",
           text: "text-sm font-medium text-black/80",

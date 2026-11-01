@@ -69,6 +69,8 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<div className="mb-4 flex items-center gap-6"><h2 className="text-3xl font-black uppercase tracking-widest whitespace-nowrap">LinkedIn</h2><div className="h-px w-full bg-[#2B2B2B]" /></div>}
       classes={{
+            descriptionParagraph: "text-xl leading-relaxed text-justify",
+            descriptionList: "space-y-2 pl-8 text-xl leading-relaxed text-justify list-disc",
           card: "border-2 border-[#2B2B2B] bg-white p-6",
           title: "font-black uppercase tracking-wide text-[#2B2B2B]",
           text: "text-sm leading-relaxed text-[#2B2B2B]/80",

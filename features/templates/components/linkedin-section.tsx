@@ -1,6 +1,7 @@
 import { LinkedinIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { LinkedInShowcase } from "@/lib/linkedin";
+import { DescriptionBlock } from "@/features/templates/shared";
 
 export type LinkedInSectionClasses = {
   section?: string;
@@ -11,6 +12,9 @@ export type LinkedInSectionClasses = {
   muted?: string;
   chip?: string;
   link?: string;
+  /** Paragraph/list classes for long text (about, posts); mirror the template's project description. */
+  descriptionParagraph?: string;
+  descriptionList?: string;
   /** Wrapper around the posts list (defaults to a responsive grid). */
   posts?: string;
   post?: string;
@@ -62,7 +66,13 @@ export function LinkedInSection({
               </p>
             ) : null}
             {profile.about ? (
-              <p className={cn("whitespace-pre-line pt-2", classes.text)}>{profile.about}</p>
+              <div className="pt-2">
+                <DescriptionBlock
+                  text={profile.about}
+                  paragraphClassName={classes.descriptionParagraph ?? classes.text}
+                  listClassName={classes.descriptionList ?? classes.text}
+                />
+              </div>
             ) : null}
           </div>
         </div>
@@ -115,9 +125,13 @@ export function LinkedInSection({
         <div className={cn("grid gap-4 @md:grid-cols-2", classes.posts)}>
           {data.posts.map((post) => (
             <article key={post.id} className={cn("flex min-w-0 flex-col gap-2", classes.card, classes.post)}>
-              <p className={cn("line-clamp-6 whitespace-pre-line [overflow-wrap:anywhere]", classes.text)}>
-                {post.text}
-              </p>
+              <div className="min-w-0 [overflow-wrap:anywhere]">
+                <DescriptionBlock
+                  text={post.text}
+                  paragraphClassName={classes.descriptionParagraph ?? classes.text}
+                  listClassName={classes.descriptionList ?? classes.text}
+                />
+              </div>
               <div className={cn("mt-auto flex flex-wrap items-center gap-x-3 gap-y-1", classes.muted)}>
                 {post.date ? <span>{post.date}</span> : null}
                 {post.reactions ? <span>{post.reactions} reactions</span> : null}

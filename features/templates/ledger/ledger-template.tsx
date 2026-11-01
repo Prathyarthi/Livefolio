@@ -195,6 +195,8 @@ export function LedgerTemplate({ data }: AppProps) {
       data={data.linkedin}
       heading={<div className="border-l-2 border-[var(--lf-accent)] pl-4"><SectionHeading>LinkedIn</SectionHeading></div>}
       classes={{
+            descriptionParagraph: "text-sm text-slate-300 leading-relaxed",
+            descriptionList: "space-y-3 text-sm text-slate-300 leading-relaxed",
           card: "bg-[#111418] border border-slate-800 p-5 rounded-none",
           title: "font-mono text-sm font-semibold text-slate-100",
           text: "text-sm leading-relaxed text-slate-300",

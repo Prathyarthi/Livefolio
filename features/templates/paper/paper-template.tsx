@@ -77,6 +77,8 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>LinkedIn</SectionHeading>}
       classes={{
+            descriptionParagraph: "text-[#555] leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-[#555] leading-relaxed",
           card: "border border-[#2c2c2c] bg-white p-6",
           title: "font-serif text-lg font-bold text-[#2c2c2c]",
           text: "font-serif text-sm leading-relaxed text-[#2c2c2c]/80",

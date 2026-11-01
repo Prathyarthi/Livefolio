@@ -82,6 +82,8 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<h2 className="text-3xl font-bold text-white">LinkedIn</h2>}
       classes={{
+            descriptionParagraph: "text-slate-400 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-slate-400 leading-relaxed marker:text-[var(--lf-accent)]",
           card: "rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6",
           title: "font-semibold text-white",
           text: "text-sm leading-relaxed text-slate-300",

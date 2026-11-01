@@ -82,6 +82,8 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading number="IN">LinkedIn</SectionHeading>}
       classes={{
+            descriptionParagraph: "text-sm text-white/70 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-sm text-white/70 leading-relaxed marker:text-white/50",
           card: "border-2 border-white/50 bg-[#003366]/80 p-6",
           title: "font-bold uppercase tracking-widest text-white",
           text: "text-sm leading-relaxed text-white/80",
