@@ -2,10 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Reorder, useDragControls } from "motion/react";
-import { Eye, EyeOff, GripVertical, Loader2 } from "lucide-react";
+import { Eye, EyeOff, GripVertical, Loader2, Pencil, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useUpdatePortfolio } from "@/features/portfolio/api/use-portfolio";
 import { cn } from "@/lib/utils";
-import { getSectionLabels } from "@/features/templates/section-labels";
+import {
+  getCustomSectionLabel,
+  getSectionLabels,
+  MAX_SECTION_TITLE_CHARS,
+  normalizeSectionTitles,
+  STANDARD_SECTION_LABELS,
+} from "@/features/templates/section-labels";
 import { getTemplateSectionLayout } from "@/features/templates/section-layouts";
 import {
   applyGroupOrder,
@@ -48,18 +58,115 @@ function layoutsEqual(
   );
 }
 
+function RenameSectionPopover({
+  sectionKey,
+  label,
+  isCustom,
+  onRename,
+}: {
+  sectionKey: ReorderableSectionKey;
+  label: string;
+  isCustom: boolean;
+  onRename: (key: ReorderableSectionKey, title: string) => Promise<boolean>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(label);
+  const [saving, setSaving] = useState(false);
+  const defaultLabel = STANDARD_SECTION_LABELS[sectionKey];
+
+  const submit = async (title: string) => {
+    setSaving(true);
+    const ok = await onRename(sectionKey, title);
+    setSaving(false);
+    if (ok) setOpen(false);
+  };
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) setValue(isCustom ? label : "");
+      }}
+    >
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="shrink-0 rounded-md p-1.5 text-text-muted transition-colors hover:bg-surface-sunken hover:text-text-primary"
+          aria-label={`Rename ${label}`}
+          title="Rename heading"
+        >
+          <Pencil className="h-3.5 w-3.5" aria-hidden />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 space-y-3 p-3">
+        <form
+          className="space-y-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit(value);
+          }}
+        >
+          <div className="space-y-1.5">
+            <label
+              htmlFor={`section-title-${sectionKey}`}
+              className="text-xs font-medium text-text-primary"
+            >
+              Section heading
+            </label>
+            <Input
+              id={`section-title-${sectionKey}`}
+              value={value}
+              maxLength={MAX_SECTION_TITLE_CHARS}
+              placeholder={defaultLabel}
+              autoFocus
+              onChange={(event) => setValue(event.target.value)}
+            />
+            <p className="flex justify-between text-[11px] text-text-muted">
+              <span>Leave empty to use the template default.</span>
+              <span>
+                {value.trim().length}/{MAX_SECTION_TITLE_CHARS}
+              </span>
+            </p>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={saving || !isCustom}
+              onClick={() => void submit("")}
+            >
+              <RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+              Reset
+            </Button>
+            <Button type="submit" size="sm" disabled={saving}>
+              {saving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
+              Save
+            </Button>
+          </div>
+        </form>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function SectionRow({
   sectionKey,
   label,
   hidden,
   draggable,
+  isCustomLabel,
   onToggleHidden,
+  onRename,
 }: {
   sectionKey: ReorderableSectionKey;
   label: string;
   hidden: boolean;
   draggable: boolean;
+  isCustomLabel: boolean;
   onToggleHidden: () => void;
+  onRename: (key: ReorderableSectionKey, title: string) => Promise<boolean>;
 }) {
   const controls = useDragControls();
 
@@ -86,7 +193,18 @@ function SectionRow({
       )}
       <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary">
         {label}
+        {isCustomLabel ? (
+          <span className="ml-1.5 text-[11px] font-normal text-text-muted">
+            ({STANDARD_SECTION_LABELS[sectionKey]})
+          </span>
+        ) : null}
       </span>
+      <RenameSectionPopover
+        sectionKey={sectionKey}
+        label={label}
+        isCustom={isCustomLabel}
+        onRename={onRename}
+      />
       <button
         type="button"
         onClick={onToggleHidden}
@@ -138,6 +256,27 @@ export function SectionsTabContent({
     () => getSectionLabels(data.portfolio.customization),
     [data.portfolio.customization],
   );
+
+  const updatePortfolio = useUpdatePortfolio();
+
+  const handleRename = async (
+    key: ReorderableSectionKey,
+    title: string,
+  ): Promise<boolean> => {
+    const current = normalizeSectionTitles(
+      (data.portfolio.customization as { sectionLabels?: unknown } | null)?.sectionLabels,
+    );
+    const next = normalizeSectionTitles({ ...current, [key]: title });
+    if (!title.trim()) delete next[key];
+    try {
+      await updatePortfolio.mutateAsync({ customization: { sectionLabels: next } });
+      toast.success(title.trim() ? "Section heading updated" : "Section heading reset");
+      return true;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to rename section");
+      return false;
+    }
+  };
 
   const initialResolved = useMemo(
     () =>
@@ -210,8 +349,8 @@ export function SectionsTabContent({
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">
         <p className="mb-3 text-xs leading-relaxed text-text-muted">
           {layout.fixed
-            ? "This template has a fixed mosaic layout. You can hide sections, but their positions stay put."
-            : "Drag to reorder sections. The header stays fixed at the top."}
+            ? "This template has a fixed mosaic layout. You can hide or rename sections, but their positions stay put."
+            : "Drag to reorder sections, or use the pencil to rename a heading. The header stays fixed at the top."}
         </p>
 
         {visibleGroups.length === 0 ? (
@@ -244,7 +383,9 @@ export function SectionsTabContent({
                           label={labels[key]}
                           hidden={localHidden.includes(key)}
                           draggable
+                          isCustomLabel={getCustomSectionLabel(data.portfolio.customization, key) != null}
                           onToggleHidden={() => handleToggleHidden(key)}
+                          onRename={handleRename}
                         />
                       ))}
                     </Reorder.Group>
@@ -257,7 +398,9 @@ export function SectionsTabContent({
                           label={labels[key]}
                           hidden={localHidden.includes(key)}
                           draggable={false}
+                          isCustomLabel={getCustomSectionLabel(data.portfolio.customization, key) != null}
                           onToggleHidden={() => handleToggleHidden(key)}
+                          onRename={handleRename}
                         />
                       ))}
                     </div>

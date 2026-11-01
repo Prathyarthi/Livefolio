@@ -78,7 +78,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading className="mb-12">LinkedIn</SectionHeading>}
+      heading={<SectionHeading className="mb-12">{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-4 pl-8 text-2xl md:text-3xl leading-snug font-medium text-black marker:text-black",
             aboutParagraph: "text-2xl md:text-3xl leading-snug font-medium text-black",

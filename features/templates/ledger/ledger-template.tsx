@@ -192,7 +192,7 @@ export function LedgerTemplate({ data }: AppProps) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<div className="border-l-2 border-[var(--lf-accent)] pl-4"><SectionHeading>LinkedIn</SectionHeading></div>}
+      heading={<div className="border-l-2 border-[var(--lf-accent)] pl-4"><SectionHeading>{labels.linkedin}</SectionHeading></div>}
       classes={{
             aboutList: "space-y-2 pl-5 text-base @sm:text-lg text-slate-400 leading-relaxed marker:text-[var(--lf-accent)]",
             aboutParagraph: "text-base @sm:text-lg text-slate-400 leading-relaxed",

@@ -80,7 +80,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-4 pl-0 text-lg md:text-xl leading-loose text-[#c0c0c0] font-serif font-light list-none",
             aboutParagraph: "text-lg md:text-xl leading-loose text-[#c0c0c0] font-serif font-light",
