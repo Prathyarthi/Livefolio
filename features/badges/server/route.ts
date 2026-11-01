@@ -30,5 +30,5 @@ export const badges = new Elysia({ prefix: "/badges" })
     if (awarded.length) {
       rows = await prisma.userBadge.findMany({ where: { userId }, select: ROW_SELECT });
     }
-    return { success: true, ...buildBadgeShelf(rows), newlyAwarded: awarded };
+    return { success: true, badges: buildBadgeShelf(rows), newlyAwarded: awarded };
   });

@@ -26,9 +26,6 @@ export interface BadgeDefinition {
   description: string;
   icon: BadgeIcon;
   category: BadgeCategory;
-  /** Earned public-eligible badges always show on the public profile; others stay private. */
-  publicEligible: boolean;
-  unlockHint: string;
 }
 
 /** Integration source id (SocialProfile.platform / LinkedInImport) → badge key. */
@@ -60,8 +57,6 @@ function integration(
     description: `Imported ${what} from ${label}.`,
     icon,
     category: "integration",
-    publicEligible: true,
-    unlockHint: `Connect ${label} on the Import page to unlock this badge.`,
   };
 }
 
@@ -72,8 +67,6 @@ export const BADGES = [
     description: "Joined and opened your dashboard for the first time.",
     icon: "sparkles",
     category: "onboarding",
-    publicEligible: false,
-    unlockHint: "Open your dashboard to unlock this badge.",
   },
   {
     key: "portfolio_published",
@@ -81,8 +74,6 @@ export const BADGES = [
     description: "Published your portfolio for the world to see.",
     icon: "rocket",
     category: "milestone",
-    publicEligible: true,
-    unlockHint: "Choose a subdomain and publish your portfolio to unlock this badge.",
   },
   integration("github", "GitHub", "github", "repositories"),
   integration("linkedin", "LinkedIn", "linkedin", "your profile"),
@@ -104,11 +95,6 @@ export function getBadge(key: string): BadgeDefinition | undefined {
 
 export function isBadgeKey(key: unknown): key is BadgeKey {
   return typeof key === "string" && BY_KEY.has(key);
-}
-
-/** Whether an earned badge appears on the public profile (Welcome stays private). */
-export function canShowOnPortfolio(key: string): boolean {
-  return getBadge(key)?.publicEligible === true;
 }
 
 export function isIntegrationSource(value: unknown): value is IntegrationSource {
@@ -139,26 +125,15 @@ export interface EarnedBadgeRow {
   awardedAt: Date;
 }
 
-/** Full shelf: every catalog badge with earned state, in catalog order. Unknown rows are dropped. */
+/** Earned badges only, in catalog order (unknown keys dropped). */
 export function buildBadgeShelf(rows: EarnedBadgeRow[]) {
   const earned = new Map(rows.map((r) => [r.badgeKey, r]));
-  const shelf = BADGES.map((badge) => {
+  return BADGES.flatMap((badge) => {
     const row = earned.get(badge.key);
-    return {
-      ...badge,
-      earned: Boolean(row),
-      awardedAt: row?.awardedAt.toISOString() ?? null,
-    };
+    return row ? [{ ...badge, awardedAt: row.awardedAt.toISOString() }] : [];
   });
-  const next = shelf.find((b) => !b.earned) ?? null;
-  return { badges: shelf, nextBadgeKey: next?.key ?? null };
 }
 
-/** Public badges: every earned, public-eligible badge (no per-badge opt-in). */
-export function publicBadges(rows: EarnedBadgeRow[]): BadgeDefinition[] {
-  const earned = new Set(rows.map((r) => r.badgeKey));
-  return BADGES.filter((b) => b.publicEligible && earned.has(b.key));
-}
 
 export interface BadgeAwarderDeps {
   /** Insert if absent; resolve true only when a new row was created. */
@@ -200,34 +175,3 @@ export function createBadgeAwarder(deps: BadgeAwarderDeps) {
   };
 }
 
-/** Serializable public badge for templates (profile "Achievements" row). */
-export interface PublicBadge {
-  key: string;
-  name: string;
-  description: string;
-  icon: BadgeIcon;
-  awardedAt: string | null;
-}
-
-/**
- * Earned rows (from Prisma or a JSON API response) → public badges in catalog
- * order. Tolerates string dates and junk input; only public-eligible badges pass.
- */
-export function toPublicBadges(rows: unknown): PublicBadge[] {
-  if (!Array.isArray(rows)) return [];
-  const shown = new Map<string, string | null>();
-  for (const row of rows) {
-    if (!row || typeof row !== "object") continue;
-    const { badgeKey, awardedAt } = row as Record<string, unknown>;
-    if (typeof badgeKey !== "string") continue;
-    const date = awardedAt instanceof Date ? awardedAt : typeof awardedAt === "string" ? new Date(awardedAt) : null;
-    shown.set(badgeKey, date && !Number.isNaN(date.getTime()) ? date.toISOString() : null);
-  }
-  return BADGES.filter((b) => b.publicEligible && shown.has(b.key)).map((b) => ({
-    key: b.key,
-    name: b.name,
-    description: b.description,
-    icon: b.icon,
-    awardedAt: shown.get(b.key) ?? null,
-  }));
-}

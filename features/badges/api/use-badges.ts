@@ -9,15 +9,11 @@ export interface ShelfBadge {
   description: string;
   icon: BadgeIcon;
   category: BadgeCategory;
-  publicEligible: boolean;
-  unlockHint: string;
-  earned: boolean;
-  awardedAt: string | null;
+  awardedAt: string;
 }
 
 export interface BadgeShelfResponse {
   badges: ShelfBadge[];
-  nextBadgeKey: string | null;
   newlyAwarded: string[];
 }
 
