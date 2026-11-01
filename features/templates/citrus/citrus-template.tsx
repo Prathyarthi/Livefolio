@@ -33,7 +33,6 @@ import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function CitrusTemplate({ data }: { data: PortfolioData }) {
@@ -359,7 +358,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <main className="space-y-32">
-          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.map((cs) => (
                 <section key={cs.id}>

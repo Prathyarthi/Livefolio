@@ -38,7 +38,6 @@ import {
   type ReorderableSectionKey,
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function VibrantTemplate({ data }: { data: PortfolioData }) {
@@ -486,7 +485,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <div className="space-y-24 md:space-y-32">
-          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.length > 0 && customSections.map((cs) => (
             <section key={cs.id} className="scroll-mt-32">

@@ -38,7 +38,6 @@ import {
   type ReorderableSectionKey,
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function MonochromeTemplate({ data }: { data: PortfolioData }) {
@@ -436,7 +435,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
           </div>
         </header>
 
-        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-32 border-t border-[var(--lf-accent)] pt-12">

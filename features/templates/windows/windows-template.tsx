@@ -38,7 +38,6 @@ import {
   type ReorderableSectionKey,
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function WindowsTemplate({ data }: { data: PortfolioData }) {
@@ -420,7 +419,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
           </div>
         </Window>
 
-        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <Window key={cs.id} title={`Custom - ${cs.label}`}>

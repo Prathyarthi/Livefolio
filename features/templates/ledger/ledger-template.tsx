@@ -67,7 +67,6 @@ import {
   Filter,
 } from "lucide-react";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 interface AppProps {
   data: PortfolioData;
@@ -989,7 +988,7 @@ export function LedgerTemplate({ data }: AppProps) {
           </div>
         </section>
 
-        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && (
           <div className="space-y-12">

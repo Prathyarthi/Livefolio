@@ -44,7 +44,6 @@ import {
   type ReorderableSectionKey,
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 export function ModernTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -562,7 +561,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
           )}
 
           <div className="mt-8 min-w-0 space-y-8 md:mt-10 md:space-y-10">
-            {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+            {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
           </div>
 
           {customSections.length > 0 && (

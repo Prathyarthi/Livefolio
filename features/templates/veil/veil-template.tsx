@@ -65,7 +65,6 @@ import { resolveAccentColor } from "@/features/templates/template-accent-palette
 import { DitherVeil } from "./dither-veil";
 import styles from "./veil-template.module.css";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 type PortfolioMeta = PortfolioData["portfolio"];
 type Experience = PortfolioData["experiences"][number];
@@ -1218,25 +1217,20 @@ export function VeilTemplate({ data }: AppProps) {
     certifications: certifications.length > 0,
     articles: articles.length > 0,
     achievements: achievements.length > 0,
+    linkedin: Boolean(data.linkedin),
     profiles: hasProfiles,
   };
-  const hasLinkedIn = Boolean(data.linkedin);
   const numbered = resolved.order.full.filter(
-    (key) => (present[key] || (key === "profiles" && hasLinkedIn)) && !resolved.isHidden(key),
+    (key) => present[key] && !resolved.isHidden(key),
   );
-  // Hero is (01); body sections continue from (02). LinkedIn sits just before
-  // Profiles and takes its own number, shifting Profiles and later sections by one.
-  const linkedinAt = hasLinkedIn ? numbered.indexOf("profiles") : -1;
-  const num = (key: ReorderableSectionKey) => {
-    const i = numbered.indexOf(key);
-    return i + 2 + (linkedinAt >= 0 && i >= linkedinAt ? 1 : 0);
-  };
+  // Hero is (01); body sections continue from (02) in their actual order.
+  const num = (key: ReorderableSectionKey) => numbered.indexOf(key) + 2;
   const linkedinSection = data.linkedin ? (
     <section id="linkedin" className="scroll-mt-20 py-14 @md:py-20">
       <div className={SHELL}>
         <LinkedInSection
           data={data.linkedin}
-          heading={<SectionHeading index={linkedinAt + 2}>LinkedIn</SectionHeading>}
+          heading={<SectionHeading index={num("linkedin")}>{labels.linkedin}</SectionHeading>}
           classes={{
             aboutList: "list-disc space-y-2 pl-5 text-base leading-relaxed text-[var(--veil-muted)] marker:text-[var(--veil-faint)] @sm:text-lg",
             aboutParagraph: "text-base leading-relaxed text-[var(--veil-muted)] @sm:text-lg",
@@ -1377,7 +1371,7 @@ export function VeilTemplate({ data }: AppProps) {
           {present.skills && <SkillMarquee skills={skills} primaryColor={primaryColor} />}
           <StatStripe stats={stats} />
 
-          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.length > 0 && (
             <section className="py-14 @md:py-20">

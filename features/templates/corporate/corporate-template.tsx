@@ -42,7 +42,6 @@ import {
   type ReorderableSectionKey,
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function CorporateTemplate({ data }: { data: PortfolioData }) {
@@ -562,7 +561,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
         )}
 
         <div className="mt-6 space-y-6 md:mt-8 md:space-y-8">
-          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
 
         {customSections.length > 0 && (

@@ -34,7 +34,6 @@ import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function PaperTemplate({ data }: { data: PortfolioData }) {
@@ -407,7 +406,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-12">

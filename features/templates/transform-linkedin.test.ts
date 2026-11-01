@@ -1,7 +1,13 @@
 import { describe, expect, it } from "bun:test";
-import { createElement, Fragment, isValidElement } from "react";
+import { createElement } from "react";
 import { portfolioToTemplateData } from "./transform";
-import { withLinkedInBeforeProfiles } from "./section-order";
+import {
+  normalizeOrder,
+  REORDERABLE_SECTIONS,
+  renderSections,
+  resolveSectionLayout,
+} from "./section-order";
+import { getTemplateSectionLayout } from "./section-layouts";
 
 const base = {
   title: "Ada",
@@ -27,22 +33,44 @@ describe("LinkedIn posts no longer in Articles", () => {
   });
 });
 
-describe("withLinkedInBeforeProfiles", () => {
-  it("places LinkedIn in the profiles slot, before profiles", () => {
-    const profiles = createElement("section", { id: "profiles" });
-    const linkedin = createElement("section", { id: "linkedin" });
-    const out = withLinkedInBeforeProfiles({ profiles }, linkedin).profiles;
-    expect(isValidElement(out)).toBe(true);
-    const el = out as React.ReactElement<{ children: unknown[] }>;
-    expect(el.type).toBe(Fragment);
-    expect(el.props.children).toEqual([linkedin, profiles]);
+describe("LinkedIn as its own reorderable section", () => {
+  it("is a reorderable key placed right before profiles by default", () => {
+    const keys = [...REORDERABLE_SECTIONS];
+    expect(keys.indexOf("linkedin")).toBe(keys.indexOf("profiles") - 1);
   });
 
-  it("renders LinkedIn even without profiles, and is a no-op without LinkedIn", () => {
-    const linkedin = createElement("section", { id: "linkedin" });
-    const out = withLinkedInBeforeProfiles({ profiles: null }, linkedin).profiles as React.ReactElement<{ children: unknown[] }>;
-    expect(out.props.children).toEqual([linkedin, null]);
-    const blocks = { profiles: false };
-    expect(withLinkedInBeforeProfiles(blocks, null)).toBe(blocks);
+  it("inserts linkedin before profiles in legacy saved orders", () => {
+    const legacy = ["profiles", "about", "projects", "experience", "education", "skills", "certifications", "achievements", "articles", "github"];
+    const out = normalizeOrder(legacy);
+    expect(out.slice(0, 3)).toEqual(["linkedin", "profiles", "about"]);
+    expect(out).toHaveLength(REORDERABLE_SECTIONS.length);
+  });
+
+  it("keeps an explicitly saved linkedin position", () => {
+    const out = normalizeOrder(["linkedin", "about", "profiles"]);
+    expect(out.slice(0, 3)).toEqual(["linkedin", "about", "profiles"]);
+  });
+
+  it("moves and hides independently of profiles", () => {
+    const layout = getTemplateSectionLayout("minimal");
+    const blocks = {
+      about: createElement("section", { id: "about" }),
+      linkedin: createElement("section", { id: "linkedin" }),
+      profiles: createElement("section", { id: "profiles" }),
+    };
+    const moved = resolveSectionLayout(layout, { sectionLayout: { order: ["linkedin", "about", "profiles"] } });
+    expect(renderSections(moved, "full", blocks).map((n) => (n as { key: string }).key)).toEqual(["linkedin", "about", "profiles"]);
+
+    const hidden = resolveSectionLayout(layout, { sectionLayout: { hidden: ["linkedin"] } });
+    expect(renderSections(hidden, "full", blocks).map((n) => (n as { key: string }).key)).toEqual(["about", "profiles"]);
+
+    const profilesHidden = resolveSectionLayout(layout, { sectionLayout: { hidden: ["profiles"] } });
+    expect(renderSections(profilesHidden, "full", blocks).map((n) => (n as { key: string }).key)).toEqual(["about", "linkedin"]);
+  });
+
+  it("every template layout includes linkedin", () => {
+    for (const id of ["minimal", "bento", "veil", "developer", "windows", "blueprint", "pulse", "ledger"]) {
+      expect(getTemplateSectionLayout(id).groups[0]!.defaultOrder).toContain("linkedin");
+    }
   });
 });

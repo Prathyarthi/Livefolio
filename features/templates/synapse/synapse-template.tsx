@@ -62,7 +62,6 @@ import {
   X,
 } from "lucide-react";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 interface AppProps {
   data: PortfolioData;
@@ -910,7 +909,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           </div>
         </section>
 
-        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {data.customSections.length > 0 && (
           <section className={cn(SECTION_PAD, "max-w-5xl mx-auto")}>

@@ -70,7 +70,6 @@ import {
   FileText,
 } from "lucide-react";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 type Article = PortfolioData["articles"][number];
 
@@ -741,7 +740,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
       </section>
 
 
-      {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+      {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
       {data.customSections.length > 0 && (
         <section className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white">

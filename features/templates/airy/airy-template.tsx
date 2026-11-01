@@ -35,7 +35,6 @@ import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function AiryTemplate({ data }: { data: PortfolioData }) {
@@ -358,7 +357,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <main className="space-y-24">
-          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.map((cs) => (
                 <section key={cs.id} className="rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-xs">

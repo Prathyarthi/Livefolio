@@ -42,7 +42,6 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export function MinimalTemplate({ data }: { data: PortfolioData }) {
@@ -557,7 +556,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
         )}
 
         <div className="mt-8 space-y-8 md:mt-10 md:space-y-10">
-          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
 
         {customSections.length > 0 && (

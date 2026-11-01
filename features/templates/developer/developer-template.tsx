@@ -44,7 +44,6 @@ import { CollapsibleList } from "@/features/templates/collapsible-list";
 // import { getPreviewImage } from "@/lib/link-preview-code";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 
 export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
@@ -623,7 +622,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
       )}
 
       {/* About / cat summary.md */}
-      {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+      {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
       {customSections.map((cs) => (
         <section key={cs.id} className="border-b border-[var(--lf-g-900-30)]">

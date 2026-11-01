@@ -17,6 +17,7 @@ export const REORDERABLE_SECTIONS = [
   "certifications",
   "achievements",
   "articles",
+  "linkedin",
   "profiles",
   "github",
 ] as const satisfies readonly SectionKey[];
@@ -73,6 +74,14 @@ export function normalizeOrder(
         result.push(item);
       }
     }
+  }
+
+  // LinkedIn became its own section after orders were already saved; slot it
+  // in right before Profiles rather than at the end.
+  const profilesAt = result.indexOf("profiles");
+  if (!seen.has("linkedin") && profilesAt >= 0) {
+    seen.add("linkedin");
+    result.splice(profilesAt, 0, "linkedin");
   }
 
   for (const key of REORDERABLE_SECTIONS) {
@@ -166,23 +175,6 @@ export function renderSections(
     });
 }
 
-/**
- * Puts the LinkedIn section immediately before the Profiles section (it shares
- * the "profiles" slot, so it follows that slot's order). Renders LinkedIn even
- * when the template has no profiles to show.
- */
-export function withLinkedInBeforeProfiles(
-  blocks: Partial<Record<ReorderableSectionKey, ReactNode>>,
-  linkedin: ReactNode,
-): Partial<Record<ReorderableSectionKey, ReactNode>> {
-  if (!linkedin) return blocks;
-  const profiles = blocks.profiles;
-  return {
-    ...blocks,
-    profiles: createElement(Fragment, null, linkedin, profiles || null),
-  };
-}
-
 /** Build a SectionLayoutCustomization payload from resolved draft state. */
 export function toSectionLayoutPayload(
   order: ReorderableSectionKey[],
@@ -205,7 +197,6 @@ function hasGithubActivity(data: PortfolioData): boolean {
 
 function hasProfilesSection(data: PortfolioData): boolean {
   return (
-    Boolean(data.linkedin) ||
     data.socialProfiles.length > 0 ||
     Boolean(
       data.portfolio.contactEmail ||
@@ -229,6 +220,7 @@ export function getPresentSections(
   if (data.certifications.length > 0) present.add("certifications");
   if (data.achievements.length > 0) present.add("achievements");
   if (data.articles.length > 0) present.add("articles");
+  if (data.linkedin) present.add("linkedin");
   if (hasProfilesSection(data)) present.add("profiles");
   if (hasGithubActivity(data)) present.add("github");
   return present;

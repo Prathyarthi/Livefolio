@@ -41,7 +41,6 @@ import {
 } from "../github-contribution-heatmap";
 import { LivePreviewImage } from "@/components/live-preview-image";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 const MADE_TOMMY_LINK_ID = "made-tommy-spotlight-font";
 export function SpotlightTemplate({ data }: { data: PortfolioData }) {
@@ -598,7 +597,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             </section>
           </div>
 
-          {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.map((section) => (
             <section

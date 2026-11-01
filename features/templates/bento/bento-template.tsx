@@ -488,8 +488,8 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             </section>
           ))}
 
-          {data.linkedin && !resolved.isHidden("profiles") && (
-            <div className="col-span-1 @md:col-span-3 @lg:col-span-4 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
+          {data.linkedin && !resolved.isHidden("linkedin") && (
+            <div id="linkedin-tile" className="col-span-1 @md:col-span-3 @lg:col-span-4 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
               <LinkedInSection
                 data={data.linkedin}
                 heading={

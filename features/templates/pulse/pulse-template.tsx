@@ -75,7 +75,6 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { withLinkedInBeforeProfiles } from "@/features/templates/section-order";
 
 // ==========================================
 // 1. TYPES (derived from the shared PortfolioData contract)
@@ -1137,7 +1136,7 @@ export function PulseTemplate({ data }: AppProps) {
           showSummary={!resolved.isHidden("about")}
         />
 
-        {renderSections(resolved, "full", withLinkedInBeforeProfiles(blocks, linkedinSection))}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && (
           <section className="py-12 bg-transparent">
