@@ -85,10 +85,10 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             descriptionParagraph: "text-sm text-slate-400 leading-relaxed",
             descriptionList: "space-y-2 pl-5 text-sm text-slate-400 leading-relaxed marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]",
           card: "border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] p-6",
-          title: "font-bold uppercase tracking-widest text-[var(--lf-accent)]",
+          title: "text-lg font-bold text-white uppercase tracking-wider",
           text: "text-sm leading-relaxed text-slate-300",
-          muted: "text-xs text-slate-500",
-          chip: "border border-[var(--lf-accent)] px-3 py-1 text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)]",
+          muted: "text-[10px] text-slate-500 uppercase tracking-widest",
+          chip: "text-xs font-bold uppercase tracking-wider bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-slate-300 px-3 py-1",
           link: "text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] hover:underline",
           section: "scroll-mt-24",
       }}

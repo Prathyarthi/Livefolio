@@ -503,9 +503,9 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             descriptionList: "space-y-1 pl-4 text-sm leading-relaxed text-zinc-500 marker:text-zinc-400",
                   section: "scroll-mt-24",
                   card: "rounded-2xl border border-zinc-200 bg-zinc-50 p-5",
-                  title: "font-semibold text-zinc-900",
+                  title: "font-bold text-zinc-900",
                   text: "text-sm leading-relaxed text-zinc-600",
-                  muted: "text-xs text-zinc-400",
+                  muted: "text-xs font-medium text-zinc-500",
                   chip: "rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600",
                   link: "text-sm font-medium text-[var(--lf-accent)] hover:underline",
                 }}

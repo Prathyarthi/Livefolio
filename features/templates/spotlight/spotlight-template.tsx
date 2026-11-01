@@ -156,10 +156,10 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             descriptionParagraph: "text-sm leading-relaxed text-gray-600",
             descriptionList: "space-y-2 pl-5 text-sm leading-relaxed text-gray-600 marker:text-gray-300",
           card: "rounded-lg border border-gray-200 bg-white p-6",
-          title: "font-semibold text-gray-900",
+          title: "text-xl font-bold text-gray-950",
           text: "text-sm leading-relaxed text-gray-600",
-          muted: "text-xs text-gray-400",
-          chip: "rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700",
+          muted: "text-xs font-medium text-gray-500",
+          chip: "rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700",
           link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
           section: "container mx-auto mb-16 scroll-mt-24 px-0",
       }}

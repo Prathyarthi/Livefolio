@@ -982,9 +982,9 @@ export function PulseTemplate({ data }: AppProps) {
             descriptionList: "space-y-2 pl-5 font-sans text-sm text-slate-400 leading-relaxed marker:text-slate-600",
           section: "mx-auto max-w-7xl px-4 py-12 @sm:px-6 @lg:px-8",
           card: "rounded-2xl border border-white/10 bg-white/5 p-5",
-          title: "font-display text-base font-bold text-white",
-          text: "font-sans text-sm leading-relaxed text-slate-300",
-          muted: "font-mono text-xs text-slate-500",
+          title: "font-display text-base @sm:text-lg font-bold text-white",
+          text: "font-sans text-sm text-slate-400 leading-relaxed",
+          muted: "text-xs font-mono text-slate-500",
           chip: "rounded-lg border border-white/10 bg-[#0a0a0a] px-2 py-0.5 font-mono text-[10px] text-slate-400",
           link: "font-mono text-xs text-slate-400 hover:text-white",
       }}

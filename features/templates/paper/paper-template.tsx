@@ -80,10 +80,10 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
             descriptionParagraph: "text-[#555] leading-relaxed",
             descriptionList: "space-y-2 pl-5 text-[#555] leading-relaxed",
           card: "border border-[#2c2c2c] bg-white p-6",
-          title: "font-serif text-lg font-bold text-[#2c2c2c]",
+          title: "text-xl font-bold",
           text: "font-serif text-sm leading-relaxed text-[#2c2c2c]/80",
-          muted: "font-sans text-xs uppercase tracking-wider text-[#2c2c2c]/50",
-          chip: "border border-[var(--lf-accent)] px-3 py-1 font-sans text-xs uppercase tracking-wider",
+          muted: "text-xs font-sans uppercase tracking-widest text-[#888]",
+          chip: "text-xs font-sans uppercase tracking-wider text-[#666] bg-[#e8e4db] px-2 py-1",
           link: "font-sans text-xs uppercase tracking-wider text-[var(--lf-accent)] hover:underline",
           section: "scroll-mt-12",
       }}

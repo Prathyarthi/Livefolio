@@ -85,10 +85,10 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
             descriptionParagraph: "text-sm text-white/70 leading-relaxed",
             descriptionList: "space-y-2 pl-5 text-sm text-white/70 leading-relaxed marker:text-white/50",
           card: "border-2 border-white/50 bg-[#003366]/80 p-6",
-          title: "font-bold uppercase tracking-widest text-white",
+          title: "text-lg font-bold uppercase tracking-wider",
           text: "text-sm leading-relaxed text-white/80",
-          muted: "text-xs font-mono text-white/50",
-          chip: "border border-white/50 px-3 py-1 font-mono text-xs uppercase text-white",
+          muted: "text-[10px] uppercase tracking-widest text-white/50",
+          chip: "border border-white/50 text-[10px] uppercase tracking-widest px-2 py-1",
           link: "font-mono text-xs uppercase tracking-widest text-white hover:underline",
           section: "scroll-mt-32",
       }}

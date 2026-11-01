@@ -89,10 +89,10 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
             descriptionList: "space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-stone-300",
           section: "scroll-mt-24 rounded-[1.75rem] border border-stone-200/80 bg-white/70 p-8",
           card: "rounded-2xl border border-stone-200/80 bg-white p-5",
-          title: "font-medium text-stone-900",
-          text: "text-sm text-stone-600",
-          muted: "text-xs text-stone-400",
-          chip: "rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_28%,white)] bg-white px-2.5 py-1 text-xs text-stone-500",
+          title: "font-serif text-xl font-semibold text-stone-900",
+          text: "text-sm leading-7 text-stone-600",
+          muted: "text-xs uppercase tracking-[0.22em] text-stone-400",
+          chip: "rounded-full border border-stone-200/80 bg-stone-50 px-3 py-1.5 text-sm text-stone-600",
           link: "text-sm text-stone-600 underline-offset-4 hover:text-stone-900 hover:underline",
       }}
     />

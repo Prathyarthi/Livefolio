@@ -88,10 +88,10 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
             descriptionList: "space-y-1 pl-4 text-xs",
             section: "space-y-4",
             card: "win95-outset bg-[#c0c0c0] p-3",
-            title: "font-bold text-black",
+            title: "font-bold",
             text: "text-sm text-black",
-            muted: "text-xs text-gray-700",
-            chip: "win95-button px-3 py-1 text-xs font-bold text-black",
+            muted: "text-xs",
+            chip: "win95-outset bg-[#c0c0c0] px-2 py-0.5 text-xs",
             link: "text-sm font-bold text-[#000080] underline",
           }}
         />

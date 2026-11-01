@@ -86,10 +86,10 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
             descriptionParagraph: "text-[#888] leading-relaxed font-medium",
             descriptionList: "space-y-2 pl-5 text-[#888] leading-relaxed font-medium marker:text-[var(--lf-accent)]",
           card: "rounded-[2rem] bg-white p-6 shadow-lg",
-          title: "font-semibold text-slate-900",
+          title: "text-xl font-extrabold text-[#2d2d2d]",
           text: "text-sm leading-relaxed text-slate-600",
-          muted: "text-xs text-slate-400",
-          chip: "rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_18%,white)] px-3 py-1 text-xs font-semibold text-slate-700",
+          muted: "text-[#888] text-xs font-bold",
+          chip: "bg-[#fdf6e3] text-[#b89547] text-sm font-bold px-4 py-2 rounded-2xl",
           link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
           section: "scroll-mt-32",
       }}

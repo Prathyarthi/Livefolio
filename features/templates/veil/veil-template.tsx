@@ -1241,9 +1241,9 @@ export function VeilTemplate({ data }: AppProps) {
             descriptionParagraph: "text-[15px] leading-relaxed text-[var(--veil-muted)]",
             descriptionList: "list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-[var(--veil-muted)] marker:text-[var(--lf-accent)]",
             card: cn("rounded-[4px] border bg-[var(--veil-ink-raised)] p-6", LINE),
-            title: "font-serif text-xl text-[var(--veil-paper)]",
-            text: "text-sm leading-relaxed text-[var(--veil-muted)]",
-            muted: "font-mono text-[11px] tracking-[0.12em] text-[var(--veil-faint)]",
+            title: "font-serif text-3xl leading-tight tracking-tight text-[var(--veil-paper)] @md:text-4xl [overflow-wrap:anywhere]",
+            text: "text-[15px] leading-relaxed text-[var(--veil-muted)]",
+            muted: cn("font-mono text-[11px] tracking-[0.14em]", FAINT),
             chip: cn("rounded-full border px-3 py-1 text-xs text-[var(--veil-muted)]", LINE),
             link: "font-mono text-xs tracking-[0.12em] text-[var(--lf-accent)] hover:underline",
           }}
