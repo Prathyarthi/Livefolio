@@ -41,6 +41,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function RetroTemplate({ data }: { data: PortfolioData }) {
@@ -77,6 +78,28 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("retro"),
     portfolio.customization,
   );
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+            aboutList: "space-y-3 pl-5 text-base font-medium leading-8 text-black marker:text-black",
+            aboutParagraph: "text-base font-medium leading-8 text-black",
+            postList: "list-disc space-y-2 pl-5 text-sm font-bold leading-relaxed text-black",
+            postParagraph: "text-sm font-bold leading-relaxed text-black",
+            descriptionParagraph: "text-sm font-medium leading-7 text-black",
+            descriptionList: "space-y-2 pl-5 text-sm font-medium leading-7 text-black marker:text-black",
+          card: "border-4 border-black bg-[color-mix(in_srgb,var(--lf-accent)_25%,white)] p-5",
+          title: "font-sans text-xl font-black uppercase text-black",
+          text: "text-sm font-medium leading-7 text-black",
+          muted: "text-xs font-bold uppercase tracking-widest text-black",
+          chip: "border-2 border-black bg-[color-mix(in_srgb,var(--lf-accent)_40%,white)] px-3 py-1.5 text-sm font-bold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+          link: "text-sm font-black uppercase text-black underline",
+          section: "scroll-mt-24 border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:p-8",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -546,7 +569,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
         )}
 
         <div className="mt-10 space-y-10">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
 
         {customSections.length > 0 && (

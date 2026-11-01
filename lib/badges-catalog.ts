@@ -7,7 +7,7 @@
 export const BADGE_CATEGORIES = ["onboarding", "milestone", "integration"] as const;
 export type BadgeCategory = (typeof BADGE_CATEGORIES)[number];
 
-/** Lucide icon names; mapped to components in features/badges/components/badge-icon.tsx. */
+/** Semantic icon name (fallback/metadata); the medallion art lives in features/badges/components/badge-art.ts. */
 export type BadgeIcon =
   | "sparkles"
   | "rocket"
@@ -26,9 +26,6 @@ export interface BadgeDefinition {
   description: string;
   icon: BadgeIcon;
   category: BadgeCategory;
-  /** Only meaningful, verifiable achievements may be shown on a public portfolio. */
-  publicEligible: boolean;
-  unlockHint: string;
 }
 
 /** Integration source id (SocialProfile.platform / LinkedInImport) → badge key. */
@@ -60,8 +57,6 @@ function integration(
     description: `Imported ${what} from ${label}.`,
     icon,
     category: "integration",
-    publicEligible: true,
-    unlockHint: `Connect ${label} on the Import page to unlock this badge.`,
   };
 }
 
@@ -72,8 +67,6 @@ export const BADGES = [
     description: "Joined and opened your dashboard for the first time.",
     icon: "sparkles",
     category: "onboarding",
-    publicEligible: false,
-    unlockHint: "Open your dashboard to unlock this badge.",
   },
   {
     key: "portfolio_published",
@@ -81,8 +74,6 @@ export const BADGES = [
     description: "Published your portfolio for the world to see.",
     icon: "rocket",
     category: "milestone",
-    publicEligible: true,
-    unlockHint: "Choose a subdomain and publish your portfolio to unlock this badge.",
   },
   integration("github", "GitHub", "github", "repositories"),
   integration("linkedin", "LinkedIn", "linkedin", "your profile"),
@@ -104,10 +95,6 @@ export function getBadge(key: string): BadgeDefinition | undefined {
 
 export function isBadgeKey(key: unknown): key is BadgeKey {
   return typeof key === "string" && BY_KEY.has(key);
-}
-
-export function canShowOnPortfolio(key: string): boolean {
-  return getBadge(key)?.publicEligible === true;
 }
 
 export function isIntegrationSource(value: unknown): value is IntegrationSource {
@@ -136,30 +123,17 @@ export function qualifiedBadgeKeys(facts: BadgeFacts): BadgeKey[] {
 export interface EarnedBadgeRow {
   badgeKey: string;
   awardedAt: Date;
-  showOnPortfolio: boolean;
 }
 
-/** Full shelf: every catalog badge with earned state, in catalog order. Unknown rows are dropped. */
+/** Earned badges only, in catalog order (unknown keys dropped). */
 export function buildBadgeShelf(rows: EarnedBadgeRow[]) {
   const earned = new Map(rows.map((r) => [r.badgeKey, r]));
-  const shelf = BADGES.map((badge) => {
+  return BADGES.flatMap((badge) => {
     const row = earned.get(badge.key);
-    return {
-      ...badge,
-      earned: Boolean(row),
-      awardedAt: row?.awardedAt.toISOString() ?? null,
-      showOnPortfolio: Boolean(row?.showOnPortfolio && badge.publicEligible),
-    };
+    return row ? [{ ...badge, awardedAt: row.awardedAt.toISOString() }] : [];
   });
-  const next = shelf.find((b) => !b.earned) ?? null;
-  return { badges: shelf, nextBadgeKey: next?.key ?? null };
 }
 
-/** Public badges for a portfolio: earned, opted-in, and eligible only. */
-export function publicBadges(rows: EarnedBadgeRow[]): BadgeDefinition[] {
-  const shown = new Set(rows.filter((r) => r.showOnPortfolio).map((r) => r.badgeKey));
-  return BADGES.filter((b) => b.publicEligible && shown.has(b.key));
-}
 
 export interface BadgeAwarderDeps {
   /** Insert if absent; resolve true only when a new row was created. */
@@ -200,3 +174,4 @@ export function createBadgeAwarder(deps: BadgeAwarderDeps) {
     }
   };
 }
+

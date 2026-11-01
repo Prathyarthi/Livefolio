@@ -40,6 +40,7 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { LivePreviewImage } from "@/components/live-preview-image";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 const MADE_TOMMY_LINK_ID = "made-tommy-spotlight-font";
 export function SpotlightTemplate({ data }: { data: PortfolioData }) {
@@ -146,6 +147,28 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("spotlight"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SpotlightSectionHeading title="LinkedIn" />}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-base leading-relaxed text-gray-600 marker:text-[var(--lf-accent)] md:text-lg",
+            aboutParagraph: "text-base leading-relaxed text-gray-600 md:text-lg",
+            postList: "list-disc space-y-2 pl-5 text-xl font-bold text-gray-950",
+            postParagraph: "text-xl font-bold text-gray-950",
+            descriptionParagraph: "text-sm leading-relaxed text-gray-600",
+            descriptionList: "space-y-2 pl-5 text-sm leading-relaxed text-gray-600 marker:text-gray-300",
+          card: "rounded-lg border border-gray-200 bg-white p-6",
+          title: "text-xl font-bold text-gray-950",
+          text: "text-sm leading-relaxed text-gray-600",
+          muted: "text-xs font-medium text-gray-500",
+          chip: "rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "container mx-auto mb-16 scroll-mt-24 px-0",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary?.trim() && (
                 <section key="about" className="container mx-auto mb-16 px-0" id="about">
@@ -574,7 +597,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             </section>
           </div>
 
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.map((section) => (
             <section

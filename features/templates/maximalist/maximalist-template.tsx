@@ -69,6 +69,7 @@ import {
   CornerDownLeft,
   FileText,
 } from "lucide-react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 type Article = PortfolioData["articles"][number];
 
@@ -173,6 +174,28 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<div className="mb-2 border-b-4 border-white pb-6"><SectionHeading>LinkedIn</SectionHeading></div>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-slate-200 text-base sm:text-lg font-bold leading-relaxed marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-slate-200 text-base sm:text-lg font-bold leading-relaxed",
+            postList: "list-disc space-y-2 pl-5 text-base sm:text-lg font-black text-white uppercase tracking-tight",
+            postParagraph: "text-base sm:text-lg font-black text-white uppercase tracking-tight",
+            descriptionParagraph: "text-sm font-bold leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-sm font-bold leading-relaxed marker:text-current",
+          card: "border-4 border-white bg-black p-6",
+          title: "text-xl font-black uppercase tracking-tight opacity-90 font-mono",
+          text: "text-sm font-bold leading-relaxed",
+          muted: "font-mono text-xs",
+          chip: "border-2 border-white px-3 py-1 text-xs font-black uppercase text-white",
+          link: "text-sm font-black uppercase text-[var(--lf-accent)] hover:underline",
+          section: "mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: null,
@@ -717,7 +740,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
       </section>
 
 
-      {renderSections(resolved, "full", blocks)}
+      {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
       {data.customSections.length > 0 && (
         <section className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white">

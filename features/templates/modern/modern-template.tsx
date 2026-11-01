@@ -43,6 +43,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 export function ModernTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -78,6 +79,28 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("modern"),
     portfolio.customization,
   );
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+            aboutList: "space-y-3 pl-5 text-base leading-8 text-zinc-300 marker:text-zinc-600",
+            aboutParagraph: "text-base leading-8 text-zinc-300",
+            postList: "list-disc space-y-2 pl-5 text-sm text-white leading-relaxed",
+            postParagraph: "text-sm text-white leading-relaxed",
+            descriptionParagraph: "text-sm leading-7 text-zinc-300",
+            descriptionList: "space-y-2 pl-5 text-sm leading-7 text-zinc-300 marker:text-zinc-600",
+          card: "rounded-2xl border border-white/10 bg-white/5 p-5",
+          title: "text-xl font-semibold text-white",
+          text: "text-sm leading-7 text-zinc-300",
+          muted: "text-xs uppercase tracking-[0.22em] text-zinc-500",
+          chip: "rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-sm text-zinc-300",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-24 rounded-[1.85rem] border border-white/10 bg-white/[0.045] p-6 md:p-8",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -538,7 +561,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
           )}
 
           <div className="mt-8 min-w-0 space-y-8 md:mt-10 md:space-y-10">
-            {renderSections(resolved, "full", blocks)}
+            {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
           </div>
 
           {customSections.length > 0 && (

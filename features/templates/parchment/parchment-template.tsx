@@ -33,6 +33,7 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function ParchmentTemplate({ data }: { data: PortfolioData }) {
@@ -62,6 +63,28 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("parchment"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<div className="mb-4 flex items-center gap-6"><h2 className="text-3xl font-black uppercase tracking-widest whitespace-nowrap">LinkedIn</h2><div className="h-px w-full bg-[#2B2B2B]" /></div>}
+      classes={{
+            aboutList: "space-y-2 pl-8 text-xl font-normal list-disc",
+            aboutParagraph: "text-xl leading-relaxed font-normal",
+            postList: "list-disc space-y-2 pl-5 text-lg font-black uppercase",
+            postParagraph: "text-lg font-black uppercase",
+            descriptionParagraph: "text-xl leading-relaxed text-justify",
+            descriptionList: "space-y-2 pl-8 text-xl leading-relaxed text-justify list-disc",
+          card: "border-2 border-[#2B2B2B] bg-white p-6",
+          title: "text-2xl font-black uppercase",
+          text: "text-lg leading-relaxed",
+          muted: "font-bold tracking-widest uppercase text-sm",
+          chip: "border border-[#2B2B2B] px-3 py-1 text-xs font-bold uppercase",
+          link: "text-sm font-bold uppercase tracking-widest text-[#2B2B2B] hover:underline",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
                 <section key="about" id="about" className="scroll-mt-32">
@@ -364,7 +387,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
         )}
 
         <main className="space-y-32">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.map((cs) => (
                 <section key={cs.id}>

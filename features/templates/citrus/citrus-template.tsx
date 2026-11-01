@@ -32,6 +32,7 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function CitrusTemplate({ data }: { data: PortfolioData }) {
@@ -61,6 +62,28 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("citrus"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="mb-10 text-4xl font-black text-[#264653] uppercase tracking-tight">LinkedIn</h2>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-xl font-medium text-[#264653]/80 marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-xl leading-relaxed text-[#264653]/80 font-medium",
+            postList: "list-disc space-y-2 pl-5 text-lg font-black text-[#264653] uppercase",
+            postParagraph: "text-lg font-black text-[#264653] uppercase",
+            descriptionParagraph: "text-lg text-[#264653]/80",
+            descriptionList: "space-y-2 pl-5 text-lg text-[#264653]/80 marker:text-[var(--lf-accent)]",
+          card: "bg-white border-4 border-[#264653] p-6 rounded-xl shadow-[8px_8px_0_0_var(--lf-accent)]",
+          title: "text-2xl font-black text-[#264653] uppercase",
+          text: "text-[#264653]/90 text-lg leading-relaxed font-medium",
+          muted: "font-bold uppercase tracking-widest text-[#264653]",
+          chip: "bg-[#FFFCF2] border-2 border-[#264653] px-3 py-1.5 text-sm font-bold text-[#264653]",
+          link: "text-sm font-black uppercase tracking-widest text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-32 max-w-4xl",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
                 <section key="about" id="about" className="scroll-mt-32 max-w-4xl relative">
@@ -335,7 +358,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <main className="space-y-32">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.map((cs) => (
                 <section key={cs.id}>

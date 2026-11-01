@@ -33,6 +33,7 @@ import { ArticleSourceLabel, RichText,
 import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function PaperTemplate({ data }: { data: PortfolioData }) {
@@ -70,6 +71,26 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("paper"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+            postList: "list-disc space-y-2 pl-5 text-lg font-bold",
+            postParagraph: "text-lg font-bold",
+            descriptionParagraph: "text-[#555] leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-[#555] leading-relaxed",
+          card: "border border-[#2c2c2c] bg-white p-6",
+          title: "text-xl font-bold",
+          text: "font-serif text-sm leading-relaxed text-[#2c2c2c]/80",
+          muted: "text-xs font-sans uppercase tracking-widest text-[#888]",
+          chip: "text-xs font-sans uppercase tracking-wider text-[#666] bg-[#e8e4db] px-2 py-1",
+          link: "font-sans text-xs uppercase tracking-wider text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-12",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
               <section key="about" id="about" className="scroll-mt-12">
@@ -385,7 +406,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-12">

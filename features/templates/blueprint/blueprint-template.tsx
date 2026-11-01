@@ -37,6 +37,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function BlueprintTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +75,28 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading number="IN">LinkedIn</SectionHeading>}
+      classes={{
+            aboutList: "space-y-2 pl-6 text-base md:text-lg leading-relaxed text-white/90 marker:text-white",
+            aboutParagraph: "text-base md:text-lg leading-relaxed text-white/90",
+            postList: "list-disc space-y-2 pl-5 text-sm font-bold uppercase tracking-wider leading-snug",
+            postParagraph: "text-sm font-bold uppercase tracking-wider leading-snug",
+            descriptionParagraph: "text-sm text-white/70 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-sm text-white/70 leading-relaxed marker:text-white/50",
+          card: "border-2 border-white/50 bg-[#003366]/80 p-6",
+          title: "text-lg font-bold uppercase tracking-wider",
+          text: "text-sm leading-relaxed text-white/80",
+          muted: "text-[10px] uppercase tracking-widest text-white/50",
+          chip: "border border-white/50 text-[10px] uppercase tracking-widest px-2 py-1",
+          link: "font-mono text-xs uppercase tracking-widest text-white hover:underline",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -470,7 +493,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
 
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs, idx) => (
           <section key={cs.id} className="scroll-mt-32">

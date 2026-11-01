@@ -66,6 +66,7 @@ import {
   FileCheck,
   Filter,
 } from "lucide-react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 interface AppProps {
   data: PortfolioData;
@@ -187,6 +188,28 @@ export function LedgerTemplate({ data }: AppProps) {
       return matchesSearch && matchesTech;
     });
   }, [visibleProjects, projectSearch, selectedTech]);
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<div className="border-l-2 border-[var(--lf-accent)] pl-4"><SectionHeading>LinkedIn</SectionHeading></div>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-base @sm:text-lg text-slate-400 leading-relaxed marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-base @sm:text-lg text-slate-400 leading-relaxed",
+            postList: "list-disc space-y-2 pl-5 font-mono font-bold text-white text-sm @sm:text-base uppercase tracking-wide",
+            postParagraph: "font-mono font-bold text-white text-sm @sm:text-base uppercase tracking-wide",
+            descriptionParagraph: "text-sm text-slate-300 leading-relaxed",
+            descriptionList: "space-y-3 text-sm text-slate-300 leading-relaxed",
+          card: "bg-[#111418] border border-slate-800 p-5 rounded-none",
+          title: "text-base @sm:text-lg font-mono font-bold uppercase text-white",
+          text: "text-sm text-slate-300 leading-relaxed",
+          muted: "text-xs font-mono text-slate-500 uppercase",
+          chip: "border border-slate-700 px-2 py-0.5 font-mono text-[11px] text-slate-400",
+          link: "font-mono text-xs text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-20",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, ReactNode>> = {
     about: null,
@@ -965,7 +988,7 @@ export function LedgerTemplate({ data }: AppProps) {
           </div>
         </section>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && (
           <div className="space-y-12">

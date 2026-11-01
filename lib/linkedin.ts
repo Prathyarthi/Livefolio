@@ -142,12 +142,14 @@ export function parseStoredPosts(value: unknown): LinkedInPost[] {
 }
 
 /**
- * What the LinkedIn section renders: only the selected profile fields.
- * Selected posts are rendered in the Articles section instead (source "linkedin").
+ * What the LinkedIn section renders: the selected profile fields plus the
+ * selected posts. Posts live only here (on LinkedInImport.posts); they are no
+ * longer mirrored into the Articles section.
  */
 export interface LinkedInShowcase {
   profileUrl: string;
   profile: Partial<LinkedInProfileData>;
+  posts: LinkedInPost[];
 }
 
 export function buildLinkedInShowcase(
@@ -155,6 +157,7 @@ export function buildLinkedInShowcase(
     | {
         profileUrl: string;
         profileData: unknown;
+        posts?: unknown;
         selection: unknown;
         showOnPortfolio: boolean;
       }
@@ -172,8 +175,17 @@ export function buildLinkedInShowcase(
       (picked as Record<string, unknown>)[field] = value;
     }
   }
-  if (Object.keys(picked).length === 0) return null;
-  return { profileUrl: row.profileUrl, profile: picked };
+  // Older syncs may still carry "…more" markers; clean them for display.
+  for (const field of ["headline", "about"] as const) {
+    const value = picked[field];
+    if (typeof value === "string") picked[field] = stripSeeMoreMarker(value);
+  }
+  const posts = selectedLinkedInPosts(row.posts, row.selection).map((post) => ({
+    ...post,
+    text: stripSeeMoreMarker(post.text),
+  }));
+  if (Object.keys(picked).length === 0 && posts.length === 0) return null;
+  return { profileUrl: row.profileUrl, profile: picked, posts };
 }
 
 // ── Scraping ───────────────────────────────────────────────
@@ -196,7 +208,7 @@ export class LinkedInScrapeError extends Error {
   }
 }
 
-const PROMPT = `Extract this public LinkedIn profile. Return name, headline, location, about/summary, profile photo URL, current position, experience, education, skills, and up to ${MAX_LINKEDIN_POSTS} most recent posts (text, date, link, reaction and comment counts). Use null for anything not visible. Do not invent data. If the page is a sign-in/auth wall, an error page, or not a person's profile, set profileAvailable to false.`;
+const PROMPT = `Extract this public LinkedIn profile. Return the FULL, untruncated text for every field: expand any "see more"/"…more" toggles and never shorten or add an ellipsis. Return name, headline, location, about/summary, profile photo URL, current position, experience, education, skills, and up to ${MAX_LINKEDIN_POSTS} most recent posts (text, date, link, reaction and comment counts). Use null for anything not visible. Do not invent data. If the page is a sign-in/auth wall, an error page, or not a person's profile, set profileAvailable to false.`;
 
 function cleanUrl(value: string | null): string | null {
   if (!value) return null;
@@ -213,6 +225,15 @@ function postId(post: z.infer<typeof linkedInPostSchema>, index: number): string
   let hash = 0;
   for (let i = 0; i < basis.length; i++) hash = (hash * 31 + basis.charCodeAt(i)) | 0;
   return `p_${(hash >>> 0).toString(36)}`;
+}
+
+/**
+ * Removes LinkedIn's collapsed-text UI markers ("…more", "... see more") that
+ * scrapes sometimes capture at the end of a post or bio. A bare trailing "…"
+ * is kept: it means LinkedIn served truncated text, and we don't fake the rest.
+ */
+export function stripSeeMoreMarker(text: string): string {
+  return text.replace(/\s*(?:…|\.{3})\s*(?:see\s+)?more\s*$/i, "").trimEnd();
 }
 
 export function normalizeScrapeResult(json: unknown): {
@@ -241,13 +262,20 @@ export function normalizeScrapeResult(json: unknown): {
     .slice(0, MAX_LINKEDIN_POSTS)
     .map((post, index) => ({
       ...post,
+      // id is derived from the raw post so existing selections stay stable.
+      text: stripSeeMoreMarker(post.text),
       url: cleanUrl(post.url),
       imageUrl: cleanUrl(post.imageUrl),
       id: postId(post, index),
     }))
     .filter((post) => (seen.has(post.id) ? false : (seen.add(post.id), true)));
   return {
-    profile: { ...profile, profileImageUrl: cleanUrl(profile.profileImageUrl) },
+    profile: {
+      ...profile,
+      headline: profile.headline ? stripSeeMoreMarker(profile.headline) : profile.headline,
+      about: profile.about ? stripSeeMoreMarker(profile.about) : profile.about,
+      profileImageUrl: cleanUrl(profile.profileImageUrl),
+    },
     posts: normalizedPosts,
   };
 }

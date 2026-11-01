@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import {
   LinkedInScrapeError,
   buildLinkedInShowcase,
+  stripSeeMoreMarker,
   selectedLinkedInPosts,
   linkedInDayWindow,
   linkedInMonthWindow,
@@ -95,19 +96,39 @@ describe("fetch config fallback", () => {
 });
 
 describe("buildLinkedInShowcase", () => {
-  it("only includes selected fields; posts are selected separately", async () => {
+  it("includes only selected fields and selected posts", async () => {
     process.env.SGAI_API_KEY = "test";
     const { profile, posts } = await scrapeLinkedInProfile("https://www.linkedin.com/in/ada", mockFetch(200, { json: sample }));
     const showcase = buildLinkedInShowcase({
       profileUrl: "https://www.linkedin.com/in/ada",
       profileData: profile,
+      posts,
       selection: { fields: ["headline", "education"], postIds: [posts[0].id] },
       showOnPortfolio: true,
     });
-    expect(showcase).toEqual({ profileUrl: "https://www.linkedin.com/in/ada", profile: { headline: "Engineer" } });
+    expect(showcase?.profileUrl).toBe("https://www.linkedin.com/in/ada");
+    expect(showcase?.profile).toEqual({ headline: "Engineer" });
+    expect(showcase?.posts.map((p) => p.text)).toEqual(["Hello"]);
     expect(selectedLinkedInPosts(posts, { fields: [], postIds: [posts[0].id] }).map((p) => p.text)).toEqual(["Hello"]);
     expect(
       buildLinkedInShowcase({ profileUrl: "x", profileData: profile, selection: {}, showOnPortfolio: false }),
+    ).toBeNull();
+  });
+
+  it("renders a posts-only showcase and nothing when empty", async () => {
+    process.env.SGAI_API_KEY = "test";
+    const { profile, posts } = await scrapeLinkedInProfile("https://www.linkedin.com/in/ada", mockFetch(200, { json: sample }));
+    const postsOnly = buildLinkedInShowcase({
+      profileUrl: "u",
+      profileData: profile,
+      posts,
+      selection: { fields: [], postIds: [posts[0].id] },
+      showOnPortfolio: true,
+    });
+    expect(postsOnly?.profile).toEqual({});
+    expect(postsOnly?.posts).toHaveLength(1);
+    expect(
+      buildLinkedInShowcase({ profileUrl: "u", profileData: profile, posts, selection: { fields: [], postIds: [] }, showOnPortfolio: true }),
     ).toBeNull();
   });
 });
@@ -131,5 +152,14 @@ describe("sync quota", () => {
     const q = toLinkedInQuota(3, 1, new Date("2026-10-15T10:00:00Z"));
     expect(q).toMatchObject({ remaining: 0, blockedBy: "monthly", nextAvailableAt: "2026-11-01T00:00:00.000Z" });
     expect(toLinkedInQuota(5, 0, now).remaining).toBe(0);
+  });
+});
+
+describe("stripSeeMoreMarker", () => {
+  it("removes LinkedIn see-more markers but keeps real ellipses", () => {
+    expect(stripSeeMoreMarker("Great launch today. ...more")).toBe("Great launch today.");
+    expect(stripSeeMoreMarker("Great launch …see more")).toBe("Great launch");
+    expect(stripSeeMoreMarker("Full Stack Developer | Chess…")).toBe("Full Stack Developer | Chess…");
+    expect(stripSeeMoreMarker("Nothing to strip")).toBe("Nothing to strip");
   });
 });

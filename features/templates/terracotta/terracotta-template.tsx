@@ -33,6 +33,7 @@ import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { motion } from "motion/react";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function TerracottaTemplate({ data }: { data: PortfolioData }) {
@@ -62,6 +63,28 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("terracotta"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="mb-4 flex items-center gap-4 text-3xl font-medium text-[var(--lf-accent)]">LinkedIn <span className="h-px flex-1 bg-[#3D405B]/10" /></h2>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-xl font-light text-[#3D405B]/90 marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-xl leading-loose text-[#3D405B]/90 font-light",
+            postList: "list-disc space-y-2 pl-5 text-xl font-medium text-[#3D405B]",
+            postParagraph: "text-xl font-medium text-[#3D405B]",
+            descriptionParagraph: "text-lg leading-relaxed font-light text-[#3D405B]/80",
+            descriptionList: "space-y-2 pl-5 text-lg leading-relaxed font-light text-[#3D405B]/80 marker:text-[var(--lf-accent)]",
+          card: "bg-white p-6 rounded-3xl shadow-xs border border-[#3D405B]/5",
+          title: "text-2xl font-medium text-[#3D405B]",
+          text: "text-[#3D405B]/80 font-light leading-relaxed text-lg",
+          muted: "text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)]",
+          chip: "rounded-full border border-[#3D405B]/10 bg-[#F4F1DE] px-3 py-1.5 text-xs font-medium text-[#3D405B]",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-32 max-w-4xl",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
                 <section key="about" id="about" className="scroll-mt-32 max-w-4xl">
@@ -351,7 +374,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
         )}
 
         <main className="space-y-32">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.map((cs) => (
                 <section key={cs.id}>

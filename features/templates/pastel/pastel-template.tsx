@@ -38,6 +38,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function PastelTemplate({ data }: { data: PortfolioData }) {
@@ -75,6 +76,28 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="text-3xl font-extrabold text-slate-800">LinkedIn</h2>}
+      classes={{
+            aboutList: "space-y-3 pl-6 text-lg md:text-xl leading-relaxed text-[#666] font-medium marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-lg md:text-xl leading-relaxed text-[#666] font-medium",
+            postList: "list-disc space-y-2 pl-5 text-base font-extrabold text-[#2d2d2d] leading-snug",
+            postParagraph: "text-base font-extrabold text-[#2d2d2d] leading-snug",
+            descriptionParagraph: "text-[#888] leading-relaxed font-medium",
+            descriptionList: "space-y-2 pl-5 text-[#888] leading-relaxed font-medium marker:text-[var(--lf-accent)]",
+          card: "rounded-[2rem] bg-white p-6 shadow-lg",
+          title: "text-xl font-extrabold text-[#2d2d2d]",
+          text: "text-sm leading-relaxed text-slate-600",
+          muted: "text-[#888] text-xs font-bold",
+          chip: "bg-[#fdf6e3] text-[#b89547] text-sm font-bold px-4 py-2 rounded-2xl",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -436,7 +459,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-32">

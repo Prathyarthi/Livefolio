@@ -37,6 +37,7 @@ import { ArticleSourceLabel, RichText,
 import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function SpaceTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +75,28 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("space"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-lg leading-relaxed text-slate-300 marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-lg leading-relaxed text-slate-300",
+            postList: "list-disc space-y-2 pl-5 text-sm font-bold text-white leading-relaxed",
+            postParagraph: "text-sm font-bold text-white leading-relaxed",
+            descriptionParagraph: "text-slate-400 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-slate-400 leading-relaxed marker:text-[var(--lf-accent)]",
+          card: "rounded-3xl bg-[#0B0F19]/60 backdrop-blur-xl border border-[color-mix(in_srgb,var(--lf-accent)_22%,transparent)] p-6",
+          title: "text-xl font-bold text-white",
+          text: "text-slate-400 leading-relaxed",
+          muted: "text-xs font-medium text-slate-400",
+          chip: "rounded-xl bg-[#030014] px-4 py-2 text-sm font-medium text-[color-mix(in_srgb,var(--lf-accent)_70%,white)] border border-[color-mix(in_srgb,var(--lf-accent)_35%,transparent)] shadow-[0_0_10px_rgba(0,0,0,0.5)]",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
                 <section key="about" id="about" className="scroll-mt-32">
@@ -447,7 +470,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <div className="space-y-24">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.length > 0 && customSections.map((cs) => (
             <section key={cs.id} className="scroll-mt-32">

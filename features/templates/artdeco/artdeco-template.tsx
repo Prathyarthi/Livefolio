@@ -38,6 +38,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
@@ -75,6 +76,28 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+            aboutList: "space-y-4 pl-0 text-lg md:text-xl leading-loose text-[#c0c0c0] font-serif font-light list-none",
+            aboutParagraph: "text-lg md:text-xl leading-loose text-[#c0c0c0] font-serif font-light",
+            postList: "list-disc space-y-2 pl-5 text-sm font-serif text-[var(--lf-accent)] uppercase tracking-wider leading-snug",
+            postParagraph: "text-sm font-serif text-[var(--lf-accent)] uppercase tracking-wider leading-snug",
+            descriptionParagraph: "text-[#a0a0a0] leading-relaxed font-light",
+            descriptionList: "space-y-2 pl-5 text-[#a0a0a0] leading-relaxed font-light marker:text-[var(--lf-accent)]",
+          card: "border border-[var(--lf-accent)]/60 bg-[#0b132b] p-6",
+          title: "text-xl font-serif text-[var(--lf-accent)] uppercase tracking-wider",
+          text: "text-sm leading-relaxed text-slate-300",
+          muted: "text-[#888] text-[10px] font-bold uppercase tracking-[0.2em]",
+          chip: "border border-[var(--lf-accent)] px-3 py-1 text-xs uppercase tracking-widest text-[var(--lf-accent)]",
+          link: "text-sm uppercase tracking-widest text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -461,7 +484,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-32">

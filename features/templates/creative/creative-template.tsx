@@ -42,6 +42,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export default function CreativeTemplate({ data }: { data: PortfolioData }) {
@@ -67,6 +68,28 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("creative"),
     portfolio.customization,
   );
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading accent="fuchsia">LinkedIn</SectionHeading>}
+      classes={{
+            aboutList: "space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-base leading-8 text-stone-600",
+            postList: "list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-900",
+            postParagraph: "text-sm leading-relaxed text-stone-900",
+            descriptionParagraph: "text-sm leading-7 text-stone-600",
+            descriptionList: "space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-[var(--lf-accent)]",
+          card: "rounded-2xl border border-fuchsia-100 bg-white p-5",
+          title: "text-xl font-semibold text-stone-950",
+          text: "text-sm leading-7 text-stone-600",
+          muted: "text-xs uppercase tracking-[0.22em] text-stone-400",
+          chip: "rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-3 py-1.5 text-sm text-stone-700",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -524,7 +547,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
           )}
 
           <div className="mt-8 space-y-8">
-            {renderSections(resolved, "full", blocks)}
+            {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
           </div>
 
           {customSections.length > 0 && (

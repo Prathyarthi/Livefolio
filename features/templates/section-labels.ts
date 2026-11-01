@@ -9,6 +9,7 @@ export type SectionKey =
   | "certifications"
   | "achievements"
   | "articles"
+  | "linkedin"
   | "profiles"
   | "github"
   | "openSource"
@@ -26,6 +27,7 @@ export const STANDARD_SECTION_LABELS: Record<SectionKey, string> = {
   certifications: "Certifications",
   achievements: "Achievements",
   articles: "Articles",
+  linkedin: "LinkedIn",
   profiles: "Profiles",
   github: "GitHub Activity",
   openSource: "Open Source",

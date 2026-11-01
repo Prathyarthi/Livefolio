@@ -37,6 +37,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function WindowsTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +75,32 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <Window key="linkedin" id="linkedin" title="LinkedIn - Profile">
+      <div className="win95-inset bg-white p-4">
+        <LinkedInSection
+          data={data.linkedin}
+          heading={null}
+          classes={{
+            aboutList: "space-y-1 pl-4 font-mono text-sm leading-relaxed text-black",
+            aboutParagraph: "font-mono text-sm leading-relaxed text-black",
+            postList: "list-disc space-y-2 pl-5 font-bold",
+            postParagraph: "font-bold",
+            descriptionParagraph: "text-xs",
+            descriptionList: "space-y-1 pl-4 text-xs",
+            section: "space-y-4",
+            card: "win95-outset bg-[#c0c0c0] p-3",
+            title: "font-bold",
+            text: "text-sm text-black",
+            muted: "text-xs",
+            chip: "win95-outset bg-[#c0c0c0] px-2 py-0.5 text-xs",
+            link: "text-sm font-bold text-[#000080] underline",
+          }}
+        />
+      </div>
+    </Window>
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -392,7 +419,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
           </div>
         </Window>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <Window key={cs.id} title={`Custom - ${cs.label}`}>

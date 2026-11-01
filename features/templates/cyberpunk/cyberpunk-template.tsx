@@ -37,6 +37,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +75,28 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-sm md:text-base leading-relaxed text-slate-300 marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]",
+            aboutParagraph: "text-sm md:text-base leading-relaxed text-slate-300",
+            postList: "list-disc space-y-2 pl-5 text-sm font-bold text-white uppercase tracking-wider",
+            postParagraph: "text-sm font-bold text-white uppercase tracking-wider",
+            descriptionParagraph: "text-sm text-slate-400 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-sm text-slate-400 leading-relaxed marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]",
+          card: "border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] p-6",
+          title: "text-lg font-bold text-white uppercase tracking-wider",
+          text: "text-sm leading-relaxed text-slate-300",
+          muted: "text-[10px] text-slate-500 uppercase tracking-widest",
+          chip: "text-xs font-bold uppercase tracking-wider bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-slate-300 px-3 py-1",
+          link: "text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] hover:underline",
+          section: "scroll-mt-24",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -453,7 +476,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-24">

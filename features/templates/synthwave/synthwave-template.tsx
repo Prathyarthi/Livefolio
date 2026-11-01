@@ -38,6 +38,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
@@ -75,6 +76,28 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="text-3xl font-black text-white uppercase tracking-widest drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">LinkedIn</h2>}
+      classes={{
+            aboutList: "space-y-3 pl-6 text-lg md:text-xl leading-relaxed text-[#e0e0e0] font-medium marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-lg md:text-xl leading-relaxed text-[#e0e0e0] font-medium",
+            postList: "list-disc space-y-2 pl-5 text-sm font-black text-white uppercase tracking-wider leading-snug",
+            postParagraph: "text-sm font-black text-white uppercase tracking-wider leading-snug",
+            descriptionParagraph: "text-[#b0b0b0] leading-relaxed font-medium",
+            descriptionList: "space-y-2 pl-5 text-[#b0b0b0] leading-relaxed font-medium marker:text-[var(--lf-accent)]",
+          card: "bg-[#1a0b2e]/90 border-2 border-[var(--lf-accent)] p-6 shadow-[0_0_20px_rgba(255,0,127,0.25)]",
+          title: "text-xl font-black text-white uppercase tracking-wider drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]",
+          text: "text-sm leading-relaxed text-pink-100/80",
+          muted: "text-[var(--lf-accent)] text-[10px] font-bold uppercase tracking-widest",
+          chip: "bg-[#0d0221] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] text-xs font-bold px-3 py-1.5 uppercase tracking-widest",
+          link: "text-xs font-black uppercase tracking-widest text-[#ffbc00] hover:underline",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -451,7 +474,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
           )}
         </header>
 
-        {renderSections(resolved, "full", blocks)}
+        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {customSections.length > 0 && customSections.map((cs) => (
           <section key={cs.id} className="scroll-mt-32">

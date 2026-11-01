@@ -37,6 +37,7 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export function VibrantTemplate({ data }: { data: PortfolioData }) {
@@ -74,6 +75,28 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<h2 className="text-3xl font-bold text-white">LinkedIn</h2>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-lg leading-relaxed text-slate-300 marker:text-[var(--lf-accent)]",
+            aboutParagraph: "text-lg leading-relaxed text-slate-300",
+            postList: "list-disc space-y-2 pl-5 text-lg font-bold text-white leading-snug",
+            postParagraph: "text-lg font-bold text-white leading-snug",
+            descriptionParagraph: "text-slate-400 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-slate-400 leading-relaxed marker:text-[var(--lf-accent)]",
+          card: "rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6",
+          title: "text-xl font-bold text-white",
+          text: "text-slate-400 leading-relaxed",
+          muted: "text-xs font-medium text-slate-400",
+          chip: "rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 border border-white/5",
+          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
+          section: "scroll-mt-32",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -462,7 +485,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         <div className="space-y-24 md:space-y-32">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.length > 0 && customSections.map((cs) => (
             <section key={cs.id} className="scroll-mt-32">

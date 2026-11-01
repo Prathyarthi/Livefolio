@@ -43,6 +43,7 @@ import { CollapsibleList } from "@/features/templates/collapsible-list";
 
 // import { getPreviewImage } from "@/lib/link-preview-code";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
@@ -72,6 +73,28 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("developer"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<p className="text-sm text-gray-600">guest@portfolio:~$ cat linkedin.json</p>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-[var(--lf-g-300-90)] leading-relaxed marker:text-[var(--lf-g-700)]",
+            aboutParagraph: "text-[var(--lf-g-300-90)] leading-relaxed",
+            postList: "list-disc space-y-2 pl-5 text-sm text-gray-300 leading-relaxed",
+            postParagraph: "text-sm text-gray-300 leading-relaxed",
+            descriptionParagraph: "text-sm text-gray-400 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-sm text-gray-400 leading-relaxed marker:text-[var(--lf-g-900)]",
+          card: "rounded-lg border border-[var(--lf-g-900-40)] bg-gray-900/50 p-5",
+          title: "text-lg font-semibold text-[var(--lf-g-300)]",
+          text: "text-sm text-gray-400 leading-relaxed",
+          muted: "text-gray-600 text-xs",
+          chip: "rounded border border-[var(--lf-g-900-40)] px-2 py-0.5 text-xs text-[var(--lf-g-500-80)]",
+          link: "text-sm text-[var(--lf-g-300)] hover:underline",
+          section: "mx-auto max-w-5xl scroll-mt-24 px-5 py-14 sm:px-6 md:py-16",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
             <section key="about" id="about" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)] bg-gray-950/50">
@@ -599,7 +622,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
       )}
 
       {/* About / cat summary.md */}
-      {renderSections(resolved, "full", blocks)}
+      {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
       {customSections.map((cs) => (
         <section key={cs.id} className="border-b border-[var(--lf-g-900-30)]">
