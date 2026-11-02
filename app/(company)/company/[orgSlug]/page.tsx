@@ -110,7 +110,7 @@ export default function OrganizationHomePage() {
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href="/company">← Back to companies</Link>
       </Button>
-      <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+      <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
         {org.bannerUrl ? (
           <div className="relative h-36 overflow-hidden rounded-t-[var(--radius-lg)] md:h-44">
             <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
@@ -137,7 +137,7 @@ export default function OrganizationHomePage() {
                 org.bannerUrl || org.logoUrl ? "pt-4" : "pt-5"
               }`}
             >
-              <p className="eyebrow uppercase">Organization</p>
+              <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Organization</p>
               <h1 className="flex items-center gap-2 text-h2 text-text-primary">
                 <span className="min-w-0 truncate">{org.name}</span>
                 {org.verified ? (
@@ -162,7 +162,7 @@ export default function OrganizationHomePage() {
       </div>
 
       {workspaces.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
+        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 py-10 text-center md:p-8">
           <LayoutGrid className="h-8 w-8 text-text-muted" />
           <h2 className="mt-3 text-h3 text-text-primary">No workspaces yet</h2>
           <p className="mt-1 text-body-sm text-text-secondary">
@@ -170,7 +170,7 @@ export default function OrganizationHomePage() {
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+        <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
           {workspaces.map((workspace) => (
             <li key={workspace.id}>
               <Link

@@ -47,7 +47,7 @@ export default function ApplicationDetailPage() {
         <Badge variant="neutral">
           {APPLICATION_STATUS_LABELS[data.status] ?? data.status}
         </Badge>
-        <h1 className="text-h2 text-text-primary">
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">
           <RichText as="span" text={data.job.title} />
         </h1>
         <p className="text-body-sm text-text-secondary">

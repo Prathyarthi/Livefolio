@@ -39,8 +39,8 @@ export default function CompanyJobsPage() {
     <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="eyebrow uppercase">Jobs</p>
-          <h1 className="text-h2 text-text-primary">Open roles</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Jobs</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Open roles</h1>
           <p className="text-body-sm text-text-secondary">
             Create, publish, and share jobs. Applicants apply with their
             Livefolio.

@@ -47,8 +47,8 @@ export default function CompanyOverviewPage() {
     <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="eyebrow uppercase">Overview</p>
-          <h1 className="text-h2 text-text-primary">{org.name}</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Overview</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">{org.name}</h1>
           <p className="max-w-xl text-body-sm text-text-secondary">
             {org.description ||
               "Create jobs and receive Livefolio applications from candidates."}

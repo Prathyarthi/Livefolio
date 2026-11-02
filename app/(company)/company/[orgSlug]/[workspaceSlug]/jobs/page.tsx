@@ -47,8 +47,8 @@ export default function CompanyJobsPage() {
       </Button>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="eyebrow uppercase">Jobs</p>
-          <h1 className="text-h2 text-text-primary">Open roles</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Jobs</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Open roles</h1>
           <p className="text-body-sm text-text-secondary">
             Create, publish, and share jobs. Applicants apply with their
             Livefolio.
@@ -78,14 +78,14 @@ export default function CompanyJobsPage() {
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading jobs…</p>
       ) : !jobs || jobs.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-12 text-center shadow-[var(--shadow-card)] md:p-8">
+        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-6 py-12 text-center">
           <h2 className="text-h3 text-text-primary">No jobs in this view</h2>
           <p className="mt-1 text-body-sm text-text-secondary">
             Create a job draft, then publish when you&apos;re ready.
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
           {jobs.map((job) => (
             <li
               key={job.id}

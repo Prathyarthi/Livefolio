@@ -54,8 +54,8 @@ export default function CompanyOverviewPage() {
       </Button>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="eyebrow uppercase">Workspace</p>
-          <h1 className="text-h2 text-text-primary">{workspace.name}</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Workspace</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">{workspace.name}</h1>
           <p className="max-w-xl text-body-sm text-text-secondary">
             {workspace.description ||
               "Create jobs and receive Livefolio applications from candidates."}
@@ -91,7 +91,7 @@ export default function CompanyOverviewPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]"
+            className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6"
           >
             <p className="text-label uppercase text-text-secondary">
               {stat.label}
@@ -112,7 +112,7 @@ export default function CompanyOverviewPage() {
         {jobsLoading ? (
           <p className="text-body-sm text-text-muted">Loading jobs…</p>
         ) : recentJobs.length === 0 ? (
-          <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
+          <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-6 py-10 text-center">
             <Briefcase className="mx-auto h-8 w-8 text-text-muted" />
             <h3 className="mt-3 text-h3 text-text-primary">No jobs yet</h3>
             <p className="mt-1 text-body-sm text-text-secondary">
@@ -123,7 +123,7 @@ export default function CompanyOverviewPage() {
             </Button>
           </div>
         ) : (
-          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
             {recentJobs.map((job) => (
               <li key={job.id}>
                 <Link

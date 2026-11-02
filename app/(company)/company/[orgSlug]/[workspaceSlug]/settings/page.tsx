@@ -71,8 +71,8 @@ export default function WorkspaceSettingsPage() {
         </Link>
       </Button>
       <header className="space-y-1">
-        <p className="eyebrow uppercase">Workspace Settings</p>
-        <h1 className="text-h2 text-text-primary">Manage workspace</h1>
+        <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Workspace Settings</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Manage workspace</h1>
         <p className="text-body-sm text-text-secondary">
           Configure the workspace name and set up custom fields that apply to all jobs here.
         </p>
@@ -83,7 +83,7 @@ export default function WorkspaceSettingsPage() {
           Only owners and admins can edit workspace settings.
         </p>
       ) : (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
           <div className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">Workspace name</Label>

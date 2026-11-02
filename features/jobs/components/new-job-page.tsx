@@ -94,8 +94,8 @@ export default function NewJobPage() {
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8 p-6 md:p-8">
       <header className="space-y-1">
-        <p className="eyebrow uppercase">New job</p>
-        <h1 className="text-h2 text-text-primary">Create a role</h1>
+        <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">New job</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Create a role</h1>
         <p className="text-body-sm text-text-secondary">
           Candidates will apply with their Livefolio. Keep requirements
           structured so matching can improve later.

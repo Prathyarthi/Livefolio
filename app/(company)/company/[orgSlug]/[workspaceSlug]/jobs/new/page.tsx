@@ -161,15 +161,15 @@ export default function NewJobPage() {
       </Button>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-1">
-          <p className="eyebrow uppercase">New job</p>
-          <h1 className="text-h2 text-text-primary">Create a role</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">New job</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Create a role</h1>
           <p className="text-body-sm text-text-secondary">
             Candidates will apply with their Livefolio. Fill in compensation,
             location, and requirements so the public page feels complete.
           </p>
         </div>
         <div
-          className="inline-flex rounded-[var(--radius-md)] border border-border-default bg-surface-raised p-1 shadow-[var(--shadow-card)]"
+          className="inline-flex rounded-[var(--radius-md)] border border-border-default bg-surface-raised p-1"
           role="group"
           aria-label="Layout view"
         >
@@ -198,7 +198,7 @@ export default function NewJobPage() {
         )}
       >
         {showRecruiter ? (
-          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
             <JobRoleFields
               values={form}
               onChange={patchForm}
@@ -227,7 +227,7 @@ export default function NewJobPage() {
               compact={layoutMode === "both"}
             />
             {layoutMode === "candidate" ? (
-              <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]">
+              <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4">
                 {actions}
               </div>
             ) : null}

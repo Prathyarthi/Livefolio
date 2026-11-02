@@ -117,7 +117,7 @@ export default function ApplicantDetailPage() {
         </Avatar>
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-h2 text-text-primary">{summary.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">{summary.name}</h1>
             {data.shortlisted ? (
               <Badge variant="success">Shortlisted</Badge>
             ) : null}

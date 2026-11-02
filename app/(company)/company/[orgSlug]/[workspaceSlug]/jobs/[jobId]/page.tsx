@@ -158,7 +158,7 @@ export default function ManageJobPage() {
             {job._count?.applications ?? 0} applicants
           </span>
         </div>
-        <h1 className="text-h2 text-text-primary">
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">
           <RichText as="span" text={job.title} />
         </h1>
         <JobPerkPills job={job} />
@@ -229,7 +229,7 @@ export default function ManageJobPage() {
       </div>
 
       {(job.status === "published" || job.status === "paused") && (
-        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)] md:p-6">
+        <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-6">
           <p className="text-label uppercase text-text-secondary">
             Shareable job link
           </p>
@@ -253,7 +253,7 @@ export default function ManageJobPage() {
       )}
 
       {editing && form ? (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
           <JobRoleFields
             values={form}
             onChange={(patch) => setForm((prev) => (prev ? { ...prev, ...patch } : prev))}

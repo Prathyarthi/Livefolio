@@ -84,8 +84,8 @@ export default function CompanySettingsPage() {
       </Button>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="eyebrow uppercase">Settings</p>
-          <h1 className="text-h2 text-text-primary">Company branding</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Settings</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Company branding</h1>
           <p className="text-body-sm text-text-secondary">
             These details appear on public job pages.
           </p>
@@ -117,7 +117,7 @@ export default function CompanySettingsPage() {
           Only owners and admins can edit company settings.
         </p>
       ) : (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
           <div className="space-y-5">
             <div className="space-y-3">
               <div>

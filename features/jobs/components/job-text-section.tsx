@@ -49,7 +49,7 @@ export function JobTextSection({
   return (
     <section
       className={cn(
-        "rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]",
+        "rounded-[var(--radius-lg)] border border-border-default bg-surface-raised",
         compact ? "p-4" : "p-6 md:p-8",
       )}
     >
@@ -109,7 +109,7 @@ export function JobRequirementCard({
   return (
     <div
       className={cn(
-        "rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]",
+        "rounded-[var(--radius-lg)] border border-border-default bg-surface-raised",
         compact ? "p-4" : "p-6",
       )}
     >

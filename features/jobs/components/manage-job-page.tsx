@@ -82,7 +82,7 @@ export default function ManageJobPage() {
             {job._count?.applications ?? 0} applicants
           </span>
         </div>
-        <h1 className="text-h2 text-text-primary">{job.title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">{job.title}</h1>
         <p className="text-body-sm text-text-secondary">
           {formatJobMeta([
             job.department,
