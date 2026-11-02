@@ -153,7 +153,17 @@ function parseSearchFilters(query: Record<string, string | undefined>): Applican
     appliedAfter: query.appliedAfter?.trim() || undefined,
     appliedBefore: query.appliedBefore?.trim() || undefined,
     proof: isProofKind(query.proof) ? query.proof : undefined,
+    ids: parseIds(query.ids),
   };
+}
+
+/** Comma-separated application ids, capped for the compare view. */
+function parseIds(raw: string | undefined): string[] | undefined {
+  if (!raw) return undefined;
+  const ids = Array.from(
+    new Set(raw.split(",").map((id) => id.trim()).filter(Boolean)),
+  ).slice(0, 10);
+  return ids.length > 0 ? ids : undefined;
 }
 
 function parseSnapshot(data: unknown): ApplicationSnapshotData | null {

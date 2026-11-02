@@ -176,13 +176,13 @@ export default function CompanyBillingPage() {
 
   if (!billing) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-6 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
         </Button>
         <header className="space-y-1">
-          <p className="eyebrow uppercase">Billing</p>
-          <h1 className="text-h2 text-text-primary">Organization plan</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Billing</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Organization plan</h1>
         </header>
         <p className="rounded-[var(--radius-md)] bg-danger-bg px-4 py-3 text-body-sm text-danger">
           {error ?? "Failed to load billing"}
@@ -214,14 +214,14 @@ export default function CompanyBillingPage() {
   const intervalCheckoutReady = checkoutIntervals.includes(billingInterval);
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
       </Button>
 
       <header className="space-y-1">
-        <p className="eyebrow uppercase">Billing</p>
-        <h1 className="text-h2 text-text-primary">Organization plan</h1>
+        <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Billing</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Organization plan</h1>
         <p className="text-body-sm text-text-secondary">
           Free includes 1 workspace and 1 open job. Org Pro unlocks unlimited
           workspaces and published roles on this organization.
@@ -252,7 +252,7 @@ export default function CompanyBillingPage() {
         </p>
       ) : null}
 
-      <section className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+      <section className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-text-secondary" />

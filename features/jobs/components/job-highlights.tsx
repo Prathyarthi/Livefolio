@@ -125,7 +125,7 @@ export function JobHighlights({
           className={
             compact
               ? "flex items-start gap-2.5 rounded-[var(--radius-md)] border border-border-default bg-surface-raised p-3"
-              : "flex items-start gap-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]"
+              : "flex items-start gap-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4"
           }
         >
           <span

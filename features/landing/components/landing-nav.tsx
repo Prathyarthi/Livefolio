@@ -20,8 +20,9 @@ const CANDIDATE_LINKS = [
 ];
 
 const RECRUITER_LINKS = [
+  { label: "How we rank", href: "#how-we-rank" },
+  { label: "References", href: "#references" },
   { label: "How it works", href: "#how-it-works" },
-  { label: "Why Livefolio", href: "#why-livefolio" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
   { label: "For candidates", href: "/" },

@@ -38,7 +38,7 @@ export function SharedSnapshotPreview({
   ].some((items) => items.length > 0);
 
   return (
-    <section className="overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+    <section className="overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
       <div className="flex items-start justify-between gap-4 border-b border-border-default px-5 py-4 sm:px-6">
         <div className="min-w-0">
           <p className="text-label uppercase text-text-secondary">

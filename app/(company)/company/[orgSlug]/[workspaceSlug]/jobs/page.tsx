@@ -1,5 +1,6 @@
 "use client";
 
+import { JobStatusBadge, ListSkeleton } from "@/features/organization/components/workspace-ui";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -41,14 +42,14 @@ export default function CompanyJobsPage() {
   const origin = useMemo(() => getAppOrigin(), []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
       </Button>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="eyebrow uppercase">Jobs</p>
-          <h1 className="text-h2 text-text-primary">Open roles</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Jobs</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Open roles</h1>
           <p className="text-body-sm text-text-secondary">
             Create, publish, and share jobs. Applicants apply with their
             Livefolio.
@@ -76,16 +77,16 @@ export default function CompanyJobsPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-body-sm text-text-muted">Loading jobs…</p>
+        <ListSkeleton rows={3} />
       ) : !jobs || jobs.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-12 text-center shadow-[var(--shadow-card)] md:p-8">
+        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-6 py-12 text-center">
           <h2 className="text-h3 text-text-primary">No jobs in this view</h2>
           <p className="mt-1 text-body-sm text-text-secondary">
             Create a job draft, then publish when you&apos;re ready.
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
           {jobs.map((job) => (
             <li
               key={job.id}
@@ -99,13 +100,7 @@ export default function CompanyJobsPage() {
                   >
                     <RichText as="span" text={job.title} />
                   </Link>
-                  <Badge
-                    variant={
-                      job.status === "published" ? "success" : "neutral"
-                    }
-                  >
-                    {JOB_STATUS_LABELS[job.status] ?? job.status}
-                  </Badge>
+                  <JobStatusBadge status={job.status} label={JOB_STATUS_LABELS[job.status] ?? job.status} />
                 </div>
                 <p className="text-body-sm text-text-secondary">
                   {formatJobMeta([

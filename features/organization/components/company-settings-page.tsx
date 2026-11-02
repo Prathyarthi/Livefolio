@@ -1,5 +1,6 @@
 "use client";
 
+import { PageSkeleton } from "@/features/organization/components/workspace-ui";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -38,7 +39,7 @@ export default function CompanySettingsPage() {
 
   if (isLoading || !org) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading settings…</div>
+      <PageSkeleton />
     );
   }
 
@@ -61,10 +62,10 @@ export default function CompanySettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8 p-4 md:p-8">
       <header className="space-y-1">
-        <p className="eyebrow uppercase">Settings</p>
-        <h1 className="text-h2 text-text-primary">Company branding</h1>
+        <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Settings</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Company branding</h1>
         <p className="text-body-sm text-text-secondary">
           These details appear on public job pages.
         </p>

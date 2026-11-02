@@ -45,7 +45,7 @@ export function AuthAwareCtas({
           </Link>
         </Button>
         <Button asChild variant="outline" size={size}>
-          <Link href="#how-it-works">See how it works</Link>
+          <Link href="#ranked-shortlist">See a ranked shortlist</Link>
         </Button>
       </div>
     );

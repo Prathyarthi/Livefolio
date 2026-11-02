@@ -12,7 +12,7 @@ export function ScreeningAnswersSection({
   if (!answers || answers.length === 0) return null;
 
   return (
-    <section className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 shadow-[var(--shadow-card)] md:p-6">
+    <section className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 md:p-6">
       <h2 className="text-h3 text-text-primary">{title}</h2>
       <dl className="space-y-4">
         {answers.map((answer) => (

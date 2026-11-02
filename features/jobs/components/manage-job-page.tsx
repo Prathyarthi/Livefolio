@@ -1,5 +1,6 @@
 "use client";
 
+import { JobStatusBadge, PageSkeleton } from "@/features/organization/components/workspace-ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -30,7 +31,7 @@ export default function ManageJobPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading job…</div>
+      <PageSkeleton />
     );
   }
 
@@ -72,17 +73,15 @@ export default function ManageJobPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 p-4 md:p-8">
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={job.status === "published" ? "success" : "neutral"}>
-            {JOB_STATUS_LABELS[job.status] ?? job.status}
-          </Badge>
+          <JobStatusBadge status={job.status} label={JOB_STATUS_LABELS[job.status] ?? job.status} />
           <span className="text-body-sm text-text-secondary">
             {job._count?.applications ?? 0} applicants
           </span>
         </div>
-        <h1 className="text-h2 text-text-primary">{job.title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">{job.title}</h1>
         <p className="text-body-sm text-text-secondary">
           {formatJobMeta([
             job.department,
