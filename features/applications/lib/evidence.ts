@@ -39,6 +39,8 @@ export type ApplicantEvidenceSummary = {
   totalPreferred: number;
   rankScore: number;
   rankReasons: string[];
+  /** Points added by named references when Include references is on. */
+  referenceBonus?: number;
 };
 
 const TOKEN_STOP_WORDS = new Set([
