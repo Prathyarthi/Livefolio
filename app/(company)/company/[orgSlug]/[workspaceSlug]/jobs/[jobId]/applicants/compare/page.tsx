@@ -29,7 +29,12 @@ export default function CompareApplicantsPage() {
     return Array.from(new Set(parsed)).slice(0, MAX_COMPARE_CANDIDATES);
   }, [searchParams]);
 
-  const poolQuery = useApplicantPool(jobId);
+  // Load exactly the selected applications, whatever page they were picked from.
+  const poolQuery = useApplicantPool(jobId, {
+    ids,
+    pageSize: MAX_COMPARE_CANDIDATES,
+    enabled: ids.length >= MIN_COMPARE_CANDIDATES,
+  });
 
   const selected = useMemo(() => {
     if (!poolQuery.data) return [];

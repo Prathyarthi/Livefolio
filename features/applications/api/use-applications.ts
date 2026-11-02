@@ -241,6 +241,8 @@ export type ApplicantPoolFilters = {
   proof?: ProofKind;
   sort?: SearchSort;
   includeReferences?: boolean;
+  /** Only these application ids (compare view). */
+  ids?: string[];
 };
 
 export type ApplicantPool = {
@@ -326,6 +328,7 @@ export function useApplicantPool(
     stage?: string;
     page?: number;
     pageSize?: number;
+    enabled?: boolean;
   } & ApplicantPoolFilters,
 ) {
   const stage = options?.stage;
@@ -339,6 +342,7 @@ export function useApplicantPool(
   const appliedAfter = options?.appliedAfter;
   const appliedBefore = options?.appliedBefore;
   const proof = options?.proof;
+  const ids = options?.ids;
   const sort = options?.sort ?? "relevance";
   const includeReferences = options?.includeReferences === true;
   const page = options?.page ?? 1;
@@ -360,12 +364,13 @@ export function useApplicantPool(
       appliedAfter ?? "",
       appliedBefore ?? "",
       proof ?? "",
+      ids?.join(",") ?? "",
       sort,
       includeReferences ? "references" : "",
       page,
       pageSize,
     ],
-    enabled: Boolean(jobId),
+    enabled: Boolean(jobId) && options?.enabled !== false,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (stage) params.set("stage", stage);
@@ -379,6 +384,7 @@ export function useApplicantPool(
       if (appliedAfter) params.set("appliedAfter", appliedAfter);
       if (appliedBefore) params.set("appliedBefore", appliedBefore);
       if (proof) params.set("proof", proof);
+      if (ids?.length) params.set("ids", ids.join(","));
       if (includeReferences) params.set("references", "1");
       params.set("sort", sort);
       params.set("page", String(page));
