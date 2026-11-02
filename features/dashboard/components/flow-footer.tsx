@@ -18,7 +18,7 @@ type FlowFooterProps = {
   previous?: FlowAction;
   next?: FlowAction;
   className?: string;
-  /** Short hint shown on the left; omit for none. */
+  /** Short hint shown between the nav actions; omit for none. */
   message?: string | null;
   /** Pin navigation above content (`top`) or below (`bottom`, default). */
   placement?: "top" | "bottom";
@@ -26,14 +26,55 @@ type FlowFooterProps = {
   actions?: ReactNode;
 };
 
-const flowNavButtonClass =
-  "h-11 w-full justify-center sm:w-auto sm:min-w-[13rem]";
+function FlowNavButton({
+  action,
+  direction,
+}: {
+  action: FlowAction;
+  direction: "previous" | "next";
+}) {
+  const isPrevious = direction === "previous";
+  const Icon = isPrevious ? ArrowLeft : ArrowRight;
+  const content = (
+    <>
+      {isPrevious ? <Icon /> : null}
+      {action.label}
+      {isPrevious ? null : <Icon />}
+    </>
+  );
+
+  if (action.href) {
+    return (
+      <Button
+        variant={isPrevious ? "ghost" : "default"}
+        size="sm"
+        className="shrink-0"
+        asChild
+        disabled={action.disabled}
+      >
+        <Link href={action.href}>{content}</Link>
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant={isPrevious ? "ghost" : "default"}
+      size="sm"
+      className="shrink-0"
+      onClick={action.onClick}
+      disabled={action.disabled}
+    >
+      {content}
+    </Button>
+  );
+}
 
 export function FlowFooter({
   previous,
   next,
   className,
-  message = "Use the buttons below to move through the portfolio flow.",
+  message = null,
   placement = "bottom",
   actions,
 }: FlowFooterProps) {
@@ -43,61 +84,33 @@ export function FlowFooter({
       : "border-t border-border-default pt-5";
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
-        edgeClass,
-        className
-      )}
+    <nav
+      aria-label="Portfolio flow"
+      className={cn("flex flex-col gap-2", edgeClass, className)}
     >
-      <div className="flex flex-wrap items-center gap-3">
-        {message ? (
-          <div className="text-body-sm text-text-secondary">{message}</div>
-        ) : null}
-      </div>
+      {message ? (
+        <p className="text-body-sm text-text-muted sm:hidden">{message}</p>
+      ) : null}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center">
+          {previous ? (
+            <FlowNavButton action={previous} direction="previous" />
+          ) : null}
+        </div>
 
-      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-stretch sm:justify-end">
-        {previous ? (
-          previous.href ? (
-            <Button variant="outline" className={flowNavButtonClass} asChild>
-              <Link href={previous.href}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                {previous.label}
-              </Link>
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              className={flowNavButtonClass}
-              onClick={previous.onClick}
-              disabled={previous.disabled}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {previous.label}
-            </Button>
-          )
-        ) : null}
-        {actions}
-        {next ? (
-          next.href ? (
-            <Button className={flowNavButtonClass} asChild disabled={next.disabled}>
-              <Link href={next.href}>
-                {next.label}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          ) : (
-            <Button
-              className={flowNavButtonClass}
-              onClick={next.onClick}
-              disabled={next.disabled}
-            >
-              {next.label}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          )
-        ) : null}
+        {message ? (
+          <p className="hidden min-w-0 flex-1 truncate text-center text-body-sm text-text-muted sm:block">
+            {message}
+          </p>
+        ) : (
+          <div className="min-w-0 flex-1" />
+        )}
+
+        <div className="flex shrink-0 items-center gap-2">
+          {actions}
+          {next ? <FlowNavButton action={next} direction="next" /> : null}
+        </div>
       </div>
-    </div>
+    </nav>
   );
 }

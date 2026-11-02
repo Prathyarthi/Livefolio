@@ -15,7 +15,7 @@ export const metadata: Metadata = createPageMetadata({
 export default function PrivacyPolicyPage() {
   return (
     <MarketingPageShell>
-      <LegalDocument title="Privacy Policy" lastUpdated="June 22, 2026">
+      <LegalDocument title="Privacy Policy" lastUpdated="November 2, 2026">
         <p>
           This Privacy Policy explains how {siteConfig.legalEntity} (&quot;we,&quot;
           &quot;us,&quot; or &quot;our&quot;) collects, uses, and shares information when
@@ -87,9 +87,9 @@ export default function PrivacyPolicyPage() {
         <h2>Data retention</h2>
         <p>
           We retain your account and portfolio data for as long as your account is
-          active. If you delete your account or request deletion, we will remove or
-          anonymize your data within a reasonable period, except where retention is
-          required for legal, security, or billing purposes.
+          active. If you request deletion, we will remove or anonymize your data
+          within a reasonable period, except where retention is required for legal,
+          security, or billing purposes.
         </p>
 
         <h2>Your choices</h2>
