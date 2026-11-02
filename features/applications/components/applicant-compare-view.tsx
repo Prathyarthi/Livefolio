@@ -101,8 +101,8 @@ export function ApplicantCompareView({
       </Button>
 
       <header className="space-y-2">
-        <p className="eyebrow uppercase">Compare</p>
-        <h1 className="text-h2 text-text-primary">Evidence comparison</h1>
+        <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Compare</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Evidence comparison</h1>
         <p className="max-w-2xl text-body-sm text-text-secondary">
           Side-by-side requirement matches for{" "}
           <RichText as="span" text={jobTitle} /> — grounded in
@@ -110,7 +110,7 @@ export function ApplicantCompareView({
         </p>
       </header>
 
-      <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+      <div className="max-h-[calc(100dvh-14rem)] overflow-auto rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
         <div
           className="min-w-[640px]"
           style={{
@@ -119,14 +119,27 @@ export function ApplicantCompareView({
           }}
         >
           {/* Header row */}
-          <div className="sticky left-0 z-10 border-b border-border-default bg-surface-raised p-4">
-            <p className="text-label uppercase text-text-muted">Requirement</p>
+          <div className="sticky top-0 left-0 z-30 border-b border-border-default bg-surface-raised p-4">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-text-muted">Requirement</p>
           </div>
           {applicants.map((applicant) => (
             <div
               key={applicant.id}
-              className="border-b border-l border-border-default p-4"
+              className="sticky top-0 z-20 border-b border-l border-border-default bg-surface-raised p-4"
             >
+              <div className="mb-3 flex items-baseline justify-between gap-2">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-text-muted">Score</span>
+                <span className="flex items-baseline gap-1.5">
+                  {applicant.evidence.referenceBonus ? (
+                    <span className="font-mono text-[11px] tabular-nums text-brand-primary">
+                      +{applicant.evidence.referenceBonus} refs
+                    </span>
+                  ) : null}
+                  <span className="font-mono text-2xl font-semibold leading-none tabular-nums text-text-primary">
+                    {applicant.evidence.rankScore ?? "—"}
+                  </span>
+                </span>
+              </div>
               <div className="flex items-start gap-3">
                 <Avatar className="h-11 w-11 shrink-0">
                   <AvatarImage
@@ -221,8 +234,8 @@ export function ApplicantCompareView({
           ))}
 
           {/* Score summary row */}
-          <div className="sticky left-0 z-10 border-b border-border-default bg-surface-base/80 p-4 backdrop-blur-sm">
-            <p className="text-body-sm font-medium text-text-primary">
+          <div className="sticky left-0 z-10 border-b border-border-default bg-surface-raised p-4">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-text-muted">
               Match overview
             </p>
           </div>
@@ -234,7 +247,7 @@ export function ApplicantCompareView({
               <div className="space-y-2">
                 <div className="h-2 overflow-hidden rounded-full bg-surface-base">
                   <div
-                    className="h-full rounded-full bg-brand-secondary transition-[width] duration-500"
+                    className="h-full rounded-full bg-brand-primary transition-[width] duration-500"
                     style={{
                       width: `${
                         applicant.evidence.totalRequired > 0
@@ -343,7 +356,7 @@ function RequirementCompareRow({
   applicants: ApplicantCard[];
   zebra: boolean;
 }) {
-  const rowBg = zebra ? "bg-surface-base/30" : "bg-surface-raised";
+  const rowBg = zebra ? "bg-surface-sunken" : "bg-surface-raised";
 
   return (
     <>
@@ -369,16 +382,16 @@ function RequirementCompareRow({
             className={`border-b border-l border-border-default p-4 ${rowBg}`}
           >
             <div className="space-y-2">
-              <Badge variant={matched ? "success" : "neutral"}>
-                {matched ? (
-                  <span className="inline-flex items-center gap-1">
-                    <Check className="h-3 w-3" aria-hidden />
-                    Evidence found
-                  </span>
-                ) : (
-                  "No clear evidence"
-                )}
-              </Badge>
+              {matched ? (
+                <span className="inline-flex items-center gap-1 text-xs text-success/80">
+                  <Check className="h-3.5 w-3.5" aria-hidden />
+                  <span className="sr-only">Evidence found</span>
+                </span>
+              ) : (
+                <span className="font-mono text-sm text-text-muted" aria-label="No clear evidence">
+                  —
+                </span>
+              )}
               {evidence.length > 0 ? (
                 <ul className="space-y-1.5">
                   {evidence.map((item) => (
@@ -432,8 +445,8 @@ export function CompareSelectionBar({
   const canCompare = selectedIds.length >= MIN_COMPARE_CANDIDATES;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border-default bg-surface-raised/95 px-4 py-3 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
-      <div className="mx-auto flex w-full max-w-4xl flex-wrap items-center justify-between gap-3">
+    <div className="sticky bottom-4 z-40 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised/95 px-4 py-3 backdrop-blur-md">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <Columns2 className="h-4 w-4 shrink-0 text-brand-primary" aria-hidden />
           <p className="text-body-sm text-text-primary">
@@ -463,11 +476,11 @@ export function CompareSelectionBar({
           </Button>
           {canCompare ? (
             <Button size="sm" asChild>
-              <Link href={compareHref}>Compare evidence</Link>
+              <Link href={compareHref}>Compare ({selectedIds.length})</Link>
             </Button>
           ) : (
             <Button size="sm" disabled>
-              Compare evidence
+              Compare ({selectedIds.length})
             </Button>
           )}
         </div>
