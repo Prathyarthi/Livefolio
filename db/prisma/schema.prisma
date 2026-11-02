@@ -91,6 +91,9 @@ model OrgBillingCheckoutAttempt {
   providerSubscriptionId String?  @unique
   providerPlanId         String
   interval               String
+  /// pro | business (per-seat). Null for legacy Org Pro attempts.
+  plan                   String?
+  seats                  Int?
   status                 String   @default("creating")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
@@ -448,6 +451,10 @@ model Organization {
   razorpaySubscriptionId String?
   subscriptionCancelAtPeriodEnd Boolean   @default(false)
   subscriptionCurrentPeriodEnd  DateTime?
+  /// Per-seat hiring plan: pro | business. Null while active = legacy Org Pro.
+  subscriptionPlan              String?
+  /// Paid seats on the per-seat plan (Razorpay subscription quantity).
+  subscriptionSeats             Int?
 
   members              OrganizationMember[]
   invites              OrganizationInvite[]

@@ -24,6 +24,8 @@ import {
   orgUpgradeMessage,
   OrgPlanLimitError,
   resolveOrgAccess,
+  assertSeatAvailable,
+  ORG_BILLING_SELECT,
   withOrganizationLock,
   withUserLock,
 } from "@/lib/org-entitlements";
@@ -117,6 +119,28 @@ async function emailOrganizationInvite(input: {
   invitedById: string;
   inviterName: string;
 }) {
+  // Seats = active members + pending invites; block new invites beyond paid seats.
+  const billingOrg = await prisma.organization.findUnique({
+    where: { id: input.organizationId },
+    select: ORG_BILLING_SELECT,
+  });
+  if (billingOrg) {
+    try {
+      await assertSeatAvailable(billingOrg, prisma, {
+        excludeInviteEmail: input.email,
+      });
+    } catch (error) {
+      if (isOrgPlanLimitError(error)) {
+        return {
+          ok: false as const,
+          status: error.status,
+          error: error.message,
+          body: error.toBody(),
+        };
+      }
+      throw error;
+    }
+  }
   const pending = await prisma.organizationInvite.findFirst({
     where: {
       organizationId: input.organizationId,
@@ -671,6 +695,8 @@ export const organization = new Elysia({ prefix: "/organizations" })
           subscriptionStatus: true,
           subscriptionCancelAtPeriodEnd: true,
           subscriptionCurrentPeriodEnd: true,
+          subscriptionPlan: true,
+          subscriptionSeats: true,
         },
       });
       if (!org) {
@@ -1036,6 +1062,10 @@ export const organization = new Elysia({ prefix: "/organizations" })
         inviterName: session.name?.trim() || "A teammate",
       });
       if (!invited.ok) {
+        if ("body" in invited && invited.body) {
+          ctx.set.status = invited.status;
+          return invited.body;
+        }
         ctx.set.status = 502;
         return { error: invited.error };
       }
@@ -1246,6 +1276,10 @@ export const organization = new Elysia({ prefix: "/organizations" })
         inviterName: session.name?.trim() || "A teammate",
       });
       if (!invited.ok) {
+        if ("body" in invited && invited.body) {
+          ctx.set.status = invited.status;
+          return invited.body;
+        }
         ctx.set.status = 502;
         return { error: invited.error };
       }

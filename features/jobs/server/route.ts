@@ -40,6 +40,8 @@ async function assertCanOpenJob(
       subscriptionStatus: true,
       subscriptionCancelAtPeriodEnd: true,
       subscriptionCurrentPeriodEnd: true,
+      subscriptionPlan: true,
+      subscriptionSeats: true,
     },
   });
   if (!org) {

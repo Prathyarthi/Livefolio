@@ -1,19 +1,31 @@
 import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isProSubscription } from "@/lib/entitlements";
+import {
+  BUSINESS_MIN_SEATS,
+  canAddSeatHolder,
+  PLAN_LIMITS,
+  resolvePlanTier,
+  seatCap,
+  seatsUsed,
+  type OrgPlanTier,
+} from "@/lib/hiring-plans";
 
 type EntitlementDb = Prisma.TransactionClient | typeof prisma;
 
-export function orgUpgradeMessage(
-  kind: "organization" | "workspace" | "job",
-): string {
+export type OrgLimitKind = "organization" | "workspace" | "job" | "seat";
+
+export function orgUpgradeMessage(kind: OrgLimitKind): string {
   if (kind === "organization") {
-    return "Free plans include 1 organization. Upgrade to Org Pro to create more.";
+    return "Free plans include 1 organization. Upgrade to Pro to create more.";
   }
   if (kind === "workspace") {
-    return "Free plans include 1 workspace per organization. Upgrade to Org Pro to create more.";
+    return `Multiple workspaces are on the Business plan (from ${BUSINESS_MIN_SEATS} seats). Upgrade in Billing.`;
   }
-  return "Free plans include 1 open job posting. Upgrade to Org Pro to publish more roles.";
+  if (kind === "seat") {
+    return "All paid seats are in use. Add a seat in Billing (or upgrade from Free) to invite more teammates.";
+  }
+  return "Free plans include 1 open job posting. Upgrade to Pro to publish more roles.";
 }
 
 export class OrgPlanLimitError extends Error {
@@ -21,7 +33,7 @@ export class OrgPlanLimitError extends Error {
   readonly upgradeRequired = true;
 
   constructor(
-    readonly kind: "organization" | "workspace" | "job",
+    readonly kind: OrgLimitKind,
     readonly upgradeOrgSlug: string,
   ) {
     super(orgUpgradeMessage(kind));
@@ -33,6 +45,7 @@ export class OrgPlanLimitError extends Error {
       error: this.message,
       upgradeRequired: true as const,
       upgradeOrgSlug: this.upgradeOrgSlug,
+      limit: this.kind,
     };
   }
 }
@@ -87,6 +100,7 @@ export const FREE_OWNED_ORG_LIMIT = 1;
 export const FREE_OPEN_JOB_LIMIT = 1;
 export const FREE_WORKSPACE_LIMIT = 1;
 
+/** "pro" means any paid hiring plan (Pro, Business or legacy Org Pro); see `tier`. */
 export type OrgPlan = "free" | "pro";
 
 export type OrgBillingProfile = {
@@ -95,7 +109,20 @@ export type OrgBillingProfile = {
   subscriptionStatus?: string | null;
   subscriptionCancelAtPeriodEnd?: boolean;
   subscriptionCurrentPeriodEnd?: Date | null;
+  subscriptionPlan?: string | null;
+  subscriptionSeats?: number | null;
 };
+
+/** Select these on organization queries that feed entitlement checks. */
+export const ORG_BILLING_SELECT = {
+  id: true,
+  slug: true,
+  subscriptionStatus: true,
+  subscriptionCancelAtPeriodEnd: true,
+  subscriptionCurrentPeriodEnd: true,
+  subscriptionPlan: true,
+  subscriptionSeats: true,
+} as const;
 
 export type OrgAccessSnapshot = {
   plan: OrgPlan;
@@ -106,6 +133,13 @@ export type OrgAccessSnapshot = {
   openJobCount: number;
   workspaceCount: number;
   upgradeRequired: boolean;
+  tier: OrgPlanTier;
+  /** Paid (or included) seats; null = unlimited (legacy Org Pro). */
+  seatLimit: number | null;
+  seatsUsed: number;
+  activeMembers: number;
+  pendingInvites: number;
+  canAddSeatHolder: boolean;
 };
 
 function isPaidOrgPro(org: OrgBillingProfile, now = new Date()): boolean {
@@ -138,21 +172,56 @@ export async function countWorkspaces(
   return db.workspace.count({ where: { organizationId } });
 }
 
+/** Seat holders: active members plus pending, unexpired invites. */
+export async function countSeatHolders(
+  organizationId: string,
+  db: EntitlementDb = prisma,
+): Promise<{ activeMembers: number; pendingInvites: number }> {
+  const [activeMembers, pendingInvites] = await Promise.all([
+    db.organizationMember.count({ where: { organizationId } }),
+    db.organizationInvite.count({
+      where: { organizationId, status: "pending", expiresAt: { gt: new Date() } },
+    }),
+  ]);
+  return { activeMembers, pendingInvites };
+}
+
+export function orgPlanTier(org: OrgBillingProfile): OrgPlanTier {
+  return resolvePlanTier({
+    paid: isPaidOrgPro(org),
+    subscriptionPlan: org.subscriptionPlan,
+  });
+}
+
 export async function resolveOrgAccess(
   org: OrgBillingProfile,
-  counts?: { openJobCount?: number; workspaceCount?: number },
+  counts?: {
+    openJobCount?: number;
+    workspaceCount?: number;
+    activeMembers?: number;
+    pendingInvites?: number;
+  },
+  db: EntitlementDb = prisma,
 ): Promise<OrgAccessSnapshot> {
-  const open = counts?.openJobCount ?? (await countOpenJobs(org.id));
+  const open = counts?.openJobCount ?? (await countOpenJobs(org.id, db));
   const workspaces =
-    counts?.workspaceCount ?? (await countWorkspaces(org.id));
-  const pro = isPaidOrgPro(org);
-  const maxOpenJobs = pro ? null : FREE_OPEN_JOB_LIMIT;
-  const maxWorkspaces = pro ? null : FREE_WORKSPACE_LIMIT;
-  const canPublishMoreJobs = pro || open < FREE_OPEN_JOB_LIMIT;
-  const canCreateMoreWorkspaces = pro || workspaces < FREE_WORKSPACE_LIMIT;
+    counts?.workspaceCount ?? (await countWorkspaces(org.id, db));
+  const seats =
+    counts?.activeMembers != null && counts?.pendingInvites != null
+      ? { activeMembers: counts.activeMembers, pendingInvites: counts.pendingInvites }
+      : await countSeatHolders(org.id, db);
+  const tier = orgPlanTier(org);
+  const limits = PLAN_LIMITS[tier];
+  const maxOpenJobs = limits.maxOpenJobs;
+  const maxWorkspaces = limits.maxWorkspaces;
+  const canPublishMoreJobs = maxOpenJobs === null || open < maxOpenJobs;
+  const canCreateMoreWorkspaces =
+    maxWorkspaces === null || workspaces < maxWorkspaces;
+  const seatLimit = seatCap(tier, org.subscriptionSeats);
+  const used = seatsUsed(seats.activeMembers, seats.pendingInvites);
 
   return {
-    plan: pro ? "pro" : "free",
+    plan: tier === "free" ? "free" : "pro",
     maxOpenJobs,
     maxWorkspaces,
     canPublishMoreJobs,
@@ -160,7 +229,39 @@ export async function resolveOrgAccess(
     openJobCount: open,
     workspaceCount: workspaces,
     upgradeRequired: !canPublishMoreJobs,
+    tier,
+    seatLimit,
+    seatsUsed: used,
+    activeMembers: seats.activeMembers,
+    pendingInvites: seats.pendingInvites,
+    canAddSeatHolder: canAddSeatHolder(used, seatLimit),
   };
+}
+
+/** Throws OrgPlanLimitError("seat") when inviting one more person would exceed paid seats. */
+export async function assertSeatAvailable(
+  org: OrgBillingProfile,
+  db: EntitlementDb = prisma,
+  opts?: { excludeInviteEmail?: string },
+): Promise<void> {
+  const counts = await countSeatHolders(org.id, db);
+  let pending = counts.pendingInvites;
+  if (opts?.excludeInviteEmail) {
+    // Re-sending an existing pending invite doesn't take a new seat.
+    const existing = await db.organizationInvite.count({
+      where: {
+        organizationId: org.id,
+        email: opts.excludeInviteEmail,
+        status: "pending",
+        expiresAt: { gt: new Date() },
+      },
+    });
+    pending -= existing;
+  }
+  const cap = seatCap(orgPlanTier(org), org.subscriptionSeats);
+  if (!canAddSeatHolder(seatsUsed(counts.activeMembers, pending), cap)) {
+    throw new OrgPlanLimitError("seat", org.slug);
+  }
 }
 
 export async function userOwnsProOrganization(userId: string): Promise<boolean> {
