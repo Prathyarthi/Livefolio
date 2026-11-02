@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { RecruiterSection } from "@/features/landing/components/recruiter-section";
 
 const FAQS = [
   {
@@ -34,35 +35,19 @@ const FAQS = [
 
 export function RecruiterFAQ() {
   return (
-    <section
-      id="faq"
-      aria-labelledby="recruiter-faq-heading"
-      className="px-6 py-[var(--space-9)]"
-    >
-      <div className="mx-auto max-w-[720px]">
-        <div className="text-center">
-          <p className="eyebrow uppercase">FAQ</p>
-          <h2
-            id="recruiter-faq-heading"
-            className="mt-2 text-h2 text-text-primary"
-          >
-            Common questions
-          </h2>
-        </div>
-
-        <Accordion type="single" collapsible className="mt-10">
-          {FAQS.map((item) => (
-            <AccordionItem key={item.q} value={item.q}>
-              <AccordionTrigger className="text-left text-body text-text-primary">
-                {item.q}
-              </AccordionTrigger>
-              <AccordionContent className="text-body-sm text-text-secondary">
-                {item.a}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </div>
-    </section>
+    <RecruiterSection id="faq" index="6.0" label="FAQ" title="Questions">
+      <Accordion type="single" collapsible className="border-t border-border-default">
+        {FAQS.map((item) => (
+          <AccordionItem key={item.q} value={item.q}>
+            <AccordionTrigger className="text-left text-body text-text-primary">
+              {item.q}
+            </AccordionTrigger>
+            <AccordionContent className="max-w-2xl text-body-sm text-text-secondary">
+              {item.a}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </RecruiterSection>
   );
 }

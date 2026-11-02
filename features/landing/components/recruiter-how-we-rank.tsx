@@ -1,62 +1,82 @@
-import { Code2, ListChecks, Rocket } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { BentoCard, RecruiterSection } from "@/features/landing/components/recruiter-section";
 
-const TILES = [
-  {
-    icon: ListChecks,
-    title: "Skill match",
-    body: "We read every section of the Livefolio they applied with. A skill in their skills list or a certification counts more than one mentioned in passing in a bio.",
-  },
-  {
-    icon: Rocket,
-    title: "Proof of work",
-    body: "Live projects, source code, published articles, GitHub and LeetCode profiles. A shipped link counts most. Years of experience are a filter, not a bonus.",
-  },
-  {
-    icon: Code2,
-    title: "Coding activity, only when it matters",
-    body: "For engineering roles: GitHub contributions in the last 90 days and LeetCode problems solved. For sales, design or ops roles this part is dropped, so nobody is penalised for not having a GitHub.",
-  },
+const FIELDS = [
+  ["Skills list", "1.00"],
+  ["Projects, articles", "0.85"],
+  ["Work experience", "0.70"],
+  ["Headline", "0.55"],
+  ["Passing mention", "0.25"],
 ] as const;
+
+const PROOF = [
+  ["Live project link", "1.00"],
+  ["Source code", "0.90"],
+  ["Article with URL", "0.85"],
+  ["GitHub / LeetCode profile", "0.75"],
+] as const;
+
+const BARS = [3, 6, 2, 8, 5, 9, 4, 7, 6, 10, 8, 5, 7, 9];
 
 export function RecruiterHowWeRank() {
   return (
-    <section
+    <RecruiterSection
       id="how-we-rank"
-      aria-labelledby="recruiter-rank-heading"
-      className="border-y border-border-default bg-surface-sunken/40 px-6 py-[var(--space-9)]"
+      index="1.0"
+      label="Ranking"
+      title={
+        <>
+          A score you can read.
+          <br />
+          Not a black box.
+        </>
+      }
+      body="Every applicant gets a score from 0 to 100 against your job, with up to four plain reasons."
     >
-      <div className="mx-auto max-w-[1200px]">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="eyebrow uppercase">How we rank</p>
-          <h2
-            id="recruiter-rank-heading"
-            className="mt-2 text-h2 text-text-primary"
-          >
-            A score you can read, not a black box
-          </h2>
-          <p className="mt-3 text-body text-text-secondary">
-            Every applicant gets a score from 0 to 100 against your job, with up
-            to four plain reasons explaining it.
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {TILES.map((tile) => (
-            <Card key={tile.title}>
-              <CardHeader>
-                <tile.icon className="h-5 w-5 text-brand-secondary" aria-hidden />
-                <CardTitle className="text-h3 text-text-primary">
-                  {tile.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-body-sm text-text-secondary">{tile.body}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <BentoCard
+          title="Skill match"
+          body="A skill in the skills list counts more than one mentioned in passing."
+        >
+          <ul className="space-y-2">
+            {FIELDS.map(([label, w]) => (
+              <li key={label} className="flex items-center justify-between text-xs">
+                <span className="text-text-secondary">{label}</span>
+                <span className="font-mono text-text-primary">{w}</span>
+              </li>
+            ))}
+          </ul>
+        </BentoCard>
+        <BentoCard
+          title="Proof of work"
+          body="Shipped links count most. Years of experience are a filter, not a bonus."
+        >
+          <ul className="space-y-2">
+            {PROOF.map(([label, w]) => (
+              <li key={label} className="flex items-center justify-between gap-2 text-xs">
+                <Badge variant="secondary" className="text-[11px]">{label}</Badge>
+                <span className="font-mono text-text-primary">{w}</span>
+              </li>
+            ))}
+          </ul>
+        </BentoCard>
+        <BentoCard
+          title="Coding activity, when it matters"
+          body="GitHub and LeetCode count for engineering roles only. Sales or design roles aren't penalised."
+        >
+          <p className="text-xs text-text-secondary">GitHub · last 90 days (demo)</p>
+          <div className="mt-3 flex h-20 items-end gap-1">
+            {BARS.map((h, i) => (
+              <span
+                key={i}
+                className="flex-1 rounded-sm bg-brand-secondary/70"
+                style={{ height: `${h * 10}%` }}
+              />
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-text-secondary">LeetCode · 45 hard / 120 medium (demo)</p>
+        </BentoCard>
       </div>
-    </section>
+    </RecruiterSection>
   );
 }

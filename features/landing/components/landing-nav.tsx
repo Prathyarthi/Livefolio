@@ -21,7 +21,7 @@ const CANDIDATE_LINKS = [
 
 const RECRUITER_LINKS = [
   { label: "How we rank", href: "#how-we-rank" },
-  { label: "References", href: "#ranked-shortlist" },
+  { label: "References", href: "#references" },
   { label: "How it works", href: "#how-it-works" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },

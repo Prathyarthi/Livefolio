@@ -4,7 +4,6 @@ import { CompanyShowcase } from "@/features/landing/components/company-showcase"
 import { RecruiterHero } from "@/features/landing/components/recruiter-hero";
 import { RecruiterHowWeRank } from "@/features/landing/components/recruiter-how-we-rank";
 import { RecruiterReferences } from "@/features/landing/components/recruiter-references";
-import { RecruiterTalentSearch } from "@/features/landing/components/recruiter-talent-search";
 import { RecruiterHowItWorks } from "@/features/landing/components/recruiter-how-it-works";
 import { RecruiterDifferentiation } from "@/features/landing/components/recruiter-differentiation";
 import { RecruiterPricing } from "@/features/landing/components/recruiter-pricing";
@@ -36,17 +35,16 @@ export default function RecruitersLandingPage() {
 
           <main id="main">
             <RecruiterHero />
-            <RecruiterHowWeRank />
-            <RecruiterReferences />
-            <RecruiterHowItWorks />
-            <RecruiterTalentSearch />
-            <RecruiterDifferentiation />
-            <RecruiterPricing />
             <CompanyShowcase
               eyebrow="Talent already on Livefolio"
               title="Professionals building real work are already here"
-              description="Hire people who are building in public across global enterprises, technology leaders, and growing startups."
+              description="People building in public, from global enterprises to growing startups."
             />
+            <RecruiterHowWeRank />
+            <RecruiterReferences />
+            <RecruiterHowItWorks />
+            <RecruiterDifferentiation />
+            <RecruiterPricing />
             <RecruiterFAQ />
             <RecruiterCTA />
           </main>

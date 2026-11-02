@@ -2,22 +2,19 @@ import { AuthAwareCtas } from "@/features/landing/components/auth-aware-ctas";
 
 export function RecruiterCTA() {
   return (
-    <section className="px-6 py-[var(--space-9)]">
-      <div className="relative mx-auto max-w-[1200px] overflow-hidden rounded-[var(--radius-xl)] bg-brand-light px-6 py-[var(--space-8)] text-center">
-        <div className="hero-blob" aria-hidden />
-        <div className="relative mx-auto max-w-2xl">
-          <h2 className="text-h1 text-text-primary">
-            Start hiring with Livefolio
-          </h2>
-          <p className="prose-measure mx-auto mt-4 text-body-lg text-text-secondary">
-            Create an organization, add workspaces for each hiring team, and
-            publish your first role free.
-          </p>
-          <AuthAwareCtas
-            variant="recruiter"
-            className="mt-7 flex flex-wrap items-center justify-center gap-3"
-          />
-        </div>
+    <section className="border-t border-border-default px-6 py-24 md:py-32">
+      <div className="mx-auto max-w-[1120px] text-center">
+        <h2 className="bg-gradient-to-b from-text-primary to-text-secondary bg-clip-text text-balance text-4xl font-semibold tracking-tight text-transparent md:text-6xl">
+          Hire on proof. Starting today.
+        </h2>
+        <p className="mx-auto mt-4 max-w-md text-body text-text-secondary">
+          Your first open job is free.
+        </p>
+        <AuthAwareCtas
+          variant="recruiter"
+          size="default"
+          className="mt-8 flex flex-wrap items-center justify-center gap-3"
+        />
       </div>
     </section>
   );
