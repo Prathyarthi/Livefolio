@@ -1,12 +1,10 @@
 import {
   BILLING_CURRENCY,
   BILLING_INTERVALS,
-  ORG_PRO_PRICING,
   PRO_PRICING,
   type BillingInterval,
 } from "@/lib/pricing";
 import {
-  getOrgRazorpayPlanId,
   getOrgSeatPlanForPlanId,
   getRazorpayPlanId,
 } from "@/lib/billing";
@@ -99,8 +97,7 @@ export function getIntervalForPlanId(planId: string): BillingInterval | null {
   return (
     BILLING_INTERVALS.find(
       (interval) =>
-        getRazorpayPlanId(interval) === planId ||
-        getOrgRazorpayPlanId(interval) === planId
+        getRazorpayPlanId(interval) === planId
     ) ??
     getOrgSeatPlanForPlanId(planId)?.interval ??
     null
@@ -129,15 +126,6 @@ export function getExpectedPlanDefinition(interval: BillingInterval) {
   };
 }
 
-export function getExpectedOrgPlanDefinition(interval: BillingInterval) {
-  const amount = ORG_PRO_PRICING[interval][BILLING_CURRENCY];
-  return {
-    amount: Math.round(amount * 100),
-    currency: BILLING_CURRENCY.toUpperCase(),
-    period: interval === "yearly" ? "yearly" : "monthly",
-    interval: interval === "quarterly" ? 3 : 1,
-  };
-}
 
 /** Expected Razorpay plan for a per-seat hiring plan: amount is per seat. */
 export function getExpectedOrgSeatPlanDefinition(

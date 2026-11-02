@@ -100,7 +100,7 @@ export const FREE_OWNED_ORG_LIMIT = 1;
 export const FREE_OPEN_JOB_LIMIT = 1;
 export const FREE_WORKSPACE_LIMIT = 1;
 
-/** "pro" means any paid hiring plan (Pro, Business or legacy Org Pro); see `tier`. */
+/** "pro" means any paid hiring plan (Pro or Business); see `tier`. */
 export type OrgPlan = "free" | "pro";
 
 export type OrgBillingProfile = {
@@ -134,7 +134,7 @@ export type OrgAccessSnapshot = {
   workspaceCount: number;
   upgradeRequired: boolean;
   tier: OrgPlanTier;
-  /** Paid (or included) seats; null = unlimited (legacy Org Pro). */
+  /** Paid seats (or 1 on Free). */
   seatLimit: number | null;
   seatsUsed: number;
   activeMembers: number;

@@ -60,12 +60,7 @@ export async function POST(req: Request) {
   const plan = parsePaidHiringPlan(tier);
   if (!plan || !org.razorpaySubscriptionId) {
     return NextResponse.json(
-      {
-        error:
-          tier === "legacy_pro"
-            ? "Your Org Pro plan has no seat limit. Seats apply once you move to a per-seat plan."
-            : "Seats can be changed on an active Pro or Business plan.",
-      },
+      { error: "Seats can be changed on an active Pro or Business plan." },
       { status: 409 },
     );
   }

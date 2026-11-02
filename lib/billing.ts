@@ -27,37 +27,6 @@ export function getRazorpayPlanId(
   return id || undefined;
 }
 
-export function getOrgRazorpayPlanId(
-  interval: BillingInterval
-): string | undefined {
-  const planIds: Record<BillingInterval, string | undefined> = {
-    monthly: process.env.RAZORPAY_ORG_PRO_PLAN_ID_MONTHLY,
-    quarterly: process.env.RAZORPAY_ORG_PRO_PLAN_ID_QUARTERLY,
-    yearly: process.env.RAZORPAY_ORG_PRO_PLAN_ID_YEARLY,
-  };
-  const id = planIds[interval]?.trim();
-  return id || undefined;
-}
-
-export function isOrgIntervalCheckoutReady(interval: BillingInterval): boolean {
-  return (
-    areRazorpayKeysConfigured() &&
-    isRazorpayWebhookConfigured() &&
-    Boolean(getOrgRazorpayPlanId(interval))
-  );
-}
-
-export function isAnyOrgBillingReady(): boolean {
-  return BILLING_INTERVALS.some((interval) =>
-    isOrgIntervalCheckoutReady(interval)
-  );
-}
-
-export function getAvailableOrgBillingIntervals(): BillingInterval[] {
-  return BILLING_INTERVALS.filter((interval) =>
-    isOrgIntervalCheckoutReady(interval)
-  );
-}
 
 export function areRazorpayKeysConfigured(): boolean {
   return Boolean(
@@ -117,7 +86,6 @@ export function getIntervalCheckoutUnavailableMessage(
 // Per-seat hiring plans (Pro / Business). Razorpay plan amount = price per seat;
 // the subscription `quantity` is the seat count.
 // Env: RAZORPAY_ORG_{PRO|BUSINESS}_SEAT_PLAN_ID_{MONTHLY|QUARTERLY|YEARLY}
-// Legacy RAZORPAY_ORG_PRO_PLAN_ID_* stay only so existing Org Pro renewals resolve.
 // ---------------------------------------------------------------------------
 
 export function getOrgSeatPlanId(

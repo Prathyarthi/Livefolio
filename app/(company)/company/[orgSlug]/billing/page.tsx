@@ -263,7 +263,7 @@ export default function CompanyBillingPage() {
   }
 
   const isPaid = billing.access.plan === "pro";
-  const tier = billing.access.tier ?? (isPaid ? "legacy_pro" : "free");
+  const tier = billing.access.tier ?? (isPaid ? "pro" : "free");
   const paymentsReady = billing.razorpayReady;
   const canManage = billing.canManageBilling;
   const isPending = billing.subscription?.status === "PENDING";
@@ -280,7 +280,7 @@ export default function CompanyBillingPage() {
   const seatsInUse = billing.access.seatsUsed ?? 0;
   const minSeats = Math.max(minSeatsFor(selectedPlan), seatsInUse || 1);
   const checkoutSeats = Math.max(seatCount, minSeats);
-  const perSeatPlan = tier === "pro" || tier === "business";
+  const perSeatPlan = tier !== "free";
   const paidSeats = billing.seats ?? seatLimit ?? 0;
   const seatTarget = Math.max(seatTarget0 ?? paidSeats, 1);
 
@@ -328,12 +328,6 @@ export default function CompanyBillingPage() {
             {cancelAtPeriodEnd ? "Cancels at period end" : isPaid ? "Active" : "Free"}
           </Badge>
         </div>
-        {tier === "legacy_pro" ? (
-          <p className="text-body-sm text-text-secondary">
-            You&apos;re on the original Org Pro plan: unlimited seats, open jobs and
-            workspaces at your current price. Nothing changes unless you cancel.
-          </p>
-        ) : null}
         {currentPeriodEnd && isPaid ? (
           <p className="text-xs text-text-muted">Current period ends {currentPeriodEnd}.</p>
         ) : null}

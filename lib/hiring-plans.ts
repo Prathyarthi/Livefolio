@@ -5,8 +5,7 @@
 import type { BillingInterval, PlanAmount } from "@/lib/pricing";
 
 export type HiringPlanSlug = "free" | "pro" | "business";
-/** `legacy_pro` = Org Pro subscribers from before per-seat pricing; keeps their terms. */
-export type OrgPlanTier = HiringPlanSlug | "legacy_pro";
+export type OrgPlanTier = HiringPlanSlug;
 export type PaidHiringPlan = Exclude<HiringPlanSlug, "free">;
 
 /** Per-seat prices. Yearly is charged once per year per seat. */
@@ -38,8 +37,6 @@ export const PLAN_LIMITS: Record<OrgPlanTier, PlanLimits> = {
   free: { maxOpenJobs: 1, maxWorkspaces: 1, includedSeats: 1 },
   pro: { maxOpenJobs: null, maxWorkspaces: 1, includedSeats: null },
   business: { maxOpenJobs: null, maxWorkspaces: null, includedSeats: null },
-  // Legacy Org Pro: unlimited jobs and workspaces, no seat cap (their original terms).
-  legacy_pro: { maxOpenJobs: null, maxWorkspaces: null, includedSeats: null },
 };
 
 export function minSeatsFor(plan: PaidHiringPlan): number {
@@ -57,20 +54,19 @@ export function normalizeSeats(plan: PaidHiringPlan, requested: unknown): number
   return Math.min(MAX_SEATS, Math.max(minSeatsFor(plan), whole));
 }
 
-/** Tier for an org given its subscription fields. Active org without a stored plan = legacy Org Pro. */
+/** Tier for an org given its subscription fields. A paid org without a stored plan falls back to Pro. */
 export function resolvePlanTier(input: {
   paid: boolean;
   subscriptionPlan?: string | null;
 }): OrgPlanTier {
   if (!input.paid) return "free";
   const plan = parsePaidHiringPlan(input.subscriptionPlan);
-  return plan ?? "legacy_pro";
+  return plan ?? "pro";
 }
 
 /** Seat cap for a tier: null = unlimited. */
 export function seatCap(tier: OrgPlanTier, paidSeats?: number | null): number | null {
   if (tier === "free") return PLAN_LIMITS.free.includedSeats;
-  if (tier === "legacy_pro") return null;
   const min = minSeatsFor(tier);
   return Math.max(min, paidSeats ?? min);
 }
@@ -107,7 +103,6 @@ export const HIRING_PLAN_NAMES: Record<OrgPlanTier, string> = {
   free: "Free",
   pro: "Pro",
   business: "Business",
-  legacy_pro: "Org Pro (legacy)",
 };
 
 export type HiringPlanFeature = { label: string; note?: string };

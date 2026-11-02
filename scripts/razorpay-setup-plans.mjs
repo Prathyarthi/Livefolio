@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Create Razorpay subscription plans for Livefolio Pro, per-seat hiring plans and/or legacy Org Pro.
+ * Create Razorpay subscription plans for Livefolio Pro and/or the per-seat hiring plans.
  *
- * Matches lib/pricing.ts PRO_PRICING / ORG_PRO_PRICING.
+ * Matches lib/pricing.ts PRO_PRICING and lib/hiring-plans.ts HIRING_SEAT_PRICING.
  *
  * Usage:
  *   node scripts/razorpay-setup-plans.mjs                    # personal Pro (INR)
- *   node scripts/razorpay-setup-plans.mjs --product=org      # Org Pro
+ *   node scripts/razorpay-setup-plans.mjs --product=org-seat # hiring Pro + Business (per seat)
  *   node scripts/razorpay-setup-plans.mjs --product=all
  *   node scripts/razorpay-setup-plans.mjs --currency=usd
  *   node scripts/razorpay-setup-plans.mjs --dry-run
@@ -35,12 +35,6 @@ const PRO_PRICING = {
   monthly: { usd: 7, inr: 599 },
   quarterly: { usd: 19, inr: 1599 },
   yearly: { usd: 70, inr: 5999 },
-};
-
-const ORG_PRO_PRICING = {
-  monthly: { usd: 29, inr: 2499 },
-  quarterly: { usd: 79, inr: 6799 },
-  yearly: { usd: 290, inr: 24999 },
 };
 
 /** Per-seat hiring plans; keep in sync with lib/hiring-plans.ts HIRING_SEAT_PRICING.
@@ -83,36 +77,6 @@ const PRODUCTS = {
       {
         key: "yearly",
         envVar: "RAZORPAY_PRO_PLAN_ID_YEARLY",
-        label: "Yearly",
-        period: "yearly",
-        interval: 1,
-      },
-    ],
-  },
-  org: {
-    id: "org",
-    pricing: ORG_PRO_PRICING,
-    namePrefixEnv: "RAZORPAY_ORG_PLAN_NAME_PREFIX",
-    defaultNamePrefix: "Livefolio Org Pro",
-    notesProduct: "org_pro",
-    planDefs: [
-      {
-        key: "monthly",
-        envVar: "RAZORPAY_ORG_PRO_PLAN_ID_MONTHLY",
-        label: "Monthly",
-        period: "monthly",
-        interval: 1,
-      },
-      {
-        key: "quarterly",
-        envVar: "RAZORPAY_ORG_PRO_PLAN_ID_QUARTERLY",
-        label: "Quarterly",
-        period: "monthly",
-        interval: 3,
-      },
-      {
-        key: "yearly",
-        envVar: "RAZORPAY_ORG_PRO_PLAN_ID_YEARLY",
         label: "Yearly",
         period: "yearly",
         interval: 1,
@@ -166,12 +130,12 @@ function parseArgs(argv) {
     else if (arg.startsWith("--product=")) {
       const value = arg.split("=")[1]?.toLowerCase();
       if (
-        ["personal", "org", "org-seat", "org-pro-seat", "org-business-seat", "all"].includes(value)
+        ["personal", "org-seat", "org-pro-seat", "org-business-seat", "all"].includes(value)
       ) {
         flags.product = value;
       } else {
         throw new Error(
-          `Invalid product "${value}". Use personal, org, org-seat, org-pro-seat, org-business-seat, or all.`,
+          `Invalid product "${value}". Use personal, org-seat, org-pro-seat, org-business-seat, or all.`,
         );
       }
     } else if (arg.startsWith("--currency=")) {
@@ -191,14 +155,14 @@ function parseArgs(argv) {
 
 function printHelp() {
   console.log(`
-Razorpay plan setup (personal Pro and/or Org Pro)
+Razorpay plan setup (personal Pro and/or per-seat hiring plans)
 
   node scripts/razorpay-setup-plans.mjs [options]
 
 Options:
-  --product=personal|org|org-seat|org-pro-seat|org-business-seat|all
+  --product=personal|org-seat|org-pro-seat|org-business-seat|all
                                Which plans to create (default: personal).
-                               org = legacy flat Org Pro; org-seat = new per-seat Pro + Business
+                               org-seat = hiring Pro + Business (per seat)
   --currency=inr|usd           Plan currency (default: NEXT_PUBLIC_BILLING_CURRENCY or inr)
   --dry-run                    Print payloads without calling Razorpay
   --list                       List existing plans in the account
@@ -206,7 +170,6 @@ Options:
   -h, --help                   Show this help
 
 Personal Pro (INR): ₹599 / ₹1,599 / ₹5,999
-Org Pro (legacy):   ₹2,499 / ₹6,799 / ₹24,999
 Hiring Pro / seat:  ₹2,999 / ₹8,499 / ₹29,988
 Hiring Business / seat (min 3 seats at checkout): ₹4,999 / ₹14,199 / ₹50,388
 

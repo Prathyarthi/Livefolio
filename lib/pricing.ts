@@ -56,14 +56,6 @@ export const PRO_PRICING: Record<BillingInterval, PlanAmount> = {
   yearly: { usd: 70, inr: 5999 },
 };
 
-/** Legacy company hiring (Org Pro, flat price) — kept for existing subscribers. New plans: lib/hiring-plans.ts. */
-export const ORG_PRO_PRICING: Record<BillingInterval, PlanAmount> = {
-  monthly: { usd: 29, inr: 2499 },
-  quarterly: { usd: 79, inr: 6799 },
-  yearly: { usd: 290, inr: 24999 },
-};
-
-export const ORG_PAID_PLAN_SLUG = "org_pro" as const;
 
 export function getBillingPeriodSuffix(interval: BillingInterval): string {
   switch (interval) {
@@ -114,14 +106,6 @@ export function formatProPriceLabel(interval: BillingInterval): string {
   return `${price}${getBillingPeriodSuffix(interval)}`;
 }
 
-export function formatOrgProPriceLabel(interval: BillingInterval): string {
-  const amount = ORG_PRO_PRICING[interval];
-  const price =
-    BILLING_CURRENCY === "usd"
-      ? formatUsd(amount.usd)
-      : formatInr(amount.inr);
-  return `${price}${getBillingPeriodSuffix(interval)}`;
-}
 
 const yearlySavings = getProSavingsPercent("yearly") ?? 0;
 

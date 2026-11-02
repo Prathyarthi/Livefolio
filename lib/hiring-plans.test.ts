@@ -16,9 +16,9 @@ describe("hiring plan tiers", () => {
   test("unpaid orgs are free", () => {
     expect(resolvePlanTier({ paid: false, subscriptionPlan: "business" })).toBe("free");
   });
-  test("paid orgs without a stored plan are legacy Org Pro", () => {
-    expect(resolvePlanTier({ paid: true, subscriptionPlan: null })).toBe("legacy_pro");
-    expect(resolvePlanTier({ paid: true, subscriptionPlan: "org_pro" })).toBe("legacy_pro");
+  test("paid orgs with a missing or unknown plan fall back to Pro", () => {
+    expect(resolvePlanTier({ paid: true, subscriptionPlan: null })).toBe("pro");
+    expect(resolvePlanTier({ paid: true, subscriptionPlan: "org_pro" })).toBe("pro");
   });
   test("paid orgs keep their per-seat plan", () => {
     expect(resolvePlanTier({ paid: true, subscriptionPlan: "pro" })).toBe("pro");
@@ -33,7 +33,6 @@ describe("seat math", () => {
   });
   test("caps per tier", () => {
     expect(seatCap("free")).toBe(1);
-    expect(seatCap("legacy_pro", 1)).toBeNull();
     expect(seatCap("pro", 4)).toBe(4);
     expect(seatCap("pro", null)).toBe(1);
     expect(seatCap("business", 1)).toBe(BUSINESS_MIN_SEATS);
@@ -68,11 +67,11 @@ describe("prices", () => {
 });
 
 describe("limits", () => {
-  test("free: 1 job, 1 workspace; pro: 1 workspace; business and legacy unlimited", () => {
+  test("free: 1 job, 1 workspace; pro: 1 workspace; business unlimited", () => {
     expect(PLAN_LIMITS.free).toEqual({ maxOpenJobs: 1, maxWorkspaces: 1, includedSeats: 1 });
     expect(PLAN_LIMITS.pro.maxWorkspaces).toBe(1);
     expect(PLAN_LIMITS.pro.maxOpenJobs).toBeNull();
     expect(PLAN_LIMITS.business.maxWorkspaces).toBeNull();
-    expect(PLAN_LIMITS.legacy_pro.maxWorkspaces).toBeNull();
+    expect(Object.keys(PLAN_LIMITS).sort()).toEqual(["business", "free", "pro"]);
   });
 });
