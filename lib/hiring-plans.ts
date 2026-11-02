@@ -133,7 +133,7 @@ export const HIRING_PLAN_FEATURES: Record<HiringPlanSlug, HiringPlanFeature[]> =
     { label: `Everything in Pro, minimum ${BUSINESS_MIN_SEATS} seats` },
     { label: "Multiple workspaces for teams or brands" },
     { label: "Priority verified-company review" },
-    { label: "Onboarding help from the founder" },
+    { label: "Onboarding help" },
     { label: "Invoice billing on request" },
   ],
 };

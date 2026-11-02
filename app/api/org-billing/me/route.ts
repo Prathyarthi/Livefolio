@@ -29,6 +29,7 @@ export async function GET(req: Request) {
       subscriptionCurrentPeriodEnd: true,
       subscriptionPlan: true,
       subscriptionSeats: true,
+      razorpaySubscriptionId: true,
     },
   });
   if (!org) {
@@ -42,6 +43,12 @@ export async function GET(req: Request) {
 
   const access = await resolveOrgAccess(org);
   const proIntervals = getAvailableOrgSeatIntervals("pro");
+  const currentSub = org.razorpaySubscriptionId
+    ? await prisma.billingSubscription.findUnique({
+        where: { providerSubscriptionId: org.razorpaySubscriptionId },
+        select: { interval: true },
+      })
+    : null;
   const businessIntervals = getAvailableOrgSeatIntervals("business");
   const sub = (org.subscriptionStatus ?? "").toLowerCase();
   const subscription =
@@ -66,6 +73,7 @@ export async function GET(req: Request) {
     availableIntervals: proIntervals,
     planIntervals: { pro: proIntervals, business: businessIntervals },
     seats: org.subscriptionSeats ?? null,
+    interval: currentSub?.interval ?? null,
     canManageBilling: canManageOrganization(membership.role),
     organization: { id: org.id, slug: org.slug, name: org.name },
     subscription,

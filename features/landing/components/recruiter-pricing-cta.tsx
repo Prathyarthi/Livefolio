@@ -30,7 +30,7 @@ export function RecruiterPricingCta({
   const text = !authenticated
     ? label
     : highlight
-      ? "Upgrade to Org Pro"
+      ? "Choose a plan"
       : "Open workspace";
 
   return (
