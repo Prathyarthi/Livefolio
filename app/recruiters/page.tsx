@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { LandingNav } from "@/features/landing/components/landing-nav";
 import { CompanyShowcase } from "@/features/landing/components/company-showcase";
 import { RecruiterHero } from "@/features/landing/components/recruiter-hero";
+import { RecruiterHowWeRank } from "@/features/landing/components/recruiter-how-we-rank";
+import { RecruiterReferences } from "@/features/landing/components/recruiter-references";
+import { RecruiterTalentSearch } from "@/features/landing/components/recruiter-talent-search";
 import { RecruiterHowItWorks } from "@/features/landing/components/recruiter-how-it-works";
 import { RecruiterDifferentiation } from "@/features/landing/components/recruiter-differentiation";
 import { RecruiterPricing } from "@/features/landing/components/recruiter-pricing";
@@ -12,7 +15,7 @@ import { createPageMetadata } from "@/lib/seo";
 export const metadata: Metadata = createPageMetadata({
   title: "Hire with Livefolio",
   description:
-    "Post jobs, receive Apply with Livefolio applications, and shortlist candidates from real professional evidence — free for one open role.",
+    "Hire on proof and references, not resume keywords. Post a role free, get one-click applications and a ranked shortlist that explains itself.",
   path: "/recruiters",
 });
 
@@ -33,14 +36,17 @@ export default function RecruitersLandingPage() {
 
           <main id="main">
             <RecruiterHero />
+            <RecruiterHowWeRank />
+            <RecruiterReferences />
+            <RecruiterHowItWorks />
+            <RecruiterTalentSearch />
+            <RecruiterDifferentiation />
+            <RecruiterPricing />
             <CompanyShowcase
               eyebrow="Talent already on Livefolio"
               title="Professionals building real work are already here"
               description="Hire people who are building in public across global enterprises, technology leaders, and growing startups."
             />
-            <RecruiterHowItWorks />
-            <RecruiterDifferentiation />
-            <RecruiterPricing />
             <RecruiterFAQ />
             <RecruiterCTA />
           </main>

@@ -1,19 +1,19 @@
 const STEPS = [
   {
     title: "Create a job",
-    body: "Add role details and structured requirements so matching stays clear.",
+    body: "Add role details, required and preferred skills, and screening questions. We turn the description into a clear checklist for matching.",
   },
   {
     title: "Candidates apply with Livefolio",
-    body: "One click shares a job-specific snapshot of their living professional profile.",
+    body: "One click shares a snapshot of their live portfolio: projects, code, writing and references.",
   },
   {
-    title: "Search that job’s applicants",
-    body: "Filter and search only people who applied — never the whole Livefolio network.",
+    title: "Search and compare",
+    body: "Search in plain words, filter by skills, city, experience or proof, and compare candidates side by side. A pool gap report shows which requirements your applicants are missing.",
   },
   {
-    title: "Shortlist with evidence",
-    body: "See tenure, skills, and proof against your requirements, then move pipeline stages.",
+    title: "Shortlist and move them forward",
+    body: "Shortlist, then move each person through New, Reviewing, Shortlisted, Interview, Offer, Hired or Rejected. Candidates see their status update.",
   },
 ] as const;
 
@@ -34,8 +34,7 @@ export function RecruiterHowItWorks() {
             From job post to shortlist
           </h2>
           <p className="mt-3 text-body text-text-secondary">
-            A focused hiring loop built on Livefolio identity — not another
-            generic ATS or talent marketplace.
+            Everything a small team needs to go from a job post to a hire, in one place.
           </p>
         </div>
 

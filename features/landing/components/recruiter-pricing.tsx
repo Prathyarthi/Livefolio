@@ -49,8 +49,9 @@ export function RecruiterPricing() {
             Simple freemium for companies
           </h2>
           <p className="mt-3 text-body text-text-secondary">
-            Separate from personal Livefolio Pro. Pay when you need more open
-            roles.
+            One price for your whole organization, not per recruiter. Many
+            sourcing and ATS tools charge per recruiter seat each month.
+            Separate from personal Livefolio Pro.
           </p>
         </div>
 

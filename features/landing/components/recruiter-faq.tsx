@@ -1,7 +1,22 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 const FAQS = [
   {
+    q: "How is the 0–100 score worked out?",
+    a: "It mixes skill match, proof of work, coding activity (only for roles that need it), context fit and recency. Each card shows up to four plain reasons, so you can always see why someone ranks where they do.",
+  },
+  {
+    q: "Do references change the ranking?",
+    a: "Only if you want them to. References always show on the applicant. Turn on Include references and they can add up to 12 points, weighted by the referee's relationship and whether their story matches your job. Turn it off and they're ignored.",
+  },
+  {
     q: "Can recruiters browse all Livefolio users?",
-    a: "No. They can search people who opted in, plus applicants for each job. Opting in is not shown on anyone’s public Livefolio.",
+    a: "No. You search the applicants for each job, plus people who opted in to Talent search. Opting in is not shown on anyone’s public Livefolio.",
   },
   {
     q: "What’s free vs Org Pro?",
@@ -35,14 +50,18 @@ export function RecruiterFAQ() {
           </h2>
         </div>
 
-        <dl className="mt-10 space-y-6">
+        <Accordion type="single" collapsible className="mt-10">
           {FAQS.map((item) => (
-            <div key={item.q}>
-              <dt className="text-h3 text-text-primary">{item.q}</dt>
-              <dd className="mt-2 text-body-sm text-text-secondary">{item.a}</dd>
-            </div>
+            <AccordionItem key={item.q} value={item.q}>
+              <AccordionTrigger className="text-left text-body text-text-primary">
+                {item.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-body-sm text-text-secondary">
+                {item.a}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </dl>
+        </Accordion>
       </div>
     </section>
   );
