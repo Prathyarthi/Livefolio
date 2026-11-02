@@ -1,8 +1,10 @@
+import { BILLING_INTERVAL_LABELS, type BillingInterval } from "@/lib/pricing";
 import {
-  BILLING_INTERVAL_LABELS,
-  formatOrgProPriceLabel,
-  type BillingInterval,
-} from "@/lib/pricing";
+  HIRING_PLAN_NAMES,
+  normalizeSeats,
+  type PaidHiringPlan,
+} from "@/lib/hiring-plans";
+import { formatSeatPriceLabel } from "@/lib/pricing";
 import { siteConfig } from "@/lib/site";
 
 declare global {
@@ -14,11 +16,17 @@ declare global {
 export async function startOrgProCheckout(options: {
   orgSlug: string;
   interval: BillingInterval;
+  /** Per-seat plan; defaults to Pro. */
+  plan?: PaidHiringPlan;
+  /** Seats to buy (Razorpay quantity). Business minimum is 3. */
+  seats?: number;
   razorpayLoaded: boolean;
   onError: (message: string) => void;
   onDismiss?: () => void | Promise<void>;
 }): Promise<void> {
   const { orgSlug, interval, razorpayLoaded, onError, onDismiss } = options;
+  const plan = options.plan ?? "pro";
+  const seats = normalizeSeats(plan, options.seats ?? 1);
 
   if (!razorpayLoaded || !window.Razorpay) {
     onError("Payment system is loading. Please try again.");
@@ -28,7 +36,7 @@ export async function startOrgProCheckout(options: {
   const res = await fetch("/api/org-billing/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orgSlug, interval }),
+    body: JSON.stringify({ orgSlug, interval, plan, seats }),
   });
 
   const body = (await res.json().catch(() => ({}))) as {
@@ -52,8 +60,8 @@ export async function startOrgProCheckout(options: {
   const razorpay = new window.Razorpay({
     key: body.keyId,
     subscription_id: body.subscriptionId,
-    name: `${siteConfig.name} Org Pro`,
-    description: `Org Pro — ${formatOrgProPriceLabel(interval)}`,
+    name: `${siteConfig.name} ${HIRING_PLAN_NAMES[plan]}`,
+    description: `${HIRING_PLAN_NAMES[plan]} — ${seats} seat${seats === 1 ? "" : "s"} × ${formatSeatPriceLabel(plan, interval)}`,
     prefill: {
       email: body.email || "",
     },

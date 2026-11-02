@@ -1,3 +1,10 @@
+// hiring-plans only imports types from this file, so there is no runtime cycle.
+import {
+  HIRING_SEAT_PRICING,
+  monthlyEquivalent,
+  type PaidHiringPlan,
+} from "@/lib/hiring-plans";
+
 export const BILLING_INTERVALS = ["monthly", "quarterly", "yearly"] as const;
 export type BillingInterval = (typeof BILLING_INTERVALS)[number];
 
@@ -49,7 +56,7 @@ export const PRO_PRICING: Record<BillingInterval, PlanAmount> = {
   yearly: { usd: 70, inr: 5999 },
 };
 
-/** Company hiring (Org Pro) — separate from personal Livefolio Pro. */
+/** Legacy company hiring (Org Pro, flat price) — kept for existing subscribers. New plans: lib/hiring-plans.ts. */
 export const ORG_PRO_PRICING: Record<BillingInterval, PlanAmount> = {
   monthly: { usd: 29, inr: 2499 },
   quarterly: { usd: 79, inr: 6799 },
@@ -167,3 +174,39 @@ export const pricingPlans: PricingPlan[] = [
 
 /** Paid plan slug — drives subscribe / billing UI in PricingCards */
 export const PAID_PLAN_SLUG = "pro" as const;
+
+// Per-seat hiring plans --------------------------------------------------------
+
+function formatAmount(amount: number, currency: BillingCurrency = BILLING_CURRENCY) {
+  return currency === "usd" ? formatUsd(amount) : formatInr(amount);
+}
+
+/** e.g. "₹2,999 / seat / month", "₹8,499 / seat / quarter", "₹29,988 / seat / year". */
+export function formatSeatPriceLabel(
+  plan: PaidHiringPlan,
+  interval: BillingInterval,
+  currency: BillingCurrency = BILLING_CURRENCY,
+): string {
+  const unit = interval === "monthly" ? "month" : interval === "quarterly" ? "quarter" : "year";
+  return `${formatAmount(HIRING_SEAT_PRICING[plan][interval][currency], currency)} / seat / ${unit}`;
+}
+
+/** Headline per-seat monthly price, e.g. yearly → "₹2,499". */
+export function formatSeatMonthlyHeadline(
+  plan: PaidHiringPlan,
+  interval: BillingInterval,
+  currency: BillingCurrency = BILLING_CURRENCY,
+): string {
+  return formatAmount(monthlyEquivalent(plan, interval, currency), currency);
+}
+
+/** Small print under the headline, e.g. "billed yearly at ₹29,988 per seat". */
+export function formatSeatBillingNote(
+  plan: PaidHiringPlan,
+  interval: BillingInterval,
+  currency: BillingCurrency = BILLING_CURRENCY,
+): string {
+  if (interval === "monthly") return "billed monthly";
+  const total = formatAmount(HIRING_SEAT_PRICING[plan][interval][currency], currency);
+  return `billed ${interval} at ${total} per seat`;
+}

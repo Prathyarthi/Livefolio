@@ -55,3 +55,13 @@ To learn more about the technologies used in this template:
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Per-seat hiring billing
+
+Hiring plans live in `lib/hiring-plans.ts` (Free, Pro and Business, priced per seat; Business needs at least 3 seats). Seats used = org members + pending invites; inviting beyond paid seats returns 402. Orgs that are active with no `subscriptionPlan` are legacy Org Pro and keep their original terms.
+
+Before going live:
+1. Apply migration `20261102210000_org_per_seat_plans` (additive, nullable columns).
+2. Create Razorpay plans (amount per seat): `node scripts/razorpay-setup-plans.mjs --product=org-seat --dry-run`, then run it for real, test mode first.
+3. Set `RAZORPAY_ORG_PRO_SEAT_PLAN_ID_{MONTHLY,QUARTERLY,YEARLY}` and `RAZORPAY_ORG_BUSINESS_SEAT_PLAN_ID_{MONTHLY,QUARTERLY,YEARLY}`. Keep `RAZORPAY_ORG_PRO_PLAN_ID_*` for legacy renewals.
+4. In test mode, check seat changes (`/api/org-billing/seats` uses `subscriptions.update` with `quantity`), including mid-cycle charges and which payment methods allow updates.

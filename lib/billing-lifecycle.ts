@@ -5,7 +5,12 @@ import {
   PRO_PRICING,
   type BillingInterval,
 } from "@/lib/pricing";
-import { getOrgRazorpayPlanId, getRazorpayPlanId } from "@/lib/billing";
+import {
+  getOrgRazorpayPlanId,
+  getOrgSeatPlanForPlanId,
+  getRazorpayPlanId,
+} from "@/lib/billing";
+import { HIRING_SEAT_PRICING } from "@/lib/hiring-plans";
 
 export type ProviderSubscriptionStatus =
   | "created"
@@ -96,7 +101,9 @@ export function getIntervalForPlanId(planId: string): BillingInterval | null {
       (interval) =>
         getRazorpayPlanId(interval) === planId ||
         getOrgRazorpayPlanId(interval) === planId
-    ) ?? null
+    ) ??
+    getOrgSeatPlanForPlanId(planId)?.interval ??
+    null
   );
 }
 
@@ -124,6 +131,20 @@ export function getExpectedPlanDefinition(interval: BillingInterval) {
 
 export function getExpectedOrgPlanDefinition(interval: BillingInterval) {
   const amount = ORG_PRO_PRICING[interval][BILLING_CURRENCY];
+  return {
+    amount: Math.round(amount * 100),
+    currency: BILLING_CURRENCY.toUpperCase(),
+    period: interval === "yearly" ? "yearly" : "monthly",
+    interval: interval === "quarterly" ? 3 : 1,
+  };
+}
+
+/** Expected Razorpay plan for a per-seat hiring plan: amount is per seat. */
+export function getExpectedOrgSeatPlanDefinition(
+  plan: "pro" | "business",
+  interval: BillingInterval
+) {
+  const amount = HIRING_SEAT_PRICING[plan][interval][BILLING_CURRENCY];
   return {
     amount: Math.round(amount * 100),
     currency: BILLING_CURRENCY.toUpperCase(),

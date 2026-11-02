@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Create Razorpay subscription plans for Livefolio Pro and/or Org Pro.
+ * Create Razorpay subscription plans for Livefolio Pro, per-seat hiring plans and/or legacy Org Pro.
  *
  * Matches lib/pricing.ts PRO_PRICING / ORG_PRO_PRICING.
  *
@@ -41,6 +41,20 @@ const ORG_PRO_PRICING = {
   monthly: { usd: 29, inr: 2499 },
   quarterly: { usd: 79, inr: 6799 },
   yearly: { usd: 290, inr: 24999 },
+};
+
+/** Per-seat hiring plans; keep in sync with lib/hiring-plans.ts HIRING_SEAT_PRICING.
+ * Amount is per seat; checkout sets the subscription quantity to the seat count. */
+const ORG_SEAT_PRO_PRICING = {
+  monthly: { usd: 39, inr: 2999 },
+  quarterly: { usd: 109, inr: 8499 },
+  yearly: { usd: 420, inr: 29988 },
+};
+
+const ORG_SEAT_BUSINESS_PRICING = {
+  monthly: { usd: 59, inr: 4999 },
+  quarterly: { usd: 165, inr: 14199 },
+  yearly: { usd: 600, inr: 50388 },
 };
 
 const PRODUCTS = {
@@ -107,6 +121,32 @@ const PRODUCTS = {
   },
 };
 
+PRODUCTS["org-pro-seat"] = {
+  id: "org-pro-seat",
+  pricing: ORG_SEAT_PRO_PRICING,
+  namePrefixEnv: "RAZORPAY_ORG_PRO_SEAT_PLAN_NAME_PREFIX",
+  defaultNamePrefix: "Livefolio Hiring Pro (per seat)",
+  notesProduct: "org_pro_seat",
+  planDefs: [
+      { key: "monthly", envVar: "RAZORPAY_ORG_PRO_SEAT_PLAN_ID_MONTHLY", label: "Monthly", period: "monthly", interval: 1 },
+      { key: "quarterly", envVar: "RAZORPAY_ORG_PRO_SEAT_PLAN_ID_QUARTERLY", label: "Quarterly", period: "monthly", interval: 3 },
+      { key: "yearly", envVar: "RAZORPAY_ORG_PRO_SEAT_PLAN_ID_YEARLY", label: "Yearly", period: "yearly", interval: 1 },
+    ],
+};
+
+PRODUCTS["org-business-seat"] = {
+  id: "org-business-seat",
+  pricing: ORG_SEAT_BUSINESS_PRICING,
+  namePrefixEnv: "RAZORPAY_ORG_BUSINESS_SEAT_PLAN_NAME_PREFIX",
+  defaultNamePrefix: "Livefolio Hiring Business (per seat)",
+  notesProduct: "org_business_seat",
+  planDefs: [
+      { key: "monthly", envVar: "RAZORPAY_ORG_BUSINESS_SEAT_PLAN_ID_MONTHLY", label: "Monthly", period: "monthly", interval: 1 },
+      { key: "quarterly", envVar: "RAZORPAY_ORG_BUSINESS_SEAT_PLAN_ID_QUARTERLY", label: "Quarterly", period: "monthly", interval: 3 },
+      { key: "yearly", envVar: "RAZORPAY_ORG_BUSINESS_SEAT_PLAN_ID_YEARLY", label: "Yearly", period: "yearly", interval: 1 },
+    ],
+};
+
 function parseArgs(argv) {
   const flags = {
     dryRun: false,
@@ -125,11 +165,13 @@ function parseArgs(argv) {
     else if (arg === "--write-env") flags.writeEnv = true;
     else if (arg.startsWith("--product=")) {
       const value = arg.split("=")[1]?.toLowerCase();
-      if (value === "personal" || value === "org" || value === "all") {
+      if (
+        ["personal", "org", "org-seat", "org-pro-seat", "org-business-seat", "all"].includes(value)
+      ) {
         flags.product = value;
       } else {
         throw new Error(
-          `Invalid product "${value}". Use personal, org, or all.`,
+          `Invalid product "${value}". Use personal, org, org-seat, org-pro-seat, org-business-seat, or all.`,
         );
       }
     } else if (arg.startsWith("--currency=")) {
@@ -154,7 +196,9 @@ Razorpay plan setup (personal Pro and/or Org Pro)
   node scripts/razorpay-setup-plans.mjs [options]
 
 Options:
-  --product=personal|org|all   Which plans to create (default: personal)
+  --product=personal|org|org-seat|org-pro-seat|org-business-seat|all
+                               Which plans to create (default: personal).
+                               org = legacy flat Org Pro; org-seat = new per-seat Pro + Business
   --currency=inr|usd           Plan currency (default: NEXT_PUBLIC_BILLING_CURRENCY or inr)
   --dry-run                    Print payloads without calling Razorpay
   --list                       List existing plans in the account
@@ -162,7 +206,9 @@ Options:
   -h, --help                   Show this help
 
 Personal Pro (INR): ₹599 / ₹1,599 / ₹5,999
-Org Pro (INR):      ₹2,499 / ₹6,799 / ₹24,999
+Org Pro (legacy):   ₹2,499 / ₹6,799 / ₹24,999
+Hiring Pro / seat:  ₹2,999 / ₹8,499 / ₹29,988
+Hiring Business / seat (min 3 seats at checkout): ₹4,999 / ₹14,199 / ₹50,388
 
 After creating plans, configure webhook in Razorpay Dashboard:
   POST https://your-domain.com/api/billing/webhook
@@ -196,7 +242,10 @@ function formatDisplayAmount(amount, currency) {
 }
 
 function resolveProducts(productFlag) {
-  if (productFlag === "all") return [PRODUCTS.personal, PRODUCTS.org];
+  if (productFlag === "all")
+    return [PRODUCTS.personal, PRODUCTS["org-pro-seat"], PRODUCTS["org-business-seat"]];
+  if (productFlag === "org-seat")
+    return [PRODUCTS["org-pro-seat"], PRODUCTS["org-business-seat"]];
   return [PRODUCTS[productFlag]];
 }
 
