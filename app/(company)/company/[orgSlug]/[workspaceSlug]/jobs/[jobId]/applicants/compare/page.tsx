@@ -50,7 +50,7 @@ export default function CompareApplicantsPage() {
 
   if (ids.length < MIN_COMPARE_CANDIDATES) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants
@@ -67,7 +67,7 @@ export default function CompareApplicantsPage() {
 
   if (poolQuery.isLoading) {
     return (
-      <div className="mx-auto w-full max-w-[1200px] space-y-6 p-6 md:p-8" aria-busy="true">
+      <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8" aria-busy="true">
         <Skeleton className="h-8 w-40" />
         <div className="space-y-2">
           <Skeleton className="h-4 w-24" />
@@ -84,7 +84,7 @@ export default function CompareApplicantsPage() {
 
   if (poolQuery.error || !poolQuery.data) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants
@@ -101,7 +101,7 @@ export default function CompareApplicantsPage() {
 
   if (selected.length < MIN_COMPARE_CANDIDATES) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-4 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             ← Back to applicants

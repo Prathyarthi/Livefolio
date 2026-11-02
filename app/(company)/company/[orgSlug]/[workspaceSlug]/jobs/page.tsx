@@ -1,5 +1,6 @@
 "use client";
 
+import { JobStatusBadge, ListSkeleton } from "@/features/organization/components/workspace-ui";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -41,7 +42,7 @@ export default function CompanyJobsPage() {
   const origin = useMemo(() => getAppOrigin(), []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
       </Button>
@@ -76,7 +77,7 @@ export default function CompanyJobsPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-body-sm text-text-muted">Loading jobs…</p>
+        <ListSkeleton rows={3} />
       ) : !jobs || jobs.length === 0 ? (
         <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-6 py-12 text-center">
           <h2 className="text-h3 text-text-primary">No jobs in this view</h2>
@@ -99,13 +100,7 @@ export default function CompanyJobsPage() {
                   >
                     <RichText as="span" text={job.title} />
                   </Link>
-                  <Badge
-                    variant={
-                      job.status === "published" ? "success" : "neutral"
-                    }
-                  >
-                    {JOB_STATUS_LABELS[job.status] ?? job.status}
-                  </Badge>
+                  <JobStatusBadge status={job.status} label={JOB_STATUS_LABELS[job.status] ?? job.status} />
                 </div>
                 <p className="text-body-sm text-text-secondary">
                   {formatJobMeta([

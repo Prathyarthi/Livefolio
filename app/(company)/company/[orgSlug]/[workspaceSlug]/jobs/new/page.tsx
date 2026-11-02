@@ -1,5 +1,6 @@
 "use client";
 
+import { PageSkeleton } from "@/features/organization/components/workspace-ui";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -124,7 +125,7 @@ export default function NewJobPage() {
   }
 
   if (workspaceLoading || !form) {
-    return <div className="p-8 text-body-sm text-text-muted">Loading…</div>;
+    return <PageSkeleton />;
   }
 
   const showRecruiter = layoutMode === "recruiter" || layoutMode === "both";
@@ -153,7 +154,7 @@ export default function NewJobPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-7xl space-y-8 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>
           ← Back to jobs
@@ -198,7 +199,7 @@ export default function NewJobPage() {
         )}
       >
         {showRecruiter ? (
-          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
             <JobRoleFields
               values={form}
               onChange={patchForm}

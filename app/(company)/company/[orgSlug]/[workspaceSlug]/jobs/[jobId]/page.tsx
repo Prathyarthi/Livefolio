@@ -1,5 +1,6 @@
 "use client";
 
+import { JobStatusBadge, PageSkeleton } from "@/features/organization/components/workspace-ui";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -69,7 +70,7 @@ export default function ManageJobPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading job…</div>
+      <PageSkeleton />
     );
   }
 
@@ -145,15 +146,13 @@ export default function ManageJobPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-8 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs`}>← Back to jobs</Link>
       </Button>
       <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={job.status === "published" ? "success" : "neutral"}>
-            {JOB_STATUS_LABELS[job.status] ?? job.status}
-          </Badge>
+          <JobStatusBadge status={job.status} label={JOB_STATUS_LABELS[job.status] ?? job.status} />
           <span className="text-body-sm text-text-secondary">
             {job._count?.applications ?? 0} applicants
           </span>
@@ -253,7 +252,7 @@ export default function ManageJobPage() {
       )}
 
       {editing && form ? (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
           <JobRoleFields
             values={form}
             onChange={(patch) => setForm((prev) => (prev ? { ...prev, ...patch } : prev))}

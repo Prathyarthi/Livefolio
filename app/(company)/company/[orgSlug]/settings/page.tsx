@@ -1,5 +1,6 @@
 "use client";
 
+import { PageSkeleton } from "@/features/organization/components/workspace-ui";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -54,7 +55,7 @@ export default function CompanySettingsPage() {
 
   if (isLoading || !org) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading settings…</div>
+      <PageSkeleton />
     );
   }
 
@@ -78,7 +79,7 @@ export default function CompanySettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
       </Button>
@@ -117,7 +118,7 @@ export default function CompanySettingsPage() {
           Only owners and admins can edit company settings.
         </p>
       ) : (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
           <div className="space-y-5">
             <div className="space-y-3">
               <div>

@@ -146,3 +146,29 @@ export function StageBadge({
     </Badge>
   );
 }
+
+/** Full-page loading skeleton: header plus a couple of panels. */
+export function PageSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8", className)} aria-busy="true" aria-label="Loading">
+      <div className="space-y-2">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-8 w-72 max-w-full" />
+        <Skeleton className="h-4 w-96 max-w-full" />
+      </div>
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-56 w-full" />
+    </div>
+  );
+}
+
+const JOB_STATUS_VARIANT: Record<string, BadgeVariant> = {
+  published: "success",
+  paused: "warning",
+  draft: "outline",
+  closed: "neutral",
+};
+
+export function JobStatusBadge({ status, label }: { status: string; label: string }) {
+  return <Badge variant={JOB_STATUS_VARIANT[status] ?? "neutral"}>{label}</Badge>;
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { ListSkeleton } from "@/features/organization/components/workspace-ui";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -125,7 +126,7 @@ export function WorkspaceTeamSection({
   }
 
   return (
-    <section className="space-y-5 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+    <section className="space-y-5 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
       <div className="space-y-1">
         <h2 className="text-h3 text-text-primary">Team</h2>
         <p className="text-body-sm text-text-secondary">
@@ -137,7 +138,7 @@ export function WorkspaceTeamSection({
       </div>
 
       {isLoading ? (
-        <p className="text-body-sm text-text-muted">Loading team…</p>
+        <ListSkeleton rows={3} />
       ) : (members ?? []).length === 0 ? (
         <p className="text-body-sm text-text-muted">
           No teammates in this workspace yet.

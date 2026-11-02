@@ -49,7 +49,7 @@ export default function ApplicantDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto w-full max-w-[1200px] space-y-6 p-6 md:p-8" aria-busy="true">
+      <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8" aria-busy="true">
         <div className="flex items-center gap-4">
           <Skeleton className="h-16 w-16 rounded-full" />
           <div className="space-y-2">
@@ -65,7 +65,7 @@ export default function ApplicantDetailPage() {
 
   if (error || !data) {
     return (
-      <div className="mx-auto w-full max-w-[1200px] space-y-4 p-6 md:p-8">
+      <div className="mx-auto w-full max-w-[1200px] space-y-4 p-4 md:p-8">
         {error ? (
           <QueryError error={error} fallback="Applicant not found" onRetry={() => void refetch()} />
         ) : (
@@ -123,7 +123,7 @@ export default function ApplicantDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-8 p-4 md:p-8">
       <div className="flex flex-wrap gap-2">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
@@ -314,7 +314,7 @@ export default function ApplicantDetailPage() {
 
       <SnapshotSections snapshot={snapshot} />
 
-      <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+      <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
         <div>
           <h2 className="text-h3 text-text-primary">Private recruiter notes</h2>
           <p className="text-body-sm text-text-muted">
@@ -399,7 +399,7 @@ function SnapshotSections({
   }
 
   return (
-    <div className="space-y-8 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+    <div className="space-y-8 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
       {snapshot.profile.summary ? (
         <section className="space-y-2">
           <h2 className="text-h3 text-text-primary">About</h2>

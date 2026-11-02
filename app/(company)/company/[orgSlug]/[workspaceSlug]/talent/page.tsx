@@ -92,7 +92,7 @@ export default function CompanyTalentPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
       </Button>
@@ -229,7 +229,7 @@ export default function CompanyTalentPage() {
                         {person.title || "Untitled"}
                       </p>
                       {ranked && person.score > 0 ? (
-                        <Badge variant="neutral">Match {person.score}</Badge>
+                        <span className="font-mono text-lg font-semibold tabular-nums text-text-primary" title="Match score">{person.score}</span>
                       ) : null}
                     </div>
                     {person.headline ? (

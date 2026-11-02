@@ -1,5 +1,6 @@
 "use client";
 
+import { JobStatusBadge, ListSkeleton, PageSkeleton } from "@/features/organization/components/workspace-ui";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Briefcase, Plus, Settings, Users } from "lucide-react";
@@ -27,7 +28,7 @@ export default function CompanyOverviewPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading workspace…</div>
+      <PageSkeleton />
     );
   }
 
@@ -48,7 +49,7 @@ export default function CompanyOverviewPage() {
   const recentJobs = (jobs ?? []).slice(0, 5);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-8 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}`}>← Back to organization</Link>
       </Button>
@@ -110,7 +111,7 @@ export default function CompanyOverviewPage() {
         </div>
 
         {jobsLoading ? (
-          <p className="text-body-sm text-text-muted">Loading jobs…</p>
+          <ListSkeleton rows={3} />
         ) : recentJobs.length === 0 ? (
           <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-6 py-10 text-center">
             <Briefcase className="mx-auto h-8 w-8 text-text-muted" />
@@ -152,13 +153,7 @@ export default function CompanyOverviewPage() {
                       ])}
                     </p>
                   </div>
-                  <Badge
-                    variant={
-                      job.status === "published" ? "success" : "neutral"
-                    }
-                  >
-                    {JOB_STATUS_LABELS[job.status] ?? job.status}
-                  </Badge>
+                  <JobStatusBadge status={job.status} label={JOB_STATUS_LABELS[job.status] ?? job.status} />
                 </Link>
               </li>
             ))}

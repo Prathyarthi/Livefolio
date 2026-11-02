@@ -1,5 +1,6 @@
 "use client";
 
+import { PageSkeleton } from "@/features/organization/components/workspace-ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -50,7 +51,7 @@ export default function OrganizationHomePage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading organization…</div>
+      <PageSkeleton />
     );
   }
 
@@ -106,7 +107,7 @@ export default function OrganizationHomePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-8 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href="/company">← Back to companies</Link>
       </Button>

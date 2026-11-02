@@ -1,5 +1,6 @@
 "use client";
 
+import { PageSkeleton } from "@/features/organization/components/workspace-ui";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -40,7 +41,7 @@ export default function WorkspaceSettingsPage() {
 
   if (isLoading || !workspace) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading settings…</div>
+      <PageSkeleton />
     );
   }
 
@@ -64,7 +65,7 @@ export default function WorkspaceSettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}`}>
           ← Back to overview
@@ -83,7 +84,7 @@ export default function WorkspaceSettingsPage() {
           Only owners and admins can edit workspace settings.
         </p>
       ) : (
-        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+        <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
           <div className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">Workspace name</Label>

@@ -203,7 +203,7 @@ export function CompanyIndexPage() {
             Create an organization
           </Button>
         ) : (
-          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
             <h2 className="text-h3 text-text-primary">New company</h2>
             <div className="space-y-2">
               <Label htmlFor="company-name">Company name</Label>
