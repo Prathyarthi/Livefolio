@@ -238,6 +238,7 @@ export type ApplicantPoolFilters = {
   appliedBefore?: string;
   proof?: ProofKind;
   sort?: SearchSort;
+  includeReferences?: boolean;
 };
 
 export type ApplicantPool = {
@@ -337,6 +338,7 @@ export function useApplicantPool(
   const appliedBefore = options?.appliedBefore;
   const proof = options?.proof;
   const sort = options?.sort ?? "relevance";
+  const includeReferences = options?.includeReferences === true;
   const page = options?.page ?? 1;
   const pageSize = options?.pageSize ?? 20;
 
@@ -357,6 +359,7 @@ export function useApplicantPool(
       appliedBefore ?? "",
       proof ?? "",
       sort,
+      includeReferences ? "references" : "",
       page,
       pageSize,
     ],
@@ -374,6 +377,7 @@ export function useApplicantPool(
       if (appliedAfter) params.set("appliedAfter", appliedAfter);
       if (appliedBefore) params.set("appliedBefore", appliedBefore);
       if (proof) params.set("proof", proof);
+      if (includeReferences) params.set("references", "1");
       params.set("sort", sort);
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));

@@ -85,3 +85,50 @@ export function getSectionLabels(
     ])
   ) as Record<SectionKey, string>;
 }
+
+/** Max characters for a user-defined section heading. */
+export const MAX_SECTION_TITLE_CHARS = 40;
+
+export const SECTION_KEYS = Object.keys(STANDARD_SECTION_LABELS) as SectionKey[];
+
+export function isSectionKey(value: unknown): value is SectionKey {
+  return typeof value === "string" && value in STANDARD_SECTION_LABELS;
+}
+
+/**
+ * The user's own heading for a section, or null when they haven't renamed it.
+ * Internal keys (anchors, ordering) never change; this is display-only.
+ */
+export function getCustomSectionLabel(
+  customization: PortfolioCustomization | Record<string, unknown> | null | undefined,
+  key: SectionKey,
+): string | null {
+  const value = getStoredSectionLabels(customization)[key]?.trim();
+  return value ? formatSectionLabel(value) : null;
+}
+
+/** Custom heading if set, otherwise the template's own default wording. */
+export function getSectionTitle(
+  customization: PortfolioCustomization | Record<string, unknown> | null | undefined,
+  key: SectionKey,
+  templateDefault: string,
+): string {
+  return getCustomSectionLabel(customization, key) ?? templateDefault;
+}
+
+/**
+ * Clean a sectionLabels map from user input: known keys only, trimmed,
+ * capped at MAX_SECTION_TITLE_CHARS, and empty entries dropped (= default).
+ */
+export function normalizeSectionTitles(
+  input: unknown,
+): Partial<Record<SectionKey, string>> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+  const out: Partial<Record<SectionKey, string>> = {};
+  for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
+    if (!isSectionKey(key) || typeof value !== "string") continue;
+    const trimmed = value.replace(/\s+/g, " ").trim().slice(0, MAX_SECTION_TITLE_CHARS).trim();
+    if (trimmed) out[key] = trimmed;
+  }
+  return out;
+}

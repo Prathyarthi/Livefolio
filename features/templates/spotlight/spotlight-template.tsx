@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import { ExternalLink, Menu, X } from "lucide-react";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { getCustomSectionLabel } from "@/features/templates/section-labels";
 import { CollapsibleList } from "../collapsible-list";
 import { ArticleSourceLabel, RichText,
   ContactChips,
@@ -59,6 +60,8 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("spotlight", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
+  // Projects normally shows a tagline instead of a heading; a rename replaces it.
+  const customProjectsTitle = getCustomSectionLabel(portfolio.customization, "projects");
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -150,7 +153,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SpotlightSectionHeading title="LinkedIn" />}
+      heading={<SpotlightSectionHeading title={labels.linkedin} />}
       classes={{
             aboutList: "space-y-2 pl-5 text-base leading-relaxed text-gray-600 marker:text-[var(--lf-accent)] md:text-lg",
             aboutParagraph: "text-base leading-relaxed text-gray-600 md:text-lg",
@@ -189,12 +192,16 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                     id="projects"
                   >
                     <h2 className="text-3xl text-[38px] font-extrabold leading-[140%] lg:text-5xl lg:font-medium">
-                      Where <span className="text-[var(--lf-accent)]">logic</span>{" "}
-                      <span className="m-0 block h-0 p-0 md:block lg:hidden">
-                        <br />
-                      </span>
-                      meets <span className="text-[var(--lf-accent)]">pixel</span>
-                      <span>.</span>
+                      {customProjectsTitle ?? (
+                        <>
+                          Where <span className="text-[var(--lf-accent)]">logic</span>{" "}
+                          <span className="m-0 block h-0 p-0 md:block lg:hidden">
+                            <br />
+                          </span>
+                          meets <span className="text-[var(--lf-accent)]">pixel</span>
+                          <span>.</span>
+                        </>
+                      )}
                     </h2>
                   </div>
 

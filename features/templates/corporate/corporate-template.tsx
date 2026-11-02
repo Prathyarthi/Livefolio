@@ -82,7 +82,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-3 pl-5 text-base leading-8 text-slate-600 marker:text-slate-300",
             aboutParagraph: "text-base leading-8 text-slate-600",

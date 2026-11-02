@@ -80,7 +80,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<h2 className="text-3xl font-extrabold text-slate-800">LinkedIn</h2>}
+      heading={<h2 className="text-3xl font-extrabold text-slate-800">{labels.linkedin}</h2>}
       classes={{
             aboutList: "space-y-3 pl-6 text-lg md:text-xl leading-relaxed text-[#666] font-medium marker:text-[var(--lf-accent)]",
             aboutParagraph: "text-lg md:text-xl leading-relaxed text-[#666] font-medium",

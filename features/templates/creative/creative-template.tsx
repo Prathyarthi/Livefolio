@@ -72,7 +72,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading accent="fuchsia">LinkedIn</SectionHeading>}
+      heading={<SectionHeading accent="fuchsia">{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-[var(--lf-accent)]",
             aboutParagraph: "text-base leading-8 text-stone-600",

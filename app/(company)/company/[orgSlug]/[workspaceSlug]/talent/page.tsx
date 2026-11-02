@@ -14,6 +14,7 @@ import { useOrgJobs } from "@/features/jobs/api/use-jobs";
 import {
   FacetPanel,
   ProofBadges,
+  ReferencesToggle,
   SortToggle,
   experienceBandRange,
   type FacetKind,
@@ -39,6 +40,7 @@ export default function CompanyTalentPage() {
   const [experience, setExperience] = useState<string | undefined>();
   const [jobId, setJobId] = useState("");
   const [sort, setSort] = useState<SearchSort>("relevance");
+  const [includeReferences, setIncludeReferences] = useState(false);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function CompanyTalentPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [q, location, skill, proof, experience, jobId, sort]);
+  }, [q, location, skill, proof, experience, jobId, sort, includeReferences]);
 
   const jobsQuery = useOrgJobs(orgSlug, { workspaceSlug });
   const talentQuery = useTalentSearch(orgSlug, workspaceSlug, {
@@ -59,6 +61,7 @@ export default function CompanyTalentPage() {
     ...experienceBandRange(experience),
     jobId: jobId || undefined,
     sort,
+    includeReferences,
     page,
     pageSize: DEFAULT_PAGE_SIZE,
   });
@@ -154,7 +157,7 @@ export default function CompanyTalentPage() {
           active={{ skill, location, experience, proof }}
           onSelect={selectFacet}
         />
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-3">
           <p className="text-body-sm text-text-muted">
             {data
               ? `${total}${data.truncated ? "+" : ""} ${total === 1 ? "person" : "people"}${
@@ -169,6 +172,10 @@ export default function CompanyTalentPage() {
                 Clear
               </Button>
             ) : null}
+            <ReferencesToggle
+              checked={includeReferences}
+              onChange={setIncludeReferences}
+            />
             <SortToggle value={sort} onChange={setSort} />
           </div>
         </div>
@@ -266,7 +273,7 @@ export default function CompanyTalentPage() {
                         />
                       </div>
                     ) : null}
-                    {ranked && person.reasons.length > 0 ? (
+                    {(ranked || includeReferences) && person.reasons.length > 0 ? (
                       <ul className="space-y-0.5 text-body-sm text-text-secondary">
                         {person.reasons.slice(0, 3).map((reason) => (
                           <li key={reason}>{reason}</li>

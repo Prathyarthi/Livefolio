@@ -19,10 +19,10 @@ import {
 } from "@/features/applications/api/use-applications";
 import {
   PIPELINE_STAGE_LABELS,
-  PIPELINE_STAGES,
   type PipelineStage,
 } from "@/features/jobs/constants/labels";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { ApplicationStageSelect } from "@/features/applications/components/application-stage-select";
 import { ScreeningAnswersSection } from "@/features/applications/components/screening-answers-section";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 import { NamedReferences } from "@/features/vouches/components/named-references";
@@ -156,18 +156,12 @@ export default function ApplicantDetailPage() {
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          className="h-10 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-3 text-sm"
+        <ApplicationStageSelect
           value={data.stage}
-          onChange={(e) => handleStage(e.target.value)}
+          onChange={handleStage}
           disabled={updateStage.isPending}
-        >
-          {PIPELINE_STAGES.map((stage) => (
-            <option key={stage} value={stage}>
-              {PIPELINE_STAGE_LABELS[stage]}
-            </option>
-          ))}
-        </select>
+          className="w-auto"
+        />
         <Button
           variant="outline"
           onClick={handleShortlist}

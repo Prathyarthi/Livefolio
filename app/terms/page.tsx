@@ -15,7 +15,7 @@ export const metadata: Metadata = createPageMetadata({
 export default function TermsPage() {
   return (
     <MarketingPageShell>
-      <LegalDocument title="Terms & Conditions" lastUpdated="June 22, 2026">
+      <LegalDocument title="Terms & Conditions" lastUpdated="November 2, 2026">
         <p>
           These Terms &amp; Conditions (&quot;Terms&quot;) govern your access to and
           use of {siteConfig.name}, operated by {siteConfig.legalEntity}. By creating
@@ -114,12 +114,22 @@ export default function TermsPage() {
           the Service.
         </p>
 
+        <h2>Account deletion</h2>
+        <p>
+          To request deletion of your account and associated data, contact us at{" "}
+          request deletion of your account and associated data, email{" "}
+          <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>
+          . We will process the request within a reasonable period, except where we
+          must retain records for legal, security, or billing purposes.
+        </p>
+
         <h2>Termination</h2>
         <p>
-          You may stop using the Service at any time. We may suspend or terminate
-          access if you violate these Terms or if required for security or legal
-          reasons. Upon termination, your right to use the Service ends, but sections
-          that should survive (such as liability limits) will remain in effect.
+          You may stop using the Service at any time by logging out. We may suspend
+          or terminate access if you violate these Terms or if required for
+          security or legal reasons. Upon termination, your right to use the Service
+          ends, but sections that should survive (such as liability limits) will
+          remain in effect.
         </p>
 
         <h2>Changes to these Terms</h2>

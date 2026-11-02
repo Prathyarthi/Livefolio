@@ -6,6 +6,10 @@ import { getSession } from "@/lib/session";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import { validatePortfolioSlug } from "@/lib/slug";
 import {
+  isSectionKey,
+  MAX_SECTION_TITLE_CHARS,
+} from "@/features/templates/section-labels";
+import {
   canUseTemplate,
   getPlanLimitMessage,
   resolveAccessForUser,
@@ -281,24 +285,25 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
       let normalizedCustomization = customization;
       try {
         if (customization?.sectionLabels) {
-          normalizedCustomization = {
-            ...customization,
-            sectionLabels: Object.fromEntries(
-              Object.entries(customization.sectionLabels).map(
-                ([key, value]) => {
-                  if (typeof value !== "string") {
-                    throw new ContentValidationError(
-                      `Section label ${key} must be a string`,
-                    );
-                  }
-                  return [
-                    key,
-                    normalizeRequiredLabel(value, `Section label ${key}`),
-                  ];
-                },
-              ),
-            ),
-          };
+          // Display-only heading overrides; keys stay the internal section keys.
+          const titles: Record<string, string> = {};
+          for (const [key, value] of Object.entries(customization.sectionLabels)) {
+            if (!isSectionKey(key)) {
+              throw new ContentValidationError(`Unknown section "${key}"`);
+            }
+            if (typeof value !== "string") {
+              throw new ContentValidationError(`Section heading for ${key} must be text`);
+            }
+            const trimmed = value.replace(/\s+/g, " ").trim();
+            if (trimmed.length > MAX_SECTION_TITLE_CHARS) {
+              throw new ContentValidationError(
+                `Section heading for ${key} must be ${MAX_SECTION_TITLE_CHARS} characters or fewer`,
+              );
+            }
+            // Empty means "use the template default", so it is simply not stored.
+            if (trimmed) titles[key] = normalizeRequiredLabel(trimmed, `Section heading for ${key}`);
+          }
+          normalizedCustomization = { ...customization, sectionLabels: titles };
         }
         if (customization?.heroTagline !== undefined) {
           normalizedCustomization = {
@@ -494,10 +499,7 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
             sectionLabels: t.Optional(
               t.Record(
                 t.String(),
-                t.String({
-                  minLength: 1,
-                  maxLength: MAX_SHORT_LABEL_CHARS,
-                }),
+                t.String({ maxLength: MAX_SHORT_LABEL_CHARS }),
               ),
             ),
             heroTagline: t.Optional(

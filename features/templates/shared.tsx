@@ -10,6 +10,7 @@ import type {
   TemplateSectionId,
 } from "./types";
 import {
+  getSectionTitle,
   STANDARD_SECTION_LABELS,
   NAVBAR_SECTION_TO_KEY,
 } from "./section-labels";
@@ -20,7 +21,7 @@ import { CollapsibleList } from "./collapsible-list";
 export { TechChip, TechIcon } from "./tech-chip";
 export { RichText } from "@/components/rich-text";
 
-export { getSectionLabel, getSectionLabels, STANDARD_SECTION_LABELS } from "./section-labels";
+export { getSectionLabel, getSectionLabels, getSectionTitle, STANDARD_SECTION_LABELS } from "./section-labels";
 export type { SectionKey } from "./section-labels";
 
 function RichInline({ text }: { text: string }) {
@@ -208,7 +209,11 @@ export function buildTemplateSections(data: PortfolioData) {
     .slice(0, 4)
     .map((section) => ({
       id: section,
-      label: STANDARD_SECTION_LABELS[NAVBAR_SECTION_TO_KEY[section]],
+      label: getSectionTitle(
+        customization,
+        NAVBAR_SECTION_TO_KEY[section],
+        STANDARD_SECTION_LABELS[NAVBAR_SECTION_TO_KEY[section]],
+      ),
     }));
 
   return {
