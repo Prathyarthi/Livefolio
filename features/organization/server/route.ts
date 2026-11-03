@@ -26,6 +26,7 @@ import {
   resolveOrgAccess,
   assertSeatAvailable,
   ORG_BILLING_SELECT,
+  orgPlanTier,
   withOrganizationLock,
   withUserLock,
 } from "@/lib/org-entitlements";
@@ -467,6 +468,10 @@ export const organization = new Elysia({ prefix: "/organizations" })
       session.userId,
       access.role,
     );
+    const billingProfile = await prisma.organization.findUnique({
+      where: { id: access.organization.id },
+      select: ORG_BILLING_SELECT,
+    });
 
     const accessibleWorkspaceIds = workspaces.map((ws) => ws.id);
 
@@ -504,6 +509,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
         manageJobs: canManageJobs(access.role),
       },
       jobCounts: counts,
+      planTier: billingProfile ? orgPlanTier(billingProfile) : ("free" as const),
       workspaces: workspaces.map((ws) => ({
         id: ws.id,
         name: ws.name,

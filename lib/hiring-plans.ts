@@ -23,7 +23,7 @@ export const HIRING_SEAT_PRICING: Record<PaidHiringPlan, Record<BillingInterval,
 };
 
 /** Pro: open (published or paused) jobs allowed per workspace. Drafts are unlimited. */
-export const PRO_OPEN_JOBS_PER_WORKSPACE = 10;
+export const PRO_OPEN_JOBS_PER_WORKSPACE = 5;
 /** Pro: workspaces per organization. */
 export const PRO_MAX_WORKSPACES = 5;
 export const MAX_SEATS = 200;
@@ -36,18 +36,32 @@ export type PlanLimits = {
   maxWorkspaces: number | null;
   /** Fixed seat cap for free; paid plans use the purchased seat count. */
   includedSeats: number | null;
+  /** Talent search (opted-in candidates). Pro and above. */
+  talentSearch: boolean;
 };
 
 export const PLAN_LIMITS: Record<OrgPlanTier, PlanLimits> = {
-  free: { maxOpenJobs: 1, maxOpenJobsPerWorkspace: null, maxWorkspaces: 1, includedSeats: 1 },
+  free: { maxOpenJobs: 1, maxOpenJobsPerWorkspace: null, maxWorkspaces: 1, includedSeats: 1, talentSearch: false },
   pro: {
     maxOpenJobs: null,
     maxOpenJobsPerWorkspace: PRO_OPEN_JOBS_PER_WORKSPACE,
     maxWorkspaces: PRO_MAX_WORKSPACES,
     includedSeats: null,
+    talentSearch: true,
   },
-  business: { maxOpenJobs: null, maxOpenJobsPerWorkspace: null, maxWorkspaces: null, includedSeats: null },
+  business: {
+    maxOpenJobs: null,
+    maxOpenJobsPerWorkspace: null,
+    maxWorkspaces: null,
+    includedSeats: null,
+    talentSearch: true,
+  },
 };
+
+/** Talent search is Pro and above (Enterprise is a Business org with a custom contract). */
+export function canUseTalentSearch(tier: OrgPlanTier): boolean {
+  return PLAN_LIMITS[tier].talentSearch;
+}
 
 /** Both paid plans start from 1 seat. */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -142,7 +156,6 @@ export const HIRING_CORE_FEATURES: HiringPlanFeature[] = [
   { label: "Compare candidates side by side" },
   { label: "Pool gap report" },
   { label: "Pipeline stages and shortlist" },
-  { label: "Talent search (candidates who opted in), free" },
 ];
 
 export type HiringDisplayPlan = HiringPlanSlug | "enterprise";
@@ -204,6 +217,7 @@ export const HIRING_PLAN_DISPLAY: Record<HiringDisplayPlan, HiringPlanDisplay> =
     cta: "Start hiring",
     featuresHeading: "Everything in Free, plus",
     features: [
+      { label: "Talent search (candidates who opted in)" },
       { label: "Invite teammates to share the pipeline" },
       { label: "Priority support" },
     ],

@@ -14,7 +14,7 @@ import {
 
 type EntitlementDb = Prisma.TransactionClient | typeof prisma;
 
-export type OrgLimitKind = "organization" | "workspace" | "job" | "workspace_job" | "seat";
+export type OrgLimitKind = "organization" | "workspace" | "job" | "workspace_job" | "seat" | "talent";
 
 export function orgUpgradeMessage(kind: OrgLimitKind, tier?: OrgPlanTier): string {
   if (kind === "organization") {
@@ -24,6 +24,9 @@ export function orgUpgradeMessage(kind: OrgLimitKind, tier?: OrgPlanTier): strin
     return tier === "pro"
       ? `Pro includes up to ${PRO_MAX_WORKSPACES} workspaces. Upgrade to Business in Billing for unlimited workspaces.`
       : "Free includes 1 workspace. Upgrade to Pro (up to 5) or Business (unlimited) in Billing.";
+  }
+  if (kind === "talent") {
+    return "Talent search is on Pro and above. Upgrade in Billing to search candidates who opted in.";
   }
   if (kind === "workspace_job") {
     return `Pro allows up to ${PRO_OPEN_JOBS_PER_WORKSPACE} open jobs per workspace. Pause or close a job here, or upgrade to Business in Billing for unlimited open jobs.`;

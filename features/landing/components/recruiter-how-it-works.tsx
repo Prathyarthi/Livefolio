@@ -79,7 +79,7 @@ export function RecruiterHowItWorks() {
         </BentoCard>
         <BentoCard
           title="Talent search"
-          body="Find people who opted in to be found, ranked the same way. Opting in is never shown publicly."
+          body="On Pro and above: find people who opted in to be found, ranked the same way. Opting in is never shown publicly."
         >
           <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-3 py-2 text-xs text-text-secondary">
             <Search className="h-3.5 w-3.5 shrink-0" aria-hidden />

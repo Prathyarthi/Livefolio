@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ContactSalesDialog } from "@/features/landing/components/contact-sales-dialog";
 import { HiringPlanFeatures } from "@/features/landing/components/hiring-plan-features";
 import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -19,10 +20,8 @@ import {
   formatUsd,
   type BillingInterval,
 } from "@/lib/pricing";
-import { siteConfig } from "@/lib/site";
 import {
   ENTERPRISE_PLAN,
-  enterpriseContactHref,
   HIRING_PLAN_NAMES,
   MAX_SEATS,
   minSeatsFor,
@@ -297,7 +296,7 @@ export default function CompanyBillingPage() {
       <PageHeader
         eyebrow="Billing"
         title="Hiring plan"
-        description="Proof-based ranking, references, compare, the gap report, pipeline and Talent search are on every plan. Paid plans are priced per seat."
+        description="Proof-based ranking, references, compare, the gap report and pipeline are on every plan. Talent search starts on Pro. Paid plans are priced per seat."
       />
 
       {returning && isPending ? (
@@ -513,9 +512,7 @@ export default function CompanyBillingPage() {
               {ENTERPRISE_PLAN.features.map((f) => f.label.toLowerCase()).join(", ")}.
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <a href={enterpriseContactHref(siteConfig.supportEmail)}>{ENTERPRISE_PLAN.cta}</a>
-          </Button>
+          <ContactSalesDialog size="sm" />
         </Panel>
       ) : null}
 

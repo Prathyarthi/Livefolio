@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  canUseTalentSearch,
   openJobBlockReason,
   PRO_MAX_WORKSPACES,
   PRO_OPEN_JOBS_PER_WORKSPACE,
@@ -72,7 +73,7 @@ describe("prices", () => {
 
 describe("limits", () => {
   test("free: 1 job, 1 workspace; pro: 5 workspaces, per-workspace jobs; business unlimited", () => {
-    expect(PLAN_LIMITS.free).toEqual({ maxOpenJobs: 1, maxOpenJobsPerWorkspace: null, maxWorkspaces: 1, includedSeats: 1 });
+    expect(PLAN_LIMITS.free).toEqual({ maxOpenJobs: 1, maxOpenJobsPerWorkspace: null, maxWorkspaces: 1, includedSeats: 1, talentSearch: false });
     expect(PRO_MAX_WORKSPACES).toBe(5);
     expect(PLAN_LIMITS.pro.maxWorkspaces).toBe(PRO_MAX_WORKSPACES);
     expect(PLAN_LIMITS.pro.maxOpenJobs).toBeNull();
@@ -139,5 +140,18 @@ describe("opening jobs", () => {
   });
   test("business: unlimited", () => {
     expect(openJobBlockReason("business", { orgOpen: 500, workspaceOpen: 500 })).toBeNull();
+  });
+});
+
+describe("talent search", () => {
+  test("Pro and above only", () => {
+    expect(canUseTalentSearch("free")).toBe(false);
+    expect(canUseTalentSearch("pro")).toBe(true);
+    expect(canUseTalentSearch("business")).toBe(true);
+  });
+  test("listed on Pro's plus list, not on every plan", async () => {
+    const { HIRING_PLAN_DISPLAY, HIRING_CORE_FEATURES } = await import("@/lib/hiring-plans");
+    expect(HIRING_CORE_FEATURES.some((f) => f.label.startsWith("Talent search"))).toBe(false);
+    expect(HIRING_PLAN_DISPLAY.pro.features[0]?.label).toBe("Talent search (candidates who opted in)");
   });
 });

@@ -76,6 +76,8 @@ export type OrganizationDetail = OrganizationSummary & {
     manageOrganization: boolean;
     manageJobs: boolean;
   };
+  /** Hiring plan tier; Free has no Talent search. */
+  planTier?: "free" | "pro" | "business";
   jobCounts: {
     draft: number;
     published: number;
