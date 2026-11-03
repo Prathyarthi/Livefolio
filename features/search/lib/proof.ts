@@ -26,6 +26,21 @@ export function isProofKind(value: unknown): value is ProofKind {
 }
 
 const URL_PATTERN = /https?:\/\/[^\s"']+/i;
+
+/**
+ * A social profile is "connected" only when Livefolio actually fetched data for it
+ * (cachedStats from a sync/import, e.g. GitHub contributions or LeetCode solved counts).
+ * A pasted profile URL has no cachedStats and is just a link: it earns no proof credit.
+ */
+export function isConnectedProfile(profile: { cachedStats?: unknown }): boolean {
+  const stats = profile.cachedStats;
+  return (
+    Boolean(stats) &&
+    typeof stats === "object" &&
+    !Array.isArray(stats) &&
+    Object.keys(stats as Record<string, unknown>).length > 0
+  );
+}
 const LINK_HOSTS_SOURCE = /github\.com|gitlab\.com|bitbucket\.org/i;
 
 /** Proof-of-work a Livefolio carries, for any role: shipped links, source, writing, credentials, awards. */
@@ -39,17 +54,19 @@ export function proofKindsOf(
     if (project.sourceUrl) kinds.add("source");
   }
   if (
-    snapshot.socialProfiles.some((s) =>
-      ["github", "gitlab", "leetcode", "codeforces", "stackoverflow"].includes(
-        s.platform.toLowerCase(),
-      ),
+    snapshot.socialProfiles.some(
+      (s) =>
+        isConnectedProfile(s) &&
+        ["github", "gitlab", "leetcode", "codeforces", "stackoverflow"].includes(
+          s.platform.toLowerCase(),
+        ),
     )
   ) {
     kinds.add("source");
   }
   if (
-    snapshot.socialProfiles.some((s) =>
-      ["dribbble", "behance"].includes(s.platform.toLowerCase()),
+    snapshot.socialProfiles.some(
+      (s) => isConnectedProfile(s) && ["dribbble", "behance"].includes(s.platform.toLowerCase()),
     )
   ) {
     kinds.add("live");

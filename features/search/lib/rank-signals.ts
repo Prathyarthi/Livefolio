@@ -1,3 +1,4 @@
+import { isConnectedProfile } from "@/features/search/lib/proof";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import type { JobSearchProfile } from "@/features/jobs/lib/search-profile";
 import {
@@ -230,6 +231,8 @@ function proofItems(snapshot: ApplicationSnapshotData): ProofItem[] {
     }
   }
   for (const social of snapshot.socialProfiles) {
+    // Link-only profiles (no fetched data) are unverified and earn no proof credit.
+    if (!isConnectedProfile(social)) continue;
     const platform = social.platform.toLowerCase();
     if (SOURCE_PLATFORMS.has(platform)) {
       items.push({

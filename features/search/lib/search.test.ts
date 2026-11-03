@@ -7,7 +7,7 @@ import {
   matchesInterpretedQuery,
   snapshotSearchBlob,
 } from "@/features/search/lib/match";
-import { proofKindsOf } from "@/features/search/lib/proof";
+import { isConnectedProfile, proofKindsOf } from "@/features/search/lib/proof";
 import { interpretSearchQuery, termAsTyped } from "@/features/search/lib/query";
 import {
   rankAgainstJob,
@@ -475,5 +475,41 @@ describe("facets and proof filters", () => {
     expect(matchesStructuredFilters(person, { skill: "project management professional" }, now)).toBe(true);
     expect(matchesStructuredFilters(person, { proof: "certified" }, now)).toBe(true);
     expect(matchesStructuredFilters(person, { proof: "writing" }, now)).toBe(false);
+  });
+});
+
+describe("connected vs link-only integrations", () => {
+  const linkOnly = { platform: "github", url: "https://github.com/x", username: "x", cachedStats: null };
+  const connected = { ...linkOnly, cachedStats: { totalContributions: 120 } };
+  const eng = () => jobProfile("engineering", { mustHaves: ["react"] });
+
+  test("isConnectedProfile needs fetched data", () => {
+    expect(isConnectedProfile(linkOnly)).toBe(false);
+    expect(isConnectedProfile({ ...linkOnly, cachedStats: {} })).toBe(false);
+    expect(isConnectedProfile(connected)).toBe(true);
+  });
+
+  test("a pasted GitHub link earns no proof kind, proof credit or reason", () => {
+    const linked = snapshot({ skills: [skill("React")], socialProfiles: [linkOnly] });
+    expect(proofKindsOf(linked)).not.toContain("source");
+    const rank = rankAgainstJob(linked, eng());
+    expect(rank.proven).toBe(0);
+    expect(rank.platform).toBe(0);
+    expect(rank.reasons.some((r) => /github/i.test(r))).toBe(false);
+  });
+
+  test("a connected GitHub still earns credit and outranks a link-only one", () => {
+    const real = snapshot({ skills: [skill("React")], socialProfiles: [connected] });
+    const linked = snapshot({ skills: [skill("React")], socialProfiles: [linkOnly] });
+    expect(proofKindsOf(real)).toContain("source");
+    expect(rankAgainstJob(real, eng()).score).toBeGreaterThan(rankAgainstJob(linked, eng()).score);
+  });
+
+  test("reasons never call anything connected or verified", () => {
+    const linked = snapshot({
+      skills: [skill("React")],
+      socialProfiles: [linkOnly, { platform: "dribbble", url: "https://dribbble.com/x", username: "x", cachedStats: null }],
+    });
+    for (const r of rankAgainstJob(linked, eng()).reasons) expect(r).not.toMatch(/connected|verified/i);
   });
 });
