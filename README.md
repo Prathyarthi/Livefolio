@@ -58,7 +58,7 @@ Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Per-seat hiring billing
 
-Hiring plans live in `lib/hiring-plans.ts` (Free, Pro and Business, priced per seat; Business needs at least 3 seats). Enterprise is display-only ("Custom", Contact sales via `siteConfig.supportEmail`) with no Razorpay plan or checkout. Seats used = org members + pending invites; inviting beyond paid seats returns 402.
+Hiring plans live in `lib/hiring-plans.ts` (Free, Pro and Business, priced per seat, both paid plans from 1 seat). Limits: Free 1 seat / 1 open job / 1 workspace; Pro up to `PRO_MAX_WORKSPACES` (5) workspaces and `PRO_OPEN_JOBS_PER_WORKSPACE` (10) open jobs per workspace, enforced when a job is opened, published or reopened; Business unlimited. Orgs over a limit after a downgrade keep everything and are only blocked from opening or creating more. Enterprise is display-only ("Custom", Contact sales via `siteConfig.supportEmail`) with no Razorpay plan or checkout. Seats used = org members + pending invites; inviting beyond paid seats returns 402.
 
 Before going live:
 1. Apply migration `20261102210000_org_per_seat_plans` (adds plan and seat columns).

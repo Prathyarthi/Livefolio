@@ -12,9 +12,10 @@ import {
 import {
   OrgPlanLimitError,
   isOrgPlanLimitError,
-  resolveOrgAccess,
+  orgPlanTier,
   withOrganizationLock,
 } from "@/lib/org-entitlements";
+import { openJobBlockReason } from "@/lib/hiring-plans";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import { deleteObjectQuiet, isR2Configured } from "@/lib/r2";
 import {
@@ -26,6 +27,7 @@ const OPEN_JOB_STATUSES = new Set(["published", "paused"]);
 
 async function assertCanOpenJob(
   organizationId: string,
+  workspaceId: string,
   opts?: {
     excludeJobId?: string;
     client?: Prisma.TransactionClient | typeof prisma;
@@ -59,9 +61,21 @@ async function assertCanOpenJob(
       ...(opts?.excludeJobId ? { id: { not: opts.excludeJobId } } : {}),
     },
   });
-  const access = await resolveOrgAccess(org, { openJobCount });
-  if (!access.canPublishMoreJobs) {
-    throw new OrgPlanLimitError("job", org.slug);
+  const workspaceOpenJobCount = await client.job.count({
+    where: {
+      organizationId,
+      workspaceId,
+      status: { in: ["published", "paused"] },
+      ...(opts?.excludeJobId ? { id: { not: opts.excludeJobId } } : {}),
+    },
+  });
+  // Over-limit orgs (e.g. after a downgrade) keep their open jobs; only new openings are blocked.
+  const blocked = openJobBlockReason(orgPlanTier(org), {
+    orgOpen: openJobCount,
+    workspaceOpen: workspaceOpenJobCount,
+  });
+  if (blocked) {
+    throw new OrgPlanLimitError(blocked, org.slug);
   }
   return { ok: true as const };
 }
@@ -410,7 +424,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       try {
         if (OPEN_JOB_STATUSES.has(resolvedStatus)) {
           job = await withOrganizationLock(org.id, async (tx) => {
-            await assertCanOpenJob(org.id, { client: tx });
+            await assertCanOpenJob(org.id, access.workspace.id, { client: tx });
             return tx.job.create({
               data: jobCreateData,
               include: jobCompanyInclude,
@@ -611,7 +625,7 @@ export const jobs = new Elysia({ prefix: "/jobs" })
       try {
         if (becomingOpen) {
           await withOrganizationLock(existing.organizationId, async (tx) => {
-            await assertCanOpenJob(existing.organizationId, {
+            await assertCanOpenJob(existing.organizationId, existing.workspaceId, {
               excludeJobId: existing.id,
               client: tx,
             });

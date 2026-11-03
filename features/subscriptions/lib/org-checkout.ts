@@ -18,7 +18,7 @@ export async function startOrgProCheckout(options: {
   interval: BillingInterval;
   /** Per-seat plan; defaults to Pro. */
   plan?: PaidHiringPlan;
-  /** Seats to buy (Razorpay quantity). Business minimum is 3. */
+  /** Seats to buy (Razorpay quantity). Both paid plans start from 1 seat. */
   seats?: number;
   razorpayLoaded: boolean;
   onError: (message: string) => void;

@@ -2,7 +2,8 @@ import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isProSubscription } from "@/lib/entitlements";
 import {
-  BUSINESS_MIN_SEATS,
+  PRO_MAX_WORKSPACES,
+  PRO_OPEN_JOBS_PER_WORKSPACE,
   canAddSeatHolder,
   PLAN_LIMITS,
   resolvePlanTier,
@@ -13,14 +14,19 @@ import {
 
 type EntitlementDb = Prisma.TransactionClient | typeof prisma;
 
-export type OrgLimitKind = "organization" | "workspace" | "job" | "seat";
+export type OrgLimitKind = "organization" | "workspace" | "job" | "workspace_job" | "seat";
 
-export function orgUpgradeMessage(kind: OrgLimitKind): string {
+export function orgUpgradeMessage(kind: OrgLimitKind, tier?: OrgPlanTier): string {
   if (kind === "organization") {
     return "Free plans include 1 organization. Upgrade to Pro to create more.";
   }
   if (kind === "workspace") {
-    return `Multiple workspaces are on the Business plan (from ${BUSINESS_MIN_SEATS} seats). Upgrade in Billing.`;
+    return tier === "pro"
+      ? `Pro includes up to ${PRO_MAX_WORKSPACES} workspaces. Upgrade to Business in Billing for unlimited workspaces.`
+      : "Free includes 1 workspace. Upgrade to Pro (up to 5) or Business (unlimited) in Billing.";
+  }
+  if (kind === "workspace_job") {
+    return `Pro allows up to ${PRO_OPEN_JOBS_PER_WORKSPACE} open jobs per workspace. Pause or close a job here, or upgrade to Business in Billing for unlimited open jobs.`;
   }
   if (kind === "seat") {
     return "All paid seats are in use. Add a seat in Billing (or upgrade from Free) to invite more teammates.";
@@ -35,8 +41,9 @@ export class OrgPlanLimitError extends Error {
   constructor(
     readonly kind: OrgLimitKind,
     readonly upgradeOrgSlug: string,
+    tier?: OrgPlanTier,
   ) {
-    super(orgUpgradeMessage(kind));
+    super(orgUpgradeMessage(kind, tier));
     this.name = "OrgPlanLimitError";
   }
 
@@ -127,6 +134,8 @@ export const ORG_BILLING_SELECT = {
 export type OrgAccessSnapshot = {
   plan: OrgPlan;
   maxOpenJobs: number | null;
+  /** Pro: open jobs allowed per workspace. null = unlimited. */
+  maxOpenJobsPerWorkspace: number | null;
   maxWorkspaces: number | null;
   canPublishMoreJobs: boolean;
   canCreateMoreWorkspaces: boolean;
@@ -223,6 +232,7 @@ export async function resolveOrgAccess(
   return {
     plan: tier === "free" ? "free" : "pro",
     maxOpenJobs,
+    maxOpenJobsPerWorkspace: limits.maxOpenJobsPerWorkspace,
     maxWorkspaces,
     canPublishMoreJobs,
     canCreateMoreWorkspaces,

@@ -739,7 +739,7 @@ export const organization = new Elysia({ prefix: "/organizations" })
           });
           const entitlement = await resolveOrgAccess(org, { workspaceCount });
           if (!entitlement.canCreateMoreWorkspaces) {
-            throw new OrgPlanLimitError("workspace", org.slug);
+            throw new OrgPlanLimitError("workspace", org.slug, entitlement.tier);
           }
 
           const slugTaken = await tx.workspace.findUnique({

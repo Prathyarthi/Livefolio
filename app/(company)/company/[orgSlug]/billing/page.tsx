@@ -58,6 +58,7 @@ type OrgBillingState = {
   access: {
     plan: "free" | "pro";
     maxOpenJobs: number | null;
+    maxOpenJobsPerWorkspace?: number | null;
     maxWorkspaces: number | null;
     canPublishMoreJobs: boolean;
     canCreateMoreWorkspaces: boolean;
@@ -363,7 +364,11 @@ export default function CompanyBillingPage() {
             <span className="text-text-secondary">Open jobs</span>
             <span className="font-mono tabular-nums text-text-primary">
               {billing.access.openJobCount}
-              {billing.access.maxOpenJobs != null ? ` / ${billing.access.maxOpenJobs}` : " · unlimited"}
+              {billing.access.maxOpenJobs != null
+                ? ` / ${billing.access.maxOpenJobs}`
+                : billing.access.maxOpenJobsPerWorkspace != null
+                  ? ` · up to ${billing.access.maxOpenJobsPerWorkspace} per workspace`
+                  : " · unlimited"}
             </span>
           </div>
           <div className="flex justify-between py-2">
@@ -471,9 +476,6 @@ export default function CompanyBillingPage() {
               / {billingInterval === "monthly" ? "month" : billingInterval === "quarterly" ? "quarter" : "year"}
             </p>
           </div>
-          {selectedPlan === "business" ? (
-            <p className="text-xs text-text-muted">Business starts at 3 seats.</p>
-          ) : null}
           {seatsInUse > minSeatsFor(selectedPlan) ? (
             <p className="text-xs text-text-muted">
               Your team already uses {seatsInUse} seats, so that&apos;s the minimum.

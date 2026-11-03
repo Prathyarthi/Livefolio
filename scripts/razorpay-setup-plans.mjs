@@ -171,7 +171,7 @@ Options:
 
 Personal Pro (INR): ₹599 / ₹1,599 / ₹5,999
 Hiring Pro / seat:  ₹2,999 / ₹8,499 / ₹29,988
-Hiring Business / seat (min 3 seats at checkout): ₹4,999 / ₹14,199 / ₹50,388
+Hiring Business / seat: ₹4,999 / ₹14,199 / ₹50,388
 
 After creating plans, configure webhook in Razorpay Dashboard:
   POST https://your-domain.com/api/billing/webhook

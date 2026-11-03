@@ -22,25 +22,53 @@ export const HIRING_SEAT_PRICING: Record<PaidHiringPlan, Record<BillingInterval,
   },
 };
 
-export const BUSINESS_MIN_SEATS = 3;
+/** Pro: open (published or paused) jobs allowed per workspace. Drafts are unlimited. */
+export const PRO_OPEN_JOBS_PER_WORKSPACE = 10;
+/** Pro: workspaces per organization. */
+export const PRO_MAX_WORKSPACES = 5;
 export const MAX_SEATS = 200;
 
 export type PlanLimits = {
   /** null = unlimited */
   maxOpenJobs: number | null;
+  /** Open jobs allowed in a single workspace. null = unlimited */
+  maxOpenJobsPerWorkspace: number | null;
   maxWorkspaces: number | null;
   /** Fixed seat cap for free; paid plans use the purchased seat count. */
   includedSeats: number | null;
 };
 
 export const PLAN_LIMITS: Record<OrgPlanTier, PlanLimits> = {
-  free: { maxOpenJobs: 1, maxWorkspaces: 1, includedSeats: 1 },
-  pro: { maxOpenJobs: null, maxWorkspaces: 1, includedSeats: null },
-  business: { maxOpenJobs: null, maxWorkspaces: null, includedSeats: null },
+  free: { maxOpenJobs: 1, maxOpenJobsPerWorkspace: null, maxWorkspaces: 1, includedSeats: 1 },
+  pro: {
+    maxOpenJobs: null,
+    maxOpenJobsPerWorkspace: PRO_OPEN_JOBS_PER_WORKSPACE,
+    maxWorkspaces: PRO_MAX_WORKSPACES,
+    includedSeats: null,
+  },
+  business: { maxOpenJobs: null, maxOpenJobsPerWorkspace: null, maxWorkspaces: null, includedSeats: null },
 };
 
-export function minSeatsFor(plan: PaidHiringPlan): number {
-  return plan === "business" ? BUSINESS_MIN_SEATS : 1;
+/** Both paid plans start from 1 seat. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function minSeatsFor(_plan: PaidHiringPlan): number {
+  return 1;
+}
+
+/**
+ * Whether one more job can be opened, given current open counts (excluding the job being opened).
+ * Over-limit orgs (e.g. after a downgrade) keep what they have; only new openings are blocked.
+ */
+export function openJobBlockReason(
+  tier: OrgPlanTier,
+  counts: { orgOpen: number; workspaceOpen: number },
+): "job" | "workspace_job" | null {
+  const limits = PLAN_LIMITS[tier];
+  if (limits.maxOpenJobs !== null && counts.orgOpen >= limits.maxOpenJobs) return "job";
+  if (limits.maxOpenJobsPerWorkspace !== null && counts.workspaceOpen >= limits.maxOpenJobsPerWorkspace) {
+    return "workspace_job";
+  }
+  return null;
 }
 
 export function parsePaidHiringPlan(value: unknown): PaidHiringPlan | null {
@@ -133,16 +161,20 @@ export function planLimitLines(plan: HiringDisplayPlan): string[] {
   }
   const limits = PLAN_LIMITS[plan];
   const seats =
-    plan === "free"
-      ? limitCount(limits.includedSeats, "seat", "seats")
-      : plan === "business"
-        ? `Per seat, from ${BUSINESS_MIN_SEATS} seats`
-        : "Per seat, from 1 seat";
+    plan === "free" ? limitCount(limits.includedSeats, "seat", "seats") : `Per seat, from ${minSeatsFor(plan)} seat`;
   const jobs =
-    limits.maxOpenJobs === null
-      ? "Unlimited open jobs"
-      : `${limitCount(limits.maxOpenJobs, "open job", "open jobs")} (unlimited drafts)`;
-  return [seats, jobs, limitCount(limits.maxWorkspaces, "workspace", "workspaces")];
+    limits.maxOpenJobsPerWorkspace !== null
+      ? `Up to ${limits.maxOpenJobsPerWorkspace} open jobs per workspace`
+      : limits.maxOpenJobs === null
+        ? "Unlimited open jobs"
+        : `${limitCount(limits.maxOpenJobs, "open job", "open jobs")} (unlimited drafts)`;
+  const workspaces =
+    limits.maxWorkspaces === null
+      ? "Unlimited workspaces"
+      : limits.maxWorkspaces === 1
+        ? "1 workspace"
+        : `Up to ${limits.maxWorkspaces} workspaces`;
+  return [seats, jobs, workspaces];
 }
 
 export type HiringPlanDisplay = {
