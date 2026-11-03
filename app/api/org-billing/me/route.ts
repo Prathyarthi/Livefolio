@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { prisma } from "@/lib/prisma";
-import {
-  getAvailableOrgBillingIntervals,
-  isAnyOrgBillingReady,
-} from "@/lib/billing";
+import { getAvailableOrgSeatIntervals } from "@/lib/billing";
 import { requireOrgMember } from "@/features/organization/lib/org-access";
 import { canManageOrganization } from "@/features/organization/lib/permissions";
 import { resolveOrgAccess } from "@/lib/org-entitlements";
@@ -30,6 +27,9 @@ export async function GET(req: Request) {
       subscriptionStatus: true,
       subscriptionCancelAtPeriodEnd: true,
       subscriptionCurrentPeriodEnd: true,
+      subscriptionPlan: true,
+      subscriptionSeats: true,
+      razorpaySubscriptionId: true,
     },
   });
   if (!org) {
@@ -42,6 +42,14 @@ export async function GET(req: Request) {
   }
 
   const access = await resolveOrgAccess(org);
+  const proIntervals = getAvailableOrgSeatIntervals("pro");
+  const currentSub = org.razorpaySubscriptionId
+    ? await prisma.billingSubscription.findUnique({
+        where: { providerSubscriptionId: org.razorpaySubscriptionId },
+        select: { interval: true },
+      })
+    : null;
+  const businessIntervals = getAvailableOrgSeatIntervals("business");
   const sub = (org.subscriptionStatus ?? "").toLowerCase();
   const subscription =
     sub === "active"
@@ -61,8 +69,11 @@ export async function GET(req: Request) {
         : null;
 
   return NextResponse.json({
-    razorpayReady: isAnyOrgBillingReady(),
-    availableIntervals: getAvailableOrgBillingIntervals(),
+    razorpayReady: proIntervals.length + businessIntervals.length > 0,
+    availableIntervals: proIntervals,
+    planIntervals: { pro: proIntervals, business: businessIntervals },
+    seats: org.subscriptionSeats ?? null,
+    interval: currentSub?.interval ?? null,
     canManageBilling: canManageOrganization(membership.role),
     organization: { id: org.id, slug: org.slug, name: org.name },
     subscription,

@@ -1,3 +1,4 @@
+import { withLinkedIn } from "@/features/applications/lib/linkedin-snapshot";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import {
   expandSkillTerms,
@@ -115,6 +116,7 @@ export function snapshotSearchBlob(
   snapshot: ApplicationSnapshotData | null | undefined,
   extras?: { name?: string; email?: string; coverNote?: string | null },
 ): string {
+  snapshot = withLinkedIn(snapshot);
   if (!snapshot) {
     return [extras?.name, extras?.email, extras?.coverNote]
       .filter(Boolean)

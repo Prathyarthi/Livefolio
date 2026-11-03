@@ -1,32 +1,52 @@
 "use client";
 
 import Link from "next/link";
+import { ContactSalesDialog } from "@/features/landing/components/contact-sales-dialog";
+import { HiringPlanFeatures } from "@/features/landing/components/hiring-plan-features";
 import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import {
-  CheckCircle2,
-  CreditCard,
-  Crown,
-  Loader2,
-} from "lucide-react";
+import { CheckCircle2, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CancelSubscriptionDialog } from "@/components/cancel-subscription-dialog";
 import { BillingIntervalToggle } from "@/features/subscriptions/components/billing-interval-toggle";
+import { startOrgProCheckout } from "@/features/subscriptions/lib/org-checkout";
 import {
-  orgSubscribeButtonLabel,
-  startOrgProCheckout,
-} from "@/features/subscriptions/lib/org-checkout";
-import {
-  formatOrgProPriceLabel,
+  BILLING_CURRENCY,
+  formatInr,
+  formatSeatMonthlyHeadline,
+  formatSeatPriceLabel,
+  formatUsd,
   type BillingInterval,
 } from "@/lib/pricing";
+import {
+  ENTERPRISE_PLAN,
+  HIRING_PLAN_NAMES,
+  MAX_SEATS,
+  minSeatsFor,
+  periodTotal,
+  type OrgPlanTier,
+  type PaidHiringPlan,
+} from "@/lib/hiring-plans";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import {
+  Eyebrow,
+  PageHeader,
+  PageSkeleton,
+  Panel,
+  QueryError,
+} from "@/features/organization/components/workspace-ui";
+import { cn } from "@/lib/utils";
 import { getIntervalCheckoutUnavailableMessage } from "@/lib/billing";
 
 type OrgBillingState = {
   razorpayReady: boolean;
   availableIntervals?: BillingInterval[];
+  planIntervals?: Record<PaidHiringPlan, BillingInterval[]>;
+  seats?: number | null;
+  interval?: BillingInterval | null;
   canManageBilling: boolean;
   organization: { id: string; slug: string; name: string };
   subscription: {
@@ -37,11 +57,18 @@ type OrgBillingState = {
   access: {
     plan: "free" | "pro";
     maxOpenJobs: number | null;
+    maxOpenJobsPerWorkspace?: number | null;
     maxWorkspaces: number | null;
     canPublishMoreJobs: boolean;
     canCreateMoreWorkspaces: boolean;
     openJobCount: number;
     workspaceCount: number;
+    tier?: OrgPlanTier;
+    seatLimit: number | null;
+    seatsUsed: number;
+    activeMembers: number;
+    pendingInvites: number;
+    canAddSeatHolder: boolean;
   };
 };
 
@@ -67,7 +94,11 @@ export default function CompanyBillingPage() {
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [billingInterval, setBillingInterval] =
-    useState<BillingInterval>("monthly");
+    useState<BillingInterval>("yearly");
+  const [selectedPlan, setSelectedPlan] = useState<PaidHiringPlan>("pro");
+  const [seatCount, setSeatCount] = useState(1);
+  const [seatTarget0, setSeatTarget] = useState<number | null>(null);
+  const [changingSeats, setChangingSeats] = useState(false);
   const [checkoutIntervals, setCheckoutIntervals] = useState<BillingInterval[]>([
     "monthly",
   ]);
@@ -131,6 +162,12 @@ export default function CompanyBillingPage() {
       await startOrgProCheckout({
         orgSlug,
         interval: billingInterval,
+        plan: selectedPlan,
+        seats: Math.max(
+          seatCount,
+          minSeatsFor(selectedPlan),
+          billing?.access.seatsUsed ?? 1,
+        ),
         razorpayLoaded,
         onError: setError,
         onDismiss: loadBilling,
@@ -139,6 +176,37 @@ export default function CompanyBillingPage() {
       setError("Something went wrong. Please try again.");
     } finally {
       setSubscribing(false);
+    }
+  }
+
+  async function changeSeats(seats: number) {
+    setError(null);
+    setChangingSeats(true);
+    try {
+      const res = await fetch("/api/org-billing/seats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orgSlug, seats }),
+      });
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        effective?: string;
+      };
+      if (!res.ok) {
+        setError(body.error ?? "Could not change seats.");
+        return;
+      }
+      toast.success(
+        body.effective === "cycle_end"
+          ? "Seats reduced. Billing changes at the end of this period."
+          : "Seats updated.",
+      );
+      setSeatTarget(null);
+      await loadBilling();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setChangingSeats(false);
     }
   }
 
@@ -167,11 +235,7 @@ export default function CompanyBillingPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-primary" />
-      </div>
-    );
+    return <PageSkeleton className="max-w-3xl" />;
   }
 
   if (!billing) {
@@ -201,7 +265,8 @@ export default function CompanyBillingPage() {
     );
   }
 
-  const isPro = billing.access.plan === "pro";
+  const isPaid = billing.access.plan === "pro";
+  const tier = billing.access.tier ?? (isPaid ? "pro" : "free");
   const paymentsReady = billing.razorpayReady;
   const canManage = billing.canManageBilling;
   const isPending = billing.subscription?.status === "PENDING";
@@ -211,115 +276,141 @@ export default function CompanyBillingPage() {
   const currentPeriodEnd = formatBillingDate(
     billing.subscription?.currentPeriodEnd,
   );
-  const intervalCheckoutReady = checkoutIntervals.includes(billingInterval);
+  const planIntervals =
+    billing.planIntervals?.[selectedPlan] ?? checkoutIntervals;
+  const intervalCheckoutReady = planIntervals.includes(billingInterval);
+  const seatLimit = billing.access.seatLimit;
+  const seatsInUse = billing.access.seatsUsed ?? 0;
+  const minSeats = Math.max(minSeatsFor(selectedPlan), seatsInUse || 1);
+  const checkoutSeats = Math.max(seatCount, minSeats);
+  const perSeatPlan = tier !== "free";
+  const paidSeats = billing.seats ?? seatLimit ?? 0;
+  const seatTarget = Math.max(seatTarget0 ?? paidSeats, 1);
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-8">
-      <Button variant="ghost" size="sm" asChild className="-ml-2">
+      <Button variant="ghost" size="sm" asChild className="-ml-2 text-text-secondary">
         <Link href={`/company/${orgSlug}`}>← Back to overview</Link>
       </Button>
 
-      <header className="space-y-1">
-        <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Billing</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Organization plan</h1>
-        <p className="text-body-sm text-text-secondary">
-          Free includes 1 workspace and 1 open job. Org Pro unlocks unlimited
-          workspaces and published roles on this organization.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Billing"
+        title="Hiring plan"
+        description="Proof-based ranking, references, compare, the gap report and pipeline are on every plan. Talent search starts on Pro. Paid plans are priced per seat."
+      />
 
       {returning && isPending ? (
-        <div className="rounded-[var(--radius-md)] border border-border-default bg-surface-raised px-4 py-3 text-body-sm text-text-secondary">
-          Payment is being processed. This page will update when Org Pro
-          activates.
-        </div>
+        <Alert>
+          <AlertDescription>
+            Payment is being processed. This page updates when your plan activates.
+          </AlertDescription>
+        </Alert>
       ) : null}
 
       {cancelled && cancelAtPeriodEnd ? (
-        <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-border-default bg-surface-raised px-4 py-3 text-body-sm text-text-secondary">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
-          Subscription cancelled. Org Pro remains available
-          {currentPeriodEnd
-            ? ` through ${currentPeriodEnd}`
-            : " through the current billing cycle"}
-          .
-        </div>
+        <Alert>
+          <CheckCircle2 className="h-4 w-4 text-success" />
+          <AlertDescription>
+            Subscription cancelled. Your plan stays active
+            {currentPeriodEnd ? ` through ${currentPeriodEnd}` : " through the current billing cycle"}.
+          </AlertDescription>
+        </Alert>
       ) : null}
 
-      {error ? (
-        <p className="rounded-[var(--radius-md)] bg-danger-bg px-4 py-3 text-body-sm text-danger">
-          {error}
-        </p>
-      ) : null}
+      {error ? <QueryError error={new Error(error)} /> : null}
 
-      <section className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-text-secondary" />
-            <h2 className="text-h3 text-text-primary">Current plan</h2>
+      <Panel as="section" className="space-y-6 p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <Eyebrow>Current plan</Eyebrow>
+            <p className="mt-1 text-xl font-semibold tracking-tight text-text-primary">
+              {HIRING_PLAN_NAMES[tier]}
+            </p>
           </div>
-          <Badge variant={isPro ? "success" : "neutral"}>
-            {isPro ? "Org Pro" : "Free"}
+          <Badge variant={isPaid ? "brand" : "neutral"}>
+            {cancelAtPeriodEnd ? "Cancels at period end" : isPaid ? "Active" : "Free"}
           </Badge>
         </div>
+        {currentPeriodEnd && isPaid ? (
+          <p className="text-xs text-text-muted">Current period ends {currentPeriodEnd}.</p>
+        ) : null}
 
-        {isPro ? (
-          <div className="flex items-start gap-3 rounded-[var(--radius-md)] bg-surface-base px-4 py-3">
-            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-brand-primary" />
-            <div>
-              <p className="text-body-sm font-medium text-text-primary">
-                {cancelAtPeriodEnd
-                  ? "Org Pro remains active until the billing cycle ends"
-                  : "Org Pro is active"}
-              </p>
-              <p className="mt-0.5 text-body-sm text-text-secondary">
-                Unlimited open jobs and workspaces on this organization.
-                {currentPeriodEnd
-                  ? ` Current period ends ${currentPeriodEnd}.`
-                  : ""}
-              </p>
-            </div>
+        <div className="space-y-2">
+          <div className="flex items-baseline justify-between text-body-sm">
+            <span className="text-text-secondary">Seats used</span>
+            <span className="font-mono tabular-nums text-text-primary">
+              {seatsInUse}
+              {seatLimit != null ? ` / ${seatLimit}` : " · unlimited"}
+            </span>
           </div>
-        ) : (
-          <div className="rounded-[var(--radius-md)] bg-surface-base px-4 py-3">
-            <p className="text-body-sm font-medium text-text-primary">
-              Free hiring plan
-            </p>
-            <p className="mt-0.5 text-body-sm text-text-secondary">
-              1 workspace · 1 open job ({billing.access.openJobCount}{" "}
-              open now). Drafts are unlimited.
-            </p>
-          </div>
-        )}
+          {seatLimit != null ? (
+            <Progress
+              value={Math.min(100, (seatsInUse / Math.max(seatLimit, 1)) * 100)}
+              className="h-1.5 bg-surface-sunken [&>[data-slot=progress-indicator]]:bg-brand-primary"
+              aria-label="Seats used"
+            />
+          ) : null}
+          <p className="text-xs text-text-muted">
+            {billing.access.activeMembers ?? 0} member
+            {(billing.access.activeMembers ?? 0) === 1 ? "" : "s"} ·{" "}
+            {billing.access.pendingInvites ?? 0} pending invite
+            {(billing.access.pendingInvites ?? 0) === 1 ? "" : "s"}. Pending invites hold a seat.
+          </p>
+        </div>
 
-        <div className="divide-y divide-border-default text-body-sm">
+        <div className="divide-y divide-border-default border-y border-border-default text-body-sm">
           <div className="flex justify-between py-2">
             <span className="text-text-secondary">Open jobs</span>
-            <span className="text-text-primary">
+            <span className="font-mono tabular-nums text-text-primary">
               {billing.access.openJobCount}
               {billing.access.maxOpenJobs != null
                 ? ` / ${billing.access.maxOpenJobs}`
-                : " · unlimited"}
+                : billing.access.maxOpenJobsPerWorkspace != null
+                  ? ` · up to ${billing.access.maxOpenJobsPerWorkspace} per workspace`
+                  : " · unlimited"}
             </span>
           </div>
           <div className="flex justify-between py-2">
             <span className="text-text-secondary">Workspaces</span>
-            <span className="text-text-primary">
+            <span className="font-mono tabular-nums text-text-primary">
               {billing.access.workspaceCount}
-              {billing.access.maxWorkspaces != null
-                ? ` / ${billing.access.maxWorkspaces}`
-                : " · unlimited"}
-            </span>
-          </div>
-          <div className="flex justify-between py-2">
-            <span className="text-text-secondary">Published roles</span>
-            <span className="text-text-primary">
-              {isPro ? "Unlimited" : "1 at a time"}
+              {billing.access.maxWorkspaces != null ? ` / ${billing.access.maxWorkspaces}` : " · unlimited"}
             </span>
           </div>
         </div>
 
-        {isPro && canManage && !cancelAtPeriodEnd ? (
+        {perSeatPlan && canManage && !cancelAtPeriodEnd ? (
+          <div className="space-y-3">
+            <Eyebrow>Change seats</Eyebrow>
+            <div className="flex flex-wrap items-center gap-2">
+              <SeatStepper
+                value={seatTarget}
+                min={Math.max(minSeatsFor(tier as PaidHiringPlan), seatsInUse || 1)}
+                onChange={setSeatTarget}
+              />
+              <Button
+                size="sm"
+                disabled={changingSeats || seatTarget === paidSeats}
+                onClick={() => void changeSeats(seatTarget)}
+              >
+                {changingSeats
+                  ? "Updating…"
+                  : seatTarget > paidSeats
+                    ? `Add ${seatTarget - paidSeats} seat${seatTarget - paidSeats === 1 ? "" : "s"}`
+                    : seatTarget < paidSeats
+                      ? `Remove ${paidSeats - seatTarget} seat${paidSeats - seatTarget === 1 ? "" : "s"}`
+                      : "No change"}
+              </Button>
+            </div>
+            <p className="text-xs text-text-muted">
+              {formatSeatPriceLabel(tier as PaidHiringPlan, (billing.interval ?? "monthly") as BillingInterval)}.
+              Added seats apply now; removed seats stop renewing at the end of the period.
+              You can&apos;t go below the seats in use.
+            </p>
+          </div>
+        ) : null}
+
+        {isPaid && canManage && !cancelAtPeriodEnd ? (
           <Button
             variant="outline"
             className="w-full"
@@ -330,51 +421,100 @@ export default function CompanyBillingPage() {
           </Button>
         ) : null}
 
-        {!isPro && canManage ? (
-          <div className="space-y-3 border-t border-border-default pt-4">
-            <p className="text-body-sm text-text-secondary">
-              Org Pro from {formatOrgProPriceLabel("monthly")}.
-            </p>
-            <BillingIntervalToggle
-              value={billingInterval}
-              onChange={setBillingInterval}
-            />
-            {!paymentsReady || !intervalCheckoutReady ? (
-              <p className="text-body-sm text-text-muted">
-                {getIntervalCheckoutUnavailableMessage(billingInterval)}
-              </p>
-            ) : null}
-            <Button
-              className="w-full"
-              disabled={
-                subscribing ||
-                isPending ||
-                !paymentsReady ||
-                !intervalCheckoutReady
-              }
-              onClick={() => {
-                void subscribe().catch((err) => {
-                  toast.error(
-                    err instanceof Error ? err.message : "Checkout failed",
-                  );
-                });
-              }}
-            >
-              {orgSubscribeButtonLabel(
-                billingInterval,
-                subscribing,
-                isPending,
-              )}
-            </Button>
-          </div>
-        ) : null}
-
         {!canManage ? (
           <p className="text-body-sm text-text-muted">
             Only owners and admins can manage organization billing.
           </p>
         ) : null}
-      </section>
+      </Panel>
+
+      {!isPaid && canManage ? (
+        <Panel as="section" className="space-y-5 p-4 md:p-6">
+          <div>
+            <Eyebrow>Upgrade</Eyebrow>
+            <p className="mt-1 text-body-sm text-text-secondary">
+              Pick a plan, billing period and seats. You can add seats later.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(["pro", "business"] as const).map((plan) => (
+              <button
+                key={plan}
+                type="button"
+                onClick={() => {
+                  setSelectedPlan(plan);
+                  setSeatCount((n) => Math.max(n, minSeatsFor(plan)));
+                }}
+                className={cn(
+                  "rounded-[var(--radius-md)] border p-4 text-left transition-colors",
+                  selectedPlan === plan
+                    ? "border-brand-primary bg-brand-light/40"
+                    : "border-border-default hover:border-border-strong",
+                )}
+                aria-pressed={selectedPlan === plan}
+              >
+                <p className="font-medium text-text-primary">{HIRING_PLAN_NAMES[plan]}</p>
+                <p className="mt-1 font-mono text-sm tabular-nums text-text-primary">
+                  {formatSeatMonthlyHeadline(plan, billingInterval)}{" "}
+                  <span className="text-text-muted">/ seat / mo</span>
+                </p>
+                <HiringPlanFeatures plan={plan} compact className="mt-3" />
+              </button>
+            ))}
+          </div>
+          <BillingIntervalToggle value={billingInterval} onChange={setBillingInterval} />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-body-sm text-text-secondary">Seats</span>
+              <SeatStepper value={checkoutSeats} min={minSeats} onChange={setSeatCount} />
+            </div>
+            <p className="text-body-sm text-text-secondary">
+              <span className="font-mono tabular-nums text-text-primary">
+                {formatPeriodTotal(selectedPlan, billingInterval, checkoutSeats)}
+              </span>{" "}
+              / {billingInterval === "monthly" ? "month" : billingInterval === "quarterly" ? "quarter" : "year"}
+            </p>
+          </div>
+          {seatsInUse > minSeatsFor(selectedPlan) ? (
+            <p className="text-xs text-text-muted">
+              Your team already uses {seatsInUse} seats, so that&apos;s the minimum.
+            </p>
+          ) : null}
+          {!paymentsReady || !intervalCheckoutReady ? (
+            <p className="text-body-sm text-text-muted">
+              {getIntervalCheckoutUnavailableMessage(billingInterval)}
+            </p>
+          ) : null}
+          <Button
+            className="w-full"
+            disabled={subscribing || isPending || !paymentsReady || !intervalCheckoutReady}
+            onClick={() => {
+              void subscribe().catch((err) => {
+                toast.error(err instanceof Error ? err.message : "Checkout failed");
+              });
+            }}
+          >
+            {subscribing
+              ? "Opening checkout…"
+              : isPending
+                ? "Payment pending…"
+                : `Subscribe to ${HIRING_PLAN_NAMES[selectedPlan]} · ${checkoutSeats} seat${checkoutSeats === 1 ? "" : "s"}`}
+          </Button>
+        </Panel>
+      ) : null}
+
+      {canManage ? (
+        <Panel as="section" className="flex flex-wrap items-center justify-between gap-3 p-4 md:p-6">
+          <div className="min-w-0">
+            <Eyebrow>{ENTERPRISE_PLAN.name} · {ENTERPRISE_PLAN.priceLabel}</Eyebrow>
+            <p className="mt-1 text-body-sm text-text-secondary">
+              {ENTERPRISE_PLAN.note}. Everything in Business, plus{" "}
+              {ENTERPRISE_PLAN.features.map((f) => f.label.toLowerCase()).join(", ")}.
+            </p>
+          </div>
+          <ContactSalesDialog size="sm" />
+        </Panel>
+      ) : null}
 
       <CancelSubscriptionDialog
         open={showCancelDialog}
@@ -384,4 +524,49 @@ export default function CompanyBillingPage() {
       />
     </div>
   );
+}
+
+function SeatStepper({
+  value,
+  min,
+  onChange,
+}: {
+  value: number;
+  min: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div className="inline-flex items-center rounded-[var(--radius-md)] border border-border-default">
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        className="h-8 w-8"
+        disabled={value <= min}
+        onClick={() => onChange(Math.max(min, value - 1))}
+        aria-label="Remove a seat"
+      >
+        <Minus className="h-3.5 w-3.5" />
+      </Button>
+      <span className="w-10 text-center font-mono text-sm tabular-nums text-text-primary" aria-live="polite">
+        {value}
+      </span>
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        className="h-8 w-8"
+        disabled={value >= MAX_SEATS}
+        onClick={() => onChange(Math.min(MAX_SEATS, value + 1))}
+        aria-label="Add a seat"
+      >
+        <Plus className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+}
+
+function formatPeriodTotal(plan: PaidHiringPlan, interval: BillingInterval, seats: number) {
+  const total = periodTotal(plan, interval, seats, BILLING_CURRENCY);
+  return BILLING_CURRENCY === "usd" ? formatUsd(total) : formatInr(total);
 }

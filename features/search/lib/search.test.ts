@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { linkedInSnapshotFromImport, parseLinkedInDate, withLinkedIn } from "@/features/applications/lib/linkedin-snapshot";
+import { summarizeSnapshot } from "@/features/applications/lib/applicant-summary";
 import { buildSearchFacets } from "@/features/search/lib/facets";
 import { matchesStructuredFilters } from "@/features/search/lib/filters";
 import {
@@ -7,7 +9,7 @@ import {
   matchesInterpretedQuery,
   snapshotSearchBlob,
 } from "@/features/search/lib/match";
-import { proofKindsOf } from "@/features/search/lib/proof";
+import { isConnectedProfile, proofKindsOf } from "@/features/search/lib/proof";
 import { interpretSearchQuery, termAsTyped } from "@/features/search/lib/query";
 import {
   rankAgainstJob,
@@ -475,5 +477,127 @@ describe("facets and proof filters", () => {
     expect(matchesStructuredFilters(person, { skill: "project management professional" }, now)).toBe(true);
     expect(matchesStructuredFilters(person, { proof: "certified" }, now)).toBe(true);
     expect(matchesStructuredFilters(person, { proof: "writing" }, now)).toBe(false);
+  });
+});
+
+describe("connected vs link-only integrations", () => {
+  const linkOnly = { platform: "github", url: "https://github.com/x", username: "x", cachedStats: null };
+  const connected = { ...linkOnly, cachedStats: { totalContributions: 120 } };
+  const eng = () => jobProfile("engineering", { mustHaves: ["react"] });
+
+  test("isConnectedProfile needs fetched data", () => {
+    expect(isConnectedProfile(linkOnly)).toBe(false);
+    expect(isConnectedProfile({ ...linkOnly, cachedStats: {} })).toBe(false);
+    expect(isConnectedProfile(connected)).toBe(true);
+  });
+
+  test("a pasted GitHub link earns no proof kind, proof credit or reason", () => {
+    const linked = snapshot({ skills: [skill("React")], socialProfiles: [linkOnly] });
+    expect(proofKindsOf(linked)).not.toContain("source");
+    const rank = rankAgainstJob(linked, eng());
+    expect(rank.proven).toBe(0);
+    expect(rank.platform).toBe(0);
+    expect(rank.reasons.some((r) => /github/i.test(r))).toBe(false);
+  });
+
+  test("a connected GitHub still earns credit and outranks a link-only one", () => {
+    const real = snapshot({ skills: [skill("React")], socialProfiles: [connected] });
+    const linked = snapshot({ skills: [skill("React")], socialProfiles: [linkOnly] });
+    expect(proofKindsOf(real)).toContain("source");
+    expect(rankAgainstJob(real, eng()).score).toBeGreaterThan(rankAgainstJob(linked, eng()).score);
+  });
+
+  test("reasons never call anything connected or verified", () => {
+    const linked = snapshot({
+      skills: [skill("React")],
+      socialProfiles: [linkOnly, { platform: "dribbble", url: "https://dribbble.com/x", username: "x", cachedStats: null }],
+    });
+    for (const r of rankAgainstJob(linked, eng()).reasons) expect(r).not.toMatch(/connected|verified/i);
+  });
+});
+
+describe("LinkedIn import in ranking", () => {
+  const li = {
+    syncedAt: null,
+    headline: "HR Generalist | Talent acquisition",
+    about: "People operations and payroll",
+    currentPosition: null,
+    location: "Hyderabad",
+    skills: ["Recruiting", "Payroll"],
+    experience: [
+      { title: "HR Executive", company: "Acme", location: null, startDate: "Jan 2020", endDate: "Present", description: "Onboarding and payroll" },
+    ],
+    education: [{ school: "Osmania University", degree: "MBA", field: "HR", startDate: "2017", endDate: "2019" }],
+  };
+  const linkedinRow = { platform: "linkedin", url: "https://linkedin.com/in/x", username: "x", cachedStats: null };
+
+  test("snapshot import is compact and marks LinkedIn connected", () => {
+    const summary = linkedInSnapshotFromImport({
+      profileData: { ...li, posts: [{ text: "x" }], experience: Array.from({ length: 30 }, () => li.experience[0]) },
+      lastSyncedAt: null,
+    });
+    expect(summary?.experience.length).toBe(15);
+    expect(summary && "posts" in summary).toBe(false);
+    expect(isConnectedProfile({ ...linkedinRow, connected: true })).toBe(true);
+    expect(isConnectedProfile(linkedinRow)).toBe(false);
+  });
+
+  test("parses LinkedIn dates", () => {
+    expect(parseLinkedInDate("Jan 2020")?.slice(0, 7)).toBe("2020-01");
+    expect(parseLinkedInDate("2019-03")?.slice(0, 7)).toBe("2019-03");
+    expect(parseLinkedInDate("Present")).toBeNull();
+  });
+
+  test("LinkedIn data feeds keyword match, years and a 'From LinkedIn' reason, but not proof", () => {
+    const job = jobProfile("general", { mustHaves: ["payroll"], minYears: 3 });
+    const without = snapshot({ socialProfiles: [linkedinRow] });
+    const withLi = snapshot({ socialProfiles: [{ ...linkedinRow, connected: true }], linkedin: li });
+    const a = rankAgainstJob(without, job);
+    const b = rankAgainstJob(withLi, job);
+    expect(b.overlap).toBeGreaterThan(a.overlap);
+    expect(b.score).toBeGreaterThan(a.score);
+    expect(b.proven).toBe(a.proven);
+    expect(b.reasons.some((r) => r.startsWith("From LinkedIn"))).toBe(true);
+    expect(summarizeSnapshot(withLi).yearsExperience).toBeGreaterThanOrEqual(5);
+  });
+
+  test("portfolio entries win; duplicates from LinkedIn are skipped", () => {
+    const s = snapshot({
+      experiences: [{ company: "Acme", role: "HR Executive", description: "", startDate: yearsAgo(6), endDate: null, location: null }],
+      skills: [skill("Payroll")],
+      linkedin: li,
+    });
+    const merged = withLinkedIn(s)!;
+    expect(merged.experiences.length).toBe(1);
+    expect(merged.skills.map((k) => k.name)).toEqual(["Payroll", "Recruiting"]);
+    expect(merged.linkedin).toBeNull();
+  });
+});
+
+describe("coding/design profiles earn proof only when relevant", () => {
+  const gh = { platform: "github", url: "https://github.com/x", username: "x", cachedStats: { totalContributions: 120 } };
+  const lc = { platform: "leetcode", url: "https://leetcode.com/x", username: "x", cachedStats: { hardSolved: 10 } };
+  const dr = { platform: "dribbble", url: "https://dribbble.com/x", username: "x", cachedStats: { shots: 12 } };
+
+  test("HR job: connected GitHub + LeetCode give 0 proof and no reason", () => {
+    const s = snapshot({ socialProfiles: [gh, lc] });
+    const r = rankAgainstJob(s, jobProfile("general", { mustHaves: ["HR knowledge"], confidence: 0.15, gates: gatesForRole("general", 0.15) }));
+    expect(r.proven).toBe(0);
+    expect(r.reasons.some((x) => /github|leetcode/i.test(x))).toBe(false);
+  });
+
+  test("engineering job: connected GitHub still earns proof", () => {
+    const s = snapshot({ skills: [skill("React")], socialProfiles: [gh] });
+    const r = rankAgainstJob(s, jobProfile("engineering", { mustHaves: ["react"] }));
+    expect(r.proven).toBeCloseTo(0.75, 5);
+    expect(r.reasons).toContain("github profile");
+  });
+
+  test("design job: Dribbble counts, GitHub doesn't unless a job term matches it", () => {
+    const design = jobProfile("design", { mustHaves: ["figma"] });
+    expect(rankAgainstJob(snapshot({ socialProfiles: [dr] }), design).proven).toBeGreaterThan(0);
+    expect(rankAgainstJob(snapshot({ socialProfiles: [gh] }), design).proven).toBe(0);
+    const wantsGithub = jobProfile("design", { mustHaves: ["figma", "github"] });
+    expect(rankAgainstJob(snapshot({ socialProfiles: [gh] }), wantsGithub).proven).toBeGreaterThan(0);
   });
 });

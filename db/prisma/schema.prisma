@@ -91,6 +91,9 @@ model OrgBillingCheckoutAttempt {
   providerSubscriptionId String?  @unique
   providerPlanId         String
   interval               String
+  /// pro | business (per-seat).
+  plan                   String?
+  seats                  Int?
   status                 String   @default("creating")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
@@ -443,11 +446,15 @@ model Organization {
   /// Company badge. Earned by confirming an email on the company website's domain.
   verified Boolean @default(false)
 
-  /// none | pending | active — Org Pro is `active`.
+  /// none | pending | active — a paid hiring plan is `active`.
   subscriptionStatus String @default("none")
   razorpaySubscriptionId String?
   subscriptionCancelAtPeriodEnd Boolean   @default(false)
   subscriptionCurrentPeriodEnd  DateTime?
+  /// Per-seat hiring plan: pro | business (null on Free).
+  subscriptionPlan              String?
+  /// Paid seats on the per-seat plan (Razorpay subscription quantity).
+  subscriptionSeats             Int?
 
   members              OrganizationMember[]
   invites              OrganizationInvite[]
@@ -528,7 +535,7 @@ model OrganizationInvite {
 }
 
 /// Hiring space inside an organization (e.g. Engineering vs Marketing).
-/// Org Pro is billed on Organization; workspaces share that plan.
+/// Hiring plans are billed on Organization; workspaces share that plan.
 model Workspace {
   id             String   @id @default(uuid())
   organizationId String

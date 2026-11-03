@@ -1,5 +1,6 @@
 "use client";
 
+import { isConnectedProfile } from "@/features/search/lib/proof";
 import { ListSkeleton, QueryError, StageBadge } from "@/features/organization/components/workspace-ui";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -481,10 +482,21 @@ function SnapshotSections({
 
       <SectionList
         title="Connected work"
-        items={snapshot.socialProfiles.map((s) => ({
+        items={snapshot.socialProfiles.filter(isConnectedProfile).map((s) => ({
           title: s.platform,
           meta: s.url,
         }))}
+      />
+
+      <SectionList
+        title="Profile links"
+        items={snapshot.socialProfiles
+          .filter((s) => !isConnectedProfile(s))
+          .map((s) => ({
+            title: s.platform,
+            meta: s.url,
+            body: "Link only, not connected. Not used in ranking.",
+          }))}
       />
     </div>
   );
@@ -502,8 +514,8 @@ function SectionList({
     <section className="space-y-3">
       <h2 className="text-h3 text-text-primary">{title}</h2>
       <ul className="space-y-4">
-        {items.map((item) => (
-          <li key={`${item.title}-${item.meta ?? ""}`} className="space-y-1">
+        {items.map((item, index) => (
+          <li key={`${index}-${item.title}-${item.meta ?? ""}`} className="space-y-1">
             <p className="font-medium text-text-primary">{item.title}</p>
             {item.meta ? (
               <p className="text-xs text-text-muted">{item.meta}</p>

@@ -20,12 +20,20 @@ const FAQS = [
     a: "No. You search the applicants for each job, plus people who opted in to Talent search. Opting in is not shown on anyone’s public Livefolio.",
   },
   {
-    q: "What’s free vs Org Pro?",
-    a: "Free includes one organization, one workspace, and one open job at a time. Org Pro unlocks unlimited open jobs and workspaces on that organization.",
+    q: "What’s on Free, Pro and Business?",
+    a: "Every plan has proof-based ranking with reasons, references you can switch on, compare, the pool gap report, pipeline and shortlist. Free is 1 seat, 1 open job and 1 workspace. Pro and Business are priced per seat and start from 1 seat. Pro adds Talent search (candidates who opted in), up to 5 workspaces with up to 5 open jobs per workspace (drafts are unlimited), teammate invites and priority support. Business adds unlimited workspaces and open jobs, priority verified-company review, onboarding help and invoice billing on request."
   },
   {
     q: "Is this the same as personal Livefolio Pro?",
-    a: "No. Personal Pro is for individual portfolios. Org Pro is company billing for hiring capacity.",
+    a: "No. Personal Pro is for individual portfolios. Hiring Pro and Business are company plans, billed per seat.",
+  },
+  {
+    q: "Do you offer Enterprise plans?",
+    a: "Yes. Enterprise is custom-priced for larger teams: custom seat volume, contract and invoicing, a dedicated support contact, guided onboarding, and SSO or a security review on request. Email team@livefolio.me and we’ll scope it with you.",
+  },
+  {
+    q: "What counts as a seat?",
+    a: "Each teammate in your organization, plus anyone with a pending invite. Add or remove seats from Billing; removed seats stop renewing at the end of the billing period.",
   },
   {
     q: "Do candidates need a Livefolio?",
