@@ -155,9 +155,14 @@ type ProofItem = {
   text: string;
   weight: number;
   live: boolean;
-  /** Skip the skill-term filter: a GitHub/Behance profile is proof even if it does not name the skill. */
+  /** Skip the skill-term filter: a relevant GitHub/Behance profile is proof even if it does not name the skill. */
   always?: boolean;
+  /** Connected profile that is not relevant to the job type: counts only when a job term matches it. */
+  needsTerm?: boolean;
 };
+
+/** Which connected-profile kinds are relevant to the job as a whole. */
+export type ProfileRelevance = { coding: boolean; design: boolean };
 
 const URL_PATTERN = /https?:\/\/[^\s"']+/i;
 const SOURCE_PLATFORMS = new Set([
@@ -174,7 +179,10 @@ const LIVE_PLATFORMS = new Set(["dribbble", "behance"]);
  * experience section still counts. One strong item is most of the score; a
  * second and third fill the rest.
  */
-function proofItems(snapshot: ApplicationSnapshotData): ProofItem[] {
+function proofItems(
+  snapshot: ApplicationSnapshotData,
+  relevance: ProfileRelevance,
+): ProofItem[] {
   const items: ProofItem[] = [];
   for (const exp of snapshot.experiences) {
     items.push({
@@ -240,7 +248,8 @@ function proofItems(snapshot: ApplicationSnapshotData): ProofItem[] {
         text: joinText([social.platform, social.username]),
         weight: 0.75,
         live: false,
-        always: true,
+        always: relevance.coding,
+        needsTerm: !relevance.coding,
       });
     } else if (LIVE_PLATFORMS.has(platform)) {
       items.push({
@@ -248,7 +257,8 @@ function proofItems(snapshot: ApplicationSnapshotData): ProofItem[] {
         text: joinText([social.platform, social.username]),
         weight: 0.8,
         live: true,
-        always: true,
+        always: relevance.design,
+        needsTerm: !relevance.design,
       });
     }
   }
@@ -260,10 +270,13 @@ export function provenScore(
   terms: string[],
   preferLive: boolean,
   reasons: string[],
+  relevance: ProfileRelevance = { coding: true, design: true },
 ): number {
   if (!snapshot) return 0;
-  const proven = proofItems(snapshot).filter((item) => {
+  const proven = proofItems(snapshot, relevance).filter((item) => {
     if (item.always) return true;
+    // Coding/design profiles on an unrelated job (e.g. GitHub for HR) need a job term to match.
+    if (item.needsTerm) return terms.some((term) => blobHasTerm(item.text, term));
     if (terms.length === 0) return item.weight >= 0.7 || item.live;
     return terms.some((term) => blobHasTerm(item.text, term));
   });

@@ -48,7 +48,7 @@ export type RankExtras = {
 };
 
 /** Bump whenever weights or scoring change so logged results can be compared across versions. */
-export const RANKING_VERSION = "field-weighted-v5";
+export const RANKING_VERSION = "field-weighted-v6";
 
 const COMPONENT_WEIGHTS = {
   overlap: 0.45,
@@ -170,6 +170,11 @@ function combineRank(
     [...profile.mustHaves, ...profile.niceToHaves],
     profile.gates.liveUrl,
     reasons,
+    {
+      // Same classification as platform activity: confident engineering roles read code profiles.
+      coding: profile.gates.github || profile.gates.leetcode,
+      design: profile.roleFamily === "design" && profile.confidence >= 0.6,
+    },
   );
   const platform = platformScore(snapshot, profile, reasons);
   const fit = fitScore(snapshot, profile, reasons);

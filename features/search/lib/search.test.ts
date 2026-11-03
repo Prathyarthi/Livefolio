@@ -573,3 +573,31 @@ describe("LinkedIn import in ranking", () => {
     expect(merged.linkedin).toBeNull();
   });
 });
+
+describe("coding/design profiles earn proof only when relevant", () => {
+  const gh = { platform: "github", url: "https://github.com/x", username: "x", cachedStats: { totalContributions: 120 } };
+  const lc = { platform: "leetcode", url: "https://leetcode.com/x", username: "x", cachedStats: { hardSolved: 10 } };
+  const dr = { platform: "dribbble", url: "https://dribbble.com/x", username: "x", cachedStats: { shots: 12 } };
+
+  test("HR job: connected GitHub + LeetCode give 0 proof and no reason", () => {
+    const s = snapshot({ socialProfiles: [gh, lc] });
+    const r = rankAgainstJob(s, jobProfile("general", { mustHaves: ["HR knowledge"], confidence: 0.15, gates: gatesForRole("general", 0.15) }));
+    expect(r.proven).toBe(0);
+    expect(r.reasons.some((x) => /github|leetcode/i.test(x))).toBe(false);
+  });
+
+  test("engineering job: connected GitHub still earns proof", () => {
+    const s = snapshot({ skills: [skill("React")], socialProfiles: [gh] });
+    const r = rankAgainstJob(s, jobProfile("engineering", { mustHaves: ["react"] }));
+    expect(r.proven).toBeCloseTo(0.75, 5);
+    expect(r.reasons).toContain("github profile");
+  });
+
+  test("design job: Dribbble counts, GitHub doesn't unless a job term matches it", () => {
+    const design = jobProfile("design", { mustHaves: ["figma"] });
+    expect(rankAgainstJob(snapshot({ socialProfiles: [dr] }), design).proven).toBeGreaterThan(0);
+    expect(rankAgainstJob(snapshot({ socialProfiles: [gh] }), design).proven).toBe(0);
+    const wantsGithub = jobProfile("design", { mustHaves: ["figma", "github"] });
+    expect(rankAgainstJob(snapshot({ socialProfiles: [gh] }), wantsGithub).proven).toBeGreaterThan(0);
+  });
+});
