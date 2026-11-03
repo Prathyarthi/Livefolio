@@ -1,4 +1,5 @@
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { withLinkedIn } from "@/features/applications/lib/linkedin-snapshot";
 
 /** Sum of dated experience ranges in whole years (concurrent roles can overlap). */
 export function yearsFromRanges(
@@ -22,7 +23,9 @@ export function yearsFromRanges(
   return Math.max(0, Math.round(totalMs / (365.25 * 24 * 60 * 60 * 1000)));
 }
 
-export function summarizeSnapshot(data: ApplicationSnapshotData | null | undefined) {
+export function summarizeSnapshot(raw: ApplicationSnapshotData | null | undefined) {
+  // Years, roles and skills include the LinkedIn import when the user connected it.
+  const data = withLinkedIn(raw);
   if (!data) {
     return {
       name: "Candidate",

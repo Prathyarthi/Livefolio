@@ -32,7 +32,8 @@ const URL_PATTERN = /https?:\/\/[^\s"']+/i;
  * (cachedStats from a sync/import, e.g. GitHub contributions or LeetCode solved counts).
  * A pasted profile URL has no cachedStats and is just a link: it earns no proof credit.
  */
-export function isConnectedProfile(profile: { cachedStats?: unknown }): boolean {
+export function isConnectedProfile(profile: { cachedStats?: unknown; connected?: boolean }): boolean {
+  if (profile.connected === true) return true;
   const stats = profile.cachedStats;
   return (
     Boolean(stats) &&

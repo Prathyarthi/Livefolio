@@ -6,6 +6,7 @@ import {
   type JobSearchProfile,
 } from "@/features/jobs/lib/search-profile";
 import { tokenize } from "@/features/search/lib/match";
+import { withLinkedIn } from "@/features/applications/lib/linkedin-snapshot";
 import {
   termAsTyped,
   type InterpretedSearchQuery,
@@ -135,17 +136,37 @@ function emptyRank(freshness = 0): CandidateRank {
   };
 }
 
+/** Job terms that only the LinkedIn import matched, for a "From LinkedIn" reason. */
+function linkedInOnlyHits(
+  raw: ApplicationSnapshotData | null | undefined,
+  merged: FieldBlobs,
+  profile: JobSearchProfile,
+  extras: RankExtras | undefined,
+): string[] {
+  if (!raw?.linkedin) return [];
+  const terms = [...profile.mustHaves, ...profile.niceToHaves];
+  if (terms.length === 0) return [];
+  const base = fieldBlobs({ ...raw, linkedin: null }, extras);
+  const before = new Set(matchedTerms(base, terms).hits);
+  return matchedTerms(merged, terms).hits.filter((term) => !before.has(term));
+}
+
 function combineRank(
-  snapshot: ApplicationSnapshotData | null | undefined,
+  raw: ApplicationSnapshotData | null | undefined,
   profile: JobSearchProfile,
   extras: RankExtras | undefined,
   matchAny: boolean,
 ): CandidateRank {
+  // LinkedIn import data (when connected) feeds keyword match, role and years like portfolio data.
+  const snapshot = withLinkedIn(raw);
   const blobs = fieldBlobs(snapshot, extras);
   const reasons: string[] = [];
   const overlap = overlapScore(blobs, profile, reasons, matchAny);
+  const fromLinkedIn = linkedInOnlyHits(raw, blobs, profile, extras);
+  if (fromLinkedIn[0]) reasons.push(`From LinkedIn: ${fromLinkedIn.slice(0, 2).join(", ")}`);
+  // Proof of work stays portfolio-only: LinkedIn text is a claim, not shown work.
   const proven = provenScore(
-    snapshot,
+    raw,
     [...profile.mustHaves, ...profile.niceToHaves],
     profile.gates.liveUrl,
     reasons,

@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { linkedInSnapshotFromImport, parseLinkedInDate, withLinkedIn } from "@/features/applications/lib/linkedin-snapshot";
+import { summarizeSnapshot } from "@/features/applications/lib/applicant-summary";
 import { buildSearchFacets } from "@/features/search/lib/facets";
 import { matchesStructuredFilters } from "@/features/search/lib/filters";
 import {
@@ -511,5 +513,63 @@ describe("connected vs link-only integrations", () => {
       socialProfiles: [linkOnly, { platform: "dribbble", url: "https://dribbble.com/x", username: "x", cachedStats: null }],
     });
     for (const r of rankAgainstJob(linked, eng()).reasons) expect(r).not.toMatch(/connected|verified/i);
+  });
+});
+
+describe("LinkedIn import in ranking", () => {
+  const li = {
+    syncedAt: null,
+    headline: "HR Generalist | Talent acquisition",
+    about: "People operations and payroll",
+    currentPosition: null,
+    location: "Hyderabad",
+    skills: ["Recruiting", "Payroll"],
+    experience: [
+      { title: "HR Executive", company: "Acme", location: null, startDate: "Jan 2020", endDate: "Present", description: "Onboarding and payroll" },
+    ],
+    education: [{ school: "Osmania University", degree: "MBA", field: "HR", startDate: "2017", endDate: "2019" }],
+  };
+  const linkedinRow = { platform: "linkedin", url: "https://linkedin.com/in/x", username: "x", cachedStats: null };
+
+  test("snapshot import is compact and marks LinkedIn connected", () => {
+    const summary = linkedInSnapshotFromImport({
+      profileData: { ...li, posts: [{ text: "x" }], experience: Array.from({ length: 30 }, () => li.experience[0]) },
+      lastSyncedAt: null,
+    });
+    expect(summary?.experience.length).toBe(15);
+    expect(summary && "posts" in summary).toBe(false);
+    expect(isConnectedProfile({ ...linkedinRow, connected: true })).toBe(true);
+    expect(isConnectedProfile(linkedinRow)).toBe(false);
+  });
+
+  test("parses LinkedIn dates", () => {
+    expect(parseLinkedInDate("Jan 2020")?.slice(0, 7)).toBe("2020-01");
+    expect(parseLinkedInDate("2019-03")?.slice(0, 7)).toBe("2019-03");
+    expect(parseLinkedInDate("Present")).toBeNull();
+  });
+
+  test("LinkedIn data feeds keyword match, years and a 'From LinkedIn' reason, but not proof", () => {
+    const job = jobProfile("general", { mustHaves: ["payroll"], minYears: 3 });
+    const without = snapshot({ socialProfiles: [linkedinRow] });
+    const withLi = snapshot({ socialProfiles: [{ ...linkedinRow, connected: true }], linkedin: li });
+    const a = rankAgainstJob(without, job);
+    const b = rankAgainstJob(withLi, job);
+    expect(b.overlap).toBeGreaterThan(a.overlap);
+    expect(b.score).toBeGreaterThan(a.score);
+    expect(b.proven).toBe(a.proven);
+    expect(b.reasons.some((r) => r.startsWith("From LinkedIn"))).toBe(true);
+    expect(summarizeSnapshot(withLi).yearsExperience).toBeGreaterThanOrEqual(5);
+  });
+
+  test("portfolio entries win; duplicates from LinkedIn are skipped", () => {
+    const s = snapshot({
+      experiences: [{ company: "Acme", role: "HR Executive", description: "", startDate: yearsAgo(6), endDate: null, location: null }],
+      skills: [skill("Payroll")],
+      linkedin: li,
+    });
+    const merged = withLinkedIn(s)!;
+    expect(merged.experiences.length).toBe(1);
+    expect(merged.skills.map((k) => k.name)).toEqual(["Payroll", "Recruiting"]);
+    expect(merged.linkedin).toBeNull();
   });
 });
