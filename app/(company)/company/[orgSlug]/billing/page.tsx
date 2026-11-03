@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { HiringPlanFeatures } from "@/features/landing/components/hiring-plan-features";
 import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, Minus, Plus } from "lucide-react";
@@ -22,7 +23,6 @@ import { siteConfig } from "@/lib/site";
 import {
   ENTERPRISE_PLAN,
   enterpriseContactHref,
-  HIRING_PLAN_FEATURES,
   HIRING_PLAN_NAMES,
   MAX_SEATS,
   minSeatsFor,
@@ -454,11 +454,7 @@ export default function CompanyBillingPage() {
                   {formatSeatMonthlyHeadline(plan, billingInterval)}{" "}
                   <span className="text-text-muted">/ seat / mo</span>
                 </p>
-                <ul className="mt-2 space-y-1 text-xs text-text-secondary">
-                  {HIRING_PLAN_FEATURES[plan].slice(1).map((f) => (
-                    <li key={f.label}>· {f.label}</li>
-                  ))}
-                </ul>
+                <HiringPlanFeatures plan={plan} compact className="mt-3" />
               </button>
             ))}
           </div>
@@ -511,8 +507,8 @@ export default function CompanyBillingPage() {
           <div className="min-w-0">
             <Eyebrow>{ENTERPRISE_PLAN.name} · {ENTERPRISE_PLAN.priceLabel}</Eyebrow>
             <p className="mt-1 text-body-sm text-text-secondary">
-              Custom seat volume, contract and invoicing, dedicated support, onboarding,
-              and SSO on request.
+              {ENTERPRISE_PLAN.note}. Everything in Business, plus{" "}
+              {ENTERPRISE_PLAN.features.map((f) => f.label.toLowerCase()).join(", ")}.
             </p>
           </div>
           <Button asChild variant="outline" size="sm">

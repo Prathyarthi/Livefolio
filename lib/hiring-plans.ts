@@ -107,30 +107,98 @@ export const HIRING_PLAN_NAMES: Record<OrgPlanTier, string> = {
 
 export type HiringPlanFeature = { label: string; note?: string };
 
-export const HIRING_PLAN_FEATURES: Record<HiringPlanSlug, HiringPlanFeature[]> = {
-  free: [
-    { label: "1 seat, 1 open job, unlimited drafts" },
-    { label: "Proof-based ranking with “why this rank” reasons" },
-    { label: "References you can switch on in ranking" },
-    { label: "Compare candidates side by side" },
-    { label: "Pool gap report" },
-    { label: "Pipeline stages and shortlist" },
-    { label: "Talent search (candidates who opted in)" },
-  ],
-  pro: [
-    { label: "Everything in Free" },
-    { label: "Priced per seat — add teammates as you grow" },
-    { label: "Unlimited open jobs" },
-    { label: "Team notes and invites" },
-    { label: "Priority support" },
-  ],
-  business: [
-    { label: `Everything in Pro, minimum ${BUSINESS_MIN_SEATS} seats` },
-    { label: "Multiple workspaces for teams or brands" },
-    { label: "Priority verified-company review" },
-    { label: "Onboarding help" },
-    { label: "Invoice billing on request" },
-  ],
+/** Core hiring workflow, included on every plan (Free through Enterprise). */
+export const HIRING_CORE_FEATURES: HiringPlanFeature[] = [
+  { label: "Ranking on proof, with plain “why this rank” reasons" },
+  { label: "References you can switch on in ranking" },
+  { label: "Compare candidates side by side" },
+  { label: "Pool gap report" },
+  { label: "Pipeline stages and shortlist" },
+  { label: "Talent search (candidates who opted in), free" },
+];
+
+export type HiringDisplayPlan = HiringPlanSlug | "enterprise";
+
+export const HIRING_DISPLAY_PLANS: HiringDisplayPlan[] = ["free", "pro", "business", "enterprise"];
+
+function limitCount(n: number | null, one: string, many: string): string {
+  if (n === null) return `Unlimited ${many}`;
+  return `${n} ${n === 1 ? one : many}`;
+}
+
+/** Limit lines, derived from PLAN_LIMITS so the copy matches what is enforced. */
+export function planLimitLines(plan: HiringDisplayPlan): string[] {
+  if (plan === "enterprise") {
+    return ["Custom seat volume", "Unlimited open jobs", "Unlimited workspaces"];
+  }
+  const limits = PLAN_LIMITS[plan];
+  const seats =
+    plan === "free"
+      ? limitCount(limits.includedSeats, "seat", "seats")
+      : plan === "business"
+        ? `Per seat, from ${BUSINESS_MIN_SEATS} seats`
+        : "Per seat, from 1 seat";
+  const jobs =
+    limits.maxOpenJobs === null
+      ? "Unlimited open jobs"
+      : `${limitCount(limits.maxOpenJobs, "open job", "open jobs")} (unlimited drafts)`;
+  return [seats, jobs, limitCount(limits.maxWorkspaces, "workspace", "workspaces")];
+}
+
+export type HiringPlanDisplay = {
+  name: string;
+  note: string;
+  cta: string;
+  /** Heading above `features`, e.g. "Everything in Free, plus". */
+  featuresHeading: string;
+  features: HiringPlanFeature[];
+};
+
+/**
+ * Single source of truth for plan cards on /recruiters, the billing page and the FAQ.
+ * Each paid tier lists only what it adds on top of the previous one.
+ */
+export const HIRING_PLAN_DISPLAY: Record<HiringDisplayPlan, HiringPlanDisplay> = {
+  free: {
+    name: "Free",
+    note: "One recruiter, one open role",
+    cta: "Start free",
+    featuresHeading: "Included on every plan",
+    features: HIRING_CORE_FEATURES,
+  },
+  pro: {
+    name: "Pro",
+    note: "For founders and small hiring teams",
+    cta: "Start hiring",
+    featuresHeading: "Everything in Free, plus",
+    features: [
+      { label: "Invite teammates to share the pipeline" },
+      { label: "Priority support" },
+    ],
+  },
+  business: {
+    name: "Business",
+    note: "For teams hiring across brands or regions",
+    cta: "Start hiring",
+    featuresHeading: "Everything in Pro, plus",
+    features: [
+      { label: "Priority verified-company review" },
+      { label: "Onboarding help" },
+      { label: "Invoice billing on request" },
+    ],
+  },
+  enterprise: {
+    name: "Enterprise",
+    note: "For larger hiring teams with procurement needs",
+    cta: "Contact sales",
+    featuresHeading: "Everything in Business, plus",
+    features: [
+      { label: "Custom contract and invoicing" },
+      { label: "Dedicated support contact" },
+      { label: "Guided onboarding for your team" },
+      { label: "SSO and security review on request" },
+    ],
+  },
 };
 
 /**
@@ -138,18 +206,12 @@ export const HIRING_PLAN_FEATURES: Record<HiringPlanSlug, HiringPlanFeature[]> =
  * Everything here is a service promise handled by the team, phrased "on request".
  */
 export const ENTERPRISE_PLAN = {
-  name: "Enterprise",
+  name: HIRING_PLAN_DISPLAY.enterprise.name,
   priceLabel: "Custom",
-  cta: "Contact sales",
-  note: "For larger hiring teams with procurement needs",
-  features: [
-    { label: "Everything in Business" },
-    { label: "Custom seat volume and pricing" },
-    { label: "Custom contract and invoicing" },
-    { label: "Dedicated support contact" },
-    { label: "Guided onboarding for your team" },
-    { label: "SSO and security review on request" },
-  ] satisfies HiringPlanFeature[],
+  priceNote: "Annual contract · volume pricing",
+  cta: HIRING_PLAN_DISPLAY.enterprise.cta,
+  note: HIRING_PLAN_DISPLAY.enterprise.note,
+  features: HIRING_PLAN_DISPLAY.enterprise.features,
 } as const;
 
 /** mailto link for Enterprise enquiries. */

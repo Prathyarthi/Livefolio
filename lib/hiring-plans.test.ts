@@ -90,3 +90,25 @@ describe("enterprise (display only)", () => {
     expect(href.startsWith("mailto:team@livefolio.me?subject=")).toBe(true);
   });
 });
+
+describe("plan display copy", () => {
+  test("limit lines match enforced PLAN_LIMITS", async () => {
+    const { planLimitLines } = await import("@/lib/hiring-plans");
+    expect(planLimitLines("free")).toEqual(["1 seat", "1 open job (unlimited drafts)", "1 workspace"]);
+    expect(planLimitLines("pro")).toEqual(["Per seat, from 1 seat", "Unlimited open jobs", "1 workspace"]);
+    expect(planLimitLines("business")).toEqual(["Per seat, from 3 seats", "Unlimited open jobs", "Unlimited workspaces"]);
+  });
+  test("plans are ordered and each paid tier builds on the previous one", async () => {
+    const { HIRING_DISPLAY_PLANS, HIRING_PLAN_DISPLAY, HIRING_CORE_FEATURES } = await import("@/lib/hiring-plans");
+    expect(HIRING_DISPLAY_PLANS).toEqual(["free", "pro", "business", "enterprise"]);
+    expect(HIRING_PLAN_DISPLAY.free.features).toBe(HIRING_CORE_FEATURES);
+    expect(HIRING_PLAN_DISPLAY.pro.featuresHeading).toBe("Everything in Free, plus");
+    expect(HIRING_PLAN_DISPLAY.business.featuresHeading).toBe("Everything in Pro, plus");
+    expect(HIRING_PLAN_DISPLAY.enterprise.featuresHeading).toBe("Everything in Business, plus");
+  });
+  test("no feature label is repeated across plans or core", async () => {
+    const { HIRING_PLAN_DISPLAY } = await import("@/lib/hiring-plans");
+    const all = Object.values(HIRING_PLAN_DISPLAY).flatMap((p) => p.features.map((f) => f.label));
+    expect(new Set(all).size).toBe(all.length);
+  });
+});

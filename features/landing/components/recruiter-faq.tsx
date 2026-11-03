@@ -21,7 +21,7 @@ const FAQS = [
   },
   {
     q: "What’s on Free, Pro and Business?",
-    a: "Every plan has proof-based ranking with reasons, references you can switch on, compare, the pool gap report, pipeline, shortlist and Talent search. Free is 1 seat and 1 open job. Pro is priced per seat with unlimited open jobs and team invites. Business (from 3 seats) adds multiple workspaces, priority company verification review, onboarding help and invoice billing on request."
+    a: "Every plan has proof-based ranking with reasons, references you can switch on, compare, the pool gap report, pipeline, shortlist and Talent search. Free is 1 seat, 1 open job and 1 workspace. Pro is priced per seat with unlimited open jobs, teammate invites and priority support, in 1 workspace. Business (from 3 seats) adds unlimited workspaces, priority verified-company review, onboarding help and invoice billing on request."
   },
   {
     q: "Is this the same as personal Livefolio Pro?",
