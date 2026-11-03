@@ -132,3 +132,31 @@ export const HIRING_PLAN_FEATURES: Record<HiringPlanSlug, HiringPlanFeature[]> =
     { label: "Invoice billing on request" },
   ],
 };
+
+/**
+ * Enterprise is display-only: no Razorpay plan, no checkout, no entitlement tier.
+ * Everything here is a service promise handled by the team, phrased "on request".
+ */
+export const ENTERPRISE_PLAN = {
+  name: "Enterprise",
+  priceLabel: "Custom",
+  cta: "Contact sales",
+  note: "For larger hiring teams with procurement needs",
+  features: [
+    { label: "Everything in Business" },
+    { label: "Custom seat volume and pricing" },
+    { label: "Custom contract and invoicing" },
+    { label: "Dedicated support contact" },
+    { label: "Guided onboarding for your team" },
+    { label: "SSO and security review on request" },
+  ] satisfies HiringPlanFeature[],
+} as const;
+
+/** mailto link for Enterprise enquiries. */
+export function enterpriseContactHref(email: string): string {
+  const subject = encodeURIComponent("Livefolio Hiring — Enterprise enquiry");
+  const body = encodeURIComponent(
+    "Company:\nApprox. number of recruiters / hiring managers:\nWhat you need (seats, SSO, invoicing, onboarding):\n",
+  );
+  return `mailto:${email}?subject=${subject}&body=${body}`;
+}

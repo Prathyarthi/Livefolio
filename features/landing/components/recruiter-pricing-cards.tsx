@@ -5,7 +5,11 @@ import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RecruiterPricingCta } from "@/features/landing/components/recruiter-pricing-cta";
+import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/lib/site";
 import {
+  ENTERPRISE_PLAN,
+  enterpriseContactHref,
   HIRING_PLAN_FEATURES,
   savingsPercent,
   type HiringPlanSlug,
@@ -47,7 +51,7 @@ export function RecruiterPricingCards() {
         </TabsList>
       </Tabs>
 
-      <div className="grid gap-px overflow-hidden rounded-[var(--radius-xl)] border border-border-default bg-border-default md:grid-cols-3">
+      <div className="grid gap-px overflow-hidden rounded-[var(--radius-xl)] border border-border-default bg-border-default sm:grid-cols-2 xl:grid-cols-4">
         {PLANS.map((slug) => {
           const copy = PLAN_COPY[slug];
           const paid = slug !== "free";
@@ -94,6 +98,30 @@ export function RecruiterPricingCards() {
             </div>
           );
         })}
+        <div className="flex flex-col bg-surface-base p-6 md:p-8">
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">
+            {ENTERPRISE_PLAN.name}
+          </p>
+          <p className="mt-3 text-4xl font-semibold tracking-tight text-text-primary">
+            {ENTERPRISE_PLAN.priceLabel}
+          </p>
+          <p className="mt-1 text-xs text-text-muted">Annual contract · volume pricing</p>
+          <p className="mt-3 text-body-sm text-text-secondary">{ENTERPRISE_PLAN.note}</p>
+          <ul className="mt-6 flex-1 space-y-2">
+            {ENTERPRISE_PLAN.features.map((feature) => (
+              <li
+                key={feature.label}
+                className="flex items-start gap-2 text-body-sm text-text-secondary"
+              >
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-secondary" aria-hidden />
+                {feature.label}
+              </li>
+            ))}
+          </ul>
+          <Button asChild variant="outline" className="mt-6 w-full">
+            <a href={enterpriseContactHref(siteConfig.supportEmail)}>{ENTERPRISE_PLAN.cta}</a>
+          </Button>
+        </div>
       </div>
     </div>
   );

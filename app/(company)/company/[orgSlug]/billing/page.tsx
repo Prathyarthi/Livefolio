@@ -18,7 +18,10 @@ import {
   formatUsd,
   type BillingInterval,
 } from "@/lib/pricing";
+import { siteConfig } from "@/lib/site";
 import {
+  ENTERPRISE_PLAN,
+  enterpriseContactHref,
   HIRING_PLAN_FEATURES,
   HIRING_PLAN_NAMES,
   MAX_SEATS,
@@ -499,6 +502,21 @@ export default function CompanyBillingPage() {
               : isPending
                 ? "Payment pending…"
                 : `Subscribe to ${HIRING_PLAN_NAMES[selectedPlan]} · ${checkoutSeats} seat${checkoutSeats === 1 ? "" : "s"}`}
+          </Button>
+        </Panel>
+      ) : null}
+
+      {canManage ? (
+        <Panel as="section" className="flex flex-wrap items-center justify-between gap-3 p-4 md:p-6">
+          <div className="min-w-0">
+            <Eyebrow>{ENTERPRISE_PLAN.name} · {ENTERPRISE_PLAN.priceLabel}</Eyebrow>
+            <p className="mt-1 text-body-sm text-text-secondary">
+              Custom seat volume, contract and invoicing, dedicated support, onboarding,
+              and SSO on request.
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <a href={enterpriseContactHref(siteConfig.supportEmail)}>{ENTERPRISE_PLAN.cta}</a>
           </Button>
         </Panel>
       ) : null}

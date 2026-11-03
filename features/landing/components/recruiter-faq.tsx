@@ -28,6 +28,10 @@ const FAQS = [
     a: "No. Personal Pro is for individual portfolios. Hiring Pro and Business are company plans, billed per seat.",
   },
   {
+    q: "Do you offer Enterprise plans?",
+    a: "Yes. Enterprise is custom-priced for larger teams: custom seat volume, contract and invoicing, a dedicated support contact, guided onboarding, and SSO or a security review on request. Email team@livefolio.me and we’ll scope it with you.",
+  },
+  {
     q: "What counts as a seat?",
     a: "Each teammate in your organization, plus anyone with a pending invite. Add or remove seats from Billing; removed seats stop renewing at the end of the billing period.",
   },

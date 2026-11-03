@@ -75,3 +75,18 @@ describe("limits", () => {
     expect(Object.keys(PLAN_LIMITS).sort()).toEqual(["business", "free", "pro"]);
   });
 });
+
+describe("enterprise (display only)", () => {
+  test("is not a purchasable tier", async () => {
+    const mod = await import("@/lib/hiring-plans");
+    expect(Object.keys(mod.HIRING_SEAT_PRICING)).toEqual(["pro", "business"]);
+    expect(Object.keys(mod.PLAN_LIMITS)).not.toContain("enterprise");
+    expect(mod.parsePaidHiringPlan("enterprise")).toBeNull();
+    expect(mod.ENTERPRISE_PLAN.priceLabel).toBe("Custom");
+  });
+  test("contact link is a mailto with a subject", async () => {
+    const { enterpriseContactHref } = await import("@/lib/hiring-plans");
+    const href = enterpriseContactHref("team@livefolio.me");
+    expect(href.startsWith("mailto:team@livefolio.me?subject=")).toBe(true);
+  });
+});

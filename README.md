@@ -58,7 +58,7 @@ Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Per-seat hiring billing
 
-Hiring plans live in `lib/hiring-plans.ts` (Free, Pro and Business, priced per seat; Business needs at least 3 seats). Seats used = org members + pending invites; inviting beyond paid seats returns 402.
+Hiring plans live in `lib/hiring-plans.ts` (Free, Pro and Business, priced per seat; Business needs at least 3 seats). Enterprise is display-only ("Custom", Contact sales via `siteConfig.supportEmail`) with no Razorpay plan or checkout. Seats used = org members + pending invites; inviting beyond paid seats returns 402.
 
 Before going live:
 1. Apply migration `20261102210000_org_per_seat_plans` (adds plan and seat columns).
