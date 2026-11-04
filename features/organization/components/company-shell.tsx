@@ -16,6 +16,7 @@ import {
   CreditCard,
   Users,
   BadgeCheck,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,12 @@ function CompanySidebar({
             title: "Jobs",
             href: `${workspaceBase}/jobs`,
             icon: Briefcase,
+            exact: false,
+          },
+          {
+            title: "Hiring agent",
+            href: `${workspaceBase}/agent`,
+            icon: Sparkles,
             exact: false,
           },
           {
