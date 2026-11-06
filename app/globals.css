@@ -562,13 +562,20 @@ body {
 .studio-landing {
   --studio-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
   --studio-dot: color-mix(in srgb, var(--color-text-primary) 28%, transparent);
-  /* Light studio pages: true white (not global cream #fbfaf7). Scoped only. */
+  font-family: var(--studio-sans);
+}
+
+/*
+ * True white studio page (not global cream #fbfaf7). Light only.
+ * Use html:not(.dark) so Lightning/Tailwind cannot drop .dark and apply
+ * charcoal overrides to all .studio-landing in light mode.
+ */
+html:not(.dark):not([data-theme="dark"]) .studio-landing {
   --color-surface-base: #ffffff;
   --color-surface-raised: #ffffff;
   --color-surface-sunken: #f4f4f4;
   --studio-page-bg: #ffffff;
-  font-family: var(--studio-sans);
-  background-color: var(--studio-page-bg);
+  background-color: #ffffff;
 }
 
 .studio-landing h1,
@@ -624,8 +631,8 @@ body {
   box-shadow: none;
 }
 
-.dark .studio-landing .studio-hero-highlight,
-[data-theme="dark"] .studio-landing .studio-hero-highlight {
+html.dark .studio-landing .studio-hero-highlight,
+html[data-theme="dark"] .studio-landing .studio-hero-highlight {
   background-color: var(--color-brand-secondary);
   color: #ffffff;
 }
@@ -732,14 +739,14 @@ body {
   pointer-events: none;
 }
 
-.dark .studio-landing,
-[data-theme="dark"] .studio-landing {
+html.dark .studio-landing,
+html[data-theme="dark"] .studio-landing {
   --studio-dot: color-mix(in srgb, var(--color-text-primary) 42%, transparent);
   --color-surface-base: #111010;
   --color-surface-raised: #1a1917;
   --color-surface-sunken: #141312;
   --studio-page-bg: #111010;
-  background-color: var(--studio-page-bg);
+  background-color: #111010;
 }
 
 /* Mountain backdrop — full-bleed behind nav, early fade to studio page bg (white/charcoal) */
@@ -784,14 +791,14 @@ body {
     );
 }
 
-.dark .studio-landing .studio-hero-backdrop img,
-[data-theme="dark"] .studio-landing .studio-hero-backdrop img {
+html.dark .studio-landing .studio-hero-backdrop img,
+html[data-theme="dark"] .studio-landing .studio-hero-backdrop img {
   opacity: 0.24;
   filter: saturate(0.5) contrast(0.88) brightness(0.72);
 }
 
-.dark .studio-landing .studio-hero-backdrop::after,
-[data-theme="dark"] .studio-landing .studio-hero-backdrop::after {
+html.dark .studio-landing .studio-hero-backdrop::after,
+html[data-theme="dark"] .studio-landing .studio-hero-backdrop::after {
   background:
     linear-gradient(
       to bottom,
@@ -819,8 +826,8 @@ body {
 .studio-landing .studio-hero-float__tile:nth-child(5) { animation-delay: -0.7s; }
 .studio-landing .studio-hero-float__tile:nth-child(6) { animation-delay: -4s; }
 
-.dark .studio-landing .studio-hero-float__tile,
-[data-theme="dark"] .studio-landing .studio-hero-float__tile {
+html.dark .studio-landing .studio-hero-float__tile,
+html[data-theme="dark"] .studio-landing .studio-hero-float__tile {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
