@@ -554,6 +554,112 @@ body {
 
 
 /* ─── Studio landing (candidate home only) ──────────────────────── */
+/*
+ * Scope Source Sans 3 for display/headings/nav on the candidate home.
+ * Global --font-display stays JetBrains Mono for the rest of the app
+ * (templates, recruiters, dashboard). Eyebrow/mono accents remain mono.
+ */
+.studio-landing {
+  --studio-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--studio-sans);
+}
+
+.studio-landing .font-display,
+.studio-landing .text-display,
+.studio-landing .text-h1,
+.studio-landing .text-h2,
+.studio-landing .text-h3,
+.studio-landing .text-h4 {
+  font-family: var(--studio-sans);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.studio-landing .text-display {
+  font-size: clamp(2rem, 1.4rem + 1.6vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.18;
+}
+
+.studio-landing .text-h1 {
+  font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.125rem); /* ~26–34px */
+  font-weight: 600;
+  line-height: 1.22;
+}
+
+.studio-landing .text-h2 {
+  font-size: clamp(1.375rem, 1.15rem + 0.7vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.studio-landing .studio-hero-title {
+  font-family: var(--studio-sans);
+  font-size: clamp(1.75rem, 1.35rem + 1.5vw, 2.25rem); /* ~28–36px */
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+/* Decorative mountain backdrop — fades into cream / charcoal */
+.studio-landing .studio-hero-backdrop {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: min(48vh, 400px);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.studio-landing .studio-hero-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  opacity: 0.42;
+  filter: saturate(0.78) contrast(0.95);
+}
+
+.studio-landing .studio-hero-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-surface-base) 18%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-base) 55%, transparent) 42%,
+      color-mix(in srgb, var(--color-surface-base) 92%, transparent) 78%,
+      var(--color-surface-base) 100%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-surface-base) 55%, transparent) 0%,
+      transparent 18%,
+      transparent 82%,
+      color-mix(in srgb, var(--color-surface-base) 55%, transparent) 100%
+    );
+}
+
+.dark .studio-landing .studio-hero-backdrop img,
+[data-theme="dark"] .studio-landing .studio-hero-backdrop img {
+  opacity: 0.28;
+  filter: saturate(0.55) contrast(0.9) brightness(0.75);
+}
+
+.dark .studio-landing .studio-hero-backdrop::after,
+[data-theme="dark"] .studio-landing .studio-hero-backdrop::after {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-surface-base) 35%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-base) 70%, transparent) 48%,
+      var(--color-surface-base) 100%
+    );
+}
+
 .studio-landing .studio-hatch {
   background-color: var(--color-surface-sunken);
   background-image:

@@ -9,10 +9,6 @@ import {
   LeetCodeIcon,
   MediumIcon,
 } from "@/features/landing/components/integration-icons";
-import {
-  StudioHeading,
-  StudioSection,
-} from "@/features/landing/components/studio-shell";
 import { integrations } from "@/lib/site";
 
 const ICONS = {
@@ -25,35 +21,52 @@ const ICONS = {
   codeforces: CodeforcesIcon,
 } as const;
 
-/**
- * Truthful proof strip: platforms Livefolio actually connects.
- * Not client logos, testimonials, or fabricated counts.
- */
-export function PlatformProof() {
-  return (
-    <StudioSection>
-      <StudioHeading
-        eyebrow="Connected platforms"
-        title="Bring work that already lives elsewhere"
-        description="Import a resume, then optionally connect the platforms below so repos, writing, and coding stats can stay current on your site."
-      />
+/** Platforms shown in the compact end-of-hero strip (truthful, not customers). */
+const HERO_PLATFORM_IDS = [
+  "github",
+  "medium",
+  "devto",
+  "leetcode",
+  "stackoverflow",
+  "hashnode",
+  "codeforces",
+] as const;
 
-      <ul className="mt-8 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-        {integrations.map((platform) => {
+/**
+ * Compact proof strip inside the hero — caption + inline platform marks.
+ * Not fabricated endorsements; only platforms Livefolio actually connects.
+ */
+export function HeroPlatformStrip() {
+  const platforms = integrations.filter((p) =>
+    (HERO_PLATFORM_IDS as readonly string[]).includes(p.id),
+  );
+
+  return (
+    <div className="mx-auto mt-9 w-full max-w-[36rem] border-t border-dashed border-border-default/60 pt-6">
+      <p className="text-center text-[13px] text-text-muted">
+        Connect the tools you already use
+      </p>
+      <ul className="mt-3.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2.5 sm:gap-x-5">
+        {platforms.map((platform) => {
           const Icon = ICONS[platform.id];
           return (
             <li
               key={platform.id}
-              className="inline-flex items-center gap-2 rounded-full border border-border-default bg-surface-raised px-3 py-1.5 shadow-[0_1px_2px_rgba(26,24,40,0.04)]"
+              className="inline-flex items-center gap-1.5 text-text-secondary"
             >
               <Icon className="h-3.5 w-3.5 shrink-0 text-text-primary" />
-              <span className="text-body-sm font-medium text-text-secondary">
+              <span className="text-[13px] font-medium tracking-[-0.01em]">
                 {platform.name}
               </span>
             </li>
           );
         })}
       </ul>
-    </StudioSection>
+    </div>
   );
+}
+
+/** @deprecated Prefer HeroPlatformStrip inside Hero — kept for rare imports. */
+export function PlatformProof() {
+  return <HeroPlatformStrip />;
 }

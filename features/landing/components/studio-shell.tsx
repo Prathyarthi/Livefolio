@@ -51,7 +51,7 @@ export function StudioSection({
     <section
       id={id}
       className={cn(
-        "scroll-mt-24 py-14 sm:py-16 md:py-20",
+        "scroll-mt-24 py-12 sm:py-14 md:py-16",
         padded && "px-4 sm:px-6",
         divider && "border-t border-dashed border-border-default/70",
         className,
@@ -76,18 +76,23 @@ export function StudioHeading({
   return (
     <div
       className={cn(
-        align === "center" && "mx-auto max-w-[40ch] text-center md:max-w-[42ch]",
-        align === "left" && "max-w-[42ch]",
+        align === "center" && "mx-auto max-w-[36rem] text-center",
+        align === "left" && "max-w-[34rem] text-left",
       )}
     >
       {eyebrow ? <p className="eyebrow uppercase">{eyebrow}</p> : null}
-      <h2 className={cn("text-h1 text-text-primary", eyebrow ? "mt-3" : null)}>
+      <h2
+        className={cn(
+          "text-h1 font-semibold tracking-[-0.03em] text-text-primary",
+          eyebrow ? "mt-2.5" : null,
+        )}
+      >
         {title}
       </h2>
       {description ? (
         <p
           className={cn(
-            "mt-4 max-w-[56ch] text-body text-text-secondary",
+            "mt-3 max-w-[40rem] text-body text-text-secondary",
             align === "center" && "mx-auto",
           )}
         >

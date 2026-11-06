@@ -92,21 +92,21 @@ export function LandingNav({
   if (layout === "pill" && variant === "candidate") {
     const menuLinks = CANDIDATE_PILL_MENU_LINKS;
     return (
-      <header className="sticky top-0 z-[100] px-4 pt-4 md:px-0 md:pt-8">
+      <header className="sticky top-0 z-[100] px-4 pt-3 md:px-0 md:pt-5">
         {/*
           max-w-3xl (~768px) matches reference nav width.
-          Side columns reserve logo/actions space so centred links never overlap.
+          Slimmer padding / ~16px radius to match studio floating bar.
         */}
-        <div className="relative mx-auto flex w-full max-w-3xl items-center justify-between gap-2 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-2.5 py-2 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:gap-3 sm:px-4">
-          <div className="relative z-[1] flex shrink-0 items-center lg:min-w-[9.5rem]">
+        <div className="relative mx-auto flex w-full max-w-3xl items-center justify-between gap-2 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-2.5 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:gap-3 sm:px-3.5">
+          <div className="relative z-[1] flex shrink-0 items-center lg:min-w-[9rem]">
             <Logo
-              className="shrink-0 gap-2"
-              wordmarkClassName="text-brand-primary font-display text-[17px] font-bold tracking-[-0.01em] sm:text-[20px]"
+              className="shrink-0 gap-1.5 [&_img]:h-7 [&_img]:w-7"
+              wordmarkClassName="text-brand-primary font-sans text-[15px] font-semibold tracking-[-0.02em] sm:text-[16px]"
             />
           </div>
 
           <nav
-            className="absolute left-1/2 top-1/2 z-0 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-3 lg:flex"
+            className="absolute left-1/2 top-1/2 z-0 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-2.5 lg:flex"
             aria-label="Main navigation"
           >
             {links.map(({ label, href }, index) => (
@@ -119,7 +119,7 @@ export function LandingNav({
                 ) : null}
                 <Link
                   href={href}
-                  className="whitespace-nowrap text-sm font-medium text-text-secondary transition-colors duration-150 hover:text-text-primary"
+                  className="whitespace-nowrap font-sans text-[13px] font-medium text-text-secondary transition-colors duration-150 hover:text-text-primary"
                 >
                   {label}
                 </Link>
@@ -127,14 +127,14 @@ export function LandingNav({
             ))}
           </nav>
 
-          <div className="relative z-[1] flex min-w-0 shrink-0 items-center justify-end gap-1 sm:gap-1.5 lg:min-w-[9.5rem]">
+          <div className="relative z-[1] flex min-w-0 shrink-0 items-center justify-end gap-1 sm:gap-1.5 lg:min-w-[9rem]">
             <ThemeToggle className="hidden shrink-0 lg:inline-flex" />
             {!authenticated ? (
               <Button
                 variant="ghost"
                 size="sm"
                 asChild
-                className="hidden h-8 shrink-0 rounded-full px-2.5 md:inline-flex"
+                className="hidden h-7 shrink-0 rounded-full px-2.5 text-[13px] md:inline-flex"
               >
                 <Link href="/sign-in">Sign in</Link>
               </Button>
@@ -142,7 +142,7 @@ export function LandingNav({
             <Button
               size="sm"
               asChild
-              className="hidden h-8 shrink-0 rounded-full px-3 sm:inline-flex"
+              className="hidden h-7 shrink-0 rounded-full px-3 text-[13px] sm:inline-flex"
               variant="accent"
             >
               <Link href={primaryHref}>{primaryLabelShort}</Link>
@@ -150,7 +150,7 @@ export function LandingNav({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-full lg:hidden"
+              className="h-7 w-7 shrink-0 rounded-full lg:hidden"
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}

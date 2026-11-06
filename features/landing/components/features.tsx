@@ -101,7 +101,7 @@ function StepVisual({ kind }: { kind: (typeof STEPS)[number]["visual"] }) {
     <div className={shell}>
       <div className="relative z-[1] m-auto w-[min(100%,18rem)] rounded-xl border border-border-default bg-surface-raised px-5 py-8 text-center shadow-[var(--shadow-card)]">
         <p className="font-mono text-xs text-text-muted">livefolio.me/</p>
-        <p className="mt-2 font-display text-lg font-semibold text-text-primary">
+        <p className="mt-2 font-sans text-lg font-semibold tracking-[-0.02em] text-text-primary">
           you
         </p>
         <div className="mx-auto mt-5 h-9 w-28 rounded-full bg-brand-secondary text-[12px] font-semibold leading-9 text-white">
@@ -114,17 +114,16 @@ function StepVisual({ kind }: { kind: (typeof STEPS)[number]["visual"] }) {
 
 export function Features() {
   return (
-    <StudioSection id="features" padded={false}>
-      <div className="px-4 sm:px-6">
+    <StudioSection id="features" padded={false} divider>
+      <div className="px-4 sm:px-6 md:px-8">
         <StudioHeading
-          eyebrow="How it works"
           title="From resume to live site"
           description="Import your resume, connect the platforms you already use, pick a template, and publish a shareable link."
           align="left"
         />
       </div>
 
-      <div className="mt-10 grid grid-cols-1 border-y border-border-default md:grid-cols-2 md:[&>*:nth-child(odd)]:border-r md:[&>*:nth-child(odd)]:border-border-default [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-border-default md:[&>*:nth-child(n+3)]:border-b-0">
+      <div className="mt-8 grid grid-cols-1 border-y border-border-default md:grid-cols-2 md:[&>*:nth-child(odd)]:border-r md:[&>*:nth-child(odd)]:border-border-default [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-border-default md:[&>*:nth-child(n+3)]:border-b-0">
         {STEPS.map((step) => (
           <article key={step.number} className="flex h-full flex-col">
             <div className="relative flex-1 bg-surface-sunken/30 px-4 py-6 md:px-8 md:py-8">
