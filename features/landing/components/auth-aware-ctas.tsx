@@ -54,13 +54,13 @@ export function AuthAwareCtas({
   if (authenticated) {
     return (
       <div className={className ?? "flex flex-wrap items-center justify-center gap-3"}>
-        <Button asChild variant="accent" size={size}>
+        <Button asChild variant="accent" size={size} className="font-sans">
           <Link href="/dashboard">
             Go to dashboard
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </Button>
-        <Button asChild variant="outline" size={size}>
+        <Button asChild variant="outline" size={size} className="font-sans">
           <Link href="#showcase">See examples</Link>
         </Button>
       </div>
@@ -69,13 +69,13 @@ export function AuthAwareCtas({
 
   return (
     <div className={className ?? "flex flex-wrap items-center justify-center gap-3"}>
-      <Button asChild variant="accent" size={size}>
+      <Button asChild variant="accent" size={size} className="font-sans">
         <Link href="/sign-up">
           Get started — it&apos;s free
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </Button>
-      <Button asChild variant="outline" size={size}>
+      <Button asChild variant="outline" size={size} className="font-sans">
         <Link href="#showcase">
           See examples
           <ArrowRight className="h-4 w-4" aria-hidden />

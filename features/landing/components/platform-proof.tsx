@@ -46,13 +46,13 @@ export function HeroPlatformStrip() {
       <p className="text-center text-[13px] text-text-muted">
         Connect the tools you already use
       </p>
-      <ul className="mt-3.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:flex-nowrap sm:gap-x-3.5 md:gap-x-4">
+      <ul className="mt-3.5 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2 sm:gap-x-3 md:flex-nowrap md:gap-x-3.5 lg:gap-x-4">
         {platforms.map((platform) => {
           const Icon = ICONS[platform.id];
           return (
             <li
               key={platform.id}
-              className="inline-flex items-center gap-1.5 text-text-secondary"
+              className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-text-secondary"
             >
               <Icon className="h-3.5 w-3.5 shrink-0 text-text-primary" />
               <span className="text-[12px] font-medium tracking-[-0.01em] sm:text-[13px]">
