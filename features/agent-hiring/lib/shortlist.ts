@@ -13,6 +13,8 @@ export type PoolCandidate = {
   ref: string;
   /** Applicants: job they applied to. */
   appliedTo?: string | null;
+  /** Applicants: id of that job, so the profile opens on the right role. */
+  appliedJobId?: string | null;
 };
 
 export type ShortlistCandidate = PoolCandidate & {

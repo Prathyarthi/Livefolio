@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Copy, Lock, Mail, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PageHeader, Panel } from "@/features/organization/components/workspace-ui";
+import { PageHeader, PageSkeleton, Panel } from "@/features/organization/components/workspace-ui";
 import { useOrganization } from "@/features/organization/api/use-organization";
 import { useCurrent } from "@/features/auth/api/use-current";
 import { useCreateJob, type Job } from "@/features/jobs/api/use-jobs";
@@ -32,8 +32,26 @@ import {
 } from "@/features/agent-hiring/api/use-agent-hiring";
 import { draftToJobInput, type DraftJob } from "@/features/agent-hiring/lib/brief";
 import { draftInvite, type ShortlistCandidate } from "@/features/agent-hiring/lib/shortlist";
+import {
+  agentSessionKey,
+  clearAgentSession,
+  readAgentSession,
+  writeAgentSession,
+  type AgentInvite,
+  type AgentJobRef,
+  type AgentSession,
+} from "@/features/agent-hiring/lib/session";
 
-type Invite = { subject: string; body: string; sent?: boolean };
+type Invite = AgentInvite;
+
+const EMPTY_SESSION: AgentSession = {
+  brief: "",
+  draft: null,
+  job: null,
+  result: null,
+  selected: {},
+  invites: {},
+};
 
 function errorInfo(error: unknown) {
   const e = error as { message?: string; upgradeRequired?: boolean; upgradeOrgSlug?: string };
@@ -55,15 +73,53 @@ export function AgentHiringPage() {
   const shortlist = useShortlist(orgSlug, workspaceSlug);
   const sendInvite = useSendInvite(orgSlug, workspaceSlug);
 
+  const sessionKey = agentSessionKey(orgSlug, workspaceSlug);
+  const [ready, setReady] = useState(false);
   const [brief, setBrief] = useState("");
   const [draft, setDraft] = useState<DraftJob | null>(null);
-  const [job, setJob] = useState<Job | null>(null);
+  const [job, setJob] = useState<AgentJobRef | null>(null);
   const [result, setResult] = useState<ShortlistResponse | null>(null);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [invites, setInvites] = useState<Record<string, Invite>>({});
 
+  useEffect(() => {
+    const saved = readAgentSession(sessionKey);
+    if (saved) {
+      setBrief(saved.brief);
+      setDraft(saved.draft);
+      setJob(saved.job);
+      setResult(saved.result);
+      setSelected(saved.selected);
+      setInvites(saved.invites);
+    }
+    setReady(true);
+  }, [sessionKey]);
+
+  useEffect(() => {
+    if (!ready) return;
+    writeAgentSession(sessionKey, { brief, draft, job, result, selected, invites });
+  }, [ready, sessionKey, brief, draft, job, result, selected, invites]);
+
+  function rememberJob(created: Job): AgentJobRef {
+    return {
+      id: created.id,
+      title: created.title,
+      slug: created.slug,
+      status: created.status,
+    };
+  }
+
+  function startOver() {
+    clearAgentSession(sessionKey);
+    setBrief(EMPTY_SESSION.brief);
+    setDraft(EMPTY_SESSION.draft);
+    setJob(EMPTY_SESSION.job);
+    setResult(EMPTY_SESSION.result);
+    setSelected(EMPTY_SESSION.selected);
+    setInvites(EMPTY_SESSION.invites);
+  }
+
   const llmOff = config.data ? !config.data.llmConfigured : false;
-  const talentLocked = org ? org.planTier === "free" : false;
 
   async function handleDraft() {
     try {
@@ -89,7 +145,7 @@ export function AgentHiringPage() {
         workspaceSlug,
         status: publish ? "published" : "draft",
       });
-      setJob(created);
+      setJob(rememberJob(created));
       toast.success(publish ? "Job published" : "Draft saved");
       const res = await shortlist.mutateAsync(created.id);
       setResult(res);
@@ -151,12 +207,14 @@ export function AgentHiringPage() {
 
   const selectedCount = Object.values(selected).filter(Boolean).length;
 
+  if (!ready) return <PageSkeleton />;
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-8">
       <PageHeader
         eyebrow="Hiring agent"
         title="Describe the hire. The agent finds the people."
-        description="Write what you need in plain words. The agent drafts the job for you to approve, then ranks your recent applicants and people open to work, and drafts invites you send yourself."
+        description="Write what you need in plain words. The agent drafts the job for you to approve, then finds people who opted in to be found for this role, and drafts invites you send yourself."
       />
 
       {llmOff ? (
@@ -185,13 +243,19 @@ export function AgentHiringPage() {
           placeholder="e.g. Need someone to fix our onboarding drop-off. Remote, mid-level."
           disabled={llmOff || Boolean(job)}
         />
+        <div className="flex flex-wrap items-center gap-3">
         <Button
           onClick={handleDraft}
           disabled={llmOff || draftJob.isPending || brief.trim().length < 12 || Boolean(job)}
         >
-          <Sparkles className="size-4" />
           {draftJob.isPending ? "Drafting…" : draft ? "Redraft" : "Draft the job"}
         </Button>
+        {brief || draft || job || result ? (
+          <Button variant="ghost" onClick={startOver}>
+            Start over
+          </Button>
+        ) : null}
+        </div>
       </Panel>
 
       {/* Step 2: review draft */}
@@ -360,7 +424,7 @@ export function AgentHiringPage() {
       {/* Step 3: shortlist */}
       {shortlist.isPending ? (
         <Panel className="p-6 text-body-sm text-text-secondary">
-          Searching recent applicants{talentLocked ? "" : " and talent"}…
+          Searching people who opted in to be found…
         </Panel>
       ) : null}
       {result ? (
@@ -369,8 +433,9 @@ export function AgentHiringPage() {
             <div>
               <p className="font-medium text-text-primary">3. Shortlist</p>
               <p className="text-body-sm text-text-secondary">
-                Ranked {result.pools.applicants} recent applicants
-                {result.talentSearch ? ` and ${result.pools.sourced} people open to work` : ""}.
+                {result.talentSearch
+                  ? `Found ${result.candidates.length} people who match this role.`
+                  : "Talent search is on Pro and above."}
               </p>
             </div>
             <Button onClick={draftInvites} disabled={selectedCount === 0} variant="outline">
@@ -380,9 +445,9 @@ export function AgentHiringPage() {
           {!result.talentSearch ? (
             <Alert>
               <Lock className="size-4" />
-              <AlertTitle>Only your applicants were searched</AlertTitle>
+              <AlertTitle>Talent search is on Pro and above</AlertTitle>
               <AlertDescription>
-                Sourcing people who opted in to be found is on Pro and above.{" "}
+                The hiring agent only looks for people who opted in to be found.{" "}
                 <Link className="underline" href={`/company/${orgSlug}/billing`}>
                   Upgrade in Billing
                 </Link>
@@ -390,9 +455,9 @@ export function AgentHiringPage() {
               </AlertDescription>
             </Alert>
           ) : null}
-          {result.candidates.length === 0 ? (
+          {result.talentSearch && result.candidates.length === 0 ? (
             <p className="text-body-sm text-text-secondary">
-              No candidates yet. Publish the job to start receiving applications.
+              No one open to work matched this role.
             </p>
           ) : null}
           <ul className="space-y-3">
@@ -428,10 +493,10 @@ export function AgentHiringPage() {
                         </ul>
                       ) : null}
                       <div className="flex gap-3 text-xs">
-                        {c.source === "applicant" && job ? (
+                        {c.source === "applicant" && c.appliedJobId ? (
                           <Link
                             className="underline"
-                            href={`/company/${orgSlug}/${workspaceSlug}/jobs/${job.id}/applicants/${c.ref}`}
+                            href={`/company/${orgSlug}/${workspaceSlug}/jobs/${c.appliedJobId}/applicants/${c.ref}`}
                           >
                             View application
                           </Link>

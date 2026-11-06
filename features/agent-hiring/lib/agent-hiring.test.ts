@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { draftJobFromBrief, draftToJobInput } from "./brief";
+import { parseAgentSession } from "./session";
 import { draftInvite, mergeShortlist, type PoolCandidate } from "./shortlist";
 
 const good = {
@@ -90,6 +91,27 @@ describe("mergeShortlist", () => {
     const out = mergeShortlist([cand("a", 50)], [cand("b", 50)]);
     expect(out.map((c) => c.source)).toEqual(["applicant", "sourced"]);
   });
+});
+
+test("parseAgentSession keeps a draft and ignores garbage", () => {
+  const raw = JSON.stringify({
+    brief: "Need a designer for onboarding",
+    draft: {
+      title: "Designer",
+      summary: "Own onboarding.",
+      requirements: [],
+      responsibilities: [],
+    },
+    job: { id: "j1", title: "Designer", slug: "designer", status: "draft" },
+    result: null,
+    selected: {},
+    invites: {},
+  });
+  const session = parseAgentSession(raw);
+  expect(session?.brief).toBe("Need a designer for onboarding");
+  expect(session?.job?.id).toBe("j1");
+  expect(parseAgentSession("not json")).toBeNull();
+  expect(parseAgentSession(null)).toBeNull();
 });
 
 test("draftInvite uses first name, reasons and job link", () => {

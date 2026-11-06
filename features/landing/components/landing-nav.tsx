@@ -98,7 +98,7 @@ export function LandingNav({
       : "Dashboard"
     : variant === "recruiter"
       ? "Start hiring"
-      : "Get started — it's free";
+      : "Get started free";
   const primaryLabelShort = authenticated
     ? variant === "recruiter"
       ? "Workspace"

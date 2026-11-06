@@ -16,7 +16,6 @@ import {
   CreditCard,
   Users,
   BadgeCheck,
-  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -78,24 +77,24 @@ function CompanySidebar({
             exact: false,
           },
           {
-            title: "Hiring agent",
-            href: `${workspaceBase}/agent`,
-            icon: Sparkles,
-            exact: false,
-          },
-          {
             title: "Talent",
             href: `${workspaceBase}/talent`,
             icon: Users,
             exact: false,
             badge: org?.planTier === "free" ? "Pro" : undefined,
           },
-          {
-            title: "Workspace Settings",
-            href: `${workspaceBase}/settings`,
-            icon: Settings,
-            exact: false,
-          },
+          // Settings belong to one workspace. The org page can hold several,
+          // so this link only appears after a workspace is open.
+          ...(workspaceSlug
+            ? [
+                {
+                  title: "Workspace Settings",
+                  href: `${workspaceBase}/settings`,
+                  icon: Settings,
+                  exact: false,
+                },
+              ]
+            : []),
         ]
       : []),
     {

@@ -9,7 +9,7 @@ export function CTA() {
             Build your portfolio today
           </h2>
           <p className="prose-measure mx-auto mt-4 text-body-lg text-text-secondary">
-            Upload your resume, go live in minutes — then connect integrations to
+            Upload your resume, go live in seconds, then connect integrations to
             keep it current.
           </p>
           <AuthAwareCtas

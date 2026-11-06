@@ -11,7 +11,7 @@ export function Hero() {
         Wider stage so floating tiles sit beside copy without colliding.
         Inner measure keeps headline readable.
       */}
-      <div className="relative z-[1] mx-auto w-full max-w-[52rem]">
+      <div className="relative z-[1] mx-auto w-full max-w-[70rem]">
         <HeroFloatingIntegrations />
 
         <div className="relative z-[1] mx-auto w-full max-w-[40rem] text-center">

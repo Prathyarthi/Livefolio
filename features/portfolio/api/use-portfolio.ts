@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { attachClaimedSlug } from "@/lib/claim-slug";
 
 async function throwPortfolioApiError(
   response: Response,
@@ -39,7 +40,11 @@ export function useCreatePortfolio() {
       });
       if (!res.ok) await throwPortfolioApiError(res, "Failed to create portfolio");
 
-      return res.json();
+      const created = await res.json();
+      if (!created?.slug) {
+        await attachClaimedSlug();
+      }
+      return created;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["portfolio"] }),
   });

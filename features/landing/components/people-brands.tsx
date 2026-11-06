@@ -2,11 +2,10 @@ import { StudioSection } from "@/features/landing/components/studio-shell";
 
 /**
  * Decorative brand marks around a neutral headline.
- * Not a customer/endorsement claim — logos identify well-known employers only.
+ * Not a customer/endorsement claim. Logos identify well-known employers only.
  *
- * Positions are intentionally irregular (stable “designed random”), not mirrored
- * left/right pairs or even rows. Mobile parks marks in staggered top/bottom
- * bands so copy stays clear; md+ uses a scattered orbit.
+ * Marks sit in the open space above, below, and beside the copy, closer to
+ * the headline than the page edges, so they don't form two side columns.
  */
 const BRANDS = [
   {
@@ -15,22 +14,19 @@ const BRANDS = [
     src: "/landing/brands/accenture.svg",
     tile: "bg-[#A100FF]",
     logo: "brightness-0 invert",
-    // mobile top-left · desktop upper-left
-    mobile:
-      "left-[4%] top-[1%] size-11 -rotate-[9deg] sm:size-12",
-    desktop:
-      "left-[3%] top-[6%] size-[4.1rem] -rotate-[8deg] lg:left-[5%]",
+    mark: "h-[50%] w-[50%]",
+    mobile: "left-[6%] top-[6%] size-11 -rotate-[8deg] sm:size-12",
+    desktop: "left-[10%] top-[14%] size-[4.1rem] -rotate-[8deg] lg:left-[14%]",
   },
   {
     id: "netflix",
     name: "Netflix",
     src: "/landing/brands/netflix.svg",
-    tile: "bg-[#E50914]",
-    logo: "brightness-0 invert",
-    mobile:
-      "left-[38%] top-[0%] size-10 rotate-[6deg] sm:left-[40%] sm:size-11",
-    desktop:
-      "left-[20%] top-[2%] size-[3.35rem] rotate-[5deg] lg:left-[22%]",
+    tile: "bg-black border-black!",
+    logo: "",
+    mark: "h-[80%] w-auto",
+    mobile: "left-[40%] top-[2%] size-12 rotate-[4deg] sm:left-[42%]",
+    desktop: "left-[34%] top-[3%] size-[3.6rem] rotate-[4deg] lg:left-[36%]",
   },
   {
     id: "ibm",
@@ -38,10 +34,9 @@ const BRANDS = [
     src: "/landing/brands/ibm.svg",
     tile: "bg-[#0F62FE]",
     logo: "brightness-0 invert",
-    mobile:
-      "right-[5%] top-[5%] size-11 rotate-[4deg] sm:size-12",
-    desktop:
-      "right-[7%] top-[3%] size-[3.75rem] rotate-[7deg] lg:right-[9%]",
+    mark: "h-[32%] w-[76%]",
+    mobile: "right-[8%] top-[7%] size-11 rotate-[6deg] sm:size-12",
+    desktop: "right-[22%] top-[5%] size-[3.85rem] rotate-[6deg] lg:right-[26%]",
   },
   {
     id: "autodesk",
@@ -49,10 +44,9 @@ const BRANDS = [
     src: "/landing/brands/autodesk.svg",
     tile: "bg-[#000000]",
     logo: "brightness-0 invert",
-    mobile:
-      "left-[16%] top-[14%] size-[2.65rem] rotate-[13deg] sm:size-11",
-    desktop:
-      "left-[2%] top-[46%] size-16 rotate-[11deg] lg:left-[3%]",
+    mark: "h-[48%] w-[48%]",
+    mobile: "left-[8%] top-[18%] size-10 rotate-[12deg]",
+    desktop: "left-[5%] top-[42%] size-[3.7rem] rotate-[11deg] lg:left-[8%]",
   },
   {
     id: "adobe",
@@ -60,10 +54,9 @@ const BRANDS = [
     src: "/landing/brands/adobe.svg",
     tile: "bg-[#EB1000]",
     logo: "brightness-0 invert",
-    mobile:
-      "left-[6%] bottom-[9%] size-10 -rotate-[14deg] sm:size-11",
-    desktop:
-      "right-[4%] top-[22%] size-[3.65rem] -rotate-[12deg] lg:right-[5%]",
+    mark: "h-[52%] w-[46%]",
+    mobile: "right-[7%] top-[20%] size-10 -rotate-[10deg]",
+    desktop: "right-[6%] top-[36%] size-[3.65rem] -rotate-[10deg] lg:right-[9%]",
   },
   {
     id: "sap",
@@ -71,10 +64,9 @@ const BRANDS = [
     src: "/landing/brands/sap.svg",
     tile: "bg-[#008FD3]",
     logo: "brightness-0 invert",
-    mobile:
-      "left-[42%] bottom-[17%] size-10 -rotate-[3deg] sm:left-[44%] sm:size-11",
-    desktop:
-      "right-[2%] top-[52%] size-[3.5rem] -rotate-[6deg] lg:right-[3.5%]",
+    mark: "h-[34%] w-[72%]",
+    mobile: "left-[18%] bottom-[8%] size-10 -rotate-[4deg] sm:size-11",
+    desktop: "right-[16%] bottom-[18%] size-[3.55rem] -rotate-[5deg] lg:right-[18%]",
   },
   {
     id: "airbnb",
@@ -82,10 +74,9 @@ const BRANDS = [
     src: "/landing/brands/airbnb.svg",
     tile: "bg-[#FF5A5F]",
     logo: "brightness-0 invert",
-    mobile:
-      "right-[4%] bottom-[10%] size-[2.55rem] rotate-[10deg] sm:right-[6%] sm:size-10",
-    desktop:
-      "left-[24%] bottom-[4%] size-[3.6rem] rotate-[9deg] lg:left-[22%]",
+    mark: "h-[52%] w-[52%]",
+    mobile: "left-[44%] bottom-[3%] size-11 rotate-[8deg]",
+    desktop: "left-[40%] bottom-[2%] size-[3.5rem] rotate-[7deg] lg:left-[42%]",
   },
   {
     id: "pwc",
@@ -93,10 +84,9 @@ const BRANDS = [
     src: "/landing/brands/pwc.svg",
     tile: "bg-white",
     logo: "",
-    mobile:
-      "left-[22%] bottom-[0.5%] size-10 -rotate-[7deg] sm:left-[24%] sm:size-11",
-    desktop:
-      "left-[6%] bottom-[10%] size-[3.9rem] -rotate-[10deg] lg:left-[8%]",
+    mark: "h-[36%] w-[70%]",
+    mobile: "left-[8%] bottom-[3%] size-10 -rotate-[7deg] sm:size-11",
+    desktop: "left-[16%] bottom-[6%] size-[3.8rem] -rotate-[8deg] lg:left-[18%]",
   },
   {
     id: "standard-chartered",
@@ -104,10 +94,9 @@ const BRANDS = [
     src: "/landing/brands/standard-chartered.svg",
     tile: "bg-white",
     logo: "",
-    mobile:
-      "right-[26%] bottom-[1%] size-10 rotate-[8deg] sm:right-[28%] sm:size-11",
-    desktop:
-      "right-[10%] bottom-[16%] size-[3.55rem] rotate-[8deg] lg:right-[11%]",
+    mark: "h-[40%] w-[74%]",
+    mobile: "right-[10%] bottom-[4%] size-11 rotate-[6deg]",
+    desktop: "right-[28%] bottom-[3%] size-[3.6rem] rotate-[6deg] lg:right-[30%]",
   },
 ] as const;
 
@@ -116,18 +105,20 @@ function BrandTile({
   src,
   tile,
   logo,
+  mark,
   className,
 }: {
   name: string;
   src: string;
   tile: string;
   logo: string;
+  mark: string;
   className: string;
 }) {
   return (
     <span
       title={name}
-      className={`absolute flex items-center justify-center rounded-2xl border border-border-default shadow-[0_8px_24px_rgba(26,24,40,0.08)] ${tile} ${className}`}
+      className={`absolute flex items-center justify-center overflow-hidden rounded-2xl border border-border-default shadow-[0_8px_24px_rgba(26,24,40,0.08)] ${tile} ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -135,7 +126,7 @@ function BrandTile({
         alt=""
         width={40}
         height={40}
-        className={`h-[42%] w-[70%] max-w-[2.75rem] object-contain ${logo}`}
+        className={`object-contain ${mark} ${logo}`}
       />
     </span>
   );
@@ -144,7 +135,7 @@ function BrandTile({
 export function PeopleBrands() {
   return (
     <StudioSection id="people" padded={false} divider={false}>
-      <div className="relative mx-auto w-full max-w-[52rem] px-3 py-6 sm:px-6 sm:py-8 md:py-10">
+      <div className="relative mx-auto w-full px-3 py-6 sm:px-6 sm:py-8 md:py-10">
         {/* Mobile: staggered top/bottom marks — irregular, not mirrored rows */}
         <div
           className="pointer-events-none absolute inset-0 z-0 md:hidden"
@@ -157,6 +148,7 @@ export function PeopleBrands() {
               src={b.src}
               tile={b.tile}
               logo={b.logo}
+              mark={b.mark}
               className={b.mobile}
             />
           ))}
@@ -174,6 +166,7 @@ export function PeopleBrands() {
               src={b.src}
               tile={b.tile}
               logo={b.logo}
+              mark={b.mark}
               className={b.desktop}
             />
           ))}
@@ -186,7 +179,10 @@ export function PeopleBrands() {
             <span className="block">on Livefolio.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-[16rem] text-body text-text-secondary sm:max-w-[28rem]">
-            Portfolios that show real work — not just a resume.
+            Portfolios that show real work, not just a resume.
+          </p>
+          <p className="mt-2 text-body-sm text-text-muted">
+            And many more companies.
           </p>
         </div>
 

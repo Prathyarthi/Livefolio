@@ -9,7 +9,7 @@ export function RecruiterCTA() {
             Start hiring on proof
           </h2>
           <p className="prose-measure mx-auto mt-4 text-body text-text-secondary">
-            Post a role free. Ranked shortlists and reference-backed profiles —
+            Post a role free. Ranked shortlists and reference-backed profiles,
             no keyword theatre.
           </p>
           <AuthAwareCtas

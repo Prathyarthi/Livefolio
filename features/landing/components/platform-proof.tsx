@@ -2,11 +2,11 @@ import {
   CodeforcesIcon,
   DevtoIcon,
   HashnodeIcon,
+  LeetCodeMark,
   StackOverflowIcon,
 } from "@/components/icons";
 import {
   GitHubIcon,
-  LeetCodeIcon,
   MediumIcon,
 } from "@/features/landing/components/integration-icons";
 import { integrations } from "@/lib/site";
@@ -16,7 +16,7 @@ const ICONS = {
   medium: MediumIcon,
   devto: DevtoIcon,
   hashnode: HashnodeIcon,
-  leetcode: LeetCodeIcon,
+  leetcode: LeetCodeMark,
   stackoverflow: StackOverflowIcon,
   codeforces: CodeforcesIcon,
 } as const;

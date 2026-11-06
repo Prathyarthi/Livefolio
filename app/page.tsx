@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Hero } from "@/features/landing/components/hero";
+import { DomainClaim } from "@/features/landing/components/domain-claim";
 import { SupademoTour } from "@/features/landing/components/supademo-tour";
 import { Features } from "@/features/landing/components/features";
 import { PeopleBrands } from "@/features/landing/components/people-brands";
-import { ProductHighlights } from "@/features/landing/components/product-highlights";
 import { Integrations } from "@/features/landing/components/integrations";
 import { TemplateShowcase } from "@/features/landing/components/template-showcase";
 import { Pricing } from "@/features/landing/components/pricing";
@@ -39,9 +39,9 @@ export default function LandingPage() {
 
         <main id="main">
           <Hero />
+          <DomainClaim />
           <Features />
           <PeopleBrands />
-          <ProductHighlights />
           <SupademoTour />
           <Integrations />
           <TemplateShowcase />

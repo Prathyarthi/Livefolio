@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LandingNav } from "@/features/landing/components/landing-nav";
-import { CompanyShowcase } from "@/features/landing/components/company-showcase";
+import { PeopleBrands } from "@/features/landing/components/people-brands";
 import { RecruiterHero } from "@/features/landing/components/recruiter-hero";
 import { RecruiterHowWeRank } from "@/features/landing/components/recruiter-how-we-rank";
 import { RecruiterReferences } from "@/features/landing/components/recruiter-references";
@@ -34,11 +34,7 @@ export default function RecruitersLandingPage() {
 
         <main id="main">
           <RecruiterHero />
-          <CompanyShowcase
-            eyebrow="Talent already on Livefolio"
-            title="Professionals building real work are already here"
-            description="People building in public, from global enterprises to growing startups."
-          />
+          <PeopleBrands />
           <RecruiterHowWeRank />
           <RecruiterReferences />
           <RecruiterHowItWorks />

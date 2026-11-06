@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** Studio-aligned recruiter section: dotted top rule, numbered eyebrow, heading + body. */
+/** Centered studio section, matching the candidate landing headings. */
 export function RecruiterSection({
   id,
-  index,
   label,
   title,
   body,
@@ -30,19 +29,16 @@ export function RecruiterSection({
       )}
     >
       <div className="mx-auto w-full">
-        <p className="eyebrow flex items-center gap-2 uppercase">
-          {index ? <span className="text-brand-secondary">{index}</span> : null}
-          {label}
-        </p>
-        <div className="mt-3 grid gap-4 md:grid-cols-2 md:items-end md:gap-6">
+        <div className="mx-auto max-w-[36rem] text-center">
+          <p className="eyebrow uppercase">{label}</p>
           <h2
             id={headingId}
-            className="text-h1 text-balance font-semibold tracking-[-0.03em] text-text-primary"
+            className="mt-2.5 text-h1 text-balance font-semibold tracking-[-0.03em] text-text-primary"
           >
             {title}
           </h2>
           {body ? (
-            <p className="max-w-md text-body text-text-secondary md:justify-self-end">
+            <p className="mx-auto mt-3 max-w-[40rem] text-body text-text-secondary">
               {body}
             </p>
           ) : null}

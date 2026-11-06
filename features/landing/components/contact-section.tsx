@@ -23,7 +23,7 @@ export function ContactSection() {
           </span>
           <h3 className="mt-4 text-h4 text-text-primary">Email support</h3>
           <p className="mt-1.5 text-body-sm text-text-secondary">
-            For account, billing, and product questions — include your account
+            For account, billing, and product questions, include your account
             email and a short description of the issue.
           </p>
           <a

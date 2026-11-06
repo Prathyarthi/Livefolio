@@ -84,7 +84,7 @@ export function TemplateShowcase() {
       <StudioHeading
         eyebrow="Examples"
         title="See what Livefolio creates"
-        description="Real layouts generated from a resume. Same content, your choice of personality — with room to grow through integrations."
+        description="Real layouts generated from a resume. Same content, your choice of personality, with room to grow through integrations."
       />
 
       <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">

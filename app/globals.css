@@ -176,10 +176,10 @@
 /* ─── Design Tokens — DARK (warm studio night) ─────────────────── */
 .dark,
 [data-theme="dark"] {
-  /* Brand — terracotta leads on dark; cream for soft accents */
-  --color-brand-primary: #ed7a6d;
-  --color-brand-secondary: #f09588;
-  --color-brand-dark: #f5a89e;
+  /* Same coral as light mode. brand-light stays a dark chip surface. */
+  --color-brand-primary: #e86a5a;
+  --color-brand-secondary: #e86a5a;
+  --color-brand-dark: #e86a5a;
   --color-brand-light: #252320;
 
   /* Warm charcoal surfaces (no purple cast) */
@@ -202,7 +202,7 @@
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45), 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-modal: 0 12px 40px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-focus: 0 0 0 3px rgba(237, 122, 109, 0.35);
+  --shadow-focus: 0 0 0 3px rgba(232, 106, 90, 0.35);
 
   /* shadcn semantic mapping */
   --background: var(--color-surface-base);
@@ -236,7 +236,7 @@
 
 .dark ::selection,
 [data-theme="dark"] ::selection {
-  background: rgba(237, 122, 109, 0.35);
+  background: rgba(232, 106, 90, 0.35);
   color: var(--color-text-primary);
 }
 
@@ -619,11 +619,12 @@ html:not(.dark):not([data-theme="dark"]) .studio-landing {
   display: inline;
   background-color: var(--color-brand-secondary);
   color: #ffffff;
-  padding: 0 1px;
+  font-size: 0.68em;
+  padding: 0 0.06em;
   margin: 0;
-  border-radius: 0;
+  border-radius: 2px;
   /* smaller than parent title line-height so bg is not a tall slab */
-  line-height: 1;
+  line-height: 1.02;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   box-shadow: none;

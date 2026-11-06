@@ -14,20 +14,16 @@ import {
   applicationSnapshotInclude,
   portfolioToSnapshot,
 } from "@/features/applications/lib/snapshot";
-import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import { proofKindsOf } from "@/features/search/lib/proof";
 import { RANKING_VERSION, rankCandidate } from "@/features/search/lib/rank";
 import { talentKeywordWhere } from "@/features/talent/lib/search";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import { BRIEF_MAX, draftJobFromBrief } from "@/features/agent-hiring/lib/brief";
 import {
-  mergeShortlist,
+  SHORTLIST_SIZE,
   type PoolCandidate,
 } from "@/features/agent-hiring/lib/shortlist";
 
-/** Applicants to this workspace's jobs within this window form the "recent applies" pool. */
-const APPLICANT_WINDOW_DAYS = 180;
-const APPLICANT_CAP = 500;
 const TALENT_CAP = 300;
 
 function escapeHtml(value: string): string {
@@ -103,7 +99,7 @@ export const agentHiring = new Elysia({ prefix: "/agent-hiring" })
     { body: t.Object({ brief: t.String({ maxLength: BRIEF_MAX }) }) },
   )
 
-  // 2. Rank recent applicants + opted-in talent against the approved job.
+  // 2. Rank people who opted in to be found against this job. Other jobs' applicants are not a pool.
   .post(
     "/org/:orgSlug/workspace/:workspaceSlug/shortlist",
     async (ctx) => {
@@ -128,86 +124,56 @@ export const agentHiring = new Elysia({ prefix: "/agent-hiring" })
       }
       const jobProfile = await refreshJobSearchProfile(job.id);
 
-      const since = new Date(Date.now() - APPLICANT_WINDOW_DAYS * 86_400_000);
-      const applications = await prisma.application.findMany({
-        where: {
-          job: { organizationId: org.id, workspaceId: workspace.id },
-          submittedAt: { gte: since },
-        },
-        orderBy: { submittedAt: "desc" },
-        take: APPLICANT_CAP,
-        select: {
-          id: true,
-          userId: true,
-          submittedAt: true,
-          job: { select: { title: true } },
-          user: { select: { name: true, avatar: true } },
-          snapshot: { select: { data: true } },
-          portfolioId: true,
-        },
-      });
-      const applicants: PoolCandidate[] = applications.map((a) => {
-        const snapshot = (a.snapshot?.data ?? null) as ApplicationSnapshotData | null;
-        const rank = rankCandidate(snapshot, {
-          jobProfile,
-          extras: { name: a.user.name, freshnessAt: a.submittedAt },
-        });
-        return {
-          userId: a.userId,
-          name: a.user.name,
-          headline: snapshot?.profile.headline || snapshot?.profile.title || "",
-          avatarUrl: a.user.avatar ?? null,
-          livefolioUrl: null,
-          score: rank.score,
-          reasons: rank.reasons,
-          proof: snapshot ? proofKindsOf(snapshot) : [],
-          ref: a.id,
-          appliedTo: a.job.title,
-        };
-      });
-
       const talentAllowed = canUseTalentSearch(orgPlanTier(org));
       let sourced: PoolCandidate[] = [];
-      if (talentAllowed) {
-        const terms = jobProfile ? [...jobProfile.mustHaves, ...jobProfile.niceToHaves] : [];
+      const terms = jobProfile ? [...jobProfile.mustHaves, ...jobProfile.niceToHaves] : [];
+      if (talentAllowed && terms.length > 0) {
         const keywordWhere = await talentKeywordWhere(terms, true);
-        const rows = await prisma.portfolio.findMany({
-          where: {
-            AND: [
-              { openToWork: true, isPublished: true, slug: { not: null } },
-              ...(keywordWhere ? [keywordWhere] : []),
-            ],
-          },
-          include: { ...applicationSnapshotInclude, user: { select: { name: true } } },
-          orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
-          take: TALENT_CAP,
-        });
-        sourced = rows.map((row) => {
-          const snapshot = portfolioToSnapshot(row);
-          const rank = rankCandidate(snapshot, {
-            jobProfile,
-            extras: { name: row.user.name, freshnessAt: row.updatedAt },
-          });
-          return {
-            userId: row.userId,
-            name: row.user.name,
-            headline: row.headline || row.title,
-            avatarUrl: row.avatarUrl,
-            livefolioUrl: getPortfolioPublicUrl(row.slug!),
-            score: rank.score,
-            reasons: rank.reasons,
-            proof: proofKindsOf(snapshot),
-            ref: row.slug!,
-          };
-        });
+        const rows = keywordWhere
+          ? await prisma.portfolio.findMany({
+              where: {
+                AND: [
+                  { openToWork: true, isPublished: true, slug: { not: null } },
+                  keywordWhere,
+                ],
+              },
+              include: { ...applicationSnapshotInclude, user: { select: { name: true } } },
+              orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+              take: TALENT_CAP,
+            })
+          : [];
+        sourced = rows
+          .map((row) => {
+            const snapshot = portfolioToSnapshot(row);
+            const rank = rankCandidate(snapshot, {
+              jobProfile,
+              extras: { name: row.user.name, freshnessAt: row.updatedAt },
+            });
+            return {
+              userId: row.userId,
+              name: row.user.name,
+              headline: row.headline || row.title,
+              avatarUrl: row.avatarUrl,
+              livefolioUrl: getPortfolioPublicUrl(row.slug!),
+              score: rank.score,
+              reasons: rank.reasons,
+              proof: proofKindsOf(snapshot),
+              ref: row.slug!,
+            };
+          })
+          .filter((c) =>
+            c.reasons.some((reason) => /^(Must-have|Matches|Domain):/.test(reason)),
+          )
+          .sort((a, b) => b.score - a.score)
+          .slice(0, SHORTLIST_SIZE);
       }
 
       return {
         job,
         rankingVersion: RANKING_VERSION,
         talentSearch: talentAllowed,
-        pools: { applicants: applicants.length, sourced: sourced.length },
-        candidates: mergeShortlist(applicants, sourced),
+        pools: { applicants: 0, sourced: sourced.length },
+        candidates: sourced.map((c) => ({ ...c, source: "sourced" as const, label: "Sourced" as const })),
       };
     },
     { body: t.Object({ jobId: t.String({ minLength: 1, maxLength: 64 }) }) },
@@ -244,7 +210,11 @@ export const agentHiring = new Elysia({ prefix: "/agent-hiring" })
       let to: string | null = null;
       if (ctx.body.source === "applicant") {
         const app = await prisma.application.findFirst({
-          where: { id: ctx.body.ref, job: { organizationId: org.id, workspaceId: workspace.id } },
+          where: {
+            id: ctx.body.ref,
+            jobId: job.id,
+            job: { organizationId: org.id, workspaceId: workspace.id },
+          },
           select: { user: { select: { email: true } } },
         });
         to = app?.user.email ?? null;
