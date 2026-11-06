@@ -616,16 +616,16 @@ html:not(.dark):not([data-theme="dark"]) .studio-landing {
   letter-spacing: -0.035em;
 }
 
-/* Tight text-selection highlight (Mainline “earn trust”) — no chunky pad */
+/* Selection highlight — painted band hugs glyphs (not full line-box) */
 .studio-landing .studio-hero-highlight {
   display: inline;
   background-color: var(--color-brand-secondary);
   color: #ffffff;
-  /* zero vertical padding; ~1–2px horizontal only */
-  padding: 0 2px;
+  padding: 0 1px;
   margin: 0;
-  border-radius: 1px;
-  line-height: inherit;
+  border-radius: 0;
+  /* smaller than parent title line-height so bg is not a tall slab */
+  line-height: 1;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   box-shadow: none;
@@ -693,25 +693,9 @@ html[data-theme="dark"] .studio-landing .studio-hero-highlight {
 
 .studio-landing .studio-dot-rail::before,
 .studio-landing .studio-dot-rail::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 6px; /* square cell width = background-size */
-  background-image: radial-gradient(
-    circle closest-side,
-    var(--studio-dot) 0%,
-    var(--studio-dot) 1px,
-    transparent calc(1px + 0.5px)
-  );
-  background-size: 6px 6px; /* square → round dots, ~5px spacing */
-  background-repeat: repeat-y;
-  background-position: center top;
-  pointer-events: none;
+  content: none !important;
+  display: none !important;
 }
-
-.studio-landing .studio-dot-rail::before { left: -3px; }
-.studio-landing .studio-dot-rail::after { right: -3px; }
 
 .studio-landing .studio-dot-divider {
   border: none !important;
@@ -721,22 +705,8 @@ html[data-theme="dark"] .studio-landing .studio-hero-highlight {
 }
 
 .studio-landing .studio-dot-divider::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 6px;
-  background-image: radial-gradient(
-    circle closest-side,
-    var(--studio-dot) 0%,
-    var(--studio-dot) 1px,
-    transparent calc(1px + 0.5px)
-  );
-  background-size: 6px 6px; /* square tiles → round dots */
-  background-repeat: repeat-x;
-  background-position: left center;
-  pointer-events: none;
+  content: none !important;
+  display: none !important;
 }
 
 html.dark .studio-landing,
@@ -1129,22 +1099,6 @@ html[data-theme="dark"] .marketing-footer--studio.studio-dot-divider {
 }
 
 .marketing-footer--studio.studio-dot-divider::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: min(100%, calc(72rem - 8px));
-  max-width: calc(72rem - 8px);
-  transform: translateX(-50%);
-  height: 6px;
-  background-image: radial-gradient(
-    circle closest-side,
-    var(--studio-dot) 0%,
-    var(--studio-dot) 1px,
-    transparent calc(1px + 0.5px)
-  );
-  background-size: 6px 6px;
-  background-repeat: repeat-x;
-  background-position: left center;
-  pointer-events: none;
+  content: none !important;
+  display: none !important;
 }

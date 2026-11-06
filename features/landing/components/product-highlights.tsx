@@ -1,4 +1,14 @@
 import {
+  DevtoIcon,
+  HashnodeIcon,
+  StackOverflowIcon,
+} from "@/components/icons";
+import {
+  GitHubIcon,
+  LeetCodeIcon,
+  MediumIcon,
+} from "@/features/landing/components/integration-icons";
+import {
   FileUp,
   Link2,
   Palette,
@@ -73,15 +83,25 @@ function HighlightVisual({
     );
   }
   if (kind === "integrations") {
+    const tiles = [
+      { id: "github", Icon: GitHubIcon, label: "GitHub", className: "left-[6%] top-[12%] -rotate-[8deg]" },
+      { id: "medium", Icon: MediumIcon, label: "Medium", className: "right-[8%] top-[8%] rotate-[10deg]" },
+      { id: "devto", Icon: DevtoIcon, label: "Dev.to", className: "left-[22%] top-[40%] rotate-[6deg]" },
+      { id: "hashnode", Icon: HashnodeIcon, label: "Hashnode", className: "right-[18%] top-[36%] -rotate-[11deg]" },
+      { id: "leetcode", Icon: LeetCodeIcon, label: "LeetCode", className: "bottom-[14%] left-[12%] -rotate-[5deg]" },
+      { id: "stackoverflow", Icon: StackOverflowIcon, label: "Stack Overflow", className: "bottom-[10%] right-[10%] rotate-[9deg]" },
+    ] as const;
     return (
-      <div className="flex h-80 items-center justify-center overflow-hidden rounded-t-2xl bg-surface-sunken/60 p-8">
-        <div className="grid grid-cols-3 gap-3">
-          {["GH", "M", "DV", "HN", "LC", "CF"].map((m) => (
+      <div className="relative flex h-80 items-center justify-center overflow-hidden rounded-t-2xl bg-surface-sunken/60 p-6">
+        <div className="relative h-full w-full max-w-sm">
+          {tiles.map(({ id, Icon, label, className }) => (
             <span
-              key={m}
-              className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border-default bg-surface-raised font-mono text-xs font-bold text-text-secondary shadow-[var(--shadow-card)]"
+              key={id}
+              title={label}
+              className={`absolute flex h-14 w-14 items-center justify-center rounded-2xl border border-border-default bg-surface-raised text-text-primary shadow-[var(--shadow-card)] sm:h-16 sm:w-16 ${className}`}
             >
-              {m}
+              <Icon className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
+              <span className="sr-only">{label}</span>
             </span>
           ))}
         </div>

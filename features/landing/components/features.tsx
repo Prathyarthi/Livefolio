@@ -1,4 +1,14 @@
 import {
+  DevtoIcon,
+  HashnodeIcon,
+  StackOverflowIcon,
+} from "@/components/icons";
+import {
+  GitHubIcon,
+  LeetCodeIcon,
+  MediumIcon,
+} from "@/features/landing/components/integration-icons";
+import {
   StudioHeading,
   StudioSection,
 } from "@/features/landing/components/studio-shell";
@@ -58,15 +68,25 @@ function StepVisual({ kind }: { kind: (typeof STEPS)[number]["visual"] }) {
     );
   }
   if (kind === "connect") {
+    const tiles = [
+      { id: "github", Icon: GitHubIcon, label: "GitHub", className: "left-[8%] top-[14%] -rotate-[9deg]" },
+      { id: "medium", Icon: MediumIcon, label: "Medium", className: "right-[10%] top-[10%] rotate-[7deg] sm:right-[14%]" },
+      { id: "devto", Icon: DevtoIcon, label: "Dev.to", className: "left-[28%] top-[42%] rotate-[11deg]" },
+      { id: "hashnode", Icon: HashnodeIcon, label: "Hashnode", className: "right-[22%] top-[38%] -rotate-[6deg]" },
+      { id: "leetcode", Icon: LeetCodeIcon, label: "LeetCode", className: "bottom-[16%] left-[14%] -rotate-[12deg]" },
+      { id: "stackoverflow", Icon: StackOverflowIcon, label: "Stack Overflow", className: "bottom-[12%] right-[12%] rotate-[8deg]" },
+    ] as const;
     return (
       <div className={shell}>
-        <div className="relative z-[1] m-auto grid grid-cols-3 gap-3 p-6">
-          {["GH", "M", "DV", "HN", "LC", "SO"].map((mark) => (
+        <div className="relative z-[1] mx-auto h-full min-h-96 w-full max-w-md">
+          {tiles.map(({ id, Icon, label, className }) => (
             <span
-              key={mark}
-              className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border-default bg-surface-raised font-mono text-xs font-bold text-text-secondary shadow-[var(--shadow-card)] sm:h-16 sm:w-16"
+              key={id}
+              title={label}
+              className={`absolute flex h-14 w-14 items-center justify-center rounded-2xl border border-border-default bg-surface-raised text-text-primary shadow-[var(--shadow-card)] sm:h-16 sm:w-16 ${className}`}
             >
-              {mark}
+              <Icon className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
+              <span className="sr-only">{label}</span>
             </span>
           ))}
         </div>

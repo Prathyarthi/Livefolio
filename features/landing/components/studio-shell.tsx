@@ -37,10 +37,6 @@ export function StudioShell({ children, className }: StudioShellProps) {
       </div>
 
       <div className="studio-landing__frame relative z-[1] mx-auto w-full max-w-[calc(72rem-8px)]">
-        <div
-          aria-hidden
-          className="studio-dot-rail pointer-events-none absolute inset-y-0 left-0 right-0"
-        />
         <div className="relative z-[1]">{children}</div>
       </div>
     </div>
@@ -69,7 +65,7 @@ export function StudioSection({
       className={cn(
         "scroll-mt-24 pb-12 pt-10 sm:pb-14 sm:pt-12 md:pb-16 md:pt-14",
         padded && "px-4 sm:px-6",
-        divider && "studio-dot-divider",
+        divider && "border-t-0",
         className,
       )}
     >

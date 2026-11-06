@@ -25,7 +25,7 @@ export function RecruiterSection({
       id={id}
       aria-labelledby={headingId}
       className={cn(
-        "studio-dot-divider scroll-mt-24 px-4 pb-12 pt-10 sm:px-6 sm:pb-14 sm:pt-12 md:pb-16 md:pt-14",
+        "scroll-mt-24 px-4 pb-12 pt-10 sm:px-6 sm:pb-14 sm:pt-12 md:pb-16 md:pt-14",
         className,
       )}
     >

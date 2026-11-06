@@ -2,7 +2,7 @@ import { AuthAwareCtas } from "@/features/landing/components/auth-aware-ctas";
 
 export function CTA() {
   return (
-    <section className="studio-dot-divider py-14 sm:py-16">
+    <section className="py-14 sm:py-16">
       <div className="mx-auto w-full max-w-none">
         <div className="rounded-[var(--radius-xl)] border border-border-default bg-surface-raised px-6 py-10 text-center sm:px-10 sm:py-12">
           <h2 className="text-h1 text-text-primary">

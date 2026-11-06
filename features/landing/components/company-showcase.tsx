@@ -71,7 +71,7 @@ export function CompanyShowcase({
   return (
     <section
       aria-labelledby="company-showcase-heading"
-      className="studio-dot-divider bg-surface-sunken/40 py-10 sm:py-12"
+      className="bg-surface-sunken/40 py-10 sm:py-12"
     >
       <div className="mx-auto w-full px-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

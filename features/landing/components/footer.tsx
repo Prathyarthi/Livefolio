@@ -93,7 +93,7 @@ export function Footer({
     <footer
       className={cn(
         "marketing-footer px-4 py-8 sm:px-6",
-        studio && "marketing-footer--studio studio-dot-divider",
+        studio && "marketing-footer--studio",
       )}
     >
       <div
