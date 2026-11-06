@@ -3,14 +3,13 @@ import { Mail } from "lucide-react";
 import { TwitterIcon, LinkedinIcon } from "@/components/icons";
 import { Logo } from "@/components/logo";
 import { siteConfig } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
-const NAV = {
+const CANDIDATE_NAV = {
   Product: [
     { label: "How it works", href: "/#features" },
     { label: "Examples", href: "/#showcase" },
     { label: "Pricing", href: "/#pricing" },
-    // Hiring entry point hidden until the recruiter product is rolled out.
-    // { label: "Hiring", href: "/recruiters" },
     { label: "FAQ", href: "/#faq" },
   ],
   Account: [
@@ -24,7 +23,29 @@ const NAV = {
     { label: "All templates", href: "/sign-up" },
     { label: "Full pricing", href: "/pricing" },
   ],
-};
+} as const;
+
+/** Recruiter-context links — existing /recruiters anchors + real routes only. */
+const RECRUITER_NAV = {
+  Product: [
+    { label: "How we rank", href: "/recruiters#how-we-rank" },
+    { label: "References", href: "/recruiters#references" },
+    { label: "How it works", href: "/recruiters#how-it-works" },
+    { label: "Pricing", href: "/recruiters#pricing" },
+    { label: "FAQ", href: "/recruiters#faq" },
+  ],
+  Account: [
+    { label: "Sign in", href: "/sign-in" },
+    { label: "Start hiring", href: "/sign-up?callbackUrl=%2Fcompany" },
+    { label: "Hiring workspace", href: "/company" },
+  ],
+  Resources: [
+    { label: "Contact & support", href: "/contact" },
+    { label: "Contact sales", href: "/recruiters#pricing" },
+    { label: "For candidates", href: "/" },
+    { label: "Full pricing", href: "/pricing" },
+  ],
+} as const;
 
 const LEGAL_LINKS = [
   { href: "/privacy", label: "Privacy" },
@@ -34,20 +55,64 @@ const LEGAL_LINKS = [
 ] as const;
 
 const SOCIAL = [
-
   { label: "Twitter", href: "https://x.com/livefolio_me", icon: TwitterIcon },
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/livefolio/", icon: LinkedinIcon },
-];
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/livefolio/",
+    icon: LinkedinIcon,
+  },
+] as const;
 
-export function Footer() {
+const RECRUITER_TAGLINE =
+  "Hire on proof and references, not resume keywords. Post a role free and get a ranked shortlist that explains itself.";
+
+export type FooterProps = {
+  /**
+   * `studio` — white page, 1144 frame, dotted rule (candidate `/` + `/recruiters`).
+   * `default` — existing cream marketing footer (contact/legal/pricing/etc.).
+   */
+  surface?: "default" | "studio";
+  /** Copy + link set. Recruiter never shows resume-import / templates tagline. */
+  audience?: "candidate" | "recruiter";
+};
+
+export function Footer({
+  surface = "default",
+  audience = "candidate",
+}: FooterProps = {}) {
+  const studio = surface === "studio";
+  const nav = audience === "recruiter" ? RECRUITER_NAV : CANDIDATE_NAV;
+  const tagline =
+    audience === "recruiter" ? RECRUITER_TAGLINE : siteConfig.tagline;
+  const columns = Object.entries(nav) as [
+    string,
+    readonly { label: string; href: string }[],
+  ][];
+
   return (
-    <footer className="marketing-footer px-6 py-8">
-      <div className="mx-auto max-w-[1200px]">
+    <footer
+      className={cn(
+        "marketing-footer px-4 py-8 sm:px-6",
+        studio && "marketing-footer--studio",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto w-full",
+          studio ? "max-w-[calc(72rem-8px)]" : "max-w-[1200px]",
+        )}
+      >
         <div className="grid grid-cols-2 gap-6 md:grid-cols-[2fr_1fr_1fr_1fr] md:gap-8">
           <div className="col-span-2 md:col-span-1">
-            <Logo wordmarkClassName="mf-heading" />
-            <p className="mf-text mt-2 max-w-[260px] text-xs leading-relaxed">
-              {siteConfig.tagline}
+            <Logo
+              wordmarkClassName={cn(
+                "mf-heading",
+                studio && "font-sans text-[15px] font-semibold tracking-[-0.02em]",
+              )}
+              className={studio ? "gap-1.5 [&_img]:h-7 [&_img]:w-7" : undefined}
+            />
+            <p className="mf-text mt-2 max-w-[280px] text-xs leading-relaxed">
+              {tagline}
             </p>
             <a
               href={`mailto:${siteConfig.supportEmail}`}
@@ -72,16 +137,16 @@ export function Footer() {
             </div>
           </div>
 
-          {Object.entries(NAV).map(([title, links]) => (
+          {columns.map(([title, links]) => (
             <nav key={title} aria-label={title}>
               <p className="mf-muted text-[11px] font-medium uppercase tracking-wide">
                 {title}
               </p>
               <ul className="mt-2.5 flex flex-col gap-2">
-                {links.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link href={href} className="mf-link text-xs">
-                      {label}
+                {links.map((link) => (
+                  <li key={link.label}>
+                    <Link href={link.href} className="mf-link text-xs">
+                      {link.label}
                     </Link>
                   </li>
                 ))}

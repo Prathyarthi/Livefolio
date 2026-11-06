@@ -1,9 +1,4 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 import { RecruiterSection } from "@/features/landing/components/recruiter-section";
 
 const FAQS = [
@@ -37,25 +32,49 @@ const FAQS = [
   },
   {
     q: "Do candidates need a Livefolio?",
-    a: "Yes — Apply with Livefolio uses their professional identity. If they don’t have one yet, they can create it when they apply.",
+    a: "Yes. Apply with Livefolio uses their professional identity. If they don’t have one yet, they can create it when they apply.",
   },
 ] as const;
 
 export function RecruiterFAQ() {
   return (
-    <RecruiterSection id="faq" index="6.0" label="FAQ" title="Questions">
-      <Accordion type="single" collapsible className="border-t border-border-default">
+    <RecruiterSection
+      id="faq"
+      label="FAQ"
+      title="Questions, answered"
+      body="How ranking, references, and hiring plans work."
+    >
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {FAQS.map((item) => (
-          <AccordionItem key={item.q} value={item.q}>
-            <AccordionTrigger className="text-left text-body text-text-primary">
+          <details
+            key={item.q}
+            className="group rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-4 py-1 transition-colors open:border-border-strong"
+          >
+            <summary
+              className={cn(
+                "flex cursor-pointer list-none items-center justify-between gap-3 py-3.5",
+                "text-left text-sm font-semibold text-text-primary",
+                "marker:content-none [&::-webkit-details-marker]:hidden",
+              )}
+            >
               {item.q}
-            </AccordionTrigger>
-            <AccordionContent className="max-w-2xl text-body-sm text-text-secondary">
+              <span
+                className={cn(
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+                  "bg-brand-secondary/12 text-base font-light leading-none text-brand-secondary",
+                  "transition-transform duration-200 group-open:rotate-45",
+                )}
+                aria-hidden
+              >
+                +
+              </span>
+            </summary>
+            <div className="border-t border-dashed border-border-default/70 pb-4 pt-3 text-body-sm leading-relaxed text-text-secondary">
               {item.a}
-            </AccordionContent>
-          </AccordionItem>
+            </div>
+          </details>
         ))}
-      </Accordion>
+      </div>
     </RecruiterSection>
   );
 }

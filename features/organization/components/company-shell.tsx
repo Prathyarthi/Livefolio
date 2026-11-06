@@ -83,12 +83,18 @@ function CompanySidebar({
             exact: false,
             badge: org?.planTier === "free" ? "Pro" : undefined,
           },
-          {
-            title: "Workspace Settings",
-            href: `${workspaceBase}/settings`,
-            icon: Settings,
-            exact: false,
-          },
+          // Settings belong to one workspace. The org page can hold several,
+          // so this link only appears after a workspace is open.
+          ...(workspaceSlug
+            ? [
+                {
+                  title: "Workspace Settings",
+                  href: `${workspaceBase}/settings`,
+                  icon: Settings,
+                  exact: false,
+                },
+              ]
+            : []),
         ]
       : []),
     {

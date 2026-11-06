@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import { validatePortfolioSlug } from "@/lib/slug";
+import { enforceSlugClaimRateLimit } from "@/lib/slug-claim-rate-limit";
 import {
   isSectionKey,
   MAX_SECTION_TITLE_CHARS,
@@ -647,6 +648,46 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
     },
     {
       body: t.Object({ isPublished: t.Boolean() }),
+    },
+  )
+
+  // Public name check for the landing claim. Does not reserve the name.
+  .post(
+    "/slug/claim",
+    async (ctx) => {
+      const retryAfter = await enforceSlugClaimRateLimit(ctx.request);
+      if (retryAfter) {
+        ctx.set.status = 429;
+        ctx.set.headers["retry-after"] = String(retryAfter);
+        return { error: "Too many attempts. Try again in a little while." };
+      }
+
+      // Hidden field. Quietly pretend it worked so scripts do not probe around it.
+      if (ctx.body.companyWebsite?.trim()) {
+        return { available: true as const, slug: "" };
+      }
+
+      const validated = validatePortfolioSlug(ctx.body.slug);
+      if (!validated || validated.length < 3 || validated.length > 30) {
+        return { available: false as const, reason: "invalid" as const };
+      }
+
+      const existing = await prisma.portfolio.findUnique({
+        where: { slug: validated },
+        select: { id: true },
+      });
+
+      return {
+        available: !existing,
+        reason: existing ? ("taken" as const) : undefined,
+        slug: validated,
+      };
+    },
+    {
+      body: t.Object({
+        slug: t.String({ maxLength: 80 }),
+        companyWebsite: t.Optional(t.String({ maxLength: 200 })),
+      }),
     },
   )
 

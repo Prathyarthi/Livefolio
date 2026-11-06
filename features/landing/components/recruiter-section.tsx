@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** Linear-style section: hairline top border, numbered eyebrow, big two-line heading, short body. */
+/** Centered studio section, matching the candidate landing headings. */
 export function RecruiterSection({
   id,
-  index,
   label,
   title,
   body,
@@ -25,29 +24,26 @@ export function RecruiterSection({
       id={id}
       aria-labelledby={headingId}
       className={cn(
-        "scroll-mt-20 border-t border-border-default px-6 py-24 md:py-32",
+        "scroll-mt-24 px-4 pb-12 pt-10 sm:px-6 sm:pb-14 sm:pt-12 md:pb-16 md:pt-14",
         className,
       )}
     >
-      <div className="mx-auto max-w-[1120px]">
-        <p className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-text-secondary">
-          {index ? <span className="text-brand-secondary">{index}</span> : null}
-          {label}
-        </p>
-        <div className="mt-4 grid gap-6 md:grid-cols-2 md:items-end">
+      <div className="mx-auto w-full">
+        <div className="mx-auto max-w-[36rem] text-center">
+          <p className="eyebrow uppercase">{label}</p>
           <h2
             id={headingId}
-            className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-text-primary md:text-5xl"
+            className="mt-2.5 text-h1 text-balance font-semibold tracking-[-0.03em] text-text-primary"
           >
             {title}
           </h2>
           {body ? (
-            <p className="max-w-md text-body text-text-secondary md:justify-self-end">
+            <p className="mx-auto mt-3 max-w-[40rem] text-body text-text-secondary">
               {body}
             </p>
           ) : null}
         </div>
-        {children ? <div className="mt-14">{children}</div> : null}
+        {children ? <div className="mt-10 md:mt-12">{children}</div> : null}
       </div>
     </section>
   );
@@ -68,12 +64,12 @@ export function BentoCard({
   return (
     <div
       className={cn(
-        "flex min-w-0 flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border-default bg-gradient-to-b from-surface-raised to-surface-base",
+        "flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border-default bg-gradient-to-b from-surface-raised to-surface-base",
         className,
       )}
     >
       <div className="flex-1 p-5">{children}</div>
-      <div className="border-t border-border-default p-5">
+      <div className="border-t border-dashed border-border-default/70 p-5">
         <h3 className="text-body font-semibold text-text-primary">{title}</h3>
         <p className="mt-1 text-body-sm text-text-secondary">{body}</p>
       </div>
