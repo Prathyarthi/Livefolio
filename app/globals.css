@@ -1072,3 +1072,79 @@ html[data-theme="dark"] .studio-landing .studio-hero-float__tile {
   color: var(--mf-hover);
   background-color: var(--mf-hover-surface);
 }
+
+/*
+ * Studio landings (/ and /recruiters) — white page, 1144 frame, sans.
+ * Does not change default .marketing-footer cream on contact/legal/etc.
+ * Dotted top via .studio-dot-divider (shared studio dots).
+ */
+html:not(.dark):not([data-theme="dark"]) .marketing-footer--studio {
+  --mf-bg: #ffffff;
+  --mf-text: #5e5a6e;
+  --mf-heading: #2a2744;
+  --mf-muted: #6b6878;
+  --mf-border: #e5e5e5;
+  --mf-hover: #1a1828;
+  --mf-hover-surface: rgba(26, 24, 40, 0.06);
+  background-color: #ffffff;
+  border-top: none; /* dotted rule from .studio-dot-divider::before */
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+html.dark .marketing-footer--studio,
+html[data-theme="dark"] .marketing-footer--studio {
+  --mf-bg: #111010;
+  --mf-text: #b0a99f;
+  --mf-heading: #f4f1ea;
+  --mf-muted: #7d756c;
+  --mf-border: #2c2a26;
+  --mf-hover: #f4f1ea;
+  --mf-hover-surface: rgba(244, 241, 234, 0.08);
+  background-color: #111010;
+  border-top: none;
+}
+
+.marketing-footer--studio .mf-divider {
+  border-top-style: solid;
+  border-color: var(--mf-border);
+}
+
+.marketing-footer--studio .mf-heading,
+.marketing-footer--studio .mf-link,
+.marketing-footer--studio .mf-text,
+.marketing-footer--studio .mf-muted {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Footer sits outside StudioShell — re-apply round dotted top rule here. */
+.marketing-footer--studio.studio-dot-divider {
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 28%, transparent);
+  position: relative;
+  border: none !important;
+}
+
+html.dark .marketing-footer--studio.studio-dot-divider,
+html[data-theme="dark"] .marketing-footer--studio.studio-dot-divider {
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 42%, transparent);
+}
+
+.marketing-footer--studio.studio-dot-divider::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(100%, calc(72rem - 8px));
+  max-width: calc(72rem - 8px);
+  transform: translateX(-50%);
+  height: 6px;
+  background-image: radial-gradient(
+    circle closest-side,
+    var(--studio-dot) 0%,
+    var(--studio-dot) 1px,
+    transparent calc(1px + 0.5px)
+  );
+  background-size: 6px 6px;
+  background-repeat: repeat-x;
+  background-position: left center;
+  pointer-events: none;
+}
