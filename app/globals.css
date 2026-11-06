@@ -555,59 +555,76 @@ body {
 
 /* ─── Studio landing (candidate home only) ──────────────────────── */
 /*
- * Scope Source Sans 3 for display/headings/nav on the candidate home.
- * Global --font-display stays JetBrains Mono for the rest of the app
- * (templates, recruiters, dashboard). Eyebrow/mono accents remain mono.
+ * Scope Source Sans 3 for display/headings/nav/buttons on the candidate home.
+ * Must beat @layer base h1/h2 mono and Button font-mono. Global app fonts
+ * unchanged. Eyebrow/step mono accents remain.
  */
 .studio-landing {
   --studio-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
   font-family: var(--studio-sans);
 }
 
+.studio-landing h1,
+.studio-landing h2,
+.studio-landing h3,
+.studio-landing h4,
 .studio-landing .font-display,
 .studio-landing .text-display,
 .studio-landing .text-h1,
 .studio-landing .text-h2,
 .studio-landing .text-h3,
 .studio-landing .text-h4 {
-  font-family: var(--studio-sans);
+  font-family: var(--studio-sans) !important;
   font-weight: 600;
   letter-spacing: -0.03em;
 }
 
 .studio-landing .text-display {
   font-size: clamp(2rem, 1.4rem + 1.6vw, 2.5rem);
-  font-weight: 600;
   line-height: 1.18;
 }
 
 .studio-landing .text-h1 {
-  font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.125rem); /* ~26–34px */
-  font-weight: 600;
+  font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.125rem);
   line-height: 1.22;
 }
 
 .studio-landing .text-h2 {
   font-size: clamp(1.375rem, 1.15rem + 0.7vw, 1.75rem);
-  font-weight: 600;
   line-height: 1.25;
 }
 
 .studio-landing .studio-hero-title {
-  font-family: var(--studio-sans);
+  font-family: var(--studio-sans) !important;
   font-size: clamp(1.75rem, 1.35rem + 1.5vw, 2.25rem); /* ~28–36px */
   font-weight: 600;
   line-height: 1.18;
   letter-spacing: -0.035em;
-  text-wrap: balance;
 }
 
-/* Decorative mountain backdrop — fades into cream / charcoal */
+/* Studio buttons / nav links — sans (Button root uses font-mono globally) */
+.studio-landing [data-slot="button"],
+.studio-landing button:not(.eyebrow),
+.studio-landing a {
+  font-family: var(--studio-sans);
+}
+
+/* Keep mono accents */
+.studio-landing .eyebrow,
+.studio-landing .text-mono,
+.studio-landing .font-mono {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace !important;
+}
+
+/*
+ * Mountain backdrop: full-bleed at page top (behind sticky nav), fades to
+ * solid surface early so subcopy / CTAs / proof sit on clean cream/charcoal.
+ */
 .studio-landing .studio-hero-backdrop {
   position: absolute;
   inset-inline: 0;
   top: 0;
-  height: min(48vh, 400px);
+  height: min(38vh, 340px);
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
@@ -615,11 +632,12 @@ body {
 
 .studio-landing .studio-hero-backdrop img {
   width: 100%;
-  height: 100%;
+  height: 118%;
   object-fit: cover;
-  object-position: center 35%;
-  opacity: 0.42;
-  filter: saturate(0.78) contrast(0.95);
+  object-position: center top;
+  opacity: 0.38;
+  filter: saturate(0.72) contrast(0.94);
+  transform: translateY(0);
 }
 
 .studio-landing .studio-hero-backdrop::after {
@@ -629,24 +647,25 @@ body {
   background:
     linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--color-surface-base) 18%, transparent) 0%,
-      color-mix(in srgb, var(--color-surface-base) 55%, transparent) 42%,
-      color-mix(in srgb, var(--color-surface-base) 92%, transparent) 78%,
+      color-mix(in srgb, var(--color-surface-base) 12%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-base) 40%, transparent) 28%,
+      color-mix(in srgb, var(--color-surface-base) 78%, transparent) 55%,
+      color-mix(in srgb, var(--color-surface-base) 96%, transparent) 78%,
       var(--color-surface-base) 100%
     ),
     linear-gradient(
       to right,
-      color-mix(in srgb, var(--color-surface-base) 55%, transparent) 0%,
-      transparent 18%,
-      transparent 82%,
-      color-mix(in srgb, var(--color-surface-base) 55%, transparent) 100%
+      color-mix(in srgb, var(--color-surface-base) 45%, transparent) 0%,
+      transparent 14%,
+      transparent 86%,
+      color-mix(in srgb, var(--color-surface-base) 45%, transparent) 100%
     );
 }
 
 .dark .studio-landing .studio-hero-backdrop img,
 [data-theme="dark"] .studio-landing .studio-hero-backdrop img {
-  opacity: 0.28;
-  filter: saturate(0.55) contrast(0.9) brightness(0.75);
+  opacity: 0.24;
+  filter: saturate(0.5) contrast(0.88) brightness(0.72);
 }
 
 .dark .studio-landing .studio-hero-backdrop::after,
@@ -654,8 +673,9 @@ body {
   background:
     linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--color-surface-base) 35%, transparent) 0%,
-      color-mix(in srgb, var(--color-surface-base) 70%, transparent) 48%,
+      color-mix(in srgb, var(--color-surface-base) 28%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-base) 62%, transparent) 40%,
+      color-mix(in srgb, var(--color-surface-base) 92%, transparent) 72%,
       var(--color-surface-base) 100%
     );
 }

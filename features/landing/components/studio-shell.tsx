@@ -20,7 +20,23 @@ export function StudioShell({ children, className }: StudioShellProps) {
         className,
       )}
     >
-      <div className="studio-landing__frame relative mx-auto w-full max-w-[calc(72rem-8px)]">
+      {/*
+        Full-bleed mountain at page top (behind sticky nav). Provenance:
+        public/landing/PROVENANCE.md — Unsplash / Daniel Seßler.
+      */}
+      <div className="studio-hero-backdrop" aria-hidden>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/landing/hero-mountains.jpg"
+          alt=""
+          width={1400}
+          height={934}
+          decoding="async"
+          fetchPriority="high"
+        />
+      </div>
+
+      <div className="studio-landing__frame relative z-[1] mx-auto w-full max-w-[calc(72rem-8px)]">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-y-0 left-0 right-0 border-x border-dashed border-border-default/70"

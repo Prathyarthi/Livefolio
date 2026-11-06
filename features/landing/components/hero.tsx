@@ -5,32 +5,18 @@ import { siteConfig } from "@/lib/site";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8 md:pb-14 md:pt-10">
-      {/*
-        Decorative mountain photo (Unsplash / Daniel Seßler) — see
-        public/landing/PROVENANCE.md. Fades into cream / charcoal via CSS.
-      */}
-      <div className="studio-hero-backdrop" aria-hidden>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/landing/hero-mountains.jpg"
-          alt=""
-          width={1400}
-          height={934}
-          decoding="async"
-          fetchPriority="high"
-        />
-      </div>
-
+    <section className="relative px-4 pb-10 pt-4 sm:px-6 sm:pb-12 sm:pt-6 md:pb-14 md:pt-8">
       <div className="relative z-[1] mx-auto w-full max-w-[40rem] text-center">
         <p className="eyebrow uppercase">Resume → portfolio</p>
 
+        {/*
+          Intentional two-line headline on all breakpoints (matches reference
+          rhythm). Terracotta phrase always starts the second line.
+        */}
         <h1 className="studio-hero-title mt-3 text-text-primary">
-          <span className="block sm:inline">Your resume becomes</span>
-          <span className="hidden sm:inline"> </span>
-          <span className="block sm:inline">
-            a{" "}
-            <span className="text-brand-secondary">living portfolio</span>
+          <span className="block">Your resume becomes</span>
+          <span className="block">
+            a <span className="text-brand-secondary">living portfolio</span>
             <span className="text-brand-secondary">.</span>
           </span>
         </h1>

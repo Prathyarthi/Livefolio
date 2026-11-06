@@ -42,11 +42,11 @@ export function HeroPlatformStrip() {
   );
 
   return (
-    <div className="mx-auto mt-9 w-full max-w-[36rem] border-t border-dashed border-border-default/60 pt-6">
+    <div className="mx-auto mt-9 w-full max-w-[48rem] border-t border-dashed border-border-default/60 pt-6">
       <p className="text-center text-[13px] text-text-muted">
         Connect the tools you already use
       </p>
-      <ul className="mt-3.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2.5 sm:gap-x-5">
+      <ul className="mt-3.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:flex-nowrap sm:gap-x-3.5 md:gap-x-4">
         {platforms.map((platform) => {
           const Icon = ICONS[platform.id];
           return (
@@ -55,7 +55,7 @@ export function HeroPlatformStrip() {
               className="inline-flex items-center gap-1.5 text-text-secondary"
             >
               <Icon className="h-3.5 w-3.5 shrink-0 text-text-primary" />
-              <span className="text-[13px] font-medium tracking-[-0.01em]">
+              <span className="text-[12px] font-medium tracking-[-0.01em] sm:text-[13px]">
                 {platform.name}
               </span>
             </li>
