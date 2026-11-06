@@ -97,13 +97,13 @@
   --color-brand-primary: #2a2744;
   --color-brand-secondary: #e86a5a;
   --color-brand-dark: #211f3d;
-  --color-brand-light: #f3f1ec;
+  --color-brand-light: #f5f5f4;
 
-  /* Neutral surfaces */
-  --color-surface-base: #fbfaf7;
+  /* Neutral surfaces — light app/marketing canvas is true white */
+  --color-surface-base: #ffffff;
   --color-surface-raised: #ffffff;
-  --color-surface-sunken: #f3f1ec;
-  --color-border-default: #e8e5df;
+  --color-surface-sunken: #f4f4f4;
+  --color-border-default: #e5e5e5;
   --color-border-strong: #c9c4ba;
   --color-text-primary: #1a1828;
   --color-text-secondary: #5e5a6e;
@@ -566,9 +566,7 @@ body {
 }
 
 /*
- * True white studio page (not global cream #fbfaf7). Light only.
- * Use html:not(.dark) so Lightning/Tailwind cannot drop .dark and apply
- * charcoal overrides to all .studio-landing in light mode.
+ * Studio page bg — same white as global light tokens (explicit for cascade safety).
  */
 html:not(.dark):not([data-theme="dark"]) .studio-landing {
   --color-surface-base: #ffffff;
@@ -982,11 +980,11 @@ html[data-theme="dark"] .studio-landing .studio-hero-float__tile {
 
 /* ─── Marketing footer (unlayered — reliable light/dark colors) ── */
 .marketing-footer {
-  --mf-bg: #f3f1ec;
+  --mf-bg: #ffffff;
   --mf-text: #5e5a6e;
   --mf-heading: #2a2744;
   --mf-muted: #6b6878;
-  --mf-border: #e8e5df;
+  --mf-border: #e5e5e5;
   --mf-hover: #1a1828;
   --mf-hover-surface: rgba(26, 24, 40, 0.06);
 
