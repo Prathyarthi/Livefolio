@@ -561,6 +561,7 @@ body {
  */
 .studio-landing {
   --studio-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 28%, transparent);
   font-family: var(--studio-sans);
 }
 
@@ -596,20 +597,71 @@ body {
 
 .studio-landing .studio-hero-title {
   font-family: var(--studio-sans) !important;
-  font-size: clamp(1.75rem, 1.35rem + 1.5vw, 2.25rem); /* ~28–36px */
+  font-size: clamp(2rem, 1.55rem + 1.8vw, 2.875rem); /* ~32–46px */
   font-weight: 600;
-  line-height: 1.18;
+  line-height: 1.15;
   letter-spacing: -0.035em;
 }
 
-/* Studio buttons / nav links — sans (Button root uses font-mono globally) */
+/* Selection-style phrase highlight (Mainline “earn trust”) — terracotta + cream */
+.studio-landing .studio-hero-highlight {
+  display: inline;
+  background-color: var(--color-brand-secondary);
+  color: #fffaf5;
+  padding: 0.06em 0.28em 0.1em;
+  margin-inline: 0.04em;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.studio-landing .studio-hero-highlight-dot {
+  color: var(--color-brand-secondary);
+}
+
+.dark .studio-landing .studio-hero-highlight,
+[data-theme="dark"] .studio-landing .studio-hero-highlight {
+  background-color: var(--color-brand-secondary);
+  color: #fffaf5;
+}
+
+/* Studio CTA chrome — compact ~10px rectangles, not global Button */
+.studio-landing .studio-cta [data-slot="button"] {
+  font-family: var(--studio-sans) !important;
+  font-weight: 500;
+  font-size: 14px;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  padding-inline: 1.15rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+
+.studio-landing .studio-cta [data-slot="button"][data-variant="accent"],
+.studio-landing .studio-cta [data-slot="button"][data-variant="default"] {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 22%, transparent),
+    0 1px 2px color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+}
+
+.studio-landing .studio-cta [data-slot="button"][data-variant="outline"] {
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--color-border-strong) 85%, var(--color-text-primary));
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+}
+
+.studio-landing .studio-cta [data-slot="button"][data-variant="outline"]:hover {
+  background: var(--color-surface-sunken);
+}
+
 .studio-landing [data-slot="button"],
 .studio-landing button:not(.eyebrow),
 .studio-landing a {
   font-family: var(--studio-sans);
 }
 
-/* Keep mono accents */
 .studio-landing .eyebrow,
 .studio-landing .text-mono,
 .studio-landing .font-mono {
@@ -617,9 +669,48 @@ body {
 }
 
 /*
- * Mountain backdrop: full-bleed at page top (behind sticky nav), fades to
- * solid surface early so subcopy / CTAs / proof sit on clean cream/charcoal.
+ * Fine dotted rails + section dividers (Mainline-like visible dots).
+ * Radial dots beat CSS border-dashed (which reads as dashes).
  */
+.studio-landing .studio-dot-rail::before,
+.studio-landing .studio-dot-rail::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-image: radial-gradient(
+    circle at center,
+    var(--studio-dot) 0 1.05px,
+    transparent 1.15px
+  );
+  background-size: 1px 9px;
+  background-repeat: repeat-y;
+  background-position: center top;
+}
+
+.studio-landing .studio-dot-rail::before { left: 0; }
+.studio-landing .studio-dot-rail::after { right: 0; }
+
+.studio-landing .studio-dot-divider {
+  border-top: none;
+  background-image: radial-gradient(
+    circle at center,
+    var(--studio-dot) 0 1.05px,
+    transparent 1.15px
+  );
+  background-size: 9px 1px;
+  background-repeat: repeat-x;
+  background-position: left top;
+  padding-top: 1px;
+}
+
+.dark .studio-landing,
+[data-theme="dark"] .studio-landing {
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 38%, transparent);
+}
+
+/* Mountain backdrop — full-bleed behind nav, early cream fade */
 .studio-landing .studio-hero-backdrop {
   position: absolute;
   inset-inline: 0;
@@ -637,7 +728,6 @@ body {
   object-position: center top;
   opacity: 0.38;
   filter: saturate(0.72) contrast(0.94);
-  transform: translateY(0);
 }
 
 .studio-landing .studio-hero-backdrop::after {
@@ -680,6 +770,28 @@ body {
     );
 }
 
+/* Subtle float for decorative tiles (honors reduced motion) */
+@keyframes studio-float-y {
+  0%, 100% { transform: translateY(0) rotate(var(--studio-tile-rot, 0deg)); }
+  50% { transform: translateY(-5px) rotate(var(--studio-tile-rot, 0deg)); }
+}
+
+.studio-landing .studio-hero-float__tile {
+  transform: rotate(var(--studio-tile-rot, 0deg));
+  animation: studio-float-y 7s ease-in-out infinite;
+}
+
+.studio-landing .studio-hero-float__tile:nth-child(2) { animation-delay: -1.2s; }
+.studio-landing .studio-hero-float__tile:nth-child(3) { animation-delay: -2.4s; }
+.studio-landing .studio-hero-float__tile:nth-child(4) { animation-delay: -3.1s; }
+.studio-landing .studio-hero-float__tile:nth-child(5) { animation-delay: -0.7s; }
+.studio-landing .studio-hero-float__tile:nth-child(6) { animation-delay: -4s; }
+
+.dark .studio-landing .studio-hero-float__tile,
+[data-theme="dark"] .studio-landing .studio-hero-float__tile {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
 .studio-landing .studio-hatch {
   background-color: var(--color-surface-sunken);
   background-image:
@@ -695,6 +807,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .studio-landing * {
     scroll-behavior: auto !important;
+  }
+  .studio-landing .studio-hero-float__tile {
+    animation: none !important;
   }
 }
 

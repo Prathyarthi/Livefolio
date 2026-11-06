@@ -42,7 +42,7 @@ export function HeroPlatformStrip() {
   );
 
   return (
-    <div className="mx-auto mt-9 w-full max-w-[48rem] border-t border-dashed border-border-default/60 pt-6">
+    <div className="mx-auto mt-8 w-full max-w-[48rem] pt-2">
       <p className="text-center text-[13px] text-text-muted">
         Connect the tools you already use
       </p>
