@@ -552,6 +552,26 @@ body {
   opacity: 0.08;
 }
 
+
+/* ─── Studio landing (candidate home only) ──────────────────────── */
+.studio-landing .studio-hatch {
+  background-color: var(--color-surface-sunken);
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 6px,
+      color-mix(in srgb, var(--color-border-default) 55%, transparent) 6px,
+      color-mix(in srgb, var(--color-border-default) 55%, transparent) 7px
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-landing * {
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ─── Marquee (social proof logos) ─────────────────────────────── */
 @keyframes marquee {
   from { transform: translateX(0); }

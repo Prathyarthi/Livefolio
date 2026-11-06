@@ -1,9 +1,10 @@
+import { StudioSection } from "@/features/landing/components/studio-shell";
 import { PricingPlansSection } from "@/features/subscriptions/components/pricing-plans-section";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="scroll-mt-16 px-6 py-[var(--space-9)]">
+    <StudioSection id="pricing">
       <PricingPlansSection />
-    </section>
+    </StudioSection>
   );
 }

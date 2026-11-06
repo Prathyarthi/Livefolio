@@ -2,10 +2,9 @@ import { AuthAwareCtas } from "@/features/landing/components/auth-aware-ctas";
 
 export function CTA() {
   return (
-    <section className="px-6 py-[var(--space-9)]">
-      <div className="relative mx-auto max-w-[1200px] overflow-hidden rounded-[var(--radius-xl)] bg-brand-light px-6 py-[var(--space-8)] text-center">
-        <div className="hero-blob" aria-hidden />
-        <div className="relative mx-auto max-w-2xl">
+    <section className="border-t border-dashed border-border-default/70 px-1 py-14 sm:py-16">
+      <div className="mx-auto w-full max-w-[765px]">
+        <div className="rounded-[var(--radius-xl)] border border-border-default bg-surface-raised px-6 py-10 text-center sm:px-10 sm:py-12">
           <h2 className="text-h1 text-text-primary">
             Build your portfolio today
           </h2>

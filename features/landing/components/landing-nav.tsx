@@ -19,6 +19,14 @@ const CANDIDATE_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
+const CANDIDATE_PILL_LINKS = [
+  { label: "How it works", href: "/#features" },
+  { label: "Integrations", href: "/#integrations" },
+  { label: "Templates", href: "/#showcase" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "FAQ", href: "/#faq" },
+];
+
 const RECRUITER_LINKS = [
   { label: "How we rank", href: "#how-we-rank" },
   { label: "References", href: "#references" },
@@ -30,13 +38,26 @@ const RECRUITER_LINKS = [
 
 type LandingNavProps = {
   variant?: "candidate" | "recruiter";
+  /**
+   * `bar` keeps the existing sticky full-width nav (recruiters + marketing pages).
+   * `pill` is the studio floating nav used only on the candidate home landing.
+   */
+  layout?: "bar" | "pill";
 };
 
-export function LandingNav({ variant = "candidate" }: LandingNavProps) {
+export function LandingNav({
+  variant = "candidate",
+  layout = "bar",
+}: LandingNavProps) {
   const [open, setOpen] = useState(false);
   const { status } = useSession();
   const authenticated = status === "authenticated";
-  const links = variant === "recruiter" ? RECRUITER_LINKS : CANDIDATE_LINKS;
+  const links =
+    variant === "recruiter"
+      ? RECRUITER_LINKS
+      : layout === "pill"
+        ? CANDIDATE_PILL_LINKS
+        : CANDIDATE_LINKS;
 
   const primaryHref = authenticated
     ? variant === "recruiter"
@@ -59,6 +80,116 @@ export function LandingNav({ variant = "candidate" }: LandingNavProps) {
     : variant === "recruiter"
       ? "Start hiring"
       : "Get started";
+
+  if (layout === "pill" && variant === "candidate") {
+    return (
+      <header className="sticky top-0 z-[100] px-3 pt-3 sm:px-4 sm:pt-4">
+        <div className="mx-auto flex max-w-[765px] items-center gap-2 rounded-full border border-border-default bg-surface-raised/90 px-2 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/80 dark:bg-surface-raised/85">
+          <Logo className="ml-1.5 shrink-0" />
+
+          <nav
+            className="hidden min-w-0 flex-1 items-center justify-center md:flex"
+            aria-label="Main navigation"
+          >
+            {links.map(({ label, href }, index) => (
+              <div key={label} className="flex items-center">
+                {index > 0 ? (
+                  <span
+                    aria-hidden
+                    className="mx-0.5 h-4 border-l border-dotted border-border-strong/80"
+                  />
+                ) : null}
+                <Link
+                  href={href}
+                  className="whitespace-nowrap rounded-full px-2.5 py-1.5 text-[13px] font-medium text-text-secondary transition-colors duration-150 hover:text-text-primary"
+                >
+                  {label}
+                </Link>
+              </div>
+            ))}
+          </nav>
+
+          <div className="ml-auto flex shrink-0 items-center gap-1">
+            <ThemeToggle className="hidden shrink-0 md:inline-flex" />
+            {!authenticated ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="hidden h-8 shrink-0 rounded-full px-3 sm:inline-flex"
+              >
+                <Link href="/sign-in">Sign in</Link>
+              </Button>
+            ) : null}
+            <Button
+              size="sm"
+              asChild
+              className="hidden h-8 shrink-0 rounded-full px-3.5 sm:inline-flex"
+              variant="accent"
+            >
+              <Link href={primaryHref}>
+                <span className="hidden lg:inline">{primaryLabel}</span>
+                <span className="lg:hidden">{primaryLabelShort}</span>
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 rounded-full md:hidden"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            "mx-auto mt-2 max-w-[765px] overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-[var(--shadow-card)] transition-[max-height,opacity] duration-200 ease-[var(--ease-out)] md:hidden",
+            open ? "max-h-[28rem] opacity-100" : "max-h-0 border-0 opacity-0",
+          )}
+        >
+          <nav
+            className="flex flex-col gap-1 px-3 py-3"
+            aria-label="Mobile navigation"
+          >
+            <div className="mb-1 flex items-center justify-between px-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                Menu
+              </span>
+              <ThemeToggle />
+            </div>
+            {links.map(({ label, href }) => (
+              <Link
+                key={label}
+                href={href}
+                onClick={() => setOpen(false)}
+                className="rounded-[var(--radius-md)] px-3 py-2.5 text-[15px] font-medium text-text-secondary hover:bg-surface-sunken hover:text-text-primary"
+              >
+                {label}
+              </Link>
+            ))}
+            <div className="mt-2 flex flex-col gap-2">
+              {!authenticated ? (
+                <Button variant="outline" asChild className="w-full rounded-full">
+                  <Link href="/sign-in" onClick={() => setOpen(false)}>
+                    Sign in
+                  </Link>
+                </Button>
+              ) : null}
+              <Button asChild className="w-full rounded-full" variant="accent">
+                <Link href={primaryHref} onClick={() => setOpen(false)}>
+                  {primaryLabel}
+                </Link>
+              </Button>
+            </div>
+          </nav>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="glass-nav sticky top-0 z-[100]">
@@ -153,7 +284,6 @@ export function LandingNav({ variant = "candidate" }: LandingNavProps) {
             </Link>
           ))}
           <div className="mt-2 flex flex-col gap-2">
-            {/* Candidate hiring shortcut hidden until recruiter rollout. */}
             {!authenticated ? (
               <Button variant="outline" asChild className="w-full">
                 <Link href="/sign-in" onClick={() => setOpen(false)}>
