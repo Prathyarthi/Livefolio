@@ -9,6 +9,7 @@ import { RecruiterDifferentiation } from "@/features/landing/components/recruite
 import { RecruiterPricing } from "@/features/landing/components/recruiter-pricing";
 import { RecruiterFAQ } from "@/features/landing/components/recruiter-faq";
 import { RecruiterCTA } from "@/features/landing/components/recruiter-cta";
+import { StudioShell } from "@/features/landing/components/studio-shell";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
@@ -28,28 +29,25 @@ export default function RecruitersLandingPage() {
         Skip to main content
       </a>
 
-      <div className="relative min-h-screen overflow-x-hidden bg-surface-base">
-        <div className="glass-ambient" aria-hidden />
-        <div className="relative z-[1]">
-          <LandingNav variant="recruiter" />
+      <StudioShell>
+        <LandingNav variant="recruiter" layout="pill" />
 
-          <main id="main">
-            <RecruiterHero />
-            <CompanyShowcase
-              eyebrow="Talent already on Livefolio"
-              title="Professionals building real work are already here"
-              description="People building in public, from global enterprises to growing startups."
-            />
-            <RecruiterHowWeRank />
-            <RecruiterReferences />
-            <RecruiterHowItWorks />
-            <RecruiterDifferentiation />
-            <RecruiterPricing />
-            <RecruiterFAQ />
-            <RecruiterCTA />
-          </main>
-        </div>
-      </div>
+        <main id="main">
+          <RecruiterHero />
+          <CompanyShowcase
+            eyebrow="Talent already on Livefolio"
+            title="Professionals building real work are already here"
+            description="People building in public, from global enterprises to growing startups."
+          />
+          <RecruiterHowWeRank />
+          <RecruiterReferences />
+          <RecruiterHowItWorks />
+          <RecruiterDifferentiation />
+          <RecruiterPricing />
+          <RecruiterFAQ />
+          <RecruiterCTA />
+        </main>
+      </StudioShell>
     </>
   );
 }

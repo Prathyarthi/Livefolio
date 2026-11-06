@@ -28,16 +28,17 @@ export function AuthAwareCtas({
   const showArrow = !studio;
 
   if (variant === "recruiter") {
+
     if (authenticated) {
       return (
         <div className={className ?? "flex flex-wrap items-center justify-center gap-3"}>
-          <Button asChild variant="accent" size={size}>
+          <Button asChild variant="accent" size={size} className={studioBtn}>
             <Link href="/company">
               Open hiring workspace
-              <ArrowRight className="h-4 w-4" aria-hidden />
+              {showArrow ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
             </Link>
           </Button>
-          <Button asChild variant="outline" size={size}>
+          <Button asChild variant="outline" size={size} className={studioBtn}>
             <Link href="/dashboard">Go to dashboard</Link>
           </Button>
         </div>
@@ -46,13 +47,13 @@ export function AuthAwareCtas({
 
     return (
       <div className={className ?? "flex flex-wrap items-center justify-center gap-3"}>
-        <Button asChild variant="accent" size={size}>
+        <Button asChild variant="accent" size={size} className={studioBtn}>
           <Link href="/sign-up?callbackUrl=%2Fcompany">
             Start hiring — free
-            <ArrowRight className="h-4 w-4" aria-hidden />
+            {showArrow ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
           </Link>
         </Button>
-        <Button asChild variant="outline" size={size}>
+        <Button asChild variant="outline" size={size} className={studioBtn}>
           <Link href="#ranked-shortlist">See a ranked shortlist</Link>
         </Button>
       </div>

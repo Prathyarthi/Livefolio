@@ -35,6 +35,22 @@ const CANDIDATE_PILL_MENU_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
+/** Short inline links for recruiter studio pill (~768px). */
+const RECRUITER_PILL_LINKS = [
+  { label: "How we rank", href: "#how-we-rank" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Pricing", href: "#pricing" },
+];
+
+const RECRUITER_PILL_MENU_LINKS = [
+  { label: "How we rank", href: "#how-we-rank" },
+  { label: "References", href: "#references" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Pricing", href: "#pricing" },
+  { label: "FAQ", href: "#faq" },
+  { label: "For candidates", href: "/" },
+];
+
 const RECRUITER_LINKS = [
   { label: "How we rank", href: "#how-we-rank" },
   { label: "References", href: "#references" },
@@ -61,10 +77,12 @@ export function LandingNav({
   const { status } = useSession();
   const authenticated = status === "authenticated";
   const links =
-    variant === "recruiter"
-      ? RECRUITER_LINKS
-      : layout === "pill"
-        ? CANDIDATE_PILL_LINKS
+    layout === "pill"
+      ? variant === "recruiter"
+        ? RECRUITER_PILL_LINKS
+        : CANDIDATE_PILL_LINKS
+      : variant === "recruiter"
+        ? RECRUITER_LINKS
         : CANDIDATE_LINKS;
 
   const primaryHref = authenticated
@@ -89,8 +107,9 @@ export function LandingNav({
       ? "Start hiring"
       : "Get started";
 
-  if (layout === "pill" && variant === "candidate") {
-    const menuLinks = CANDIDATE_PILL_MENU_LINKS;
+  if (layout === "pill") {
+    const menuLinks =
+      variant === "recruiter" ? RECRUITER_PILL_MENU_LINKS : CANDIDATE_PILL_MENU_LINKS;
     return (
       <header className="sticky top-0 z-[100] px-4 pt-3 md:px-0 md:pt-5">
         {/*

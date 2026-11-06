@@ -47,7 +47,7 @@ function CompanyRow({
             className="flex shrink-0 items-center gap-3 rounded-full border border-border-default bg-surface-raised/80 px-5 py-3 shadow-[0_1px_2px_rgba(26,24,40,0.04)]"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-brand-secondary/70" />
-            <span className="whitespace-nowrap font-display text-sm font-semibold tracking-[-0.02em] text-text-secondary sm:text-base">
+            <span className="whitespace-nowrap font-sans text-sm font-semibold tracking-[-0.02em] text-text-secondary sm:text-base">
               {company}
             </span>
           </div>
@@ -71,9 +71,9 @@ export function CompanyShowcase({
   return (
     <section
       aria-labelledby="company-showcase-heading"
-      className="border-y border-border-default bg-surface-sunken/55 py-[var(--space-7)]"
+      className="studio-dot-divider bg-surface-sunken/40 py-10 sm:py-12"
     >
-      <div className="mx-auto max-w-[1200px] px-6">
+      <div className="mx-auto w-full px-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="eyebrow uppercase">{eyebrow}</p>
