@@ -7,16 +7,22 @@ type StudioShellProps = {
 };
 
 /**
- * Candidate-landing only layout: airy centred column with faint dashed rails.
- * Does not change global palette — only structure and section rhythm.
+ * Candidate-landing only layout.
+ * Outer shell matches reference geometry: ~72rem / max-w-6xl (~1152px),
+ * with faint dashed rails. Palette unchanged.
  */
 export function StudioShell({ children, className }: StudioShellProps) {
   return (
-    <div className={cn("studio-landing relative min-h-screen overflow-x-hidden bg-surface-base", className)}>
-      <div className="studio-landing__frame relative mx-auto w-full max-w-[920px] px-4 sm:px-6">
+    <div
+      className={cn(
+        "studio-landing relative min-h-screen overflow-x-hidden bg-surface-base",
+        className,
+      )}
+    >
+      <div className="studio-landing__frame relative mx-auto w-full max-w-[calc(72rem-8px)] px-4 sm:px-6 lg:px-8">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-4 right-4 border-x border-dashed border-border-default/70 sm:left-6 sm:right-6"
+          className="pointer-events-none absolute inset-y-0 left-4 right-4 border-x border-dashed border-border-default/70 sm:left-6 sm:right-6 lg:left-8 lg:right-8"
         />
         <div className="relative z-[1]">{children}</div>
       </div>
@@ -42,12 +48,13 @@ export function StudioSection({
     <section
       id={id}
       className={cn(
-        "scroll-mt-24 px-1 py-14 sm:py-16 md:py-20",
+        "scroll-mt-24 py-14 sm:py-16 md:py-20",
         divider && "border-t border-dashed border-border-default/70",
         className,
       )}
     >
-      <div className="mx-auto w-full max-w-[765px]">{children}</div>
+      {/* Full shell width — no 765px clamp on card grids / process / pricing */}
+      <div className="mx-auto w-full">{children}</div>
     </section>
   );
 }
@@ -64,7 +71,12 @@ export function StudioHeading({
   align?: "center" | "left";
 }) {
   return (
-    <div className={cn(align === "center" && "mx-auto max-w-xl text-center")}>
+    <div
+      className={cn(
+        align === "center" && "mx-auto max-w-[40ch] text-center md:max-w-[42ch]",
+        align === "left" && "max-w-[42ch]",
+      )}
+    >
       {eyebrow ? <p className="eyebrow uppercase">{eyebrow}</p> : null}
       <h2 className={cn("text-h1 text-text-primary", eyebrow ? "mt-3" : null)}>
         {title}
@@ -72,8 +84,8 @@ export function StudioHeading({
       {description ? (
         <p
           className={cn(
-            "mt-4 text-body text-text-secondary",
-            align === "center" && "prose-measure mx-auto",
+            "mt-4 max-w-[56ch] text-body text-text-secondary",
+            align === "center" && "mx-auto",
           )}
         >
           {description}

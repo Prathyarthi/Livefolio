@@ -19,12 +19,20 @@ const CANDIDATE_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
+/** Inline desktop links — kept short to fit max-w-3xl (~768px) without overlap. */
 const CANDIDATE_PILL_LINKS = [
+  { label: "How it works", href: "/#features" },
+  { label: "Templates", href: "/#showcase" },
+  { label: "Pricing", href: "/#pricing" },
+];
+
+const CANDIDATE_PILL_MENU_LINKS = [
   { label: "How it works", href: "/#features" },
   { label: "Integrations", href: "/#integrations" },
   { label: "Templates", href: "/#showcase" },
   { label: "Pricing", href: "/#pricing" },
   { label: "FAQ", href: "/#faq" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const RECRUITER_LINKS = [
@@ -82,26 +90,33 @@ export function LandingNav({
       : "Get started";
 
   if (layout === "pill" && variant === "candidate") {
+    const menuLinks = CANDIDATE_PILL_MENU_LINKS;
     return (
-      <header className="sticky top-0 z-[100] px-3 pt-3 sm:px-4 sm:pt-4">
-        <div className="mx-auto flex max-w-[765px] items-center gap-2 rounded-full border border-border-default bg-surface-raised/90 px-2 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/80 dark:bg-surface-raised/85">
-          <Logo className="ml-1.5 shrink-0" />
+      <header className="sticky top-0 z-[100] px-4 pt-4 md:px-0 md:pt-8">
+        {/*
+          max-w-3xl (~768px) matches reference nav width.
+          Side columns reserve logo/actions space so centred links never overlap.
+        */}
+        <div className="relative mx-auto flex w-full max-w-3xl items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-3 py-2 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:px-4">
+          <div className="relative z-[1] flex min-w-0 max-w-[40%] shrink-0 items-center sm:max-w-[34%] lg:min-w-[9.5rem] lg:max-w-none">
+            <Logo className="min-w-0" wordmarkClassName="truncate text-brand-primary font-display text-[18px] font-bold tracking-[-0.01em] sm:text-[20px]" />
+          </div>
 
           <nav
-            className="hidden min-w-0 flex-1 items-center justify-center md:flex"
+            className="absolute left-1/2 top-1/2 z-0 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-3 lg:flex"
             aria-label="Main navigation"
           >
             {links.map(({ label, href }, index) => (
-              <div key={label} className="flex items-center">
+              <div key={label} className="flex items-center gap-3">
                 {index > 0 ? (
                   <span
                     aria-hidden
-                    className="mx-0.5 h-4 border-l border-dotted border-border-strong/80"
+                    className="size-1 shrink-0 rounded-full bg-brand-secondary/80"
                   />
                 ) : null}
                 <Link
                   href={href}
-                  className="whitespace-nowrap rounded-full px-2.5 py-1.5 text-[13px] font-medium text-text-secondary transition-colors duration-150 hover:text-text-primary"
+                  className="whitespace-nowrap text-sm font-medium text-text-secondary transition-colors duration-150 hover:text-text-primary"
                 >
                   {label}
                 </Link>
@@ -109,14 +124,14 @@ export function LandingNav({
             ))}
           </nav>
 
-          <div className="ml-auto flex shrink-0 items-center gap-1">
-            <ThemeToggle className="hidden shrink-0 md:inline-flex" />
+          <div className="relative z-[1] flex min-w-0 shrink-0 items-center justify-end gap-1 sm:gap-1.5 lg:min-w-[9.5rem]">
+            <ThemeToggle className="hidden shrink-0 lg:inline-flex" />
             {!authenticated ? (
               <Button
                 variant="ghost"
                 size="sm"
                 asChild
-                className="hidden h-8 shrink-0 rounded-full px-3 sm:inline-flex"
+                className="hidden h-8 shrink-0 rounded-full px-2.5 sm:inline-flex"
               >
                 <Link href="/sign-in">Sign in</Link>
               </Button>
@@ -124,18 +139,15 @@ export function LandingNav({
             <Button
               size="sm"
               asChild
-              className="hidden h-8 shrink-0 rounded-full px-3.5 sm:inline-flex"
+              className="hidden h-8 shrink-0 rounded-full px-3 sm:inline-flex"
               variant="accent"
             >
-              <Link href={primaryHref}>
-                <span className="hidden lg:inline">{primaryLabel}</span>
-                <span className="lg:hidden">{primaryLabelShort}</span>
-              </Link>
+              <Link href={primaryHref}>{primaryLabelShort}</Link>
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-full md:hidden"
+              className="h-8 w-8 shrink-0 rounded-full lg:hidden"
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
@@ -147,8 +159,8 @@ export function LandingNav({
 
         <div
           className={cn(
-            "mx-auto mt-2 max-w-[765px] overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-[var(--shadow-card)] transition-[max-height,opacity] duration-200 ease-[var(--ease-out)] md:hidden",
-            open ? "max-h-[28rem] opacity-100" : "max-h-0 border-0 opacity-0",
+            "mx-auto mt-2 w-full max-w-3xl overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-[var(--shadow-card)] transition-[max-height,opacity] duration-200 ease-[var(--ease-out)] lg:hidden",
+            open ? "max-h-[32rem] opacity-100" : "max-h-0 border-0 opacity-0",
           )}
         >
           <nav
@@ -161,7 +173,7 @@ export function LandingNav({
               </span>
               <ThemeToggle />
             </div>
-            {links.map(({ label, href }) => (
+            {menuLinks.map(({ label, href }) => (
               <Link
                 key={label}
                 href={href}
