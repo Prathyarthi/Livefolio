@@ -67,7 +67,7 @@ export function StudioSection({
     <section
       id={id}
       className={cn(
-        "scroll-mt-24 py-12 sm:py-14 md:py-16",
+        "scroll-mt-24 pb-12 pt-10 sm:pb-14 sm:pt-12 md:pb-16 md:pt-14",
         padded && "px-4 sm:px-6",
         divider && "studio-dot-divider",
         className,

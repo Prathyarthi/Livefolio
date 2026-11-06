@@ -669,45 +669,67 @@ body {
 }
 
 /*
- * Fine dotted rails + section dividers (Mainline-like visible dots).
- * Radial dots beat CSS border-dashed (which reads as dashes).
+ * Fine round dotted rails + section dividers (Mainline-like).
+ * IMPORTANT: square background-size tiles so radial circles stay round
+ * (9px×1px elongated into dashes). Never set padding-top here — that
+ * overrode StudioSection py-* and collapsed process heading gap to ~10px.
+ * No border-dashed on these elements.
  */
+.studio-landing .studio-dot-rail {
+  border: none !important;
+}
+
 .studio-landing .studio-dot-rail::before,
 .studio-landing .studio-dot-rail::after {
   content: "";
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 1px;
+  width: 6px; /* square cell width = background-size */
   background-image: radial-gradient(
-    circle at center,
-    var(--studio-dot) 0 1.05px,
-    transparent 1.15px
+    circle closest-side,
+    var(--studio-dot) 0%,
+    var(--studio-dot) 1px,
+    transparent calc(1px + 0.5px)
   );
-  background-size: 1px 9px;
+  background-size: 6px 6px; /* square → round dots, ~5px spacing */
   background-repeat: repeat-y;
   background-position: center top;
+  pointer-events: none;
 }
 
-.studio-landing .studio-dot-rail::before { left: 0; }
-.studio-landing .studio-dot-rail::after { right: 0; }
+.studio-landing .studio-dot-rail::before { left: -3px; }
+.studio-landing .studio-dot-rail::after { right: -3px; }
 
 .studio-landing .studio-dot-divider {
-  border-top: none;
+  border: none !important;
+  border-top: none !important;
+  position: relative;
+  /* do NOT touch padding — StudioSection py-* owns breathing room */
+}
+
+.studio-landing .studio-dot-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 6px;
   background-image: radial-gradient(
-    circle at center,
-    var(--studio-dot) 0 1.05px,
-    transparent 1.15px
+    circle closest-side,
+    var(--studio-dot) 0%,
+    var(--studio-dot) 1px,
+    transparent calc(1px + 0.5px)
   );
-  background-size: 9px 1px;
+  background-size: 6px 6px; /* square tiles → round dots */
   background-repeat: repeat-x;
-  background-position: left top;
-  padding-top: 1px;
+  background-position: left center;
+  pointer-events: none;
 }
 
 .dark .studio-landing,
 [data-theme="dark"] .studio-landing {
-  --studio-dot: color-mix(in srgb, var(--color-text-primary) 38%, transparent);
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 42%, transparent);
 }
 
 /* Mountain backdrop — full-bleed behind nav, early cream fade */

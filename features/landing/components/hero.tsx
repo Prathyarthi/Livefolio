@@ -21,8 +21,7 @@ export function Hero() {
             <span className="block">Your resume becomes</span>
             <span className="block">
               a{" "}
-              <span className="studio-hero-highlight">living portfolio</span>
-              <span className="studio-hero-highlight-dot">.</span>
+              <span className="studio-hero-highlight">living portfolio.</span>
             </span>
           </h1>
 
