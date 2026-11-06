@@ -7,9 +7,10 @@ type StudioShellProps = {
 };
 
 /**
- * Candidate-landing only layout.
- * Outer shell matches reference geometry: ~72rem / max-w-6xl (~1152px),
- * with faint dashed rails. Palette unchanged.
+ * Candidate-landing shell.
+ * Outer frame = calc(72rem - 8px) ≈ 1144px. Rails sit on the frame edges
+ * (not inset by horizontal padding), so measured rail/process width matches
+ * the shell. Section content uses its own mobile-safe padding.
  */
 export function StudioShell({ children, className }: StudioShellProps) {
   return (
@@ -19,10 +20,10 @@ export function StudioShell({ children, className }: StudioShellProps) {
         className,
       )}
     >
-      <div className="studio-landing__frame relative mx-auto w-full max-w-[calc(72rem-8px)] px-4 sm:px-6 lg:px-8">
+      <div className="studio-landing__frame relative mx-auto w-full max-w-[calc(72rem-8px)]">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-4 right-4 border-x border-dashed border-border-default/70 sm:left-6 sm:right-6 lg:left-8 lg:right-8"
+          className="pointer-events-none absolute inset-y-0 left-0 right-0 border-x border-dashed border-border-default/70"
         />
         <div className="relative z-[1]">{children}</div>
       </div>
@@ -34,8 +35,9 @@ type StudioSectionProps = {
   id?: string;
   children: ReactNode;
   className?: string;
-  /** Draw the horizontal dashed divider above this section. */
   divider?: boolean;
+  /** Extra horizontal padding inside the full-width shell (mobile-safe). */
+  padded?: boolean;
 };
 
 export function StudioSection({
@@ -43,17 +45,18 @@ export function StudioSection({
   children,
   className,
   divider = true,
+  padded = true,
 }: StudioSectionProps) {
   return (
     <section
       id={id}
       className={cn(
         "scroll-mt-24 py-14 sm:py-16 md:py-20",
+        padded && "px-4 sm:px-6",
         divider && "border-t border-dashed border-border-default/70",
         className,
       )}
     >
-      {/* Full shell width — no 765px clamp on card grids / process / pricing */}
       <div className="mx-auto w-full">{children}</div>
     </section>
   );

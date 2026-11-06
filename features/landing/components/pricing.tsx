@@ -4,7 +4,8 @@ import { PricingPlansSection } from "@/features/subscriptions/components/pricing
 export function Pricing() {
   return (
     <StudioSection id="pricing">
-      <PricingPlansSection />
+      {/* Full studio shell width — override shared max-w-4xl (896px) for landing only */}
+      <PricingPlansSection className="max-w-none" />
     </StudioSection>
   );
 }

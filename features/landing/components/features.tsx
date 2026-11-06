@@ -114,13 +114,15 @@ function StepVisual({ kind }: { kind: (typeof STEPS)[number]["visual"] }) {
 
 export function Features() {
   return (
-    <StudioSection id="features">
-      <StudioHeading
-        eyebrow="How it works"
-        title="From resume to live site"
-        description="Import your resume, connect the platforms you already use, pick a template, and publish a shareable link."
-        align="left"
-      />
+    <StudioSection id="features" padded={false}>
+      <div className="px-4 sm:px-6">
+        <StudioHeading
+          eyebrow="How it works"
+          title="From resume to live site"
+          description="Import your resume, connect the platforms you already use, pick a template, and publish a shareable link."
+          align="left"
+        />
+      </div>
 
       <div className="mt-10 grid grid-cols-1 border-y border-border-default md:grid-cols-2 md:[&>*:nth-child(odd)]:border-r md:[&>*:nth-child(odd)]:border-border-default [&>*:not(:last-child)]:border-b [&>*:not(:last-child)]:border-border-default md:[&>*:nth-child(n+3)]:border-b-0">
         {STEPS.map((step) => (

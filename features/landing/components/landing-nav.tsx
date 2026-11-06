@@ -97,9 +97,12 @@ export function LandingNav({
           max-w-3xl (~768px) matches reference nav width.
           Side columns reserve logo/actions space so centred links never overlap.
         */}
-        <div className="relative mx-auto flex w-full max-w-3xl items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-3 py-2 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:px-4">
-          <div className="relative z-[1] flex min-w-0 max-w-[40%] shrink-0 items-center sm:max-w-[34%] lg:min-w-[9.5rem] lg:max-w-none">
-            <Logo className="min-w-0" wordmarkClassName="truncate text-brand-primary font-display text-[18px] font-bold tracking-[-0.01em] sm:text-[20px]" />
+        <div className="relative mx-auto flex w-full max-w-3xl items-center justify-between gap-2 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-2.5 py-2 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:gap-3 sm:px-4">
+          <div className="relative z-[1] flex shrink-0 items-center lg:min-w-[9.5rem]">
+            <Logo
+              className="shrink-0 gap-2"
+              wordmarkClassName="text-brand-primary font-display text-[17px] font-bold tracking-[-0.01em] sm:text-[20px]"
+            />
           </div>
 
           <nav
@@ -131,7 +134,7 @@ export function LandingNav({
                 variant="ghost"
                 size="sm"
                 asChild
-                className="hidden h-8 shrink-0 rounded-full px-2.5 sm:inline-flex"
+                className="hidden h-8 shrink-0 rounded-full px-2.5 md:inline-flex"
               >
                 <Link href="/sign-in">Sign in</Link>
               </Button>
