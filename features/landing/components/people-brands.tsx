@@ -1,11 +1,12 @@
 import { StudioSection } from "@/features/landing/components/studio-shell";
 
 /**
- * Decorative brand marks orbiting a neutral headline.
+ * Decorative brand marks around a neutral headline.
  * Not a customer/endorsement claim — logos identify well-known employers only.
  *
- * Mobile (< md): top/bottom logo bands with clear gap around the copy.
- * md+: scattered orbit (desktop visual QA).
+ * Positions are intentionally irregular (stable “designed random”), not mirrored
+ * left/right pairs or even rows. Mobile parks marks in staggered top/bottom
+ * bands so copy stays clear; md+ uses a scattered orbit.
  */
 const BRANDS = [
   {
@@ -14,10 +15,22 @@ const BRANDS = [
     src: "/landing/brands/accenture.svg",
     tile: "bg-[#A100FF]",
     logo: "brightness-0 invert",
-    rotate: "-rotate-[8deg]",
-    band: "top",
-    orbit:
-      "left-[6%] top-[8%] -rotate-[8deg]",
+    // mobile top-left · desktop upper-left
+    mobile:
+      "left-[4%] top-[1%] size-11 -rotate-[9deg] sm:size-12",
+    desktop:
+      "left-[3%] top-[6%] size-[4.1rem] -rotate-[8deg] lg:left-[5%]",
+  },
+  {
+    id: "netflix",
+    name: "Netflix",
+    src: "/landing/brands/netflix.svg",
+    tile: "bg-[#E50914]",
+    logo: "brightness-0 invert",
+    mobile:
+      "left-[38%] top-[0%] size-10 rotate-[6deg] sm:left-[40%] sm:size-11",
+    desktop:
+      "left-[20%] top-[2%] size-[3.35rem] rotate-[5deg] lg:left-[22%]",
   },
   {
     id: "ibm",
@@ -25,9 +38,10 @@ const BRANDS = [
     src: "/landing/brands/ibm.svg",
     tile: "bg-[#0F62FE]",
     logo: "brightness-0 invert",
-    rotate: "rotate-[7deg]",
-    band: "top",
-    orbit: "right-[10%] top-[4%] rotate-[7deg]",
+    mobile:
+      "right-[5%] top-[5%] size-11 rotate-[4deg] sm:size-12",
+    desktop:
+      "right-[7%] top-[3%] size-[3.75rem] rotate-[7deg] lg:right-[9%]",
   },
   {
     id: "autodesk",
@@ -35,9 +49,21 @@ const BRANDS = [
     src: "/landing/brands/autodesk.svg",
     tile: "bg-[#000000]",
     logo: "brightness-0 invert",
-    rotate: "rotate-[11deg]",
-    band: "top",
-    orbit: "left-[2%] top-[40%] rotate-[11deg] lg:left-[4%]",
+    mobile:
+      "left-[16%] top-[14%] size-[2.65rem] rotate-[13deg] sm:size-11",
+    desktop:
+      "left-[2%] top-[46%] size-16 rotate-[11deg] lg:left-[3%]",
+  },
+  {
+    id: "adobe",
+    name: "Adobe",
+    src: "/landing/brands/adobe.svg",
+    tile: "bg-[#EB1000]",
+    logo: "brightness-0 invert",
+    mobile:
+      "left-[6%] bottom-[9%] size-10 -rotate-[14deg] sm:size-11",
+    desktop:
+      "right-[4%] top-[22%] size-[3.65rem] -rotate-[12deg] lg:right-[5%]",
   },
   {
     id: "sap",
@@ -45,9 +71,21 @@ const BRANDS = [
     src: "/landing/brands/sap.svg",
     tile: "bg-[#008FD3]",
     logo: "brightness-0 invert",
-    rotate: "-rotate-[6deg]",
-    band: "bottom",
-    orbit: "right-[3%] top-[36%] -rotate-[6deg] lg:right-[5%]",
+    mobile:
+      "left-[42%] bottom-[17%] size-10 -rotate-[3deg] sm:left-[44%] sm:size-11",
+    desktop:
+      "right-[2%] top-[52%] size-[3.5rem] -rotate-[6deg] lg:right-[3.5%]",
+  },
+  {
+    id: "airbnb",
+    name: "Airbnb",
+    src: "/landing/brands/airbnb.svg",
+    tile: "bg-[#FF5A5F]",
+    logo: "brightness-0 invert",
+    mobile:
+      "right-[4%] bottom-[10%] size-[2.55rem] rotate-[10deg] sm:right-[6%] sm:size-10",
+    desktop:
+      "left-[24%] bottom-[4%] size-[3.6rem] rotate-[9deg] lg:left-[22%]",
   },
   {
     id: "pwc",
@@ -55,9 +93,10 @@ const BRANDS = [
     src: "/landing/brands/pwc.svg",
     tile: "bg-white",
     logo: "",
-    rotate: "-rotate-[10deg]",
-    band: "bottom",
-    orbit: "bottom-[14%] left-[8%] -rotate-[10deg]",
+    mobile:
+      "left-[22%] bottom-[0.5%] size-10 -rotate-[7deg] sm:left-[24%] sm:size-11",
+    desktop:
+      "left-[6%] bottom-[10%] size-[3.9rem] -rotate-[10deg] lg:left-[8%]",
   },
   {
     id: "standard-chartered",
@@ -65,14 +104,12 @@ const BRANDS = [
     src: "/landing/brands/standard-chartered.svg",
     tile: "bg-white",
     logo: "",
-    rotate: "rotate-[8deg]",
-    band: "bottom",
-    orbit: "bottom-[12%] right-[8%] rotate-[8deg]",
+    mobile:
+      "right-[26%] bottom-[1%] size-10 rotate-[8deg] sm:right-[28%] sm:size-11",
+    desktop:
+      "right-[10%] bottom-[16%] size-[3.55rem] rotate-[8deg] lg:right-[11%]",
   },
 ] as const;
-
-const TOP = BRANDS.filter((b) => b.band === "top");
-const BOTTOM = BRANDS.filter((b) => b.band === "bottom");
 
 function BrandTile({
   name,
@@ -80,19 +117,17 @@ function BrandTile({
   tile,
   logo,
   className,
-  sizeClass = "size-11 sm:size-12",
 }: {
   name: string;
   src: string;
   tile: string;
   logo: string;
-  className?: string;
-  sizeClass?: string;
+  className: string;
 }) {
   return (
     <span
       title={name}
-      className={`flex items-center justify-center rounded-2xl border border-border-default shadow-[0_8px_24px_rgba(26,24,40,0.08)] ${sizeClass} ${tile} ${className ?? ""}`}
+      className={`absolute flex items-center justify-center rounded-2xl border border-border-default shadow-[0_8px_24px_rgba(26,24,40,0.08)] ${tile} ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -106,87 +141,61 @@ function BrandTile({
   );
 }
 
-function HeadingBlock({ className }: { className?: string }) {
-  return (
-    <div className={className}>
-      <h2 className="text-h1 font-semibold tracking-[-0.03em] text-text-primary">
-        <span className="block">People from top companies,</span>
-        <span className="block">on Livefolio.</span>
-      </h2>
-      <p className="mx-auto mt-4 max-w-[20rem] text-body text-text-secondary sm:max-w-[28rem]">
-        Portfolios that show real work — not just a resume.
-      </p>
-    </div>
-  );
-}
-
 export function PeopleBrands() {
   return (
     <StudioSection id="people" padded={false} divider={false}>
-      {/* Mobile / narrow: logos above + below copy — no absolute overlap */}
-      <div className="mx-auto flex w-full max-w-[52rem] flex-col items-center gap-12 px-4 py-10 sm:gap-14 sm:px-6 sm:py-12 md:hidden">
+      <div className="relative mx-auto w-full max-w-[52rem] px-3 py-6 sm:px-6 sm:py-8 md:py-10">
+        {/* Mobile: staggered top/bottom marks — irregular, not mirrored rows */}
         <div
-          className="flex w-full max-w-[22rem] items-end justify-center gap-3 sm:gap-4"
-          aria-hidden
-        >
-          {TOP.map((b) => (
-            <BrandTile
-              key={b.id}
-              name={b.name}
-              src={b.src}
-              tile={b.tile}
-              logo={b.logo}
-              className={b.rotate}
-            />
-          ))}
-        </div>
-
-        <HeadingBlock className="relative z-[1] max-w-[20rem] px-2 text-center sm:max-w-[24rem]" />
-
-        <div
-          className="flex w-full max-w-[22rem] items-start justify-center gap-3 sm:gap-4"
-          aria-hidden
-        >
-          {BOTTOM.map((b) => (
-            <BrandTile
-              key={b.id}
-              name={b.name}
-              src={b.src}
-              tile={b.tile}
-              logo={b.logo}
-              className={b.rotate}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* md+: scattered orbit — preserve desktop-passed composition */}
-      <div className="relative mx-auto hidden w-full max-w-[52rem] px-6 py-10 md:block">
-        <div
-          className="pointer-events-none absolute inset-0 z-0"
+          className="pointer-events-none absolute inset-0 z-0 md:hidden"
           aria-hidden
         >
           {BRANDS.map((b) => (
             <BrandTile
-              key={b.id}
+              key={`m-${b.id}`}
               name={b.name}
               src={b.src}
               tile={b.tile}
               logo={b.logo}
-              sizeClass="absolute size-16 lg:size-[4.25rem]"
-              className={b.orbit}
+              className={b.mobile}
             />
           ))}
         </div>
 
-        <HeadingBlock className="relative z-[1] mx-auto max-w-[26rem] py-24 text-center" />
-      </div>
+        {/* Desktop: irregular scattered orbit */}
+        <div
+          className="pointer-events-none absolute inset-0 z-0 hidden md:block"
+          aria-hidden
+        >
+          {BRANDS.map((b) => (
+            <BrandTile
+              key={`d-${b.id}`}
+              name={b.name}
+              src={b.src}
+              tile={b.tile}
+              logo={b.logo}
+              className={b.desktop}
+            />
+          ))}
+        </div>
 
-      <ul className="sr-only">
-        {BRANDS.map(({ id, name }) => (
-          <li key={id}>{name}</li>
-        ))}
-      </ul>
+        {/* Generous vertical padding keeps copy clear of top/bottom logo bands */}
+        <div className="relative z-[1] mx-auto max-w-[17.5rem] px-1 pt-36 pb-44 text-center sm:max-w-[22rem] sm:pt-40 sm:pb-48 md:max-w-[26rem] md:px-0 md:py-24">
+          <h2 className="text-h1 font-semibold tracking-[-0.03em] text-text-primary">
+            <span className="block">People from top companies,</span>
+            <span className="block">on Livefolio.</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-[16rem] text-body text-text-secondary sm:max-w-[28rem]">
+            Portfolios that show real work — not just a resume.
+          </p>
+        </div>
+
+        <ul className="sr-only">
+          {BRANDS.map(({ id, name }) => (
+            <li key={id}>{name}</li>
+          ))}
+        </ul>
+      </div>
     </StudioSection>
   );
 }

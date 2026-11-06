@@ -24,5 +24,8 @@ customers, partners, or endorsements.
 | `sap.svg` | SAP (alt: SAP Labs) | Simple Icons `sap` @13.21.0 | CC0 1.0 — labeled SAP Labs in UI |
 | `pwc.svg` | PwC | Wikimedia Commons [File:PwC Company Logo.svg](https://commons.wikimedia.org/wiki/File:PwC_Company_Logo.svg) | Trademark of PwC; Commons file used for identification |
 | `standard-chartered.svg` | Standard Chartered | Wikimedia Commons [File:Standard Chartered (2021).svg](https://commons.wikimedia.org/wiki/File:Standard_Chartered_(2021).svg) | Trademark of Standard Chartered; Commons file used for identification |
+| `netflix.svg` | Netflix | Simple Icons `netflix` @13.21.0 | CC0 1.0 |
+| `adobe.svg` | Adobe | Simple Icons `adobe` @13.21.0 | CC0 1.0 |
+| `airbnb.svg` | Airbnb | Simple Icons `airbnb` @13.21.0 | CC0 1.0 |
 
 Downloaded: 2026-11-07 for Livefolio candidate landing only. Do not hotlink.
