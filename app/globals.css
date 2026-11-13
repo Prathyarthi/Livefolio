@@ -97,13 +97,13 @@
   --color-brand-primary: #2a2744;
   --color-brand-secondary: #e86a5a;
   --color-brand-dark: #211f3d;
-  --color-brand-light: #f3f1ec;
+  --color-brand-light: #f5f5f4;
 
-  /* Neutral surfaces */
-  --color-surface-base: #fbfaf7;
+  /* Neutral surfaces — light app/marketing canvas is true white */
+  --color-surface-base: #ffffff;
   --color-surface-raised: #ffffff;
-  --color-surface-sunken: #f3f1ec;
-  --color-border-default: #e8e5df;
+  --color-surface-sunken: #f4f4f4;
+  --color-border-default: #e5e5e5;
   --color-border-strong: #c9c4ba;
   --color-text-primary: #1a1828;
   --color-text-secondary: #5e5a6e;
@@ -176,10 +176,10 @@
 /* ─── Design Tokens — DARK (warm studio night) ─────────────────── */
 .dark,
 [data-theme="dark"] {
-  /* Brand — terracotta leads on dark; cream for soft accents */
-  --color-brand-primary: #ed7a6d;
-  --color-brand-secondary: #f09588;
-  --color-brand-dark: #f5a89e;
+  /* Same coral as light mode. brand-light stays a dark chip surface. */
+  --color-brand-primary: #e86a5a;
+  --color-brand-secondary: #e86a5a;
+  --color-brand-dark: #e86a5a;
   --color-brand-light: #252320;
 
   /* Warm charcoal surfaces (no purple cast) */
@@ -202,7 +202,7 @@
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45), 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-modal: 0 12px 40px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-focus: 0 0 0 3px rgba(237, 122, 109, 0.35);
+  --shadow-focus: 0 0 0 3px rgba(232, 106, 90, 0.35);
 
   /* shadcn semantic mapping */
   --background: var(--color-surface-base);
@@ -236,7 +236,7 @@
 
 .dark ::selection,
 [data-theme="dark"] ::selection {
-  background: rgba(237, 122, 109, 0.35);
+  background: rgba(232, 106, 90, 0.35);
   color: var(--color-text-primary);
 }
 
@@ -552,6 +552,275 @@ body {
   opacity: 0.08;
 }
 
+
+/* ─── Studio landing (candidate home only) ──────────────────────── */
+/*
+ * Scope Source Sans 3 for display/headings/nav/buttons on the candidate home.
+ * Must beat @layer base h1/h2 mono and Button font-mono. Global app fonts
+ * unchanged. Eyebrow/step mono accents remain.
+ */
+.studio-landing {
+  --studio-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 28%, transparent);
+  font-family: var(--studio-sans);
+}
+
+/*
+ * Studio page bg — same white as global light tokens (explicit for cascade safety).
+ */
+html:not(.dark):not([data-theme="dark"]) .studio-landing {
+  --color-surface-base: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #f4f4f4;
+  --studio-page-bg: #ffffff;
+  background-color: #ffffff;
+}
+
+.studio-landing h1,
+.studio-landing h2,
+.studio-landing h3,
+.studio-landing h4,
+.studio-landing .font-display,
+.studio-landing .text-display,
+.studio-landing .text-h1,
+.studio-landing .text-h2,
+.studio-landing .text-h3,
+.studio-landing .text-h4 {
+  font-family: var(--studio-sans) !important;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.studio-landing .text-display {
+  font-size: clamp(2rem, 1.4rem + 1.6vw, 2.5rem);
+  line-height: 1.18;
+}
+
+.studio-landing .text-h1 {
+  font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.125rem);
+  line-height: 1.22;
+}
+
+.studio-landing .text-h2 {
+  font-size: clamp(1.375rem, 1.15rem + 0.7vw, 1.75rem);
+  line-height: 1.25;
+}
+
+.studio-landing .studio-hero-title {
+  font-family: var(--studio-sans) !important;
+  font-size: clamp(2rem, 1.55rem + 1.8vw, 2.875rem); /* ~32–46px */
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+/* Selection highlight — painted band hugs glyphs (not full line-box) */
+.studio-landing .studio-hero-highlight {
+  display: inline;
+  background-color: var(--color-brand-secondary);
+  color: #ffffff;
+  font-size: 0.68em;
+  padding: 0 0.06em;
+  margin: 0;
+  border-radius: 2px;
+  /* smaller than parent title line-height so bg is not a tall slab */
+  line-height: 1.02;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  box-shadow: none;
+}
+
+html.dark .studio-landing .studio-hero-highlight,
+html[data-theme="dark"] .studio-landing .studio-hero-highlight {
+  background-color: var(--color-brand-secondary);
+  color: #ffffff;
+}
+
+/* Studio CTA chrome — compact ~10px rectangles, not global Button */
+.studio-landing .studio-cta [data-slot="button"] {
+  font-family: var(--studio-sans) !important;
+  font-weight: 500;
+  font-size: 14px;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  padding-inline: 1.15rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+
+.studio-landing .studio-cta [data-slot="button"][data-variant="accent"],
+.studio-landing .studio-cta [data-slot="button"][data-variant="default"] {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 22%, transparent),
+    0 1px 2px color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+}
+
+.studio-landing .studio-cta [data-slot="button"][data-variant="outline"] {
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--color-border-strong) 85%, var(--color-text-primary));
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+}
+
+.studio-landing .studio-cta [data-slot="button"][data-variant="outline"]:hover {
+  background: var(--color-surface-sunken);
+}
+
+.studio-landing [data-slot="button"],
+.studio-landing button:not(.eyebrow),
+.studio-landing a {
+  font-family: var(--studio-sans);
+}
+
+.studio-landing .eyebrow,
+.studio-landing .text-mono,
+.studio-landing .font-mono {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace !important;
+}
+
+/*
+ * Fine round dotted rails + section dividers (Mainline-like).
+ * IMPORTANT: square background-size tiles so radial circles stay round
+ * (9px×1px elongated into dashes). Never set padding-top here — that
+ * overrode StudioSection py-* and collapsed process heading gap to ~10px.
+ * No border-dashed on these elements.
+ */
+.studio-landing .studio-dot-rail {
+  border: none !important;
+}
+
+.studio-landing .studio-dot-rail::before,
+.studio-landing .studio-dot-rail::after {
+  content: none !important;
+  display: none !important;
+}
+
+.studio-landing .studio-dot-divider {
+  border: none !important;
+  border-top: none !important;
+  position: relative;
+  /* do NOT touch padding — StudioSection py-* owns breathing room */
+}
+
+.studio-landing .studio-dot-divider::before {
+  content: none !important;
+  display: none !important;
+}
+
+html.dark .studio-landing,
+html[data-theme="dark"] .studio-landing {
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 42%, transparent);
+  --color-surface-base: #111010;
+  --color-surface-raised: #1a1917;
+  --color-surface-sunken: #141312;
+  --studio-page-bg: #111010;
+  background-color: #111010;
+}
+
+/* Mountain backdrop — full-bleed behind nav, early fade to studio page bg (white/charcoal) */
+.studio-landing .studio-hero-backdrop {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: min(38vh, 340px);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.studio-landing .studio-hero-backdrop img {
+  width: 100%;
+  height: 118%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: 0.38;
+  filter: saturate(0.72) contrast(0.94);
+}
+
+.studio-landing .studio-hero-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-surface-base) 12%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-base) 40%, transparent) 28%,
+      color-mix(in srgb, var(--color-surface-base) 78%, transparent) 55%,
+      color-mix(in srgb, var(--color-surface-base) 96%, transparent) 78%,
+      var(--color-surface-base) 100%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-surface-base) 45%, transparent) 0%,
+      transparent 14%,
+      transparent 86%,
+      color-mix(in srgb, var(--color-surface-base) 45%, transparent) 100%
+    );
+}
+
+html.dark .studio-landing .studio-hero-backdrop img,
+html[data-theme="dark"] .studio-landing .studio-hero-backdrop img {
+  opacity: 0.24;
+  filter: saturate(0.5) contrast(0.88) brightness(0.72);
+}
+
+html.dark .studio-landing .studio-hero-backdrop::after,
+html[data-theme="dark"] .studio-landing .studio-hero-backdrop::after {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-surface-base) 28%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-base) 62%, transparent) 40%,
+      color-mix(in srgb, var(--color-surface-base) 92%, transparent) 72%,
+      var(--color-surface-base) 100%
+    );
+}
+
+/* Subtle float for decorative tiles (honors reduced motion) */
+@keyframes studio-float-y {
+  0%, 100% { transform: translateY(0) rotate(var(--studio-tile-rot, 0deg)); }
+  50% { transform: translateY(-5px) rotate(var(--studio-tile-rot, 0deg)); }
+}
+
+.studio-landing .studio-hero-float__tile {
+  transform: rotate(var(--studio-tile-rot, 0deg));
+  animation: studio-float-y 7s ease-in-out infinite;
+}
+
+.studio-landing .studio-hero-float__tile:nth-child(2) { animation-delay: -1.2s; }
+.studio-landing .studio-hero-float__tile:nth-child(3) { animation-delay: -2.4s; }
+.studio-landing .studio-hero-float__tile:nth-child(4) { animation-delay: -3.1s; }
+.studio-landing .studio-hero-float__tile:nth-child(5) { animation-delay: -0.7s; }
+.studio-landing .studio-hero-float__tile:nth-child(6) { animation-delay: -4s; }
+
+html.dark .studio-landing .studio-hero-float__tile,
+html[data-theme="dark"] .studio-landing .studio-hero-float__tile {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.studio-landing .studio-hatch {
+  background-color: var(--color-surface-sunken);
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 6px,
+      color-mix(in srgb, var(--color-border-default) 55%, transparent) 6px,
+      color-mix(in srgb, var(--color-border-default) 55%, transparent) 7px
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-landing * {
+    scroll-behavior: auto !important;
+  }
+  .studio-landing .studio-hero-float__tile {
+    animation: none !important;
+  }
+}
+
 /* ─── Marquee (social proof logos) ─────────────────────────────── */
 @keyframes marquee {
   from { transform: translateX(0); }
@@ -712,11 +981,11 @@ body {
 
 /* ─── Marketing footer (unlayered — reliable light/dark colors) ── */
 .marketing-footer {
-  --mf-bg: #f3f1ec;
+  --mf-bg: #ffffff;
   --mf-text: #5e5a6e;
   --mf-heading: #2a2744;
   --mf-muted: #6b6878;
-  --mf-border: #e8e5df;
+  --mf-border: #e5e5e5;
   --mf-hover: #1a1828;
   --mf-hover-surface: rgba(26, 24, 40, 0.06);
 
@@ -771,4 +1040,64 @@ body {
 .marketing-footer .mf-social:hover {
   color: var(--mf-hover);
   background-color: var(--mf-hover-surface);
+}
+
+/*
+ * Studio landings (/ and /recruiters) — white page, 1144 frame, sans.
+ * Does not change default .marketing-footer cream on contact/legal/etc.
+ * Dotted top via .studio-dot-divider (shared studio dots).
+ */
+html:not(.dark):not([data-theme="dark"]) .marketing-footer--studio {
+  --mf-bg: #ffffff;
+  --mf-text: #5e5a6e;
+  --mf-heading: #2a2744;
+  --mf-muted: #6b6878;
+  --mf-border: #e5e5e5;
+  --mf-hover: #1a1828;
+  --mf-hover-surface: rgba(26, 24, 40, 0.06);
+  background-color: #ffffff;
+  border-top: none; /* dotted rule from .studio-dot-divider::before */
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+html.dark .marketing-footer--studio,
+html[data-theme="dark"] .marketing-footer--studio {
+  --mf-bg: #111010;
+  --mf-text: #b0a99f;
+  --mf-heading: #f4f1ea;
+  --mf-muted: #7d756c;
+  --mf-border: #2c2a26;
+  --mf-hover: #f4f1ea;
+  --mf-hover-surface: rgba(244, 241, 234, 0.08);
+  background-color: #111010;
+  border-top: none;
+}
+
+.marketing-footer--studio .mf-divider {
+  border-top-style: solid;
+  border-color: var(--mf-border);
+}
+
+.marketing-footer--studio .mf-heading,
+.marketing-footer--studio .mf-link,
+.marketing-footer--studio .mf-text,
+.marketing-footer--studio .mf-muted {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Footer sits outside StudioShell — re-apply round dotted top rule here. */
+.marketing-footer--studio.studio-dot-divider {
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 28%, transparent);
+  position: relative;
+  border: none !important;
+}
+
+html.dark .marketing-footer--studio.studio-dot-divider,
+html[data-theme="dark"] .marketing-footer--studio.studio-dot-divider {
+  --studio-dot: color-mix(in srgb, var(--color-text-primary) 42%, transparent);
+}
+
+.marketing-footer--studio.studio-dot-divider::before {
+  content: none !important;
+  display: none !important;
 }

@@ -125,7 +125,7 @@ export const pricingPlans: PricingPlan[] = [
       { label: "Public portfolio at your Livefolio link", included: true },
       { label: "Resume and platform imports during free month", included: true },
       { label: "Editor and publish", included: true },
-      { label: "Opt in so recruiters can find you — not shown on your Livefolio", included: true },
+      { label: "Opt in so recruiters can find you. Not shown on your Livefolio", included: true },
       { label: "Ask 3 people for a named reference", included: true },
       { label: "All templates during free month", included: true },
     ],
@@ -135,7 +135,7 @@ export const pricingPlans: PricingPlan[] = [
     name: "Pro",
     eyebrow: "Stand out",
     description:
-      "For active job search and a stronger public presence—with room to grow.",
+      "For active job search and a stronger public presence, with room to grow.",
     monthlyAmount: PRO_PRICING.monthly,
     pricePeriod: "/month",
     note: `Monthly, quarterly, or yearly billing at checkout. Save up to ${yearlySavings}% on yearly.`,

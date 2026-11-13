@@ -9,27 +9,36 @@ type AuthAwareCtasProps = {
   variant?: "candidate" | "recruiter";
   size?: "default" | "lg";
   className?: string;
+  /**
+   * Studio landing hero/footer CTAs — compact Mainline-like chrome,
+   * sans type, optional arrows omitted. Does not change global Button.
+   */
+  studio?: boolean;
 };
 
 export function AuthAwareCtas({
   variant = "candidate",
   size = "lg",
   className,
+  studio = false,
 }: AuthAwareCtasProps) {
   const { status } = useSession();
   const authenticated = status === "authenticated";
+  const studioBtn = studio ? "font-sans" : undefined;
+  const showArrow = !studio;
 
   if (variant === "recruiter") {
+
     if (authenticated) {
       return (
         <div className={className ?? "flex flex-wrap items-center justify-center gap-3"}>
-          <Button asChild variant="accent" size={size}>
+          <Button asChild variant="accent" size={size} className={studioBtn}>
             <Link href="/company">
               Open hiring workspace
-              <ArrowRight className="h-4 w-4" aria-hidden />
+              {showArrow ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
             </Link>
           </Button>
-          <Button asChild variant="outline" size={size}>
+          <Button asChild variant="outline" size={size} className={studioBtn}>
             <Link href="/dashboard">Go to dashboard</Link>
           </Button>
         </div>
@@ -38,13 +47,13 @@ export function AuthAwareCtas({
 
     return (
       <div className={className ?? "flex flex-wrap items-center justify-center gap-3"}>
-        <Button asChild variant="accent" size={size}>
+        <Button asChild variant="accent" size={size} className={studioBtn}>
           <Link href="/sign-up?callbackUrl=%2Fcompany">
-            Start hiring — free
-            <ArrowRight className="h-4 w-4" aria-hidden />
+            Start hiring free
+            {showArrow ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
           </Link>
         </Button>
-        <Button asChild variant="outline" size={size}>
+        <Button asChild variant="outline" size={size} className={studioBtn}>
           <Link href="#ranked-shortlist">See a ranked shortlist</Link>
         </Button>
       </div>
@@ -54,33 +63,31 @@ export function AuthAwareCtas({
   if (authenticated) {
     return (
       <div className={className ?? "flex flex-wrap items-center justify-center gap-3"}>
-        <Button asChild variant="accent" size={size}>
+        <Button asChild variant="accent" size={size} className={studioBtn}>
           <Link href="/dashboard">
             Go to dashboard
-            <ArrowRight className="h-4 w-4" aria-hidden />
+            {showArrow ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
           </Link>
         </Button>
-        {/* Hiring entry point hidden until the recruiter product is rolled out.
-        <Button asChild variant="outline" size={size}>
-          <Link href="/recruiters">Hiring</Link>
+        <Button asChild variant="outline" size={size} className={studioBtn}>
+          <Link href="#showcase">See examples</Link>
         </Button>
-        */}
       </div>
     );
   }
 
   return (
     <div className={className ?? "flex flex-wrap items-center justify-center gap-3"}>
-      <Button asChild variant="accent" size={size}>
+      <Button asChild variant="accent" size={size} className={studioBtn}>
         <Link href="/sign-up">
-          Get started — it&apos;s free
-          <ArrowRight className="h-4 w-4" aria-hidden />
+          Get started free
+          {showArrow ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
         </Link>
       </Button>
-      <Button asChild variant="outline" size={size}>
+      <Button asChild variant="outline" size={size} className={studioBtn}>
         <Link href="#showcase">
           See examples
-          <ArrowRight className="h-4 w-4" aria-hidden />
+          {showArrow ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
         </Link>
       </Button>
     </div>

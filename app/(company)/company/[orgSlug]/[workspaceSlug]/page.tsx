@@ -3,7 +3,7 @@
 import { JobStatusBadge, ListSkeleton, PageSkeleton } from "@/features/organization/components/workspace-ui";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Briefcase, Plus, Settings, Users } from "lucide-react";
+import { Bot, Briefcase, Plus, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RichText } from "@/components/rich-text";
@@ -67,6 +67,12 @@ export default function CompanyOverviewPage() {
             <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/new`}>
               <Plus className="h-4 w-4" />
               Create job
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href={`/company/${orgSlug}/${workspaceSlug}/agent`}>
+              <Bot className="h-4 w-4" />
+              Hiring agent
             </Link>
           </Button>
           <Button variant="outline" asChild>

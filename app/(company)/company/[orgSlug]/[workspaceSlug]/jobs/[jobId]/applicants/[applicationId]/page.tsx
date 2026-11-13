@@ -4,8 +4,8 @@ import { isConnectedProfile } from "@/features/search/lib/proof";
 import { ListSkeleton, QueryError, StageBadge } from "@/features/organization/components/workspace-ui";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ExternalLink, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ export default function ApplicantDetailPage() {
     applicationId: string;
   }>();
   const { orgSlug, workspaceSlug, jobId, applicationId } = params;
+  const router = useRouter();
   const { data, isLoading, error, refetch } = useCompanyApplication(
     jobId,
     applicationId,
@@ -47,8 +48,16 @@ export default function ApplicantDetailPage() {
   const addNote = useAddRecruiterNote(jobId, applicationId);
   const deleteNote = useDeleteRecruiterNote(jobId, applicationId);
   const [noteBody, setNoteBody] = useState("");
+  const openedOnAnotherJob = Boolean(data?.job?.id && data.job.id !== jobId);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!data?.job?.id || data.job.id === jobId) return;
+    router.replace(
+      `/company/${orgSlug}/${workspaceSlug}/jobs/${data.job.id}/applicants/${applicationId}`,
+    );
+  }, [data, jobId, orgSlug, workspaceSlug, applicationId, router]);
+
+  if (isLoading || openedOnAnotherJob) {
     return (
       <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8" aria-busy="true">
         <div className="flex items-center gap-4">
