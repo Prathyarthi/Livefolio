@@ -7,6 +7,7 @@
 export const NOTIFICATION_TYPES = [
   "linkedin.sync_succeeded",
   "linkedin.sync_failed",
+  "badge_earned",
   "system",
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -23,6 +24,7 @@ export const DEFAULT_CHANNEL_ENABLED: Record<NotificationChannel, boolean> = {
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   "linkedin.sync_succeeded": "LinkedIn sync succeeded",
   "linkedin.sync_failed": "LinkedIn sync failed",
+  badge_earned: "Badges earned",
   system: "Product & account updates",
 };
 

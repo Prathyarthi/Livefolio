@@ -75,7 +75,10 @@ export function portfolioToTemplateData(portfolio: any): PortfolioData {
       githubForks: p.githubForks ?? null,
       language: p.language ?? null,
     })),
-    articles: (portfolio.articles ?? []).map((a: any) => ({
+    // LinkedIn posts render in the LinkedIn section; hide any legacy mirrored rows.
+    articles: (portfolio.articles ?? [])
+      .filter((a: { source?: string | null }) => a.source !== "linkedin")
+      .map((a: any) => ({
       id: a.id,
       title: a.title,
       description: a.description,

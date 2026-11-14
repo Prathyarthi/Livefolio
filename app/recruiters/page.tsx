@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
 import { LandingNav } from "@/features/landing/components/landing-nav";
-import { CompanyShowcase } from "@/features/landing/components/company-showcase";
+import { PeopleBrands } from "@/features/landing/components/people-brands";
 import { RecruiterHero } from "@/features/landing/components/recruiter-hero";
+import { RecruiterHowWeRank } from "@/features/landing/components/recruiter-how-we-rank";
+import { RecruiterReferences } from "@/features/landing/components/recruiter-references";
 import { RecruiterHowItWorks } from "@/features/landing/components/recruiter-how-it-works";
 import { RecruiterDifferentiation } from "@/features/landing/components/recruiter-differentiation";
 import { RecruiterPricing } from "@/features/landing/components/recruiter-pricing";
 import { RecruiterFAQ } from "@/features/landing/components/recruiter-faq";
 import { RecruiterCTA } from "@/features/landing/components/recruiter-cta";
+import { StudioShell } from "@/features/landing/components/studio-shell";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Hire with Livefolio",
   description:
-    "Post jobs, receive Apply with Livefolio applications, and shortlist candidates from real professional evidence — free for one open role.",
+    "Hire on proof and references, not resume keywords. Post a role free, get one-click applications and a ranked shortlist that explains itself.",
   path: "/recruiters",
 });
 
@@ -26,26 +29,21 @@ export default function RecruitersLandingPage() {
         Skip to main content
       </a>
 
-      <div className="relative min-h-screen overflow-x-hidden bg-surface-base">
-        <div className="glass-ambient" aria-hidden />
-        <div className="relative z-[1]">
-          <LandingNav variant="recruiter" />
+      <StudioShell>
+        <LandingNav variant="recruiter" layout="pill" />
 
-          <main id="main">
-            <RecruiterHero />
-            <CompanyShowcase
-              eyebrow="Talent already on Livefolio"
-              title="Professionals building real work are already here"
-              description="Hire people who are building in public across global enterprises, technology leaders, and growing startups."
-            />
-            <RecruiterHowItWorks />
-            <RecruiterDifferentiation />
-            <RecruiterPricing />
-            <RecruiterFAQ />
-            <RecruiterCTA />
-          </main>
-        </div>
-      </div>
+        <main id="main">
+          <RecruiterHero />
+          <PeopleBrands />
+          <RecruiterHowWeRank />
+          <RecruiterReferences />
+          <RecruiterHowItWorks />
+          <RecruiterDifferentiation />
+          <RecruiterPricing />
+          <RecruiterFAQ />
+          <RecruiterCTA />
+        </main>
+      </StudioShell>
     </>
   );
 }
