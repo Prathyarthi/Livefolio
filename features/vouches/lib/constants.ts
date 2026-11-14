@@ -6,7 +6,6 @@ export const VOUCH_RELATIONSHIPS = [
   "peer",
   "founder",
   "report",
-  "classmate",
   "collaborator",
   "other",
 ] as const;
@@ -17,7 +16,6 @@ export const VOUCH_RELATIONSHIP_LABELS: Record<VouchRelationship, string> = {
   peer: "Peer",
   founder: "Founder",
   report: "Direct report",
-  classmate: "Classmate",
   collaborator: "Collaborator",
   other: "Other",
 };

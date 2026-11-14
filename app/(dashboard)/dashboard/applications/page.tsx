@@ -35,7 +35,7 @@ export default function MyApplicationsPage() {
       {isLoading ? (
         <p className="text-body-sm text-text-muted">Loading applications…</p>
       ) : error ? (
-        <p className="text-body-sm text-semantic-danger">
+        <p className="text-body-sm text-danger">
           {error instanceof Error ? error.message : "Failed to load"}
         </p>
       ) : applications.length === 0 ? (

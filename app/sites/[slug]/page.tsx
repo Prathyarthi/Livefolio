@@ -71,6 +71,7 @@ export default async function PortfolioPage({ params }: Props) {
       certifications: { orderBy: { sortOrder: "asc" } },
       achievements: { orderBy: { sortOrder: "asc" } },
       customSections: { orderBy: { sortOrder: "asc" } },
+      linkedinImport: true,
     },
   });
 
@@ -82,7 +83,11 @@ export default async function PortfolioPage({ params }: Props) {
     : "minimal";
   const template = getTemplate(templateId);
   const TemplateComponent = template.component;
-  const data = portfolioToTemplateData(portfolio);
+  const data = portfolioToTemplateData({
+    ...portfolio,
+    // LinkedIn showcase is Pro-only; drop it if the owner's plan lapsed.
+    linkedinImport: access.canUseLinkedInImport ? portfolio.linkedinImport : null,
+  });
 
   return (
     <>

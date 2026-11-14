@@ -6,6 +6,7 @@ import {
   type JobSearchProfile,
 } from "@/features/jobs/lib/search-profile";
 import { tokenize } from "@/features/search/lib/match";
+import { withLinkedIn } from "@/features/applications/lib/linkedin-snapshot";
 import {
   termAsTyped,
   type InterpretedSearchQuery,
@@ -23,6 +24,11 @@ import {
   platformScore,
   provenScore,
 } from "@/features/search/lib/rank-signals";
+import {
+  applyReferenceRank,
+  referenceMatchTerms,
+  type ReferenceForSearch,
+} from "@/features/search/lib/references";
 
 export type CandidateRank = {
   score: number;
@@ -42,7 +48,7 @@ export type RankExtras = {
 };
 
 /** Bump whenever weights or scoring change so logged results can be compared across versions. */
-export const RANKING_VERSION = "field-weighted-v5";
+export const RANKING_VERSION = "field-weighted-v6";
 
 const COMPONENT_WEIGHTS = {
   overlap: 0.45,
@@ -130,20 +136,45 @@ function emptyRank(freshness = 0): CandidateRank {
   };
 }
 
+/** Job terms that only the LinkedIn import matched, for a "From LinkedIn" reason. */
+function linkedInOnlyHits(
+  raw: ApplicationSnapshotData | null | undefined,
+  merged: FieldBlobs,
+  profile: JobSearchProfile,
+  extras: RankExtras | undefined,
+): string[] {
+  if (!raw?.linkedin) return [];
+  const terms = [...profile.mustHaves, ...profile.niceToHaves];
+  if (terms.length === 0) return [];
+  const base = fieldBlobs({ ...raw, linkedin: null }, extras);
+  const before = new Set(matchedTerms(base, terms).hits);
+  return matchedTerms(merged, terms).hits.filter((term) => !before.has(term));
+}
+
 function combineRank(
-  snapshot: ApplicationSnapshotData | null | undefined,
+  raw: ApplicationSnapshotData | null | undefined,
   profile: JobSearchProfile,
   extras: RankExtras | undefined,
   matchAny: boolean,
 ): CandidateRank {
+  // LinkedIn import data (when connected) feeds keyword match, role and years like portfolio data.
+  const snapshot = withLinkedIn(raw);
   const blobs = fieldBlobs(snapshot, extras);
   const reasons: string[] = [];
   const overlap = overlapScore(blobs, profile, reasons, matchAny);
+  const fromLinkedIn = linkedInOnlyHits(raw, blobs, profile, extras);
+  if (fromLinkedIn[0]) reasons.push(`From LinkedIn: ${fromLinkedIn.slice(0, 2).join(", ")}`);
+  // Proof of work stays portfolio-only: LinkedIn text is a claim, not shown work.
   const proven = provenScore(
-    snapshot,
+    raw,
     [...profile.mustHaves, ...profile.niceToHaves],
     profile.gates.liveUrl,
     reasons,
+    {
+      // Same classification as platform activity: confident engineering roles read code profiles.
+      coding: profile.gates.github || profile.gates.leetcode,
+      design: profile.roleFamily === "design" && profile.confidence >= 0.6,
+    },
   );
   const platform = platformScore(snapshot, profile, reasons);
   const fit = fitScore(snapshot, profile, reasons);
@@ -210,14 +241,17 @@ export function rankCandidate(
     jobProfile?: JobSearchProfile | null;
     query?: InterpretedSearchQuery | null;
     extras?: RankExtras;
+    /** Set only when the recruiter has opted in. Adds points; never lowers a score. */
+    references?: ReferenceForSearch[];
   },
 ): CandidateRank {
   const { jobProfile, query, extras } = options;
   const hasQuery = Boolean(query && (query.keywords.length > 0 || query.minExperience));
+  let rank: CandidateRank;
   if (jobProfile && query && hasQuery) {
     const job = rankAgainstJob(snapshot, jobProfile, extras);
     const byQuery = rankAgainstQuery(snapshot, query, extras);
-    return {
+    rank = {
       score: Math.round(job.score * 0.7 + byQuery.score * 0.3),
       overlap: job.overlap * 0.7 + byQuery.overlap * 0.3,
       proven: Math.max(job.proven, byQuery.proven),
@@ -226,8 +260,24 @@ export function rankCandidate(
       freshness: job.freshness,
       reasons: [...new Set([...byQuery.reasons, ...job.reasons])].slice(0, 4),
     };
+  } else if (jobProfile) {
+    rank = rankAgainstJob(snapshot, jobProfile, extras);
+  } else if (query) {
+    rank = rankAgainstQuery(snapshot, query, extras);
+  } else {
+    rank = emptyRank(freshnessScore(extras?.freshnessAt));
   }
-  if (jobProfile) return rankAgainstJob(snapshot, jobProfile, extras);
-  if (query) return rankAgainstQuery(snapshot, query, extras);
-  return emptyRank(freshnessScore(extras?.freshnessAt));
+
+  if (!options.references?.length) return rank;
+  const applied = applyReferenceRank(
+    rank.score,
+    rank.reasons,
+    options.references,
+    referenceMatchTerms({
+      keywords: query?.keywords,
+      mustHaves: jobProfile?.mustHaves,
+      niceToHaves: jobProfile?.niceToHaves,
+    }),
+  );
+  return { ...rank, score: applied.score, reasons: applied.reasons };
 }

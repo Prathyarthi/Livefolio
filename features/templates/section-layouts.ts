@@ -27,6 +27,7 @@ const FORMER_TWO_COLUMN: ReorderableSectionKey[] = [
   "education",
   "certifications",
   "achievements",
+  "linkedin",
   "profiles",
   "github",
 ];
@@ -40,6 +41,7 @@ const STANDARD_SINGLE: ReorderableSectionKey[] = [
   "certifications",
   "achievements",
   "articles",
+  "linkedin",
   "profiles",
   "github",
 ];
@@ -53,6 +55,7 @@ const AIRY_FAMILY: ReorderableSectionKey[] = [
   "certifications",
   "achievements",
   "articles",
+  "linkedin",
   "profiles",
   "github",
 ];
@@ -83,6 +86,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "achievements",
     "articles",
     "github",
+    "linkedin",
     "profiles",
   ]),
 
@@ -96,6 +100,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "achievements",
     "articles",
     "github",
+    "linkedin",
     "profiles",
   ]),
 
@@ -110,6 +115,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "experience",
     "skills",
     "projects",
+    "linkedin",
     "profiles",
     "education",
     "certifications",
@@ -124,6 +130,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "skills",
     "articles",
     "achievements",
+    "linkedin",
     "profiles",
     "github",
   ]),
@@ -137,6 +144,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "articles",
     "certifications",
     "achievements",
+    "linkedin",
     "profiles",
     "github",
   ]),
@@ -149,6 +157,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "articles",
     "education",
     "certifications",
+    "linkedin",
     "profiles",
     "github",
   ]),
@@ -163,6 +172,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "certifications",
     "articles",
     "achievements",
+    "linkedin",
     "profiles",
   ]),
 
@@ -176,6 +186,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "certifications",
     "achievements",
     "github",
+    "linkedin",
     "profiles",
   ]),
 
@@ -189,6 +200,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "articles",
     "education",
     "github",
+    "linkedin",
     "profiles",
   ]),
 
@@ -200,6 +212,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
         label: "Sections",
         defaultOrder: [
           "about",
+          "linkedin",
           "profiles",
           "projects",
           "experience",

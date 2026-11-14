@@ -23,6 +23,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo, LogoMark } from "@/components/logo";
 import { siteConfig } from "@/lib/site";
 import { Footer } from "@/features/landing/components/footer";
+import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import {
   Sidebar,
   SidebarContent,
@@ -172,6 +173,7 @@ function AppSidebar() {
             <p className="truncate text-xs text-text-muted">{user?.email}</p>
           </div>
           <div className="flex shrink-0 items-center gap-0.5 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1">
+            <NotificationBell className="size-8 group-data-[collapsible=icon]:size-8" />
             <ThemeToggle className="size-8 group-data-[collapsible=icon]:size-8" />
             <Button
               variant="ghost"
@@ -214,6 +216,7 @@ function DashboardHeader() {
       <SidebarTrigger className="size-9" />
       <Logo href="/dashboard" />
       <div className="ml-auto flex items-center gap-1">
+        <NotificationBell className="size-9" />
         <ThemeToggle className="size-9" />
       </div>
     </header>
