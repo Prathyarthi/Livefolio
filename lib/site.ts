@@ -5,7 +5,7 @@ export const siteConfig = {
   tagline:
     "A portfolio that grows with you. All your scattered work in one place, connected through integrations.",
   description:
-    "Build and publish a professional portfolio under 2 minutes. Import your resume PDF, connect GitHub, Medium, Dev.to, Hashnode, LeetCode, Stack Overflow, and Codeforces, choose a template, and go live on your own subdomain.",
+    "Build and publish a professional portfolio in seconds. Import your resume PDF, connect GitHub, Medium, Dev.to, Hashnode, LeetCode, Stack Overflow, and Codeforces, choose a template, and go live on your own subdomain.",
   supportEmail: "team@livefolio.me",
   legalEntity: "Livefolio",
 } as const;
@@ -25,7 +25,7 @@ export const integrations = [
     id: "github",
     name: "GitHub",
     description:
-      "Repos, contributions, and open-source work — pulled in automatically.",
+      "Repos, contributions, and open-source work, pulled in automatically.",
   },
   {
     id: "medium",

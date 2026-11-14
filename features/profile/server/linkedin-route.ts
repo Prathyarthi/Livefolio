@@ -6,6 +6,8 @@ import { getSession } from "@/lib/session";
 import { resolveAccessForUser } from "@/lib/entitlements";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import { syncLinkedInArticles } from "@/lib/linkedin-articles";
+import { notify } from "@/lib/notifications";
+import { awardIntegrationBadge } from "@/lib/badges";
 import {
   DEFAULT_LINKEDIN_SELECTION,
   LINKEDIN_DAILY_FAILURE_LIMIT,
@@ -129,25 +131,6 @@ function formatUtcDate(date: Date) {
 
 function retryAfterSeconds(at: Date) {
   return String(Math.max(1, Math.ceil((at.getTime() - Date.now()) / 1000)));
-}
-
-/** Mirror selected posts into Articles (or clear them when the section is hidden). */
-async function syncArticlesFor(row: {
-  portfolioId: string;
-  posts: unknown;
-  selection: unknown;
-  showOnPortfolio: boolean;
-  lastSyncedAt: Date | null;
-}) {
-  const posts = row.showOnPortfolio ? selectedLinkedInPosts(row.posts, row.selection) : [];
-  try {
-    await syncLinkedInArticles(row.portfolioId, posts, row.lastSyncedAt ?? new Date());
-    return null;
-  } catch (error) {
-    // Non-fatal: the selection is saved; report so the UI can warn.
-    console.error("[linkedin] failed to sync LinkedIn posts into articles", error);
-    return "Saved, but your Articles section couldn't be updated. Save again to retry.";
-  }
 }
 
 function toPayload(
@@ -276,12 +259,31 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
           update: data,
           create: { portfolioId: portfolio.id, ...data },
         });
-        const warning = await syncArticlesFor(row);
-        return { success: true, data: toPayload(row), quota: await readQuota(userId), warning };
+        void notify({
+          userId,
+          type: "linkedin.sync_succeeded",
+          title: "LinkedIn profile synced",
+          body: `Imported ${posts.length} post${posts.length === 1 ? "" : "s"} from LinkedIn.`,
+          href: "/dashboard/import",
+          metadata: { postCount: posts.length },
+        });
+        void awardIntegrationBadge(userId, "linkedin");
+        return { success: true, data: toPayload(row), quota: await readQuota(userId), warning: null };
       } catch (error) {
         // Failed syncs never use the quota; they count toward the daily failure cap instead.
         await Promise.all(reservedKeys.map(release));
         await recordFailure(userId);
+        void notify({
+          userId,
+          type: "linkedin.sync_failed",
+          title: "LinkedIn sync failed",
+          body:
+            error instanceof LinkedInScrapeError
+              ? error.message
+              : "We couldn't sync your LinkedIn profile. Your quota wasn't used; try again later.",
+          href: "/dashboard/import",
+          metadata: { code: error instanceof LinkedInScrapeError ? error.code : "UNKNOWN" },
+        });
         if (error instanceof LinkedInScrapeError) {
           ctx.set.status = error.status;
           return { error: error.message, code: error.code };
@@ -329,8 +331,7 @@ export const linkedin = new Elysia({ prefix: "/linkedin" })
             : { showOnPortfolio: ctx.body.showOnPortfolio }),
         },
       });
-      const warning = await syncArticlesFor(row);
-      return { success: true, data: toPayload(row), warning };
+      return { success: true, data: toPayload(row), warning: null };
     },
     {
       body: t.Object({

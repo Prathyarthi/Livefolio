@@ -110,9 +110,9 @@ export function OrgInvitePage({
         </div>
       ) : (
         <>
-          <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)]">
-            <p className="eyebrow uppercase">Team invite</p>
-            <h1 className="text-h2 text-text-primary">
+          <div className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6">
+            <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Team invite</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">
               Join {data.organizationName}
             </h1>
             <p className="mt-2 text-body-sm text-text-secondary">

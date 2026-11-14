@@ -162,7 +162,7 @@ export function SubscriptionFlow() {
           !checkoutIntervals.includes(billingInterval) && (
             <p className="max-w-md text-center text-xs text-text-muted">
               {billingInterval === "quarterly" || billingInterval === "yearly"
-                ? `${BILLING_INTERVAL_LABELS[billingInterval]} checkout is not set up on this server yet. You can still compare prices — use Monthly to subscribe today.`
+                ? `${BILLING_INTERVAL_LABELS[billingInterval]} checkout is not set up on this server yet. You can still compare prices. Use Monthly to subscribe today.`
                 : "This billing period is not available for checkout yet."}
             </p>
           )}

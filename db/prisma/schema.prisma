@@ -51,6 +51,9 @@ model User {
   storedFiles          StoredFile[]
   vouchesRequested     Vouch[] @relation("VouchesRequested")
   vouchesGiven         Vouch[] @relation("VouchesGiven")
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  badges                  UserBadge[]
 
   @@map("users")
 }
@@ -88,6 +91,9 @@ model OrgBillingCheckoutAttempt {
   providerSubscriptionId String?  @unique
   providerPlanId         String
   interval               String
+  /// pro | business (per-seat).
+  plan                   String?
+  seats                  Int?
   status                 String   @default("creating")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
@@ -440,11 +446,15 @@ model Organization {
   /// Company badge. Earned by confirming an email on the company website's domain.
   verified Boolean @default(false)
 
-  /// none | pending | active — Org Pro is `active`.
+  /// none | pending | active — a paid hiring plan is `active`.
   subscriptionStatus String @default("none")
   razorpaySubscriptionId String?
   subscriptionCancelAtPeriodEnd Boolean   @default(false)
   subscriptionCurrentPeriodEnd  DateTime?
+  /// Per-seat hiring plan: pro | business (null on Free).
+  subscriptionPlan              String?
+  /// Paid seats on the per-seat plan (Razorpay subscription quantity).
+  subscriptionSeats             Int?
 
   members              OrganizationMember[]
   invites              OrganizationInvite[]
@@ -525,7 +535,7 @@ model OrganizationInvite {
 }
 
 /// Hiring space inside an organization (e.g. Engineering vs Marketing).
-/// Org Pro is billed on Organization; workspaces share that plan.
+/// Hiring plans are billed on Organization; workspaces share that plan.
 model Workspace {
   id             String   @id @default(uuid())
   organizationId String
@@ -817,7 +827,7 @@ model Vouch {
   /// pending | completed | cancelled
   status String @default("pending")
 
-  /// manager | peer | founder | report | classmate | collaborator
+  /// manager | peer | founder | report | collaborator | other
   relationship String?
   /// One specific story (short)
   story String? @db.Text
@@ -841,4 +851,59 @@ model Vouch {
   @@index([inviteEmail, status])
   @@index([portfolioId, status])
   @@map("vouches")
+}
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  /// See NOTIFICATION_TYPES in lib/notifications.ts
+  type      String
+  title     String
+  body      String?
+  href      String?
+  metadata  Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+/// Absent row = channel default (in-app on).
+model NotificationPreference {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  channel   String
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, channel])
+  @@map("notification_preferences")
+}
+
+// ============================================================
+// BADGES (catalog lives in code: lib/badges-catalog.ts)
+// ============================================================
+
+model UserBadge {
+  id              String   @id @default(uuid())
+  userId          String
+  badgeKey        String
+  awardedAt       DateTime @default(now())
+  showOnPortfolio Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeKey])
+  @@index([userId, showOnPortfolio])
+  @@map("user_badges")
 }

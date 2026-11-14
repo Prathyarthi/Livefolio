@@ -17,6 +17,7 @@ import {
   Users,
   BadgeCheck,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -80,13 +81,20 @@ function CompanySidebar({
             href: `${workspaceBase}/talent`,
             icon: Users,
             exact: false,
+            badge: org?.planTier === "free" ? "Pro" : undefined,
           },
-          {
-            title: "Workspace Settings",
-            href: `${workspaceBase}/settings`,
-            icon: Settings,
-            exact: false,
-          },
+          // Settings belong to one workspace. The org page can hold several,
+          // so this link only appears after a workspace is open.
+          ...(workspaceSlug
+            ? [
+                {
+                  title: "Workspace Settings",
+                  href: `${workspaceBase}/settings`,
+                  icon: Settings,
+                  exact: false,
+                },
+              ]
+            : []),
         ]
       : []),
     {
@@ -166,7 +174,9 @@ function CompanySidebar({
         <SidebarGroup className="group-data-[collapsible=icon]:p-1.5">
           <SidebarGroupContent>
             <SidebarMenu className="gap-1.5 group-data-[collapsible=icon]:gap-1">
-              {nav.map(({ title, href, icon: Icon, exact }) => {
+              {nav.map((item) => {
+                const { title, href, icon: Icon, exact } = item;
+                const badge = "badge" in item ? item.badge : undefined;
                 const active = exact
                   ? pathname === href
                   : pathname.startsWith(href);
@@ -187,6 +197,11 @@ function CompanySidebar({
                       >
                         <Icon aria-hidden />
                         <span>{title}</span>
+                        {badge ? (
+                          <Badge variant="neutral" className="ml-auto font-mono text-[10px]">
+                            {badge}
+                          </Badge>
+                        ) : null}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
