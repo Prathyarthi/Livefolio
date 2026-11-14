@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { getCustomSectionLabel, type SectionKey } from "@/features/templates/section-labels";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import {
   formatDateRange,
@@ -43,9 +44,15 @@ import { CollapsibleList } from "@/features/templates/collapsible-list";
 
 // import { getPreviewImage } from "@/lib/link-preview-code";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 
 export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
+  // Terminal headings are shell commands; a renamed section shows as a comment.
+  const customTitle = (key: SectionKey) => {
+    const title = getCustomSectionLabel(data.portfolio.customization, key);
+    return title ? <span className="ml-2 text-gray-500"># {title}</span> : null;
+  };
   const { portfolio, experiences, educations, skills, projects, socialProfiles, certifications, achievements, customSections, livePreviewProjectIds } =
     data;
   const skillsByCategory = groupSkillsByCategory(skills);
@@ -72,12 +79,34 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("developer"),
     portfolio.customization,
   );
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<p className="text-sm text-gray-600">guest@portfolio:~$ cat linkedin.json{customTitle("linkedin")}</p>}
+      classes={{
+            aboutList: "space-y-2 pl-5 text-[var(--lf-g-300-90)] leading-relaxed marker:text-[var(--lf-g-700)]",
+            aboutParagraph: "text-[var(--lf-g-300-90)] leading-relaxed",
+            postList: "list-disc space-y-2 pl-5 text-sm text-gray-300 leading-relaxed",
+            postParagraph: "text-sm text-gray-300 leading-relaxed",
+            descriptionParagraph: "text-sm text-gray-400 leading-relaxed",
+            descriptionList: "space-y-2 pl-5 text-sm text-gray-400 leading-relaxed marker:text-[var(--lf-g-900)]",
+          card: "rounded-lg border border-[var(--lf-g-900-40)] bg-gray-900/50 p-5",
+          title: "text-lg font-semibold text-[var(--lf-g-300)]",
+          text: "text-sm text-gray-400 leading-relaxed",
+          muted: "text-gray-600 text-xs",
+          chip: "rounded border border-[var(--lf-g-900-40)] px-2 py-0.5 text-xs text-[var(--lf-g-500-80)]",
+          link: "text-sm text-[var(--lf-g-300)] hover:underline",
+          section: "mx-auto max-w-5xl scroll-mt-24 px-5 py-14 sm:px-6 md:py-16",
+      }}
+    />
+  ) : null;
+
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
             <section key="about" id="about" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)] bg-gray-950/50">
               <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
                 <p className="mb-4 text-sm text-gray-600">
-                  guest@portfolio:~$ cat summary.md
+                  guest@portfolio:~$ cat summary.md{customTitle("about")}
                 </p>
                 <div className="rounded-lg border border-[var(--lf-g-900-50)] bg-gray-900/60 overflow-hidden">
                   <div className="flex items-center gap-2 border-b border-[var(--lf-g-900-30)] bg-gray-900 px-4 py-2">
@@ -110,7 +139,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             <section key="projects" id="work" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)]">
               <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
                 <p className="mb-8 text-sm text-gray-600">
-                  guest@portfolio:~$ ls -la ~/projects/
+                  guest@portfolio:~$ ls -la ~/projects/{customTitle("projects")}
                 </p>
                 <CollapsibleList
                   initial={4}
@@ -239,7 +268,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             <section key="experience" id="experience" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)]">
               <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
                 <p className="mb-8 text-sm text-gray-600">
-                  guest@portfolio:~$ git log --oneline --graph career.log
+                  guest@portfolio:~$ git log --oneline --graph career.log{customTitle("experience")}
                 </p>
                 <div className="relative space-y-8 border-l-2 border-[var(--lf-g-900-50)] pl-6 ml-2">
                   {experiences.map((exp) => {
@@ -287,7 +316,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             <section key="education" className="border-b border-[var(--lf-g-900-30)]">
               <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
                 <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ cat education.log
+                  guest@portfolio:~$ cat education.log{customTitle("education")}
                 </p>
                 <div className="space-y-4">
                   {educations.map((edu) => (
@@ -325,7 +354,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             <section key="skills" className="border-b border-[var(--lf-g-900-30)]">
               <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
                 <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ cat package.json | jq &apos;.dependencies&apos;
+                  guest@portfolio:~$ cat package.json | jq &apos;.dependencies&apos;{customTitle("skills")}
                 </p>
                 <div className="rounded-lg border border-[var(--lf-g-900-50)] bg-gray-900/60 overflow-hidden">
                   <div className="flex items-center gap-2 border-b border-[var(--lf-g-900-30)] bg-gray-900 px-4 py-2">
@@ -381,7 +410,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             <section key="certifications" className="border-b border-[var(--lf-g-900-30)]">
               <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
                 <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ ls ~/certifications/
+                  guest@portfolio:~$ ls ~/certifications/{customTitle("certifications")}
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {certifications.map((cert) => (
@@ -417,7 +446,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             <section key="achievements" className="border-b border-[var(--lf-g-900-30)] bg-gray-950">
               <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
                 <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ cat ~/achievements.txt
+                  guest@portfolio:~$ cat ~/achievements.txt{customTitle("achievements")}
                 </p>
                 <div className="space-y-3">
                   {achievements.map((ach) => (
@@ -444,7 +473,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             <section key="profiles" id="profiles" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)] bg-gray-950/60">
               <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
                 <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ cat profiles.json
+                  guest@portfolio:~$ cat profiles.json{customTitle("profiles")}
                 </p>
                 <div className="rounded-lg border border-[var(--lf-g-900-40)] bg-gray-900/50 p-5">
                   <p className="text-sm text-[var(--lf-g-300)]">connect</p>
@@ -483,7 +512,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
             <section key="github" className="border-b border-[var(--lf-g-900-30)]">
               <div className="mx-auto max-w-5xl px-5 py-10 sm:px-6 md:py-12">
                 <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ neofetch --stats
+                  guest@portfolio:~$ neofetch --stats{customTitle("github")}
                 </p>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                   {githubStats?.public_repos != null && (
@@ -599,7 +628,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
       )}
 
       {/* About / cat summary.md */}
-      {renderSections(resolved, "full", blocks)}
+      {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
       {customSections.map((cs) => (
         <section key={cs.id} className="border-b border-[var(--lf-g-900-30)]">

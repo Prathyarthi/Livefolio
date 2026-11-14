@@ -36,6 +36,8 @@ export function isEditStepComplete(
       return (portfolio.customSections?.length ?? 0) > 0;
     case "social":
       return (portfolio.socialProfiles?.length ?? 0) > 0;
+    case "references":
+      return false;
     case "publish":
       return Boolean(portfolio.isPublished);
     default:

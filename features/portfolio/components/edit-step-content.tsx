@@ -12,6 +12,7 @@ import { ProjectForm } from "@/features/portfolio/components/project-form";
 import { PublishButton } from "@/features/portfolio/components/publish-button";
 import { SkillsEditor } from "@/features/portfolio/components/skills-editor";
 import { SocialLinksEditor } from "@/features/portfolio/components/social-links-editor";
+import { EditReferencesSection } from "@/features/vouches/components/edit-references-section";
 
 export function EditStepContent({ step }: { step: EditStepValue }) {
   switch (step) {
@@ -31,6 +32,8 @@ export function EditStepContent({ step }: { step: EditStepValue }) {
       return <CustomSectionEditor />;
     case "social":
       return <SocialLinksEditor />;
+    case "references":
+      return <EditReferencesSection />;
     case "publish":
       return (
         <div className={EDIT_FORM_STACK_CLASS}>

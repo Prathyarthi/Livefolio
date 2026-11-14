@@ -15,7 +15,9 @@ import {
   Plus,
   CreditCard,
   Users,
+  BadgeCheck,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -38,7 +40,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useOrganization } from "@/features/organization/api/use-organization";
 import { OrgLogo } from "@/features/organization/components/org-logo";
-
 function CompanySidebar({
   orgSlug,
   workspaceSlug,
@@ -80,13 +81,20 @@ function CompanySidebar({
             href: `${workspaceBase}/talent`,
             icon: Users,
             exact: false,
+            badge: org?.planTier === "free" ? "Pro" : undefined,
           },
-          {
-            title: "Workspace Settings",
-            href: `${workspaceBase}/settings`,
-            icon: Settings,
-            exact: false,
-          },
+          // Settings belong to one workspace. The org page can hold several,
+          // so this link only appears after a workspace is open.
+          ...(workspaceSlug
+            ? [
+                {
+                  title: "Workspace Settings",
+                  href: `${workspaceBase}/settings`,
+                  icon: Settings,
+                  exact: false,
+                },
+              ]
+            : []),
         ]
       : []),
     {
@@ -144,11 +152,14 @@ function CompanySidebar({
                 <LogoMark className="h-8 w-8 shrink-0" />
               )}
               <span className="min-w-0 group-data-[collapsible=icon]:hidden">
-                <span className="block truncate font-display text-sm font-bold text-brand-primary">
-                  {org?.name ?? "Company"}
+                <span className="flex min-w-0 items-center gap-1 font-display text-sm font-bold text-brand-primary">
+                  <span className="truncate">{org?.name ?? "Company"}</span>
+                  {org?.verified ? (
+                    <BadgeCheck className="size-3.5 shrink-0 text-sky-500" aria-label="Verified company" />
+                  ) : null}
                 </span>
                 <span className="block text-[11px] text-text-muted">
-                  {org?.name ? "Organization" : "Hiring"}
+                  {org?.verified ? "Verified company" : org?.name ? "Organization" : "Hiring"}
                 </span>
               </span>
             </Link>
@@ -163,7 +174,9 @@ function CompanySidebar({
         <SidebarGroup className="group-data-[collapsible=icon]:p-1.5">
           <SidebarGroupContent>
             <SidebarMenu className="gap-1.5 group-data-[collapsible=icon]:gap-1">
-              {nav.map(({ title, href, icon: Icon, exact }) => {
+              {nav.map((item) => {
+                const { title, href, icon: Icon, exact } = item;
+                const badge = "badge" in item ? item.badge : undefined;
                 const active = exact
                   ? pathname === href
                   : pathname.startsWith(href);
@@ -184,6 +197,11 @@ function CompanySidebar({
                       >
                         <Icon aria-hidden />
                         <span>{title}</span>
+                        {badge ? (
+                          <Badge variant="neutral" className="ml-auto font-mono text-[10px]">
+                            {badge}
+                          </Badge>
+                        ) : null}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

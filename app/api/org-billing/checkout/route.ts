@@ -4,17 +4,23 @@ import Razorpay from "razorpay";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { prisma } from "@/lib/prisma";
 import {
-  getOrgRazorpayPlanId,
-  isOrgIntervalCheckoutReady,
+  getOrgSeatPlanId,
+  isOrgSeatCheckoutReady,
   parseBillingInterval,
 } from "@/lib/billing";
 import {
-  getExpectedOrgPlanDefinition,
+  getExpectedOrgSeatPlanDefinition,
   getSubscriptionTotalCount,
 } from "@/lib/billing-lifecycle";
+import {
+  minSeatsFor,
+  normalizeSeats,
+  parsePaidHiringPlan,
+  seatsUsed,
+} from "@/lib/hiring-plans";
+import { countSeatHolders } from "@/lib/org-entitlements";
 import { enforceCheckoutRateLimit } from "@/lib/billing-rate-limit";
 import { requireOrgAdmin } from "@/features/organization/lib/org-access";
-import { ORG_PAID_PLAN_SLUG } from "@/lib/pricing";
 
 type RazorpayFailure = {
   statusCode?: number;
@@ -57,10 +63,14 @@ export async function POST(req: Request) {
 
   let orgSlug = "";
   let requestedInterval: unknown = "monthly";
+  let requestedPlan: unknown = "pro";
+  let requestedSeats: unknown = undefined;
   try {
     const body = await req.json();
     orgSlug = typeof body?.orgSlug === "string" ? body.orgSlug.trim() : "";
     requestedInterval = body?.interval ?? "monthly";
+    requestedPlan = body?.plan ?? "pro";
+    requestedSeats = body?.seats;
   } catch {
     return NextResponse.json({ error: "Invalid JSON payload." }, { status: 400 });
   }
@@ -74,11 +84,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid billing interval." }, { status: 400 });
   }
 
-  if (!isOrgIntervalCheckoutReady(interval)) {
+  const plan = parsePaidHiringPlan(requestedPlan);
+  if (!plan) {
+    return NextResponse.json({ error: "Invalid plan." }, { status: 400 });
+  }
+  const seats = normalizeSeats(plan, requestedSeats);
+
+  if (!isOrgSeatCheckoutReady(plan, interval)) {
     return NextResponse.json(
       {
         error:
-          "Org billing is not fully configured for this interval (missing key, webhook secret, or Org Pro plan).",
+          "Hiring billing is not fully configured for this plan and interval (missing key, webhook secret, or Razorpay plan).",
       },
       { status: 503 },
     );
@@ -92,6 +108,8 @@ export async function POST(req: Request) {
       subscriptionStatus: true,
       subscriptionCancelAtPeriodEnd: true,
       subscriptionCurrentPeriodEnd: true,
+      subscriptionPlan: true,
+      subscriptionSeats: true,
     },
   });
   if (!org) {
@@ -103,7 +121,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const planId = getOrgRazorpayPlanId(interval)!;
+  // Paid seats must cover everyone already holding a seat.
+  const holders = await countSeatHolders(org.id);
+  const used = seatsUsed(holders.activeMembers, holders.pendingInvites);
+  if (seats < used) {
+    return NextResponse.json(
+      {
+        error: `Your team already uses ${used} seat${used === 1 ? "" : "s"} (members and pending invites). Choose at least ${Math.max(used, minSeatsFor(plan))} seats.`,
+        seatsUsed: used,
+      },
+      { status: 400 },
+    );
+  }
+
+  const planId = getOrgSeatPlanId(plan, interval)!;
   let claimedAttemptId: string | null = null;
   let createdProviderSubscriptionId: string | null = null;
 
@@ -125,7 +156,7 @@ export async function POST(req: Request) {
       });
     } else if (org.subscriptionStatus === "active") {
       return NextResponse.json(
-        { error: "Org Pro is already active for this organization." },
+        { error: "A hiring plan is already active. Change seats from Billing instead." },
         { status: 409 },
       );
     }
@@ -153,10 +184,14 @@ export async function POST(req: Request) {
       where: { organizationId: org.id },
     });
     if (existingAttempt?.providerSubscriptionId) {
-      if (existingAttempt.interval !== interval) {
+      if (
+        existingAttempt.interval !== interval ||
+        (existingAttempt.plan ?? "pro") !== plan ||
+        (existingAttempt.seats ?? 1) !== seats
+      ) {
         return NextResponse.json(
           {
-            error: `A ${existingAttempt.interval} checkout is already open. Dismiss it before changing intervals.`,
+            error: `A ${existingAttempt.plan ?? "pro"} ${existingAttempt.interval} checkout for ${existingAttempt.seats ?? 1} seat(s) is already open. Dismiss it before changing plan, seats or interval.`,
             existingInterval: existingAttempt.interval,
           },
           { status: 409 },
@@ -193,7 +228,7 @@ export async function POST(req: Request) {
       interval?: number;
       item?: { amount?: number; currency?: string };
     };
-    const expectedPlan = getExpectedOrgPlanDefinition(interval);
+    const expectedPlan = getExpectedOrgSeatPlanDefinition(plan, interval);
     if (
       providerPlan.period !== expectedPlan.period ||
       providerPlan.interval !== expectedPlan.interval ||
@@ -203,7 +238,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error:
-            "Configured Razorpay Org Pro plan does not match the advertised price or billing interval.",
+            "Configured Razorpay plan does not match the advertised per-seat price or billing interval.",
         },
         { status: 503 },
       );
@@ -217,6 +252,8 @@ export async function POST(req: Request) {
           userId: session.user.id,
           providerPlanId: planId,
           interval,
+          plan,
+          seats,
           status: "creating",
         },
       });
@@ -243,13 +280,15 @@ export async function POST(req: Request) {
 
     const subscription = await razorpay.subscriptions.create({
       plan_id: planId,
+      quantity: seats,
       customer_notify: 1,
       total_count: getSubscriptionTotalCount(interval),
       notes: {
         userId: session.user.id,
         organizationId: org.id,
         orgSlug: org.slug,
-        plan: ORG_PAID_PLAN_SLUG,
+        plan,
+        seats: String(seats),
         interval,
       },
     });
@@ -266,6 +305,9 @@ export async function POST(req: Request) {
           razorpaySubscriptionId: subscription.id,
           subscriptionCancelAtPeriodEnd: false,
           subscriptionCurrentPeriodEnd: null,
+          // Applied once the subscription activates (status gates entitlements).
+          subscriptionPlan: plan,
+          subscriptionSeats: seats,
         },
       });
       if (updated.count === 0) return false;
@@ -300,7 +342,7 @@ export async function POST(req: Request) {
         where: { id: checkoutAttempt.id },
       });
       return NextResponse.json(
-        { error: "Org Pro is already active for this organization." },
+        { error: "A hiring plan is already active. Change seats from Billing instead." },
         { status: 409 },
       );
     }
@@ -310,6 +352,8 @@ export async function POST(req: Request) {
       subscriptionId: subscription.id,
       email: user.email,
       interval,
+      plan,
+      seats,
       orgSlug: org.slug,
     });
   } catch (error) {

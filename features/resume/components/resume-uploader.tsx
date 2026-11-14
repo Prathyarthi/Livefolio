@@ -1,5 +1,6 @@
 "use client";
 
+import { normalizeSectionTitles } from "@/features/templates/section-labels";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -203,8 +204,8 @@ export function ResumeUploader({
           "Portfolio website URL",
         ),
         location: sanitizeImportedLabel(data.contact?.location) || null,
-        ...(data.sectionLabels && Object.keys(data.sectionLabels).length > 0
-          ? { customization: { sectionLabels: data.sectionLabels } }
+        ...(Object.keys(normalizeSectionTitles(data.sectionLabels)).length > 0
+          ? { customization: { sectionLabels: normalizeSectionTitles(data.sectionLabels) } }
           : {}),
       });
 

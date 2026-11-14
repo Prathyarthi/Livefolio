@@ -42,12 +42,18 @@ model User {
   billingPayments         BillingPayment[]
 
   organizationMembers OrganizationMember[]
+  organizationInvitesSent OrganizationInvite[] @relation("OrgInvitesSent")
   workspaceMembers    WorkspaceMember[]
   jobsCreated         Job[]
   applications        Application[]
   recruiterNotes      RecruiterNote[]
   emailSendLogs        EmailSendLog[]
   storedFiles          StoredFile[]
+  vouchesRequested     Vouch[] @relation("VouchesRequested")
+  vouchesGiven         Vouch[] @relation("VouchesGiven")
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  badges                  UserBadge[]
 
   @@map("users")
 }
@@ -85,6 +91,9 @@ model OrgBillingCheckoutAttempt {
   providerSubscriptionId String?  @unique
   providerPlanId         String
   interval               String
+  /// pro | business (per-seat).
+  plan                   String?
+  seats                  Int?
   status                 String   @default("creating")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
@@ -188,6 +197,8 @@ model Portfolio {
   views          PortfolioView[]
   clicks         PortfolioClick[]
   storedFiles    StoredFile[]
+  vouches        Vouch[]
+  linkedinImport LinkedInImport?
 
   @@index([slug])
   @@index([openToWork, isPublished])
@@ -336,6 +347,30 @@ model SocialProfile {
   @@map("social_profiles")
 }
 
+/// Pro-only LinkedIn import (scraped via ScrapeGraphAI). One per portfolio.
+model LinkedInImport {
+  id          String @id @default(uuid())
+  portfolioId String @unique
+  profileUrl  String
+
+  /// Last scraped profile details (see lib/linkedin.ts LinkedInProfileData).
+  profileData Json @default("{}")
+  /// Last scraped posts (see lib/linkedin.ts LinkedInPost[]).
+  posts       Json @default("[]")
+  /// Which fields/posts the user chose to showcase (LinkedInSelection).
+  selection   Json @default("{}")
+  /// Master toggle for the public portfolio section.
+  showOnPortfolio Boolean @default(true)
+
+  lastSyncedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@map("linkedin_imports")
+}
+
 model Certification {
   id          String    @id @default(uuid())
   portfolioId String
@@ -408,13 +443,22 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  /// none | pending | active — Org Pro is `active`.
+  /// Company badge. Earned by confirming an email on the company website's domain.
+  verified Boolean @default(false)
+
+  /// none | pending | active — a paid hiring plan is `active`.
   subscriptionStatus String @default("none")
   razorpaySubscriptionId String?
   subscriptionCancelAtPeriodEnd Boolean   @default(false)
   subscriptionCurrentPeriodEnd  DateTime?
+  /// Per-seat hiring plan: pro | business (null on Free).
+  subscriptionPlan              String?
+  /// Paid seats on the per-seat plan (Razorpay subscription quantity).
+  subscriptionSeats             Int?
 
   members              OrganizationMember[]
+  invites              OrganizationInvite[]
+  verification         OrganizationVerification?
   workspaces           Workspace[]
   jobs                 Job[]
   billingSubscriptions BillingSubscription[]
@@ -423,6 +467,29 @@ model Organization {
 
   @@index([slug])
   @@map("organizations")
+}
+
+/// Work-email proof that an organization controls its website domain. The address stays private.
+model OrganizationVerification {
+  id             String    @id @default(uuid())
+  organizationId String    @unique
+  email          String
+  domain         String
+  /// pending | verified
+  status         String    @default("pending")
+  codeHash       String?
+  codeSalt       String?
+  codeExpiresAt  DateTime?
+  attempts       Int       @default(0)
+  lastSentAt     DateTime?
+  verifiedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([email, status])
+  @@map("organization_verifications")
 }
 
 model OrganizationMember {
@@ -442,8 +509,33 @@ model OrganizationMember {
   @@map("organization_members")
 }
 
+/// Email invite to join an organization. Membership is created only after accept.
+model OrganizationInvite {
+  id             String   @id @default(uuid())
+  token          String   @unique
+  organizationId String
+  email          String
+  /// admin | recruiter | hiring_manager
+  role           String
+  workspaceIds   Json     @default("[]")
+  invitedById    String
+  /// pending | accepted | revoked
+  status         String   @default("pending")
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("OrgInvitesSent", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([email, status])
+  @@map("organization_invites")
+}
+
 /// Hiring space inside an organization (e.g. Engineering vs Marketing).
-/// Org Pro is billed on Organization; workspaces share that plan.
+/// Hiring plans are billed on Organization; workspaces share that plan.
 model Workspace {
   id             String   @id @default(uuid())
   organizationId String
@@ -698,7 +790,7 @@ model EmailSendLog {
   id         String   @id @default(uuid())
   userId     String?
   toEmail    String
-  /// welcome | no_portfolio | unpublished | published | blast
+  /// welcome | no_portfolio | unpublished | published | blast | vouch_request | vouch_received | company_verification | org_invite
   type       String
   campaignId String?
   resendId   String?
@@ -714,4 +806,104 @@ model EmailSendLog {
   @@index([toEmail, createdAt])
   @@index([campaignId])
   @@map("email_send_logs")
+}
+
+// ============================================================
+// REFERENCES / VOUCHES
+// ============================================================
+
+model Vouch {
+  id          String  @id @default(uuid())
+  token       String  @unique
+  requesterId String
+  portfolioId String?
+
+  inviteEmail  String
+  inviteName   String?
+  personalNote String? @db.Text
+
+  refereeId String?
+
+  /// pending | completed | cancelled
+  status String @default("pending")
+
+  /// manager | peer | founder | report | collaborator | other
+  relationship String?
+  /// One specific story (short)
+  story String? @db.Text
+  /// yes | with_caveats
+  wouldWorkAgain String?
+
+  lastEmailedAt DateTime?
+  emailCount    Int       @default(0)
+
+  completedAt DateTime?
+  cancelledAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requester User       @relation("VouchesRequested", fields: [requesterId], references: [id], onDelete: Cascade)
+  referee   User?      @relation("VouchesGiven", fields: [refereeId], references: [id], onDelete: Cascade)
+  portfolio Portfolio? @relation(fields: [portfolioId], references: [id], onDelete: SetNull)
+
+  @@index([requesterId, status])
+  @@index([refereeId, status])
+  @@index([inviteEmail, status])
+  @@index([portfolioId, status])
+  @@map("vouches")
+}
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  /// See NOTIFICATION_TYPES in lib/notifications.ts
+  type      String
+  title     String
+  body      String?
+  href      String?
+  metadata  Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+/// Absent row = channel default (in-app on).
+model NotificationPreference {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  channel   String
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, channel])
+  @@map("notification_preferences")
+}
+
+// ============================================================
+// BADGES (catalog lives in code: lib/badges-catalog.ts)
+// ============================================================
+
+model UserBadge {
+  id              String   @id @default(uuid())
+  userId          String
+  badgeKey        String
+  awardedAt       DateTime @default(now())
+  showOnPortfolio Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeKey])
+  @@index([userId, showOnPortfolio])
+  @@map("user_badges")
 }

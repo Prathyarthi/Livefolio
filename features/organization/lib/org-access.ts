@@ -28,6 +28,7 @@ export async function getMembershipByOrgSlug(orgSlug: string, userId: string) {
       brandColor: true,
       websiteUrl: true,
       location: true,
+      verified: true,
       members: {
         where: { userId },
         take: 1,
@@ -49,6 +50,7 @@ export async function getMembershipByOrgSlug(orgSlug: string, userId: string) {
       brandColor: org.brandColor,
       websiteUrl: org.websiteUrl,
       location: org.location,
+      verified: org.verified,
     },
     membership,
     role: membership.role as OrgRole,

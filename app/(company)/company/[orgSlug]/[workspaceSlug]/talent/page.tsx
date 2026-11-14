@@ -1,9 +1,11 @@
 "use client";
 
+import { ListSkeleton, QueryError,  } from "@/features/organization/components/workspace-ui";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ExternalLink, Search, Users, X } from "lucide-react";
+import { ExternalLink, Lock, Search, Users, X } from "lucide-react";
+import { useOrganization } from "@/features/organization/api/use-organization";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,7 @@ import { useOrgJobs } from "@/features/jobs/api/use-jobs";
 import {
   FacetPanel,
   ProofBadges,
+  ReferencesToggle,
   SortToggle,
   experienceBandRange,
   type FacetKind,
@@ -24,6 +27,7 @@ import type { SearchSort } from "@/features/search/lib/query";
 import { ListPagination } from "@/components/list-pagination";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import { stripRichTextToPlain } from "@/lib/rich-text";
+import { NamedReferences } from "@/features/vouches/components/named-references";
 
 export default function CompanyTalentPage() {
   const params = useParams<{ orgSlug: string; workspaceSlug: string }>();
@@ -38,6 +42,7 @@ export default function CompanyTalentPage() {
   const [experience, setExperience] = useState<string | undefined>();
   const [jobId, setJobId] = useState("");
   const [sort, setSort] = useState<SearchSort>("relevance");
+  const [includeReferences, setIncludeReferences] = useState(false);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -47,8 +52,11 @@ export default function CompanyTalentPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [q, location, skill, proof, experience, jobId, sort]);
+  }, [q, location, skill, proof, experience, jobId, sort, includeReferences]);
 
+  const { data: org } = useOrganization(orgSlug);
+  // Talent search is Pro and above. Unknown tier (still loading) keeps the request off.
+  const talentLocked = org ? org.planTier === "free" : undefined;
   const jobsQuery = useOrgJobs(orgSlug, { workspaceSlug });
   const talentQuery = useTalentSearch(orgSlug, workspaceSlug, {
     q: q || undefined,
@@ -58,8 +66,10 @@ export default function CompanyTalentPage() {
     ...experienceBandRange(experience),
     jobId: jobId || undefined,
     sort,
+    includeReferences,
     page,
     pageSize: DEFAULT_PAGE_SIZE,
+    enabled: talentLocked === false,
   });
 
   const data = talentQuery.data;
@@ -86,28 +96,58 @@ export default function CompanyTalentPage() {
     if (kind === "proof") setProof((bucket?.id as ProofKind | undefined) ?? undefined);
   }
 
+  const upgradeRequired =
+    talentLocked === true ||
+    Boolean((talentQuery.error as { upgradeRequired?: boolean } | null)?.upgradeRequired);
+
+  if (upgradeRequired) {
+    return (
+      <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8">
+        <Button variant="ghost" size="sm" asChild className="-ml-2">
+          <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
+        </Button>
+        <div className="flex flex-col items-start gap-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+          <div className="flex items-center gap-2">
+            <Lock className="h-4 w-4 text-text-muted" aria-hidden />
+            <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Talent · Pro</p>
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Talent search is on Pro and above
+          </h1>
+          <p className="max-w-xl text-body-sm text-text-secondary">
+            Search people who opted in to be found, ranked on proof against your jobs.
+            Your applicants, ranking, compare and pipeline stay free.
+          </p>
+          <Button asChild>
+            <Link href={`/company/${orgSlug}/billing`}>Upgrade to Pro</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
       </Button>
 
       <header className="space-y-1">
-        <p className="eyebrow uppercase">Talent</p>
-        <h1 className="text-h2 text-text-primary">Find talent</h1>
+        <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Talent</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Find talent</h1>
         <p className="max-w-2xl text-body-sm text-text-secondary">
           Search people who opted in so you can reach them. This is separate
           from applicants on your jobs. Pick a job to rank everyone against it.
         </p>
       </header>
 
-      <div className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)] md:p-6">
+      <div className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-6">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder='Try “brand designer in Bangalore”, “seo OR content strategy”, or “sales -insurance”'
+            placeholder="Search skills, roles, cities…"
             className="pl-9"
             aria-label="Search talent"
           />
@@ -153,7 +193,7 @@ export default function CompanyTalentPage() {
           active={{ skill, location, experience, proof }}
           onSelect={selectFacet}
         />
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-3">
           <p className="text-body-sm text-text-muted">
             {data
               ? `${total}${data.truncated ? "+" : ""} ${total === 1 ? "person" : "people"}${
@@ -168,6 +208,10 @@ export default function CompanyTalentPage() {
                 Clear
               </Button>
             ) : null}
+            <ReferencesToggle
+              checked={includeReferences}
+              onChange={setIncludeReferences}
+            />
             <SortToggle value={sort} onChange={setSort} />
           </div>
         </div>
@@ -180,15 +224,15 @@ export default function CompanyTalentPage() {
       </div>
 
       {talentQuery.isLoading ? (
-        <p className="text-body-sm text-text-muted">Loading talent…</p>
+        <ListSkeleton rows={6} />
       ) : talentQuery.isError ? (
-        <p className="text-body-sm text-text-secondary">
-          {talentQuery.error instanceof Error
-            ? talentQuery.error.message
-            : "Couldn’t load talent. Try again in a moment."}
-        </p>
+        <QueryError
+          error={talentQuery.error}
+          fallback="Couldn’t load talent. Try again in a moment."
+          onRetry={() => void talentQuery.refetch()}
+        />
       ) : people.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
+        <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-6 py-10 text-center">
           <Users className="mx-auto h-8 w-8 text-text-muted" />
           <h3 className="mt-3 text-h3 text-text-primary">
             {hasFilters || jobId ? "No matches" : "No talent yet"}
@@ -201,7 +245,7 @@ export default function CompanyTalentPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
             {people.map((person) => (
               <li
                 key={person.slug}
@@ -220,7 +264,7 @@ export default function CompanyTalentPage() {
                         {person.title || "Untitled"}
                       </p>
                       {ranked && person.score > 0 ? (
-                        <Badge variant="neutral">Match {person.score}</Badge>
+                        <span className="font-mono text-lg font-semibold tabular-nums text-text-primary" title="Match score">{person.score}</span>
                       ) : null}
                     </div>
                     {person.headline ? (
@@ -254,7 +298,18 @@ export default function CompanyTalentPage() {
                       </div>
                     ) : null}
                     <ProofBadges proof={person.proof} />
-                    {ranked && person.reasons.length > 0 ? (
+                    {person.vouches.length > 0 ? (
+                      <div className="pt-1">
+                        <NamedReferences
+                          vouches={person.vouches}
+                          title={`${person.vouches.length} named ${
+                            person.vouches.length === 1 ? "reference" : "references"
+                          }`}
+                          description="Visible to hiring teams only."
+                        />
+                      </div>
+                    ) : null}
+                    {(ranked || includeReferences) && person.reasons.length > 0 ? (
                       <ul className="space-y-0.5 text-body-sm text-text-secondary">
                         {person.reasons.slice(0, 3).map((reason) => (
                           <li key={reason}>{reason}</li>

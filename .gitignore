@@ -43,5 +43,5 @@ next-env.d.ts
 .cache_restore
 
 leads/
-docs/
+/docs/
 svs

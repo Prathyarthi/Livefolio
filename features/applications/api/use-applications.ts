@@ -11,6 +11,7 @@ import type {
 import type { SearchFacets } from "@/features/search/lib/facets";
 import type { ProofKind } from "@/features/search/lib/proof";
 import type { InterpretedSearchQuery, SearchSort } from "@/features/search/lib/query";
+import type { NamedVouch } from "@/features/vouches/lib/public";
 
 async function throwApiError(
   response: Response,
@@ -191,6 +192,8 @@ export type ApplicantEvidenceSummary = {
   totalPreferred: number;
   rankScore?: number;
   rankReasons?: string[];
+  /** Points added by named references when Include references is on. */
+  referenceBonus?: number;
 };
 
 export type ApplicantCard = {
@@ -222,6 +225,7 @@ export type ApplicantCard = {
   };
   evidence: ApplicantEvidenceSummary;
   resumeFileId: string | null;
+  vouchCount?: number;
 };
 
 export type ApplicantPoolFilters = {
@@ -236,6 +240,9 @@ export type ApplicantPoolFilters = {
   appliedBefore?: string;
   proof?: ProofKind;
   sort?: SearchSort;
+  includeReferences?: boolean;
+  /** Only these application ids (compare view). */
+  ids?: string[];
 };
 
 export type ApplicantPool = {
@@ -306,6 +313,7 @@ export type CompanyApplicationDetail = {
   snapshotData: ApplicationSnapshotData | null;
   evidence: ApplicantEvidenceSummary;
   resumeFileId: string | null;
+  vouches: NamedVouch[];
   requirements?: Array<{
     id: string;
     type: string;
@@ -320,6 +328,7 @@ export function useApplicantPool(
     stage?: string;
     page?: number;
     pageSize?: number;
+    enabled?: boolean;
   } & ApplicantPoolFilters,
 ) {
   const stage = options?.stage;
@@ -333,7 +342,9 @@ export function useApplicantPool(
   const appliedAfter = options?.appliedAfter;
   const appliedBefore = options?.appliedBefore;
   const proof = options?.proof;
+  const ids = options?.ids;
   const sort = options?.sort ?? "relevance";
+  const includeReferences = options?.includeReferences === true;
   const page = options?.page ?? 1;
   const pageSize = options?.pageSize ?? 20;
 
@@ -353,11 +364,13 @@ export function useApplicantPool(
       appliedAfter ?? "",
       appliedBefore ?? "",
       proof ?? "",
+      ids?.join(",") ?? "",
       sort,
+      includeReferences ? "references" : "",
       page,
       pageSize,
     ],
-    enabled: Boolean(jobId),
+    enabled: Boolean(jobId) && options?.enabled !== false,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (stage) params.set("stage", stage);
@@ -371,6 +384,8 @@ export function useApplicantPool(
       if (appliedAfter) params.set("appliedAfter", appliedAfter);
       if (appliedBefore) params.set("appliedBefore", appliedBefore);
       if (proof) params.set("proof", proof);
+      if (ids?.length) params.set("ids", ids.join(","));
+      if (includeReferences) params.set("references", "1");
       params.set("sort", sort);
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));

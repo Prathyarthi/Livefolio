@@ -1,0 +1,34 @@
+import Elysia from "elysia";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import { backfillBadges, buildBadgeShelf } from "@/lib/badges";
+
+async function requireUser(request: Request) {
+  const session = await getSession(request);
+  return session?.userId ?? null;
+}
+
+const ROW_SELECT = { badgeKey: true, awardedAt: true } as const;
+
+export const badges = new Elysia({ prefix: "/badges" })
+  // Log unexpected failures with a clear prefix; keep validation/404 responses as-is.
+  .onError(({ code, error, request, set }) => {
+    if (code === "VALIDATION" || code === "NOT_FOUND" || code === "PARSE") return;
+    console.error(`[badges] ${request.method} ${new URL(request.url).pathname} failed`, error);
+    set.status = 500;
+    return { error: "Something went wrong. Please try again." };
+  })
+  .get("/", async (ctx) => {
+    const userId = await requireUser(ctx.request);
+    if (!userId) {
+      ctx.set.status = 401;
+      return { error: "Unauthorized" };
+    }
+    let rows = await prisma.userBadge.findMany({ where: { userId }, select: ROW_SELECT });
+    // Lazy backfill: award anything existing data already qualifies for.
+    const awarded = await backfillBadges(userId, new Set(rows.map((r) => r.badgeKey)));
+    if (awarded.length) {
+      rows = await prisma.userBadge.findMany({ where: { userId }, select: ROW_SELECT });
+    }
+    return { success: true, badges: buildBadgeShelf(rows), newlyAwarded: awarded };
+  });

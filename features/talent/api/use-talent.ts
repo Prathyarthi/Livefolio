@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { SearchFacets } from "@/features/search/lib/facets";
 import type { ProofKind } from "@/features/search/lib/proof";
 import type { InterpretedSearchQuery, SearchSort } from "@/features/search/lib/query";
+import type { NamedVouch } from "@/features/vouches/lib/public";
 
 async function throwApiError(
   response: Response,
@@ -12,13 +13,15 @@ async function throwApiError(
   const body = (await response
     .clone()
     .json()
-    .catch(() => null)) as { error?: unknown; message?: unknown } | null;
+    .catch(() => null)) as { error?: unknown; message?: unknown; upgradeRequired?: unknown } | null;
   const text = body ? "" : await response.text().catch(() => "");
   const message = [body?.error, body?.message].find(
     (value): value is string =>
       typeof value === "string" && value.trim().length > 0,
   );
-  throw new Error(message?.trim() || text.trim() || fallbackMessage);
+  throw Object.assign(new Error(message?.trim() || text.trim() || fallbackMessage), {
+    upgradeRequired: body?.upgradeRequired === true,
+  });
 }
 
 export type TalentPerson = {
@@ -34,6 +37,7 @@ export type TalentPerson = {
   score: number;
   reasons: string[];
   livefolioUrl: string;
+  vouches: NamedVouch[];
 };
 
 export type TalentSearchResult = {
@@ -58,8 +62,11 @@ export type TalentSearchOptions = {
   maxExperience?: number;
   jobId?: string;
   sort?: SearchSort;
+  includeReferences?: boolean;
   page?: number;
   pageSize?: number;
+  /** false skips the request (e.g. Free orgs, where talent search is locked). */
+  enabled?: boolean;
 };
 
 export function useTalentSearch(
@@ -76,8 +83,10 @@ export function useTalentSearch(
     maxExperience,
     jobId,
     sort = "relevance",
+    includeReferences = false,
     page = 1,
     pageSize = 20,
+    enabled = true,
   } = options ?? {};
 
   return useQuery({
@@ -93,10 +102,13 @@ export function useTalentSearch(
       maxExperience ?? "",
       jobId ?? "",
       sort,
+      includeReferences ? "references" : "",
       page,
       pageSize,
     ],
-    enabled: Boolean(orgSlug && workspaceSlug),
+    enabled: enabled && Boolean(orgSlug && workspaceSlug),
+    retry: (count, error) =>
+      !(error as { upgradeRequired?: boolean }).upgradeRequired && count < 3,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (q) params.set("q", q);
@@ -106,6 +118,7 @@ export function useTalentSearch(
       if (minExperience != null) params.set("minExperience", String(minExperience));
       if (maxExperience != null) params.set("maxExperience", String(maxExperience));
       if (jobId) params.set("jobId", jobId);
+      if (includeReferences) params.set("references", "1");
       params.set("sort", sort);
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));

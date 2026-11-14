@@ -24,6 +24,7 @@ export function matchesStructuredFilters(
   snapshot: ApplicationSnapshotData | null | undefined,
   filters: SearchFilters,
   submittedAt: Date | string,
+  extras?: { skillText?: string },
 ): boolean {
   const summary = summarizeSnapshot(snapshot);
 
@@ -49,6 +50,7 @@ export function matchesStructuredFilters(
         ...(snapshot?.articles ?? []).flatMap((a) => a.tags),
         ...(snapshot?.certifications ?? []).map((c) => c.name),
         ...customText,
+        extras?.skillText,
       ].join(" | "),
     );
     if (!blobHasTerm(skillBlob, filters.skill)) return false;
