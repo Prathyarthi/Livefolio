@@ -18,6 +18,7 @@ const CANDIDATE_NAV = {
     { label: "Dashboard", href: "/dashboard" },
   ],
   Resources: [
+    { label: "Help & docs", href: "/docs" },
     { label: "Contact & support", href: "/contact" },
     { label: "Resume import", href: "/sign-up" },
     { label: "All templates", href: "/sign-up" },
