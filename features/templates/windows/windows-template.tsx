@@ -77,7 +77,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
 
 
   const linkedinSection = data.linkedin ? (
-    <Window key="linkedin" id="linkedin" title="LinkedIn - Profile">
+    <Window key="linkedin" id="linkedin" title={`${labels.linkedin} - Profile`}>
       <div className="win95-inset bg-white p-4">
         <LinkedInSection
           data={data.linkedin}

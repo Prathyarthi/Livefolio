@@ -82,7 +82,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-3 pl-5 text-base font-medium leading-8 text-black marker:text-black",
             aboutParagraph: "text-base font-medium leading-8 text-black",

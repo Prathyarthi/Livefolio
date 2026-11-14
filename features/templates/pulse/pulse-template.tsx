@@ -975,7 +975,7 @@ export function PulseTemplate({ data }: AppProps) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-2 pl-5 font-sans text-base @sm:text-lg text-slate-400 leading-relaxed marker:text-slate-500",
             aboutParagraph: "font-sans text-base @sm:text-lg text-slate-400 leading-relaxed",

@@ -78,7 +78,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-2 pl-5 text-lg leading-relaxed text-slate-300 marker:text-[var(--lf-accent)]",
             aboutParagraph: "text-lg leading-relaxed text-slate-300",

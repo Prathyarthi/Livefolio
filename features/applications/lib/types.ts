@@ -62,10 +62,39 @@ export type ApplicationSnapshotData = {
     url: string;
     username: string | null;
     cachedStats?: unknown;
+    /** True when the integration is genuinely connected without cachedStats (e.g. a LinkedIn import). */
+    connected?: boolean;
   }>;
+  /** Compact summary of the user's LinkedIn import, when they connected LinkedIn. */
+  linkedin?: LinkedInSnapshot | null;
   customSections: Array<{
     sectionType: string;
     label: string;
     items: unknown;
+  }>;
+};
+
+export type LinkedInSnapshot = {
+  syncedAt: string | null;
+  headline: string | null;
+  about: string | null;
+  currentPosition: string | null;
+  location: string | null;
+  skills: string[];
+  experience: Array<{
+    title: string;
+    company: string;
+    location: string | null;
+    /** As shown on LinkedIn, e.g. "Jan 2022" or "Present". */
+    startDate: string | null;
+    endDate: string | null;
+    description: string | null;
+  }>;
+  education: Array<{
+    school: string;
+    degree: string | null;
+    field: string | null;
+    startDate: string | null;
+    endDate: string | null;
   }>;
 };

@@ -1,41 +1,48 @@
-import { Logo } from "@/components/logo";
 import { AuthAwareCtas } from "@/features/landing/components/auth-aware-ctas";
+import { RecruiterAppMockup } from "@/features/landing/components/recruiter-app-mockup";
 
 export function RecruiterHero() {
   return (
-    <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden px-6 py-[var(--space-9)]">
-      <div className="hero-blob" aria-hidden />
+    <section className="relative overflow-x-clip px-4 pb-10 pt-10 sm:px-6 sm:pb-12 sm:pt-12 md:pb-14 md:pt-14">
+      <div className="relative z-[1] mx-auto w-full max-w-[40rem] text-center">
+        <p className="eyebrow uppercase">Hire with Livefolio</p>
 
-      <div className="relative mx-auto max-w-[1200px]">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-6 flex justify-center">
-            <Logo className="scale-110" />
-          </div>
+        <h1 className="studio-hero-title mt-4 text-text-primary">
+          <span className="block">
+            Hire on{" "}
+            <span className="studio-hero-highlight">proof and references</span>,
+          </span>
+          <span className="block">not resume keywords</span>
+        </h1>
 
-          <p className="eyebrow uppercase">Hiring with Livefolio</p>
+        <p className="mx-auto mt-5 max-w-[34rem] text-body text-text-secondary sm:text-body-lg">
+          Post a role free. Candidates apply in one click with a live portfolio.
+          You get a ranked shortlist that explains itself.
+        </p>
 
-          <h1 className="text-display mt-3 text-balance leading-none text-text-primary">
-            <span className="block">
-              Hire from real work
-              <span className="text-brand-secondary">.</span>
-            </span>
-            <span className="block -mt-1 md:-mt-2">
-              Not just resumes
-              <span className="text-brand-secondary">.</span>
-            </span>
-          </h1>
+        <AuthAwareCtas
+          variant="recruiter"
+          size="default"
+          studio
+          className="studio-cta mt-7 flex flex-col items-stretch justify-center gap-2.5 sm:flex-row sm:items-center sm:flex-wrap"
+        />
+      </div>
 
-          <p className="prose-measure mx-auto mt-5 text-body-lg text-text-secondary">
-            Post a role, collect Apply with Livefolio applications, and shortlist
-            candidates from evidence in their professional identity — scoped to
-            that job&apos;s applicant pool.
-          </p>
-
-          <AuthAwareCtas
-            variant="recruiter"
-            className="mt-7 flex flex-wrap items-center justify-center gap-3"
-          />
+      <div
+        id="ranked-shortlist"
+        className="relative z-[1] mx-auto mt-12 w-full max-w-[1040px] scroll-mt-24 px-0 sm:mt-14 md:mt-16 [perspective:2000px]"
+      >
+        <div
+          className="pointer-events-none absolute -inset-x-6 -top-8 bottom-0 rounded-full bg-brand-secondary/12 blur-3xl"
+          aria-hidden
+        />
+        <div className="relative md:origin-top md:[transform:rotateX(8deg)]">
+          <RecruiterAppMockup />
         </div>
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-surface-base to-transparent"
+          aria-hidden
+        />
       </div>
     </section>
   );

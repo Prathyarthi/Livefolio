@@ -495,7 +495,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                 heading={
                   <h2 className="text-xl font-bold text-zinc-900 flex items-center">
                     <span className="w-3 h-3 rounded-full bg-[#0a66c2] mr-3" />
-                    LinkedIn
+                    {labels.linkedin}
                   </h2>
                 }
                 classes={{

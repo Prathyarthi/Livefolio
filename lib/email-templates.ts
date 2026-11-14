@@ -158,7 +158,7 @@ export function welcomeEmailHtml(
     subject: `Welcome to ${siteConfig.name}`,
     html: emailShell({
       title: `Welcome to ${siteConfig.name}`,
-      preheader: "Your portfolio builder is ready — publish in minutes.",
+      preheader: "Your portfolio builder is ready — publish in seconds.",
       bodyHtml: `
         ${greeting(firstName)}
         ${paragraph(`Welcome to ${siteConfig.name}. Upload your resume, pick a template, and publish a live portfolio on your own link.`)}

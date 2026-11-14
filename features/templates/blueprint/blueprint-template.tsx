@@ -79,7 +79,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading number="IN">LinkedIn</SectionHeading>}
+      heading={<SectionHeading number="IN">{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-2 pl-6 text-base md:text-lg leading-relaxed text-white/90 marker:text-white",
             aboutParagraph: "text-base md:text-lg leading-relaxed text-white/90",

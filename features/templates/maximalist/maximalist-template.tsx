@@ -178,7 +178,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<div className="mb-2 border-b-4 border-white pb-6"><SectionHeading>LinkedIn</SectionHeading></div>}
+      heading={<div className="mb-2 border-b-4 border-white pb-6"><SectionHeading>{labels.linkedin}</SectionHeading></div>}
       classes={{
             aboutList: "space-y-2 pl-5 text-slate-200 text-base sm:text-lg font-bold leading-relaxed marker:text-[var(--lf-accent)]",
             aboutParagraph: "text-slate-200 text-base sm:text-lg font-bold leading-relaxed",

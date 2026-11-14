@@ -66,7 +66,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<div className="mb-4 flex items-center gap-6"><h2 className="text-3xl font-black uppercase tracking-widest whitespace-nowrap">LinkedIn</h2><div className="h-px w-full bg-[#2B2B2B]" /></div>}
+      heading={<div className="mb-4 flex items-center gap-6"><h2 className="text-3xl font-black uppercase tracking-widest whitespace-nowrap">{labels.linkedin}</h2><div className="h-px w-full bg-[#2B2B2B]" /></div>}
       classes={{
             aboutList: "space-y-2 pl-8 text-xl font-normal list-disc",
             aboutParagraph: "text-xl leading-relaxed font-normal",

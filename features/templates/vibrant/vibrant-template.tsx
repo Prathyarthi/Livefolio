@@ -79,7 +79,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<h2 className="text-3xl font-bold text-white">LinkedIn</h2>}
+      heading={<h2 className="text-3xl font-bold text-white">{labels.linkedin}</h2>}
       classes={{
             aboutList: "space-y-2 pl-5 text-lg leading-relaxed text-slate-300 marker:text-[var(--lf-accent)]",
             aboutParagraph: "text-lg leading-relaxed text-slate-300",

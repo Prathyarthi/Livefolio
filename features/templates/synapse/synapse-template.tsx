@@ -225,7 +225,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
             aboutParagraph: cn(MUTED, "leading-relaxed text-sm @sm:text-base"),
             postList: cn("list-disc space-y-2 pl-5", INK, "font-medium text-sm leading-relaxed"),

@@ -67,7 +67,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<h2 className="mb-8 text-3xl font-bold text-slate-800 px-2">LinkedIn</h2>}
+      heading={<h2 className="mb-8 text-3xl font-bold text-slate-800 px-2">{labels.linkedin}</h2>}
       classes={{
             aboutList: "space-y-2 pl-5 text-lg text-slate-600 marker:text-[var(--lf-accent)]",
             aboutParagraph: "text-lg leading-relaxed text-slate-600",

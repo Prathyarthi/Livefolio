@@ -74,7 +74,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
             postList: "list-disc space-y-2 pl-5 text-lg font-bold",
             postParagraph: "text-lg font-bold",

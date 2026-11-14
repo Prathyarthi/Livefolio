@@ -79,7 +79,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading>LinkedIn</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
             aboutList: "space-y-2 pl-5 text-sm md:text-base leading-relaxed text-slate-300 marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]",
             aboutParagraph: "text-sm md:text-base leading-relaxed text-slate-300",
