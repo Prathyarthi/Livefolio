@@ -13,13 +13,15 @@ async function throwApiError(
   const body = (await response
     .clone()
     .json()
-    .catch(() => null)) as { error?: unknown; message?: unknown } | null;
+    .catch(() => null)) as { error?: unknown; message?: unknown; upgradeRequired?: unknown } | null;
   const text = body ? "" : await response.text().catch(() => "");
   const message = [body?.error, body?.message].find(
     (value): value is string =>
       typeof value === "string" && value.trim().length > 0,
   );
-  throw new Error(message?.trim() || text.trim() || fallbackMessage);
+  throw Object.assign(new Error(message?.trim() || text.trim() || fallbackMessage), {
+    upgradeRequired: body?.upgradeRequired === true,
+  });
 }
 
 export type TalentPerson = {
@@ -63,6 +65,8 @@ export type TalentSearchOptions = {
   includeReferences?: boolean;
   page?: number;
   pageSize?: number;
+  /** false skips the request (e.g. Free orgs, where talent search is locked). */
+  enabled?: boolean;
 };
 
 export function useTalentSearch(
@@ -82,6 +86,7 @@ export function useTalentSearch(
     includeReferences = false,
     page = 1,
     pageSize = 20,
+    enabled = true,
   } = options ?? {};
 
   return useQuery({
@@ -101,7 +106,9 @@ export function useTalentSearch(
       page,
       pageSize,
     ],
-    enabled: Boolean(orgSlug && workspaceSlug),
+    enabled: enabled && Boolean(orgSlug && workspaceSlug),
+    retry: (count, error) =>
+      !(error as { upgradeRequired?: boolean }).upgradeRequired && count < 3,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (q) params.set("q", q);

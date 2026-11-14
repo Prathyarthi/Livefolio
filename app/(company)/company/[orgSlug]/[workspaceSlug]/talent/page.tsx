@@ -4,7 +4,8 @@ import { ListSkeleton, QueryError,  } from "@/features/organization/components/w
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ExternalLink, Search, Users, X } from "lucide-react";
+import { ExternalLink, Lock, Search, Users, X } from "lucide-react";
+import { useOrganization } from "@/features/organization/api/use-organization";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,9 @@ export default function CompanyTalentPage() {
     setPage(1);
   }, [q, location, skill, proof, experience, jobId, sort, includeReferences]);
 
+  const { data: org } = useOrganization(orgSlug);
+  // Talent search is Pro and above. Unknown tier (still loading) keeps the request off.
+  const talentLocked = org ? org.planTier === "free" : undefined;
   const jobsQuery = useOrgJobs(orgSlug, { workspaceSlug });
   const talentQuery = useTalentSearch(orgSlug, workspaceSlug, {
     q: q || undefined,
@@ -65,6 +69,7 @@ export default function CompanyTalentPage() {
     includeReferences,
     page,
     pageSize: DEFAULT_PAGE_SIZE,
+    enabled: talentLocked === false,
   });
 
   const data = talentQuery.data;
@@ -89,6 +94,36 @@ export default function CompanyTalentPage() {
     if (kind === "location") setLocation(bucket?.label ?? "");
     if (kind === "experience") setExperience(bucket?.id);
     if (kind === "proof") setProof((bucket?.id as ProofKind | undefined) ?? undefined);
+  }
+
+  const upgradeRequired =
+    talentLocked === true ||
+    Boolean((talentQuery.error as { upgradeRequired?: boolean } | null)?.upgradeRequired);
+
+  if (upgradeRequired) {
+    return (
+      <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8">
+        <Button variant="ghost" size="sm" asChild className="-ml-2">
+          <Link href={`/company/${orgSlug}/${workspaceSlug}`}>← Back to overview</Link>
+        </Button>
+        <div className="flex flex-col items-start gap-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 md:p-8">
+          <div className="flex items-center gap-2">
+            <Lock className="h-4 w-4 text-text-muted" aria-hidden />
+            <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Talent · Pro</p>
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Talent search is on Pro and above
+          </h1>
+          <p className="max-w-xl text-body-sm text-text-secondary">
+            Search people who opted in to be found, ranked on proof against your jobs.
+            Your applicants, ranking, compare and pipeline stay free.
+          </p>
+          <Button asChild>
+            <Link href={`/company/${orgSlug}/billing`}>Upgrade to Pro</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Bot, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BentoCard, RecruiterSection } from "@/features/landing/components/recruiter-section";
@@ -34,11 +34,26 @@ export function RecruiterHowItWorks() {
     >
       <div className="grid gap-4 md:grid-cols-2">
         <BentoCard
+          className="md:col-span-2"
+          title="Hiring agent"
+          body="Describe the role in plain words. The agent drafts the job for you to approve, finds people who opted in to be found, and drafts invites you send yourself."
+        >
+          <div className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-text-secondary">
+              Need someone to fix our onboarding drop-off. Remote, mid-level.
+            </p>
+            <span className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full bg-brand-secondary px-3 py-1.5 text-[11px] font-medium text-white">
+              <Bot className="size-3.5" aria-hidden />
+              Draft the job
+            </span>
+          </div>
+        </BentoCard>
+        <BentoCard
           title="Compare side by side"
           body="Put shortlisted candidates next to each other, requirement by requirement."
         >
           <div className="grid grid-cols-3 gap-px overflow-hidden rounded-[var(--radius-md)] border border-border-default bg-border-default text-xs">
-            {["", "Asha (demo)", "Meera (demo)", "React", "✓", "✓", "Node", "✓", "✓", "References", "—", "2"].map(
+            {["", "Asha (demo)", "Meera (demo)", "React", "✓", "✓", "Node", "✓", "✓", "References", "0", "2"].map(
               (cell, i) => (
                 <span key={i} className="truncate bg-surface-base px-2 py-1.5 text-text-secondary">
                   {cell}
@@ -79,7 +94,7 @@ export function RecruiterHowItWorks() {
         </BentoCard>
         <BentoCard
           title="Talent search"
-          body="Find people who opted in to be found, ranked the same way. Opting in is never shown publicly."
+          body="On Pro and above: find people who opted in to be found, ranked the same way. Opting in is never shown publicly."
         >
           <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border-default bg-surface-base px-3 py-2 text-xs text-text-secondary">
             <Search className="h-3.5 w-3.5 shrink-0" aria-hidden />

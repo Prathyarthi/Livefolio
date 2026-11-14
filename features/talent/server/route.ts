@@ -2,6 +2,8 @@ import Elysia, { t } from "elysia";
 import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { canUseTalentSearch } from "@/lib/hiring-plans";
+import { ORG_BILLING_SELECT, OrgPlanLimitError, orgPlanTier } from "@/lib/org-entitlements";
 import { requireWorkspaceAccess } from "@/features/organization/lib/org-access";
 import { getPortfolioPublicUrl } from "@/lib/domain";
 import { talentKeywordWhere } from "@/features/talent/lib/search";
@@ -68,7 +70,7 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
 
     const org = await prisma.organization.findUnique({
       where: { slug: ctx.params.orgSlug },
-      select: { id: true },
+      select: ORG_BILLING_SELECT,
     });
     if (!org) {
       ctx.set.status = 404;
@@ -83,6 +85,12 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
     if (!workspaceAccess) {
       ctx.set.status = 403;
       return { error: "Forbidden" };
+    }
+
+    // Talent search is Pro and above; Free orgs get a 403 with an upgrade prompt.
+    if (!canUseTalentSearch(orgPlanTier(org))) {
+      ctx.set.status = 403;
+      return new OrgPlanLimitError("talent", org.slug).toBody();
     }
 
     const q = optionalTrim(ctx.query.q);

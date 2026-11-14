@@ -1,6 +1,7 @@
 import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { linkedInSnapshotFromImport } from "@/features/applications/lib/linkedin-snapshot";
 
 export type { ApplicationSnapshotData };
 
@@ -14,6 +15,7 @@ export const applicationSnapshotInclude = {
   certifications: { orderBy: { sortOrder: "asc" as const } },
   achievements: { orderBy: { sortOrder: "asc" as const } },
   customSections: { orderBy: { sortOrder: "asc" as const } },
+  linkedinImport: { select: { profileData: true, lastSyncedAt: true } },
 } as const;
 
 function toIso(date: Date | null | undefined): string | null {
@@ -40,6 +42,9 @@ export type SnapshotPortfolio = Prisma.PortfolioGetPayload<{
 export function portfolioToSnapshot(
   portfolio: SnapshotPortfolio,
 ): ApplicationSnapshotData {
+  const linkedin = portfolio.linkedinImport
+    ? linkedInSnapshotFromImport(portfolio.linkedinImport)
+    : null;
   return {
     version: 1,
     capturedAt: new Date().toISOString(),
@@ -104,7 +109,10 @@ export function portfolioToSnapshot(
       url: s.url,
       username: s.username,
       cachedStats: s.cachedStats ?? null,
+      // A LinkedIn import is a real sync even though it stores no cachedStats.
+      ...(linkedin && s.platform.toLowerCase() === "linkedin" ? { connected: true } : {}),
     })),
+    linkedin,
     customSections: portfolio.customSections.map((c) => ({
       sectionType: c.sectionType,
       label: c.label,

@@ -1,16 +1,18 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Pencil, FileText } from "lucide-react";
-import { usePortfolio } from "@/features/portfolio/api/use-portfolio";
+import { usePortfolio, useUpdateSlug } from "@/features/portfolio/api/use-portfolio";
 import { CreatePortfolioPrompt } from "@/features/portfolio/components/create-portfolio-prompt";
 import { BadgeShelf } from "@/features/badges/components/badge-shelf";
 import { FlowFooter } from "@/features/dashboard/components/flow-footer";
 import { getPortfolioPublicUrl } from "@/lib/domain";
+import { clearClaimedSlug, readClaimedSlug } from "@/lib/claim-slug";
 
 const secondaryLinks = [
   { href: "/dashboard/preview", label: "Preview" },
@@ -20,6 +22,27 @@ const secondaryLinks = [
   { href: "/dashboard/billing", label: "Billing" },
 ] as const;
 
+function ClaimedSlugApplier({ slug }: { slug: string | null | undefined }) {
+  const applied = useRef(false);
+  const updateSlug = useUpdateSlug();
+
+  useEffect(() => {
+    if (slug) {
+      clearClaimedSlug();
+      return;
+    }
+    const claimed = readClaimedSlug();
+    if (applied.current || !claimed) return;
+    applied.current = true;
+    updateSlug.mutate(claimed, {
+      onSuccess: () => clearClaimedSlug(),
+      onError: () => clearClaimedSlug(),
+    });
+  }, [slug, updateSlug]);
+
+  return null;
+}
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -28,6 +51,8 @@ export default function DashboardPage() {
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
 
   return (
+    <>
+    {portfolio ? <ClaimedSlugApplier slug={portfolio.slug} /> : null}
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-[var(--space-6)] py-2">
       <header className="space-y-1">
         <p className="eyebrow uppercase">Overview</p>
@@ -152,5 +177,6 @@ export default function DashboardPage() {
         next={{ href: "/dashboard/import", label: "Import resume" }}
       />
     </div>
+    </>
   );
 }
