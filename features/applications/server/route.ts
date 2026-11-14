@@ -153,7 +153,17 @@ function parseSearchFilters(query: Record<string, string | undefined>): Applican
     appliedAfter: query.appliedAfter?.trim() || undefined,
     appliedBefore: query.appliedBefore?.trim() || undefined,
     proof: isProofKind(query.proof) ? query.proof : undefined,
+    ids: parseIds(query.ids),
   };
+}
+
+/** Comma-separated application ids, capped for the compare view. */
+function parseIds(raw: string | undefined): string[] | undefined {
+  if (!raw) return undefined;
+  const ids = Array.from(
+    new Set(raw.split(",").map((id) => id.trim()).filter(Boolean)),
+  ).slice(0, 10);
+  return ids.length > 0 ? ids : undefined;
 }
 
 function parseSnapshot(data: unknown): ApplicationSnapshotData | null {
@@ -526,13 +536,30 @@ export const applications = new Elysia({ prefix: "/applications" })
       return { error: "Forbidden" };
     }
 
-    const application = await prisma.application.findFirst({
+    let application = await prisma.application.findFirst({
       where: {
         id: ctx.params.applicationId,
         jobId: job.id,
       },
       include: companyApplicationInclude,
     });
+
+    // The hiring agent used to link an application to the new job. Open the
+    // application on the job it actually belongs to, in this same workspace.
+    let resolvedJob = job;
+    if (!application) {
+      application = await prisma.application.findFirst({
+        where: {
+          id: ctx.params.applicationId,
+          job: { organizationId: job.organizationId, workspaceId: job.workspaceId },
+        },
+        include: companyApplicationInclude,
+      });
+      if (application) {
+        const owner = await loadJobForCompany(application.job.id);
+        if (owner) resolvedJob = owner;
+      }
+    }
 
     if (!application) {
       ctx.set.status = 404;
@@ -541,7 +568,7 @@ export const applications = new Elysia({ prefix: "/applications" })
 
     const snapshot = parseSnapshot(application.snapshot?.data);
     const summary = summarizeSnapshot(snapshot);
-    const searchProfile = await refreshJobSearchProfile(job.id);
+    const searchProfile = await refreshJobSearchProfile(resolvedJob.id);
     const rank = rankAgainstJob(snapshot, searchProfile, {
       name: application.user.name,
       email: application.user.email,
@@ -549,7 +576,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       freshnessAt: application.submittedAt,
     });
     const evidence = attachRank(
-      buildApplicantEvidence(snapshot, job.requirements),
+      buildApplicantEvidence(snapshot, application.job.requirements),
       rank,
     );
 
@@ -571,7 +598,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       resumeFileId: resumeByUser.get(application.user.id) ?? null,
       notes: application.notes,
       job: {
-        ...job,
+        ...resolvedJob,
         requirements: application.job.requirements,
       },
       summary: {

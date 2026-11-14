@@ -1,8 +1,11 @@
 "use client";
 
+import { isConnectedProfile } from "@/features/search/lib/proof";
+import { ListSkeleton, QueryError, StageBadge } from "@/features/organization/components/workspace-ui";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ExternalLink, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -35,7 +38,8 @@ export default function ApplicantDetailPage() {
     applicationId: string;
   }>();
   const { orgSlug, workspaceSlug, jobId, applicationId } = params;
-  const { data, isLoading, error } = useCompanyApplication(
+  const router = useRouter();
+  const { data, isLoading, error, refetch } = useCompanyApplication(
     jobId,
     applicationId,
   );
@@ -44,17 +48,39 @@ export default function ApplicantDetailPage() {
   const addNote = useAddRecruiterNote(jobId, applicationId);
   const deleteNote = useDeleteRecruiterNote(jobId, applicationId);
   const [noteBody, setNoteBody] = useState("");
+  const openedOnAnotherJob = Boolean(data?.job?.id && data.job.id !== jobId);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!data?.job?.id || data.job.id === jobId) return;
+    router.replace(
+      `/company/${orgSlug}/${workspaceSlug}/jobs/${data.job.id}/applicants/${applicationId}`,
+    );
+  }, [data, jobId, orgSlug, workspaceSlug, applicationId, router]);
+
+  if (isLoading || openedOnAnotherJob) {
     return (
-      <div className="p-8 text-body-sm text-text-muted">Loading applicant…</div>
+      <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 md:p-8" aria-busy="true">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-56" />
+            <Skeleton className="h-4 w-80 max-w-full" />
+          </div>
+        </div>
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="space-y-4 p-8">
-        <h1 className="text-h3 text-text-primary">Applicant not found</h1>
+      <div className="mx-auto w-full max-w-[1200px] space-y-4 p-4 md:p-8">
+        {error ? (
+          <QueryError error={error} fallback="Applicant not found" onRetry={() => void refetch()} />
+        ) : (
+          <h1 className="text-h3 text-text-primary">Applicant not found</h1>
+        )}
         <Button asChild variant="outline">
           <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
             Back to pool
@@ -107,7 +133,7 @@ export default function ApplicantDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 p-6 md:p-8">
+    <div className="mx-auto w-full max-w-[1200px] space-y-8 p-4 md:p-8">
       <div className="flex flex-wrap gap-2">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/company/${orgSlug}/${workspaceSlug}/jobs/${jobId}/applicants`}>
@@ -125,12 +151,11 @@ export default function ApplicantDetailPage() {
         </Avatar>
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-h2 text-text-primary">{summary.name}</h1>
-            <Badge
-              variant={data.stage === "shortlisted" ? "success" : "neutral"}
-            >
-              {PIPELINE_STAGE_LABELS[data.stage as PipelineStage] ?? data.stage}
-            </Badge>
+            <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">{summary.name}</h1>
+            <StageBadge
+              stage={data.stage}
+              label={PIPELINE_STAGE_LABELS[data.stage as PipelineStage] ?? data.stage}
+            />
           </div>
           {summary.headline ? (
             <p className="text-body text-text-secondary">{summary.headline}</p>
@@ -198,7 +223,7 @@ export default function ApplicantDetailPage() {
       </div>
 
       {data.coverNote ? (
-        <section className="space-y-2 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 shadow-[var(--shadow-card)] md:p-6">
+        <section className="space-y-2 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 md:p-6">
           <h2 className="text-h3 text-text-primary">Candidate note</h2>
           <p className="whitespace-pre-wrap text-body-sm text-text-secondary">
             {data.coverNote}
@@ -209,7 +234,7 @@ export default function ApplicantDetailPage() {
       <ScreeningAnswersSection answers={data.screeningAnswers} />
 
       {data.vouches.length > 0 ? (
-        <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 shadow-[var(--shadow-card)] md:p-6">
+        <section className="rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 md:p-6">
           <NamedReferences
             vouches={data.vouches}
             description="People who put their Livefolio account behind this candidate. Not shown on the public Livefolio."
@@ -222,7 +247,7 @@ export default function ApplicantDetailPage() {
         data.evidence.highlights.length > 0 ||
         (data.evidence.rankReasons && data.evidence.rankReasons.length > 0) ||
         data.evidence.rankScore) ? (
-        <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 shadow-[var(--shadow-card)] md:p-6">
+        <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-5 md:p-6">
           <div>
             <h2 className="text-h3 text-text-primary">
               Relevant evidence & requirements
@@ -299,7 +324,7 @@ export default function ApplicantDetailPage() {
 
       <SnapshotSections snapshot={snapshot} />
 
-      <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+      <section className="space-y-4 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
         <div>
           <h2 className="text-h3 text-text-primary">Private recruiter notes</h2>
           <p className="text-body-sm text-text-muted">
@@ -384,7 +409,7 @@ function SnapshotSections({
   }
 
   return (
-    <div className="space-y-8 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+    <div className="space-y-8 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
       {snapshot.profile.summary ? (
         <section className="space-y-2">
           <h2 className="text-h3 text-text-primary">About</h2>
@@ -466,10 +491,21 @@ function SnapshotSections({
 
       <SectionList
         title="Connected work"
-        items={snapshot.socialProfiles.map((s) => ({
+        items={snapshot.socialProfiles.filter(isConnectedProfile).map((s) => ({
           title: s.platform,
           meta: s.url,
         }))}
+      />
+
+      <SectionList
+        title="Profile links"
+        items={snapshot.socialProfiles
+          .filter((s) => !isConnectedProfile(s))
+          .map((s) => ({
+            title: s.platform,
+            meta: s.url,
+            body: "Link only, not connected. Not used in ranking.",
+          }))}
       />
     </div>
   );
@@ -487,8 +523,8 @@ function SectionList({
     <section className="space-y-3">
       <h2 className="text-h3 text-text-primary">{title}</h2>
       <ul className="space-y-4">
-        {items.map((item) => (
-          <li key={`${item.title}-${item.meta ?? ""}`} className="space-y-1">
+        {items.map((item, index) => (
+          <li key={`${index}-${item.title}-${item.meta ?? ""}`} className="space-y-1">
             <p className="font-medium text-text-primary">{item.title}</p>
             {item.meta ? (
               <p className="text-xs text-text-muted">{item.meta}</p>

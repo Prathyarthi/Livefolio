@@ -16,7 +16,11 @@ import {
   type SearchFilters,
 } from "@/features/search/lib/filters";
 
-export type ApplicantSearchFilters = SearchFilters & { q?: string };
+export type ApplicantSearchFilters = SearchFilters & {
+  q?: string;
+  /** Restrict to these application ids (compare view); still scoped to the job. */
+  ids?: string[];
+};
 
 export type JobRequirementInput = {
   type: string;
@@ -66,6 +70,7 @@ export function applicantPoolWhere(
   const resolved = mergeInterpretedFilters(filters);
   const and: Prisma.ApplicationWhereInput[] = [{ jobId }];
   if (stage) and.push({ stage });
+  if (filters.ids?.length) and.push({ id: { in: filters.ids } });
 
   if (resolved.proof) and.push({ proofKinds: { has: resolved.proof } });
   if (resolved.minExperience != null && Number.isFinite(resolved.minExperience)) {

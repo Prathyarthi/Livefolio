@@ -300,6 +300,7 @@ export async function loadApplicantPoolPage(input: {
                 ...stored,
                 rankScore: scoredRow.score,
                 rankReasons: scoredRow.reasons,
+                referenceBonus: Math.max(0, scoredRow.score - scoredRow.row.rankScore),
               }
             : stored,
           signals.get(row.user.id)?.length ?? 0,
