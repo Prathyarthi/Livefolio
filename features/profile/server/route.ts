@@ -16,6 +16,7 @@ import { normalizeArticleSource } from "@/lib/article-source";
 import { fetchLeetCodeStats } from "@/lib/leetcode";
 import { fetchMediumArticles } from "@/lib/medium";
 import { getPlanLimitMessage, resolveAccessForUser } from "@/lib/entitlements";
+import { awardIntegrationBadge } from "@/lib/badges";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
 import {
   MAX_SECTION_ROWS,
@@ -34,6 +35,7 @@ import {
   type ReorderableSectionKey,
 } from "@/features/templates/section-order";
 import type { PortfolioCustomization } from "@/features/templates/types";
+import { linkedin } from "./linkedin-route";
 
 async function requireImportEntitlement(request: Request) {
   const session = await getSession(request);
@@ -194,6 +196,7 @@ function hashnodeProfileUrl(username: string, profileUrl?: string) {
 }
 
 export const profile = new Elysia({ prefix: "/profile" })
+  .use(linkedin)
 
   // ── GitHub ──────────────────────────────────────────────
   .post(
@@ -358,6 +361,7 @@ export const profile = new Elysia({ prefix: "/profile" })
         });
       }
 
+      void awardIntegrationBadge(gate.session.userId, "github");
       return { success: true, imported: result.count };
     },
     {
@@ -460,6 +464,7 @@ export const profile = new Elysia({ prefix: "/profile" })
         },
       });
 
+      void awardIntegrationBadge(gate.session.userId, "leetcode");
       return { success: true, profile: result };
     },
     {
@@ -582,6 +587,7 @@ export const profile = new Elysia({ prefix: "/profile" })
         });
       }
 
+      void awardIntegrationBadge(gate.session.userId, "medium");
       return { success: true, imported: result.count };
     },
     {
@@ -647,6 +653,7 @@ export const profile = new Elysia({ prefix: "/profile" })
           username,
         );
       }
+      void awardIntegrationBadge(gate.session.userId, "devto");
       return { success: true, imported: result.count };
     },
     {
@@ -703,6 +710,7 @@ export const profile = new Elysia({ prefix: "/profile" })
           username,
         );
       }
+      void awardIntegrationBadge(gate.session.userId, "hashnode");
       return { success: true, imported: result.count };
     },
     {
@@ -771,6 +779,7 @@ export const profile = new Elysia({ prefix: "/profile" })
           },
         );
       }
+      void awardIntegrationBadge(gate.session.userId, "stackoverflow");
       return { success: true, imported: result.count };
     },
     {
@@ -843,6 +852,7 @@ export const profile = new Elysia({ prefix: "/profile" })
         },
       );
 
+      void awardIntegrationBadge(gate.session.userId, "codeforces");
       return { success: true };
     },
     {

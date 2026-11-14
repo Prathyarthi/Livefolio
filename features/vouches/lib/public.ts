@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getPortfolioPublicUrl } from "@/lib/domain";
+import type { ReferenceForSearch } from "@/features/search/lib/references";
 import { VOUCH_RELATIONSHIP_LABELS, type VouchRelationship } from "./constants";
 import { isVouchRelationship } from "./validation";
 
@@ -153,3 +154,69 @@ export async function countNamedVouchesByUserIds(
 }
 
 export const listPublicVouchesForUser = listNamedVouchesForUser;
+
+function toReferenceSignal(row: {
+  story: string | null;
+  relationship: string | null;
+}): ReferenceForSearch | null {
+  if (!row.story || !isVouchRelationship(row.relationship)) return null;
+  return { relationship: row.relationship, story: row.story };
+}
+
+function groupReferenceSignals(
+  rows: Array<{
+    requesterId: string;
+    story: string | null;
+    relationship: string | null;
+  }>,
+): Map<string, ReferenceForSearch[]> {
+  const map = new Map<string, ReferenceForSearch[]>();
+  for (const row of rows) {
+    const signal = toReferenceSignal(row);
+    if (!signal) continue;
+    const list = map.get(row.requesterId) ?? [];
+    list.push(signal);
+    map.set(row.requesterId, list);
+  }
+  return map;
+}
+
+/** Completed reference stories for ranking. Missing users are absent from the map. */
+export async function listReferenceSignalsByUserIds(
+  userIds: string[],
+): Promise<Map<string, ReferenceForSearch[]>> {
+  if (userIds.length === 0) return new Map();
+  const rows = await prisma.vouch.findMany({
+    where: { requesterId: { in: userIds }, ...completedVouchWhere },
+    orderBy: { completedAt: "desc" },
+    select: { requesterId: true, story: true, relationship: true },
+  });
+  return groupReferenceSignals(rows);
+}
+
+/**
+ * Superset of people whose reference stories contain any of these terms.
+ * Callers still apply word-boundary matching.
+ */
+export async function listReferenceSignalsByStoryTerms(
+  terms: string[],
+): Promise<Map<string, ReferenceForSearch[]>> {
+  const needles = [...new Set(terms.map((term) => term.trim()).filter((term) => term.length >= 2))].slice(
+    0,
+    16,
+  );
+  if (needles.length === 0) return new Map();
+
+  const rows = await prisma.vouch.findMany({
+    where: {
+      ...completedVouchWhere,
+      OR: needles.map((term) => ({
+        story: { contains: term, mode: "insensitive" as const },
+      })),
+    },
+    orderBy: { completedAt: "desc" },
+    select: { requesterId: true, story: true, relationship: true },
+    take: 5000,
+  });
+  return groupReferenceSignals(rows);
+}

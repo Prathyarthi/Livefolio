@@ -1,5 +1,6 @@
 "use client";
 
+import { ListSkeleton } from "@/features/organization/components/workspace-ui";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -71,11 +72,11 @@ export function WorkspaceTeamSection({
       return;
     }
     try {
-      await addMember.mutateAsync({
+      const result = await addMember.mutateAsync({
         email: email.trim(),
         role,
       });
-      toast.success("Member added");
+      toast.success("invited" in result ? "Invite sent" : "Member added");
       setEmail("");
       setRole("recruiter");
     } catch (error) {
@@ -125,25 +126,25 @@ export function WorkspaceTeamSection({
   }
 
   return (
-    <section className="space-y-5 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+    <section className="space-y-5 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
       <div className="space-y-1">
         <h2 className="text-h3 text-text-primary">Team</h2>
         <p className="text-body-sm text-text-secondary">
           People who can access this workspace. Owners and admins can enter
           every workspace. Removing someone here takes them out of this
-          workspace, not the company. New members must already have a
-          Livefolio account.
+          workspace, not the company. Someone new joins the company only
+          after they accept the email invite.
         </p>
       </div>
 
       {isLoading ? (
-        <p className="text-body-sm text-text-muted">Loading team…</p>
+        <ListSkeleton rows={3} />
       ) : (members ?? []).length === 0 ? (
         <p className="text-body-sm text-text-muted">
           No teammates in this workspace yet.
         </p>
       ) : (
-        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+        <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
           {(members ?? []).map((member) => {
             const editable = canEditMember(member);
             const removable = canRemoveMember(member);
@@ -224,7 +225,7 @@ export function WorkspaceTeamSection({
       )}
 
       {canManage ? (
-        <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 shadow-[var(--shadow-card)]">
+        <div className="space-y-3 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4">
           <p className="text-body-sm font-medium text-text-primary">
             Add teammate
           </p>
@@ -271,9 +272,8 @@ export function WorkspaceTeamSection({
             </div>
           </div>
           <p className="text-xs text-text-muted">
-            That email must already have a Livefolio account. If they already
-            belong to the company, they&apos;ll be added to this workspace
-            with their current role.
+            Someone already on the company is added to this workspace now.
+            Anyone else gets an email and joins after they accept.
           </p>
         </div>
       ) : null}
