@@ -358,7 +358,7 @@ export function LinkedInImporter() {
                 </span>
               </p>
               <p className="mb-2 px-2 text-xs text-muted-foreground">
-                Selected posts are added to your Articles section, labeled LinkedIn.
+                Selected posts appear in the LinkedIn section of your portfolio.
               </p>
               {state.posts.length === 0 ? (
                 <p className="px-2 text-xs text-muted-foreground">

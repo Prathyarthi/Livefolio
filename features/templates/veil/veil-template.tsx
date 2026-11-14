@@ -64,6 +64,7 @@ import {
 import { resolveAccentColor } from "@/features/templates/template-accent-palettes";
 import { DitherVeil } from "./dither-veil";
 import styles from "./veil-template.module.css";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
 type PortfolioMeta = PortfolioData["portfolio"];
 type Experience = PortfolioData["experiences"][number];
@@ -1216,13 +1217,38 @@ export function VeilTemplate({ data }: AppProps) {
     certifications: certifications.length > 0,
     articles: articles.length > 0,
     achievements: achievements.length > 0,
+    linkedin: Boolean(data.linkedin),
     profiles: hasProfiles,
   };
   const numbered = resolved.order.full.filter(
     (key) => present[key] && !resolved.isHidden(key),
   );
-  // Hero is (01); body sections continue from (02).
+  // Hero is (01); body sections continue from (02) in their actual order.
   const num = (key: ReorderableSectionKey) => numbered.indexOf(key) + 2;
+  const linkedinSection = data.linkedin ? (
+    <section id="linkedin" className="scroll-mt-20 py-14 @md:py-20">
+      <div className={SHELL}>
+        <LinkedInSection
+          data={data.linkedin}
+          heading={<SectionHeading index={num("linkedin")}>{labels.linkedin}</SectionHeading>}
+          classes={{
+            aboutList: "list-disc space-y-2 pl-5 text-base leading-relaxed text-[var(--veil-muted)] marker:text-[var(--veil-faint)] @sm:text-lg",
+            aboutParagraph: "text-base leading-relaxed text-[var(--veil-muted)] @sm:text-lg",
+            postList: "list-disc space-y-2 pl-5 font-serif text-2xl leading-snug text-[var(--veil-paper)]",
+            postParagraph: "font-serif text-2xl leading-snug text-[var(--veil-paper)]",
+            descriptionParagraph: "text-[15px] leading-relaxed text-[var(--veil-muted)]",
+            descriptionList: "list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-[var(--veil-muted)] marker:text-[var(--lf-accent)]",
+            card: cn("rounded-[4px] border bg-[var(--veil-ink-raised)] p-6", LINE),
+            title: "font-serif text-3xl leading-tight tracking-tight text-[var(--veil-paper)] @md:text-4xl [overflow-wrap:anywhere]",
+            text: "text-[15px] leading-relaxed text-[var(--veil-muted)]",
+            muted: cn("font-mono text-[11px] tracking-[0.14em]", FAINT),
+            chip: cn("rounded-full border px-3 py-1 text-xs text-[var(--veil-muted)]", LINE),
+            link: "font-mono text-xs tracking-[0.12em] text-[var(--lf-accent)] hover:underline",
+          }}
+        />
+      </div>
+    </section>
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: null,
@@ -1345,7 +1371,7 @@ export function VeilTemplate({ data }: AppProps) {
           {present.skills && <SkillMarquee skills={skills} primaryColor={primaryColor} />}
           <StatStripe stats={stats} />
 
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.length > 0 && (
             <section className="py-14 @md:py-20">

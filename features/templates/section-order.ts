@@ -17,6 +17,7 @@ export const REORDERABLE_SECTIONS = [
   "certifications",
   "achievements",
   "articles",
+  "linkedin",
   "profiles",
   "github",
 ] as const satisfies readonly SectionKey[];
@@ -73,6 +74,14 @@ export function normalizeOrder(
         result.push(item);
       }
     }
+  }
+
+  // LinkedIn became its own section after orders were already saved; slot it
+  // in right before Profiles rather than at the end.
+  const profilesAt = result.indexOf("profiles");
+  if (!seen.has("linkedin") && profilesAt >= 0) {
+    seen.add("linkedin");
+    result.splice(profilesAt, 0, "linkedin");
   }
 
   for (const key of REORDERABLE_SECTIONS) {
@@ -211,6 +220,7 @@ export function getPresentSections(
   if (data.certifications.length > 0) present.add("certifications");
   if (data.achievements.length > 0) present.add("achievements");
   if (data.articles.length > 0) present.add("articles");
+  if (data.linkedin) present.add("linkedin");
   if (hasProfilesSection(data)) present.add("profiles");
   if (hasGithubActivity(data)) present.add("github");
   return present;
