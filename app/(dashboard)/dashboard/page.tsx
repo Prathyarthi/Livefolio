@@ -53,7 +53,7 @@ export default function DashboardPage() {
   return (
     <>
     {portfolio ? <ClaimedSlugApplier slug={portfolio.slug} /> : null}
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-[var(--space-6)] py-2">
+    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-[var(--space-6)] py-2">
       <header className="space-y-1">
         <p className="eyebrow uppercase">Overview</p>
         <h1 className="text-h2 text-text-primary">Hi, {firstName}</h1>

@@ -248,19 +248,27 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         className={
           fullHeightPanel
             ? "relative flex h-dvh max-h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface-base"
-            : "relative min-w-0 overflow-x-hidden bg-surface-base"
+            : "relative flex min-w-0 flex-1 flex-col overflow-x-hidden bg-surface-base"
         }
       >
-        <DashboardHeader />
-        <main
+        <div
           className={
             fullHeightPanel
-              ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-[var(--space-5)]"
-              : "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)]"
+              ? "flex min-h-0 flex-1 flex-col"
+              : "flex min-h-svh flex-col"
           }
         >
-          {children}
-        </main>
+          <DashboardHeader />
+          <main
+            className={
+              fullHeightPanel
+                ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-[var(--space-5)]"
+                : "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)]"
+            }
+          >
+            {children}
+          </main>
+        </div>
         {!hideFooter ? <Footer /> : null}
       </SidebarInset>
     </SidebarProvider>
