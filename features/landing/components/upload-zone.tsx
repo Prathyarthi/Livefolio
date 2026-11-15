@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 type Phase = "idle" | "uploading" | "done";
 
-const ACCEPTED = [".pdf", ".docx"];
+const ACCEPTED = [".pdf"];
 const MAX_MB = 10;
 
 /**
@@ -27,7 +27,7 @@ export function UploadZone({ className }: { className?: string }) {
   const validate = (file: File): string | null => {
     const lower = file.name.toLowerCase();
     if (!ACCEPTED.some((ext) => lower.endsWith(ext))) {
-      return "Unsupported file. Upload a PDF or DOCX.";
+      return "Unsupported file. Upload a PDF.";
     }
     if (file.size > MAX_MB * 1024 * 1024) {
       return `File is too large. Max ${MAX_MB} MB.`;
@@ -85,7 +85,7 @@ export function UploadZone({ className }: { className?: string }) {
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => !isBusy && onDrop(e)}
-        aria-label="Upload your resume — PDF or DOCX, up to 10 megabytes"
+        aria-label="Upload your resume, PDF only, up to 10 megabytes"
         className={cn(
           "group relative flex h-[240px] w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-[var(--radius-xl)] border-2 border-dashed px-6 text-center outline-none transition-all duration-200 ease-[var(--ease-spring)]",
           "focus-visible:shadow-[var(--shadow-focus)]",
@@ -120,7 +120,7 @@ export function UploadZone({ className }: { className?: string }) {
                 dragOver ? "text-white/80" : "text-text-muted"
               )}
             >
-              PDF or DOCX &middot; Max 10 MB
+              PDF only &middot; Max 10 MB
             </p>
           </>
         )}
@@ -165,7 +165,7 @@ export function UploadZone({ className }: { className?: string }) {
       <input
         ref={inputRef}
         type="file"
-        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        accept=".pdf,application/pdf"
         className="sr-only"
         onChange={(e) => {
           const file = e.target.files?.[0];

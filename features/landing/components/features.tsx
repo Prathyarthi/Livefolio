@@ -14,7 +14,6 @@ import { StudioSection } from "@/features/landing/components/studio-shell";
 
 const START_OPTIONS = [
   { label: "PDF", active: true },
-  { label: "DOCX", active: false },
   { label: "Draft", active: false },
 ] as const;
 
@@ -87,7 +86,7 @@ export function Features() {
                 Start from the resume you already have
               </h3>
               <p className="mt-3 text-[14px] leading-relaxed text-[#5c4038]">
-                Upload a PDF or DOCX. We structure your experience, skills, and
+                Upload a PDF. We structure your experience, skills, and
                 projects so you begin with a draft, not a blank page.
               </p>
             </div>
