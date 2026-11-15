@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Loader2, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  useDeleteNotification,
   useMarkNotificationRead,
   type NotificationItem,
 } from "@/features/notifications/api/use-notifications";
@@ -20,7 +17,6 @@ export function NotificationRow({
   onNavigate?: () => void;
 }) {
   const markRead = useMarkNotificationRead();
-  const remove = useDeleteNotification();
   const unread = !item.readAt;
 
   const content = (
@@ -42,7 +38,7 @@ export function NotificationRow({
   };
 
   return (
-    <li className="group flex items-start gap-2 rounded-md px-3 py-2.5 hover:bg-surface-raised">
+    <li className="flex items-start gap-2 rounded-md px-3 py-2.5 hover:bg-surface-raised">
       {item.href ? (
         <Link href={item.href} onClick={handleOpen} className="flex min-w-0 flex-1">
           {content}
@@ -52,17 +48,6 @@ export function NotificationRow({
           {content}
         </button>
       )}
-      <Button
-        variant="ghost"
-        size="icon-xs"
-        className="shrink-0 opacity-60 group-hover:opacity-100"
-        aria-label="Delete notification"
-        onClick={() =>
-          remove.mutate(item.id, { onError: (error) => toast.error(error.message) })
-        }
-      >
-        <Trash2 className="h-3.5 w-3.5" aria-hidden />
-      </Button>
     </li>
   );
 }
@@ -90,12 +75,13 @@ export function NotificationList({
   if (isError) {
     return <p className="px-3 py-8 text-center text-sm text-text-muted">Couldn&apos;t load notifications.</p>;
   }
-  if (!items.length) {
+  const unreadItems = items.filter((item) => !item.readAt);
+  if (!unreadItems.length) {
     return <p className="px-3 py-8 text-center text-sm text-text-muted">{emptyText}</p>;
   }
   return (
     <ul className="flex flex-col gap-0.5">
-      {items.map((item) => (
+      {unreadItems.map((item) => (
         <NotificationRow key={item.id} item={item} onNavigate={onNavigate} />
       ))}
     </ul>
