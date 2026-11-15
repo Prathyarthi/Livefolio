@@ -123,6 +123,24 @@ export function getRecruiterSoftwareApplicationSchema() {
   };
 }
 
+/** FAQPage for /recruiters, built from the visible FAQ items so text matches word for word. */
+export function getRecruiterFaqPageSchema(
+  items: ReadonlyArray<{ q: string; a: string }>,
+) {
+  const recruitersUrl = absoluteUrl("/recruiters");
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": `${recruitersUrl}#faq`,
+    url: recruitersUrl,
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+}
+
 export type BreadcrumbEntry = { name: string; path: string };
 
 /** BreadcrumbList; "Home" is added as the first item. */

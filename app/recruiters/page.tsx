@@ -7,7 +7,7 @@ import { RecruiterReferences } from "@/features/landing/components/recruiter-ref
 import { RecruiterHowItWorks } from "@/features/landing/components/recruiter-how-it-works";
 import { RecruiterDifferentiation } from "@/features/landing/components/recruiter-differentiation";
 import { RecruiterPricing } from "@/features/landing/components/recruiter-pricing";
-import { RecruiterFAQ } from "@/features/landing/components/recruiter-faq";
+import { RECRUITER_FAQS, RecruiterFAQ } from "@/features/landing/components/recruiter-faq";
 import { RecruiterCTA } from "@/features/landing/components/recruiter-cta";
 import { StudioShell } from "@/features/landing/components/studio-shell";
 import { JsonLd } from "@/components/json-ld";
@@ -15,6 +15,7 @@ import { createPageMetadata } from "@/lib/seo";
 import {
   getBreadcrumbSchema,
   getOrganizationSchema,
+  getRecruiterFaqPageSchema,
   getRecruiterSoftwareApplicationSchema,
 } from "@/lib/structured-data";
 
@@ -32,6 +33,7 @@ export default function RecruitersLandingPage() {
         data={[
           getOrganizationSchema(),
           getRecruiterSoftwareApplicationSchema(),
+          getRecruiterFaqPageSchema(RECRUITER_FAQS),
           getBreadcrumbSchema([{ name: "For recruiters", path: "/recruiters" }]),
         ]}
       />
