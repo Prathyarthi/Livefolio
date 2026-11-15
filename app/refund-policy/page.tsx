@@ -7,7 +7,7 @@ import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Cancellation and No-Refund Policy",
-  description: `Cancellation and no-refund terms for ${siteConfig.name} Pro subscriptions.`,
+  description: `Cancellation and no-refund terms for ${siteConfig.name} Pro subscriptions, including when cancellation takes effect. Last updated July 18, 2026.`,
   path: "/refund-policy",
   openGraphType: "article",
 });

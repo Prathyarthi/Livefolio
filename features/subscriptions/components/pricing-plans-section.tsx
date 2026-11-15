@@ -1,12 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { SubscriptionFlow } from "./subscription-flow";
 import { cn } from "@/lib/utils";
 
 export function PricingPlansSection({
   className,
+  headingLevel: Heading = "h2",
 }: {
   className?: string;
+  /** `h1` on /pricing (the page has no other H1); `h2` when embedded in the landing page. */
+  headingLevel?: "h1" | "h2";
 } = {}) {
   return (
     <div
@@ -17,9 +21,9 @@ export function PricingPlansSection({
     >
       <header className="mx-auto max-w-2xl space-y-4 text-center">
         <p className="eyebrow uppercase">Pricing</p>
-        <h2 className="text-h1 text-text-primary md:text-display">
+        <Heading className="text-h1 text-text-primary md:text-display">
           Two simple plans
-        </h2>
+        </Heading>
         <p className="prose-measure mx-auto text-body text-text-secondary">
           Start with a one-month free trial of all core workflows. After that,
           stay on free essentials or upgrade to Pro, billed monthly, quarterly,
@@ -28,6 +32,17 @@ export function PricingPlansSection({
       </header>
 
       <SubscriptionFlow />
+
+      <p className="text-center text-body-sm text-text-secondary">
+        Hiring a team?{" "}
+        <Link
+          href="/recruiters#pricing"
+          className="font-medium text-brand-primary hover:underline"
+        >
+          See per-seat plans for recruiters
+        </Link>
+        .
+      </p>
     </div>
   );
 }

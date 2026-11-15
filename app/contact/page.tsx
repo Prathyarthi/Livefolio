@@ -7,8 +7,8 @@ import { createPageMetadata } from "@/lib/seo";
 import { Mail, MessageCircle, BookOpen, CreditCard, HelpCircle } from "lucide-react";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Contact & Support",
-  description: `Get help with ${siteConfig.name} — billing, publishing, resume import, templates, and account support. Email ${siteConfig.supportEmail}.`,
+  title: "Contact and Support",
+  description: `Get help with billing, publishing, resume import, templates and your account. Email ${siteConfig.supportEmail}. We typically respond within one business day.`,
   path: "/contact",
 });
 
