@@ -91,21 +91,24 @@ export function getRecruiterSoftwareApplicationSchema() {
     "@type": "SoftwareApplication",
     "@id": `${recruitersUrl}#software`,
     name: "Livefolio for recruiters",
+    alternateName: "Livefolio Hire",
     url: recruitersUrl,
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "Rank applicants for any role on proof and named references, not resume keywords. Post a role free and get a ranked shortlist with up to four plain reasons per score.",
+      "Describe who you need; get a shortlist backed by their work and references. Rank applicants for any role on proof and named references, not resume keywords, with up to four plain reasons per score. Free plan: 1 seat, 1 open job.",
     featureList: [
+      "Hiring agent: describe who you need in plain words and get a top-10 shortlist with plain reasons and source labels. The recruiter approves the job and sends the invites.",
       "Proof-based ranking with a 0 to 100 score and up to four plain reasons",
       "Optional references in the ranking (up to 12 points, switched on by the recruiter)",
       "Compare applicants side by side",
       "Pool gap report",
       "Pipeline and shortlist",
-      "Talent search across people who opted in (Pro and above)",
-      "Frozen snapshots and job-scoped applicant pools",
+      "Talent search across people who opted in (paid plans)",
+      "Frozen apply-time snapshots and job-scoped applicant pools",
     ],
     publisher: { "@id": organizationId() },
+    isRelatedTo: { "@id": `${getSiteUrl()}/#software` },
     offers: [
       {
         "@type": "Offer",
@@ -113,7 +116,8 @@ export function getRecruiterSoftwareApplicationSchema() {
         url: pricingUrl,
         price: "0",
         priceCurrency: "INR",
-        description: "1 seat, 1 open job and 1 workspace, with proof-based ranking and references.",
+        description:
+          "1 seat, 1 open job (unlimited drafts) and 1 workspace, with proof-based ranking and references. See https://livefolio.me/recruiters for other plans.",
       },
     ],
   };
