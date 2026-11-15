@@ -159,7 +159,7 @@ export default function TemplatesPage() {
         )}
         {accessTier === "free" && (
           <p className="mt-3 text-body-sm text-text-secondary">
-            Your free trial ended. Minimal stays available.{" "}
+            Your free trial ended. The free templates stay available.{" "}
             <Link
               href="/dashboard/billing"
               className="text-brand-primary underline underline-offset-4 hover:text-brand-dark"

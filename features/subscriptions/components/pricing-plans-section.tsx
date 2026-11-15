@@ -1,6 +1,7 @@
 "use client";
 
 import { SubscriptionFlow } from "./subscription-flow";
+import { BILLING_INTERVALS, formatProPriceLabel } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
 export function PricingPlansSection({
@@ -28,6 +29,19 @@ export function PricingPlansSection({
       </header>
 
       <SubscriptionFlow />
+
+      <p className="text-center text-body-sm text-text-secondary">
+        Pro pricing:{" "}
+        {BILLING_INTERVALS.map((interval, index) => (
+          <span key={interval}>
+            {index > 0 ? (index === BILLING_INTERVALS.length - 1 ? " or " : ", ") : ""}
+            <span className="font-medium text-text-primary">
+              {formatProPriceLabel(interval)}
+            </span>
+          </span>
+        ))}
+        .
+      </p>
     </div>
   );
 }

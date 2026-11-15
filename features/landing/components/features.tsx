@@ -86,8 +86,9 @@ export function Features() {
                 Start from the resume you already have
               </h3>
               <p className="mt-3 text-[14px] leading-relaxed text-[#5c4038]">
-                Upload a PDF. We structure your experience, skills, and
-                projects so you begin with a draft, not a blank page.
+                Upload your resume PDF (up to 10 MB). We structure your
+                experience, education, skills and projects so you begin with a
+                draft, not a blank page.
               </p>
             </div>
             <ul className="flex w-full flex-col justify-center gap-2 lg:w-[11.5rem]">

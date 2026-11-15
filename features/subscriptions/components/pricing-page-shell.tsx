@@ -55,7 +55,7 @@ export function PricingPageShell() {
                 <h2 className="text-h3 text-text-primary">Why only two plans?</h2>
                 <p className="mt-2 text-body-sm text-text-secondary">
                   Starter gives you one free month with full workflow access, then
-                  keeps core publishing on Minimal. Pro is for job-search seasons
+                  keeps core publishing on the free templates. Pro is for job-search seasons
                   when you want premium templates, resume import, and faster
                   support. We will keep the lineup this simple until usage tells us
                   we need more.

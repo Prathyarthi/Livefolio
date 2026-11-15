@@ -16,6 +16,8 @@ import { PlanPrice } from "./plan-price";
 import { subscribeButtonLabel } from "../lib/checkout";
 
 interface PricingCardsProps {
+  /** True until the session and billing state are known: buttons show a placeholder. */
+  stateLoading?: boolean;
   plans: PricingPlan[];
   loggedIn: boolean;
   paidActive: boolean;
@@ -28,6 +30,7 @@ interface PricingCardsProps {
 }
 
 export function PricingCards({
+  stateLoading = false,
   plans,
   loggedIn,
   paidActive,
@@ -153,7 +156,14 @@ export function PricingCards({
                   ))}
                 </ul>
 
-                {plan.slug === "starter" && (
+                {stateLoading && (
+                  <div
+                    className="skeleton-shimmer mt-auto h-10 w-full rounded-[var(--radius-md)]"
+                    aria-hidden
+                  />
+                )}
+
+                {!stateLoading && plan.slug === "starter" && (
                   <Button asChild variant="outline" className="mt-auto w-full">
                     <Link href={loggedIn ? "/dashboard" : plan.ctaHref}>
                       {loggedIn ? "Continue with Free" : plan.ctaLabel}
@@ -161,13 +171,13 @@ export function PricingCards({
                   </Button>
                 )}
 
-                {isPaid && !loggedIn && (
+                {!stateLoading && isPaid && !loggedIn && (
                   <Button asChild className="mt-auto w-full">
                     <Link href="/sign-up">Sign up to subscribe</Link>
                   </Button>
                 )}
 
-                {isPaid && loggedIn && paidActive && (
+                {!stateLoading && isPaid && loggedIn && paidActive && (
                   <Button
                     asChild
                     variant="outline"
@@ -177,7 +187,7 @@ export function PricingCards({
                   </Button>
                 )}
 
-                {isPaid && loggedIn && showSubscribe && (
+                {!stateLoading && isPaid && loggedIn && showSubscribe && (
                   <Button
                     type="button"
                     className="mt-auto w-full"
@@ -188,7 +198,7 @@ export function PricingCards({
                   </Button>
                 )}
 
-                {isPaid && loggedIn && showSubscribeDisabled && (
+                {!stateLoading && isPaid && loggedIn && showSubscribeDisabled && (
                   <Button
                     type="button"
                     variant="outline"
@@ -199,7 +209,7 @@ export function PricingCards({
                   </Button>
                 )}
 
-                {isPaid && loggedIn && showIntervalUnavailable && (
+                {!stateLoading && isPaid && loggedIn && showIntervalUnavailable && (
                   <Button
                     type="button"
                     variant="outline"
@@ -210,7 +220,7 @@ export function PricingCards({
                   </Button>
                 )}
 
-                {isPaid && loggedIn && paidPending && paymentsReady && intervalCheckoutReady && (
+                {!stateLoading && isPaid && loggedIn && paidPending && paymentsReady && intervalCheckoutReady && (
                   <Button
                     type="button"
                     variant="outline"
@@ -221,7 +231,7 @@ export function PricingCards({
                   </Button>
                 )}
 
-                {isPaid && loggedIn && paidPending && !paymentsReady && (
+                {!stateLoading && isPaid && loggedIn && paidPending && !paymentsReady && (
                   <Button
                     type="button"
                     variant="outline"
