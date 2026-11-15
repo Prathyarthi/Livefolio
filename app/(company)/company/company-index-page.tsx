@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Building2 } from "lucide-react";
+import { BadgeCheck, Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ import {
 } from "@/features/organization/api/use-organization";
 import { isValidOrgSlug, sanitizeHiringSlug } from "@/features/jobs/lib/slug";
 import { OrgLogo } from "@/features/organization/components/org-logo";
-
 function getOrgSlugInlineError(slug: string): string | null {
   if (!slug) return null;
   if (slug.length < 2) return "Slug must be at least 2 characters";
@@ -145,8 +144,8 @@ export function CompanyIndexPage() {
     <div className="min-h-screen bg-surface-base">
       <div className="mx-auto w-full max-w-2xl space-y-8 px-6 py-16">
         <header className="space-y-2">
-          <p className="eyebrow uppercase">Hiring</p>
-          <h1 className="text-h2 text-text-primary">Companies</h1>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">Hiring</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary md:text-3xl">Companies</h1>
           <p className="text-body-sm text-text-secondary">
             Create an organization to post jobs. Workspaces inside it keep
             different roles separate. Billing is on the organization.
@@ -154,7 +153,7 @@ export function CompanyIndexPage() {
         </header>
 
         {orgs && orgs.length > 0 ? (
-          <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised shadow-[var(--shadow-card)]">
+          <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
             {orgs.map(({ organization, role }) => (
               <li key={organization.id}>
                 <Link
@@ -169,8 +168,13 @@ export function CompanyIndexPage() {
                       size="sm"
                     />
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-text-primary">
-                        <RichText as="span" text={organization.name} />
+                      <p className="flex min-w-0 items-center gap-1.5 font-medium text-text-primary">
+                        <span className="truncate">
+                          <RichText as="span" text={organization.name} />
+                        </span>
+                        {organization.verified ? (
+                          <BadgeCheck className="size-4 shrink-0 text-sky-500" aria-label="Verified company" />
+                        ) : null}
                       </p>
                       <p className="text-body-sm text-text-secondary">
                         {role} · {organization._count?.jobs ?? 0} jobs
@@ -183,7 +187,7 @@ export function CompanyIndexPage() {
             ))}
           </ul>
         ) : (
-          <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 px-6 py-10 text-center shadow-[var(--shadow-card)] md:p-8">
+          <div className="flex flex-col items-center rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-6 py-10 text-center">
             <Building2 className="mx-auto h-8 w-8 text-text-muted" />
             <h2 className="mt-3 text-h3 text-text-primary">
               No organization yet
@@ -199,7 +203,7 @@ export function CompanyIndexPage() {
             Create an organization
           </Button>
         ) : (
-          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-6 shadow-[var(--shadow-card)] md:p-8">
+          <div className="space-y-6 rounded-[var(--radius-lg)] border border-border-default bg-surface-raised p-4 md:p-8">
             <h2 className="text-h3 text-text-primary">New company</h2>
             <div className="space-y-2">
               <Label htmlFor="company-name">Company name</Label>

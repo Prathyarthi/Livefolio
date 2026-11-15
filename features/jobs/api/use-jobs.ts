@@ -65,6 +65,7 @@ export type JobOrganization = {
   description: string | null;
   websiteUrl?: string | null;
   location?: string | null;
+  verified?: boolean;
 };
 
 export type Job = {

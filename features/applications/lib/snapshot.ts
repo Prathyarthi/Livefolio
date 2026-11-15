@@ -1,10 +1,11 @@
 import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
+import { linkedInSnapshotFromImport } from "@/features/applications/lib/linkedin-snapshot";
 
 export type { ApplicationSnapshotData };
 
-const snapshotInclude = {
+export const applicationSnapshotInclude = {
   experiences: { orderBy: { sortOrder: "asc" as const } },
   educations: { orderBy: { sortOrder: "asc" as const } },
   skills: { orderBy: { sortOrder: "asc" as const } },
@@ -14,6 +15,7 @@ const snapshotInclude = {
   certifications: { orderBy: { sortOrder: "asc" as const } },
   achievements: { orderBy: { sortOrder: "asc" as const } },
   customSections: { orderBy: { sortOrder: "asc" as const } },
+  linkedinImport: { select: { profileData: true, lastSyncedAt: true } },
 } as const;
 
 function toIso(date: Date | null | undefined): string | null {
@@ -25,12 +27,25 @@ export async function buildApplicationSnapshot(
 ): Promise<{ portfolioId: string; data: ApplicationSnapshotData } | null> {
   const portfolio = await prisma.portfolio.findUnique({
     where: { userId },
-    include: snapshotInclude,
+    include: applicationSnapshotInclude,
   });
 
   if (!portfolio) return null;
 
-  const data: ApplicationSnapshotData = {
+  return { portfolioId: portfolio.id, data: portfolioToSnapshot(portfolio) };
+}
+
+export type SnapshotPortfolio = Prisma.PortfolioGetPayload<{
+  include: typeof applicationSnapshotInclude;
+}>;
+
+export function portfolioToSnapshot(
+  portfolio: SnapshotPortfolio,
+): ApplicationSnapshotData {
+  const linkedin = portfolio.linkedinImport
+    ? linkedInSnapshotFromImport(portfolio.linkedinImport)
+    : null;
+  return {
     version: 1,
     capturedAt: new Date().toISOString(),
     profile: {
@@ -94,15 +109,16 @@ export async function buildApplicationSnapshot(
       url: s.url,
       username: s.username,
       cachedStats: s.cachedStats ?? null,
+      // A LinkedIn import is a real sync even though it stores no cachedStats.
+      ...(linkedin && s.platform.toLowerCase() === "linkedin" ? { connected: true } : {}),
     })),
+    linkedin,
     customSections: portfolio.customSections.map((c) => ({
       sectionType: c.sectionType,
       label: c.label,
       items: c.items,
     })),
   };
-
-  return { portfolioId: portfolio.id, data };
 }
 
 export function snapshotAsJson(

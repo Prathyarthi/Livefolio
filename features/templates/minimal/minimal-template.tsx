@@ -36,6 +36,7 @@ import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { getTemplateSectionLayout } from "../section-layouts";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 import {
   renderSections,
   resolveSectionLayout,
@@ -77,6 +78,28 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("minimal"),
     portfolio.customization,
   );
+
+  const linkedinSection = data.linkedin ? (
+    <LinkedInSection
+      data={data.linkedin}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
+      classes={{
+            aboutList: "space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-stone-300",
+            aboutParagraph: "text-base leading-8 text-stone-600",
+            postList: "list-disc space-y-2 pl-5 text-sm text-stone-900 leading-relaxed",
+            postParagraph: "text-sm text-stone-900 leading-relaxed",
+            descriptionParagraph: "text-sm leading-7 text-stone-600",
+            descriptionList: "space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-stone-300",
+          section: "scroll-mt-24 rounded-[1.75rem] border border-stone-200/80 bg-white/70 p-8",
+          card: "rounded-2xl border border-stone-200/80 bg-white p-5",
+          title: "font-serif text-xl font-semibold text-stone-900",
+          text: "text-sm leading-7 text-stone-600",
+          muted: "text-xs uppercase tracking-[0.22em] text-stone-400",
+          chip: "rounded-full border border-stone-200/80 bg-stone-50 px-3 py-1.5 text-sm text-stone-600",
+          link: "text-sm text-stone-600 underline-offset-4 hover:text-stone-900 hover:underline",
+      }}
+    />
+  ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
@@ -533,7 +556,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
         )}
 
         <div className="mt-8 space-y-8 md:mt-10 md:space-y-10">
-          {renderSections(resolved, "full", blocks)}
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
 
         {customSections.length > 0 && (

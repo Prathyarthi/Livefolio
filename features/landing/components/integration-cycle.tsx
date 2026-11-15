@@ -9,7 +9,8 @@ const HOLD_MS = 1500;
 
 export function IntegrationCycle() {
   const [platformIndex, setPlatformIndex] = useState(0);
-  const [text, setText] = useState("");
+  // Non-empty on SSR so "connected through …" is a complete sentence before JS.
+  const [text, setText] = useState<string>(() => integrationCycle[0] ?? "integrations");
   const [erasing, setErasing] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -51,13 +52,16 @@ export function IntegrationCycle() {
     return <span>integrations</span>;
   }
 
+  const visible =
+    text || integrationCycle[platformIndex] || "integrations";
+
   return (
     <span
       className="integration-cycle"
       aria-live="polite"
-      aria-label={`Connected through ${text || integrationCycle[platformIndex]}`}
+      aria-label={`Connected through ${visible}`}
     >
-      <span className="integration-cycle__word">{text}</span>
+      <span className="integration-cycle__word">{visible}</span>
       <span className="integration-cycle__cursor" aria-hidden>
         ▊
       </span>

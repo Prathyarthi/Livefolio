@@ -128,7 +128,7 @@ export async function POST(req: Request) {
     interval = getIntervalForPlanId(providerPlanId);
     if (!interval) {
       return NextResponse.json(
-        { error: "Subscription is not linked to a configured Org Pro plan." },
+        { error: "Subscription is not linked to a configured hiring plan." },
         { status: 403 },
       );
     }

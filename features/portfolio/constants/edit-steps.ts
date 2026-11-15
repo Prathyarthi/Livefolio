@@ -8,6 +8,7 @@ import {
   Trophy,
   Layers,
   Rocket,
+  Handshake,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ export const EDIT_STEPS = [
   { value: "achievements", label: "Achievements", short: "Awards", icon: Trophy },
   { value: "custom", label: "Custom Sections", short: "Custom", icon: Layers },
   { value: "social", label: "Social Links", short: "Social", icon: Globe },
+  { value: "references", label: "References", short: "Refs", icon: Handshake },
   { value: "publish", label: "Publish", short: "Publish", icon: Rocket },
 ] as const satisfies ReadonlyArray<{
   value: string;
@@ -30,6 +32,12 @@ export const EDIT_STEPS = [
 
 export type EditStepValue = (typeof EDIT_STEPS)[number]["value"];
 
+export function isEditStepValue(
+  value: string | null | undefined,
+): value is EditStepValue {
+  return EDIT_STEPS.some((step) => step.value === value);
+}
+
 export const EDIT_STEP_DESCRIPTIONS: Record<EditStepValue, string> = {
   basic: "Your name, headline, summary, and how people can reach you.",
   experience: "Roles, companies, and what you accomplished in each job.",
@@ -39,5 +47,6 @@ export const EDIT_STEP_DESCRIPTIONS: Record<EditStepValue, string> = {
   achievements: "Awards, talks, milestones, and standout moments.",
   custom: "Extra sections for anything that does not fit elsewhere.",
   social: "GitHub, LinkedIn, writing platforms, coding profiles, and other links.",
+  references: "Named vouches recruiters can see - not shown on your public Livefolio.",
   publish: "Go live, share your link, and let recruiters find you.",
 };

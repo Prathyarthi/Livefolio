@@ -61,7 +61,7 @@ export type JobJdInput = {
 };
 
 const ENGINEERING_HINTS =
-  /\b(software|engineer|developer|swe|backend|frontend|full[- ]?stack|platform|infra|sre|devops|mobile|android|ios|ml|machine learning|data engineer|security engineer)\b/i;
+  /\b(software|engineer|developer|swe|backend|frontend|full[- ]?stack|platform engineer(?:ing)?|infra|sre|devops|(?:mobile|android|ios) (?:engineer|developer|dev)|ml engineer|machine learning|data engineer|security engineer)\b/i;
 const DESIGN_HINTS = /\b(design(?:er)?|ux|ui|product design|figma)\b/i;
 const MARKETING_HINTS = /\b(marketing|growth marketer|brand|seo|demand gen)\b/i;
 const SALES_HINTS = /\b(sales|account executive|ae\b|sdr|bdr)\b/i;

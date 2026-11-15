@@ -1,15 +1,38 @@
 import Elysia, { t } from "elysia";
+import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { canUseTalentSearch } from "@/lib/hiring-plans";
+import { ORG_BILLING_SELECT, OrgPlanLimitError, orgPlanTier } from "@/lib/org-entitlements";
 import { requireWorkspaceAccess } from "@/features/organization/lib/org-access";
 import { getPortfolioPublicUrl } from "@/lib/domain";
+import { talentKeywordWhere } from "@/features/talent/lib/search";
+import { parsePageParams, paginateSlice } from "@/lib/pagination";
 import {
-  talentIdsMatchingJsonAndArrays,
-  talentTextSearchOr,
-} from "@/features/talent/lib/search";
-import { parsePageParams } from "@/lib/pagination";
+  applicationSnapshotInclude,
+  portfolioToSnapshot,
+} from "@/features/applications/lib/snapshot";
+import { summarizeSnapshot } from "@/features/applications/lib/applicant-summary";
+import { buildSearchFacets } from "@/features/search/lib/facets";
+import { matchesStructuredFilters } from "@/features/search/lib/filters";
+import {
+  matchesInterpretedQuery,
+  snapshotSearchBlob,
+} from "@/features/search/lib/match";
+import { appendReferenceText } from "@/features/search/lib/references";
+import { findUserIdsMatchingReferences } from "@/features/search/server/reference-users";
+import { isProofKind, proofKindsOf } from "@/features/search/lib/proof";
+import { interpretSearchQuery, parseSearchSort } from "@/features/search/lib/query";
+import { RANKING_VERSION, rankCandidate } from "@/features/search/lib/rank";
+import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
+import {
+  listNamedVouchesByUserIds,
+  listReferenceSignalsByUserIds,
+} from "@/features/vouches/lib/public";
 
-const QUERY_MAX = 80;
+const QUERY_MAX = 120;
+/** Ranking runs in memory, so recall is capped to the most recently updated matches. */
+const RECALL_CAP = 300;
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -17,8 +40,23 @@ function optionalTrim(value?: string | null) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function optionalNumber(value?: string | null): number | undefined {
+  if (value == null || value === "") return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 function contains(value: string) {
   return { contains: value, mode: "insensitive" as const };
+}
+
+function clauseOrUsers(
+  clause: Prisma.PortfolioWhereInput | null,
+  userIds: string[],
+): Prisma.PortfolioWhereInput | null {
+  if (userIds.length === 0) return clause;
+  if (!clause) return { userId: { in: userIds } };
+  return { OR: [clause, { userId: { in: userIds } }] };
 }
 
 export const talent = new Elysia({ prefix: "/talent" }).get(
@@ -32,7 +70,7 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
 
     const org = await prisma.organization.findUnique({
       where: { slug: ctx.params.orgSlug },
-      select: { id: true },
+      select: ORG_BILLING_SELECT,
     });
     if (!org) {
       ctx.set.status = 404;
@@ -49,57 +87,152 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       return { error: "Forbidden" };
     }
 
+    // Talent search is Pro and above; Free orgs get a 403 with an upgrade prompt.
+    if (!canUseTalentSearch(orgPlanTier(org))) {
+      ctx.set.status = 403;
+      return new OrgPlanLimitError("talent", org.slug).toBody();
+    }
+
     const q = optionalTrim(ctx.query.q);
+    const includeReferences =
+      ctx.query.references === "1" || ctx.query.references === "true";
     const location = optionalTrim(ctx.query.location);
     const skill = optionalTrim(ctx.query.skill);
+    const proof = isProofKind(ctx.query.proof) ? ctx.query.proof : undefined;
+    const minExperience = optionalNumber(ctx.query.minExperience);
+    const maxExperience = optionalNumber(ctx.query.maxExperience);
+    const sort = parseSearchSort(ctx.query.sort);
     const { page: requestedPage, pageSize } = parsePageParams(ctx.query);
 
-    const jsonAndArrayIds = q ? await talentIdsMatchingJsonAndArrays(q) : [];
+    const jobId = optionalTrim(ctx.query.jobId);
+    let job: { id: string; title: string } | null = null;
+    if (jobId) {
+      job = await prisma.job.findFirst({
+        where: {
+          id: jobId,
+          organizationId: org.id,
+          workspaceId: workspaceAccess.workspace.id,
+        },
+        select: { id: true, title: true },
+      });
+      if (!job) {
+        ctx.set.status = 404;
+        return { error: "Job not found in this workspace" };
+      }
+    }
+    const jobProfile = job ? await refreshJobSearchProfile(job.id) : null;
 
-    const where = {
-      openToWork: true,
-      isPublished: true,
-      slug: { not: null },
-      ...(location ? { location: contains(location) } : {}),
-      ...(skill ? { skills: { some: { name: contains(skill) } } } : {}),
-      ...(q ? { OR: talentTextSearchOr(q, jsonAndArrayIds) } : {}),
-    };
+    const interpreted = interpretSearchQuery(q ?? undefined);
+    const jobTerms = jobProfile
+      ? [...jobProfile.mustHaves, ...jobProfile.niceToHaves]
+      : [];
+    const recallTerms =
+      interpreted.keywords.length > 0 ? interpreted.keywords : jobTerms;
+    const referenceQuery =
+      interpreted.keywords.length > 0
+        ? interpreted
+        : {
+            ...interpreted,
+            keywords: recallTerms.slice(0, 8),
+            matchAny: true,
+          };
+    const [keywordWhere, skillWhere, keywordReferenceIds, skillReferenceIds] =
+      await Promise.all([
+        talentKeywordWhere(
+          recallTerms,
+          interpreted.keywords.length > 0 ? interpreted.matchAny : true,
+        ),
+        skill ? talentKeywordWhere([skill], false) : Promise.resolve(null),
+        includeReferences
+          ? findUserIdsMatchingReferences({ interpreted: referenceQuery })
+          : Promise.resolve([] as string[]),
+        includeReferences && skill
+          ? findUserIdsMatchingReferences({
+              interpreted: { ...interpreted, keywords: [], matchAny: false },
+              skill,
+            })
+          : Promise.resolve([] as string[]),
+      ]);
+    const resolvedLocation = location ?? interpreted.location ?? null;
 
-    const total = await prisma.portfolio.count({ where });
-    const pageCount = Math.max(1, Math.ceil(total / pageSize) || 1);
-    const page = Math.min(requestedPage, pageCount);
+    const filters: Prisma.PortfolioWhereInput[] = [
+      { openToWork: true, isPublished: true, slug: { not: null } },
+    ];
+    if (resolvedLocation) filters.push({ location: contains(resolvedLocation) });
+    const keywordClause = clauseOrUsers(keywordWhere, keywordReferenceIds);
+    const skillClause = clauseOrUsers(skillWhere, skillReferenceIds);
+    if (keywordClause) filters.push(keywordClause);
+    if (skillClause) filters.push(skillClause);
 
     const rows = await prisma.portfolio.findMany({
-      where,
-      select: {
-        slug: true,
-        title: true,
-        headline: true,
-        location: true,
-        avatarUrl: true,
-        updatedAt: true,
-        skills: {
-          orderBy: { sortOrder: "asc" },
-          take: 8,
-          select: { name: true },
-        },
-        experiences: {
-          orderBy: { sortOrder: "asc" },
-          take: 1,
-          select: { role: true, company: true },
-        },
-      },
+      where: { AND: filters },
+      include: applicationSnapshotInclude,
       orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+      take: RECALL_CAP,
     });
 
+    const signals = includeReferences
+      ? await listReferenceSignalsByUserIds(rows.map((row) => row.userId))
+      : undefined;
+
+    const matched = rows
+      .map((row) => {
+        const snapshot = portfolioToSnapshot(row);
+        return { row, snapshot, references: signals?.get(row.userId) };
+      })
+      .filter(({ row, snapshot, references }) => {
+        const blob = appendReferenceText(snapshotSearchBlob(snapshot), references);
+        if (!matchesInterpretedQuery(blob, interpreted)) return false;
+        return matchesStructuredFilters(
+          snapshot,
+          {
+            location: resolvedLocation ?? undefined,
+            skill: skill ?? undefined,
+            proof,
+            minExperience: minExperience ?? interpreted.minExperience,
+            maxExperience,
+          },
+          row.updatedAt,
+          {
+            skillText: references?.map((ref) => ref.story).join(" "),
+          },
+        );
+      })
+      .map(({ row, snapshot, references }) => ({
+        row,
+        snapshot,
+        rank: rankCandidate(snapshot, {
+          jobProfile,
+          query: interpreted,
+          extras: { freshnessAt: row.updatedAt },
+          references,
+        }),
+      }))
+      .sort((a, b) => {
+        if (sort === "relevance") {
+          const diff = b.rank.score - a.rank.score;
+          if (diff !== 0) return diff;
+        }
+        return b.row.updatedAt.getTime() - a.row.updatedAt.getTime();
+      });
+
+    const paged = paginateSlice(matched, requestedPage, pageSize);
+    const vouchesByUser = await listNamedVouchesByUserIds(
+      paged.items.map((item) => item.row.userId),
+    );
+
     return {
-      total,
-      page,
-      pageSize,
-      pageCount,
-      people: rows.map((row) => {
+      total: paged.total,
+      truncated: rows.length >= RECALL_CAP,
+      page: paged.page,
+      pageSize: paged.pageSize,
+      pageCount: paged.pageCount,
+      sort,
+      rankingVersion: RANKING_VERSION,
+      job,
+      interpreted,
+      facets: buildSearchFacets(matched.map((item) => item.snapshot)),
+      people: paged.items.map(({ row, snapshot, rank }) => {
         const slug = row.slug!;
         const recent = row.experiences[0];
         return {
@@ -108,11 +241,16 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
           headline: row.headline,
           location: row.location,
           avatarUrl: row.avatarUrl,
-          skills: row.skills.map((s) => s.name),
+          skills: row.skills.slice(0, 8).map((s) => s.name),
           recentRole: recent
             ? { role: recent.role, company: recent.company }
             : null,
+          yearsExperience: summarizeSnapshot(snapshot).yearsExperience,
+          proof: proofKindsOf(snapshot),
+          score: rank.score,
+          reasons: rank.reasons,
           livefolioUrl: getPortfolioPublicUrl(slug),
+          vouches: vouchesByUser.get(row.userId) ?? [],
         };
       }),
     };
@@ -122,6 +260,12 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       q: t.Optional(t.String()),
       location: t.Optional(t.String()),
       skill: t.Optional(t.String()),
+      proof: t.Optional(t.String()),
+      minExperience: t.Optional(t.String()),
+      maxExperience: t.Optional(t.String()),
+      jobId: t.Optional(t.String()),
+      sort: t.Optional(t.String()),
+      references: t.Optional(t.String()),
       page: t.Optional(t.String()),
       pageSize: t.Optional(t.String()),
     }),

@@ -14,6 +14,10 @@ export type PoolGapReport = {
   rows: PoolGapRow[];
 };
 
+export function requirementKey(req: { type: string; label: string }): string {
+  return `${req.type}|${req.label}`;
+}
+
 export function buildPoolGapReport(
   applicants: Array<{
     evidence: {
@@ -26,16 +30,28 @@ export function buildPoolGapReport(
   }>,
   requirements: JobRequirementInput[],
 ): PoolGapReport {
-  const poolSize = applicants.length;
+  return buildPoolGapReportFromKeys(
+    applicants.map((applicant) =>
+      applicant.evidence.requirementMatches
+        .filter((match) => match.matched)
+        .map(requirementKey),
+    ),
+    requirements,
+  );
+}
+
+/** Gap report from each applicant's matched "type|label" keys, as stored on the application. */
+export function buildPoolGapReportFromKeys(
+  matchedKeysPerApplicant: string[][],
+  requirements: JobRequirementInput[],
+): PoolGapReport {
+  const poolSize = matchedKeysPerApplicant.length;
+  const counts = new Map<string, number>();
+  for (const keys of matchedKeysPerApplicant) {
+    for (const key of new Set(keys)) counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
   const rows: PoolGapRow[] = requirements.map((req) => {
-    const matchedCount = applicants.filter((applicant) =>
-      applicant.evidence.requirementMatches.some(
-        (match) =>
-          match.label === req.label &&
-          match.type === req.type &&
-          match.matched,
-      ),
-    ).length;
+    const matchedCount = counts.get(requirementKey(req)) ?? 0;
 
     return {
       label: req.label,

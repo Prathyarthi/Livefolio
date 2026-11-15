@@ -8,6 +8,10 @@ import type {
   ScreeningAnswerInput,
   ScreeningQuestion,
 } from "@/features/jobs/lib/screening-questions";
+import type { SearchFacets } from "@/features/search/lib/facets";
+import type { ProofKind } from "@/features/search/lib/proof";
+import type { InterpretedSearchQuery, SearchSort } from "@/features/search/lib/query";
+import type { NamedVouch } from "@/features/vouches/lib/public";
 
 async function throwApiError(
   response: Response,
@@ -188,6 +192,8 @@ export type ApplicantEvidenceSummary = {
   totalPreferred: number;
   rankScore?: number;
   rankReasons?: string[];
+  /** Points added by named references when Include references is on. */
+  referenceBonus?: number;
 };
 
 export type ApplicantCard = {
@@ -219,6 +225,7 @@ export type ApplicantCard = {
   };
   evidence: ApplicantEvidenceSummary;
   resumeFileId: string | null;
+  vouchCount?: number;
 };
 
 export type ApplicantPoolFilters = {
@@ -231,14 +238,11 @@ export type ApplicantPoolFilters = {
   maxExperience?: number;
   appliedAfter?: string;
   appliedBefore?: string;
-};
-
-export type InterpretedApplicantQuery = {
-  raw: string;
-  keywords: string[];
-  skills: string[];
-  minExperience?: number;
-  location?: string;
+  proof?: ProofKind;
+  sort?: SearchSort;
+  includeReferences?: boolean;
+  /** Only these application ids (compare view). */
+  ids?: string[];
 };
 
 export type ApplicantPool = {
@@ -258,11 +262,17 @@ export type ApplicantPool = {
   };
   stageCounts: Record<string, number>;
   matchedCount: number;
+  /** Text search ranked only the top recalled candidates; refine to see the rest. */
+  truncated: boolean;
+  /** Applicants still being re-scored after a job or ranking change. */
+  indexing: { pending: number };
   page: number;
   pageSize: number;
   pageCount: number;
   filters: ApplicantPoolFilters;
-  interpreted?: InterpretedApplicantQuery;
+  sort: SearchSort;
+  interpreted?: InterpretedSearchQuery;
+  facets: SearchFacets;
   gaps: PoolGapReport;
   applicants: ApplicantCard[];
 };
@@ -303,6 +313,7 @@ export type CompanyApplicationDetail = {
   snapshotData: ApplicationSnapshotData | null;
   evidence: ApplicantEvidenceSummary;
   resumeFileId: string | null;
+  vouches: NamedVouch[];
   requirements?: Array<{
     id: string;
     type: string;
@@ -317,6 +328,7 @@ export function useApplicantPool(
     stage?: string;
     page?: number;
     pageSize?: number;
+    enabled?: boolean;
   } & ApplicantPoolFilters,
 ) {
   const stage = options?.stage;
@@ -329,6 +341,10 @@ export function useApplicantPool(
   const maxExperience = options?.maxExperience;
   const appliedAfter = options?.appliedAfter;
   const appliedBefore = options?.appliedBefore;
+  const proof = options?.proof;
+  const ids = options?.ids;
+  const sort = options?.sort ?? "relevance";
+  const includeReferences = options?.includeReferences === true;
   const page = options?.page ?? 1;
   const pageSize = options?.pageSize ?? 20;
 
@@ -347,10 +363,14 @@ export function useApplicantPool(
       maxExperience ?? "",
       appliedAfter ?? "",
       appliedBefore ?? "",
+      proof ?? "",
+      ids?.join(",") ?? "",
+      sort,
+      includeReferences ? "references" : "",
       page,
       pageSize,
     ],
-    enabled: Boolean(jobId),
+    enabled: Boolean(jobId) && options?.enabled !== false,
     queryFn: async () => {
       const params = new URLSearchParams();
       if (stage) params.set("stage", stage);
@@ -363,6 +383,10 @@ export function useApplicantPool(
       if (maxExperience != null) params.set("maxExperience", String(maxExperience));
       if (appliedAfter) params.set("appliedAfter", appliedAfter);
       if (appliedBefore) params.set("appliedBefore", appliedBefore);
+      if (proof) params.set("proof", proof);
+      if (ids?.length) params.set("ids", ids.join(","));
+      if (includeReferences) params.set("references", "1");
+      params.set("sort", sort);
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));
       const qs = params.toString();
@@ -373,7 +397,30 @@ export function useApplicantPool(
       if (!res.ok) await throwApiError(res, "Failed to load applicants");
       return res.json() as Promise<ApplicantPool>;
     },
+    refetchInterval: (query) =>
+      (query.state.data?.indexing?.pending ?? 0) > 0 ? 2000 : false,
   });
+}
+
+/** Patch a card in every cached pool page so stage and shortlist clicks show instantly. */
+function patchPoolCard(
+  qc: ReturnType<typeof useQueryClient>,
+  jobId: string,
+  applicationId: string,
+  patch: Partial<ApplicantCard>,
+) {
+  qc.setQueriesData<ApplicantPool>(
+    { queryKey: ["applications", "job", jobId] },
+    (pool) =>
+      pool && Array.isArray(pool.applicants)
+        ? {
+            ...pool,
+            applicants: pool.applicants.map((card) =>
+              card.id === applicationId ? { ...card, ...patch } : card,
+            ),
+          }
+        : pool,
+  );
 }
 
 export function useCompanyApplication(
@@ -415,6 +462,15 @@ export function useUpdateApplicationStage(jobId: string) {
       if (!res.ok) await throwApiError(res, "Failed to update stage");
       return res.json();
     },
+    onMutate: (vars) => {
+      patchPoolCard(qc, jobId, vars.applicationId, {
+        stage: vars.stage,
+        shortlisted: vars.stage === "shortlisted",
+      });
+    },
+    onError: () => {
+      qc.invalidateQueries({ queryKey: ["applications", "job", jobId] });
+    },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["applications", "job", jobId] });
       qc.invalidateQueries({
@@ -444,6 +500,14 @@ export function useToggleShortlist(jobId: string) {
       );
       if (!res.ok) await throwApiError(res, "Failed to update shortlist");
       return res.json();
+    },
+    onMutate: (vars) => {
+      patchPoolCard(qc, jobId, vars.applicationId, {
+        shortlisted: vars.shortlisted,
+      });
+    },
+    onError: () => {
+      qc.invalidateQueries({ queryKey: ["applications", "job", jobId] });
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["applications", "job", jobId] });

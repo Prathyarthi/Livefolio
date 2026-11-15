@@ -158,7 +158,7 @@ export function welcomeEmailHtml(
     subject: `Welcome to ${siteConfig.name}`,
     html: emailShell({
       title: `Welcome to ${siteConfig.name}`,
-      preheader: "Your portfolio builder is ready — publish in minutes.",
+      preheader: "Your portfolio builder is ready — publish in seconds.",
       bodyHtml: `
         ${greeting(firstName)}
         ${paragraph(`Welcome to ${siteConfig.name}. Upload your resume, pick a template, and publish a live portfolio on your own link.`)}
@@ -253,8 +253,125 @@ export function publishedPortfolioEmailHtml(
   };
 }
 
+export function vouchRequestEmailHtml(input: {
+  refereeName?: string | null;
+  requesterName: string;
+  personalNote?: string | null;
+  vouchUrl: string;
+}): { subject: string; html: string } {
+  const requester = input.requesterName.trim() || "A Livefolio member";
+  const firstName =
+    input.refereeName?.trim().split(/\s+/)[0] || "there";
+  const note = input.personalNote?.trim();
+
+  return {
+    subject: `${requester} asked you to vouch for them on ${siteConfig.name}`,
+    html: emailShell({
+      title: `Vouch for ${requester}`,
+      preheader: "Two short questions. Under a minute.",
+      bodyHtml: `
+        ${paragraph(`Hey ${escapeHtml(firstName)},`)}
+        ${paragraph(
+          `<strong>${escapeHtml(requester)}</strong> asked you to vouch for them on ${siteConfig.name}.`,
+        )}
+        ${
+          note
+            ? `<blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid ${brand.coral};background:${brand.footer};color:${brand.text};font-size:15px;line-height:1.6;">${escapeHtml(note)}</blockquote>`
+            : ""
+        }
+        ${paragraph("It takes under a minute: how you know them, and one specific thing they are great at. Sign in to Livefolio with this email.", true)}
+        ${ctaButton(input.vouchUrl, `Vouch for ${requester}`)}
+      `,
+      footerHtml: `<p style="font-size:12px;color:${brand.muted};margin:0;">
+        You're receiving this because ${escapeHtml(requester)} asked you to vouch on ${siteConfig.name}.
+        If this wasn't meant for you, you can ignore it.
+      </p>`,
+    }),
+  };
+}
+
+export function vouchReceivedEmailHtml(input: {
+  requesterName: string;
+  refereeName: string;
+  story: string;
+  dashboardUrl: string;
+}): { subject: string; html: string } {
+  const firstName = input.requesterName.trim().split(/\s+/)[0] || "there";
+  const referee = input.refereeName.trim() || "Someone";
+
+  return {
+    subject: `${referee} vouched for you on ${siteConfig.name}`,
+    html: emailShell({
+      title: `${referee} vouched for you`,
+      preheader: "A named reference is ready for recruiters to see.",
+      bodyHtml: `
+        ${paragraph(`Hey ${escapeHtml(firstName)},`)}
+        ${paragraph(`<strong>${escapeHtml(referee)}</strong> just vouched for you on ${siteConfig.name}.`)}
+        <blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid ${brand.coral};background:${brand.footer};color:${brand.text};font-size:15px;line-height:1.6;">${escapeHtml(input.story)}</blockquote>
+        ${paragraph("Recruiters can see this when they review you. It is not shown on your public Livefolio.", true)}
+        ${ctaButton(input.dashboardUrl, "See your references")}
+        ${founderSignOff()}
+      `,
+    }),
+  };
+}
+
+export function companyVerificationEmailHtml(input: {
+  company: string;
+  code: string;
+}): { subject: string; html: string } {
+  const company = input.company.trim() || "your company";
+  return {
+    subject: `${input.code} is your ${siteConfig.name} company code`,
+    html: emailShell({
+      title: "Verify your company",
+      preheader: `Enter this code to verify ${company}.`,
+      bodyHtml: `
+        ${paragraph(`Use this code to verify <strong>${escapeHtml(company)}</strong> on ${siteConfig.name}.`)}
+        <p style="font-size:32px;letter-spacing:8px;font-weight:700;color:${brand.heading};margin:0 0 16px;text-align:center;">${escapeHtml(input.code)}</p>
+        ${paragraph("The code expires in 10 minutes. If you didn't ask to verify this company, you can ignore this email.", true)}
+      `,
+      footerHtml: `<p style="font-size:12px;color:${brand.muted};margin:0;">
+        You're receiving this because someone entered this address to verify a company on ${siteConfig.name}.
+      </p>`,
+    }),
+  };
+}
+
+export function orgInviteEmailHtml(input: {
+  inviterName: string;
+  organizationName: string;
+  roleLabel: string;
+  inviteUrl: string;
+}): { subject: string; html: string } {
+  const inviter = input.inviterName.trim() || "A teammate";
+  const organization = input.organizationName.trim() || "a company";
+  return {
+    subject: `${inviter} invited you to ${organization} on ${siteConfig.name}`,
+    html: emailShell({
+      title: `Join ${organization}`,
+      preheader: `Accept to join ${organization} as ${input.roleLabel}.`,
+      bodyHtml: `
+        ${paragraph(`<strong>${escapeHtml(inviter)}</strong> invited you to <strong>${escapeHtml(organization)}</strong> on ${siteConfig.name}.`)}
+        ${paragraph(`You'll join as ${escapeHtml(input.roleLabel)}. Sign in with this email address, then accept the invite.`, true)}
+        ${ctaButton(input.inviteUrl, "Accept invite")}
+      `,
+      footerHtml: `<p style="font-size:12px;color:${brand.muted};margin:0;">
+        You're receiving this because ${escapeHtml(inviter)} invited this address to ${escapeHtml(organization)} on ${siteConfig.name}.
+        If this wasn't meant for you, you can ignore it.
+      </p>`,
+    }),
+  };
+}
+
 export type AutomatedEmailDemo = {
-  id: "welcome" | "no_portfolio" | "unpublished" | "published";
+  id:
+    | "welcome"
+    | "no_portfolio"
+    | "unpublished"
+    | "published"
+    | "vouch_request"
+    | "vouch_received";
   label: string;
   description: string;
   subject: string;
@@ -269,6 +386,19 @@ export function getAutomatedEmailDemos(
   const noPortfolio = noPortfolioReminderEmailHtml(name, options);
   const unpublished = unpublishedReminderEmailHtml(name, options);
   const published = publishedPortfolioEmailHtml(name, "alex", options);
+  const vouchRequest = vouchRequestEmailHtml({
+    refereeName: name,
+    requesterName: "Sam Rivera",
+    personalNote: "Would you vouch for the billing rewrite we shipped together?",
+    vouchUrl: absoluteUrl("/vouch/preview"),
+  });
+  const vouchReceived = vouchReceivedEmailHtml({
+    requesterName: name,
+    refereeName: "Sam Rivera",
+    story:
+      "Shipped the billing rewrite with me and owned the edge cases without dropping the ball.",
+    dashboardUrl: absoluteUrl("/dashboard/references"),
+  });
 
   return [
     {
@@ -300,6 +430,20 @@ export function getAutomatedEmailDemos(
         "Sent once when the user first publishes a live portfolio.",
       subject: published.subject,
       html: published.html,
+    },
+    {
+      id: "vouch_request",
+      label: "Reference request",
+      description: "Sent when someone asks a person to vouch for them.",
+      subject: vouchRequest.subject,
+      html: vouchRequest.html,
+    },
+    {
+      id: "vouch_received",
+      label: "Reference received",
+      description: "Sent to the candidate when a vouch is submitted.",
+      subject: vouchReceived.subject,
+      html: vouchReceived.html,
     },
   ];
 }

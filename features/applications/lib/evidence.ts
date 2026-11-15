@@ -2,6 +2,11 @@ import type { ApplicationSnapshotData } from "@/features/applications/lib/types"
 import type { JobRequirementInput } from "@/features/applications/lib/search";
 import { yearsFromRanges } from "@/features/applications/lib/applicant-summary";
 import { stripRichTextToPlain } from "@/lib/rich-text";
+import {
+  customItemTitle,
+  customSectionEntries,
+  flattenSearchableJson,
+} from "@/features/search/lib/match";
 
 export type EvidenceItem = {
   kind:
@@ -34,6 +39,8 @@ export type ApplicantEvidenceSummary = {
   totalPreferred: number;
   rankScore: number;
   rankReasons: string[];
+  /** Points added by named references when Include references is on. */
+  referenceBonus?: number;
 };
 
 const TOKEN_STOP_WORDS = new Set([
@@ -236,6 +243,19 @@ function collectKeywordEvidence(
   for (const achievement of snapshot.achievements) {
     if (textIncludesTokens(achievement.title, tokens)) {
       evidence.push({ kind: "achievement", label: achievement.title });
+    }
+  }
+
+  for (const section of snapshot.customSections ?? []) {
+    for (const entry of customSectionEntries(section)) {
+      const strings = flattenSearchableJson(entry);
+      if (!textIncludesTokens([section.label, ...strings].join(" "), tokens)) continue;
+      const title = customItemTitle(entry, section.label);
+      evidence.push({
+        kind: "project",
+        label: `${section.label}: ${title}`,
+        detail: strings.find((s) => s !== title && !/^https?:\/\//i.test(s))?.slice(0, 160),
+      });
     }
   }
 

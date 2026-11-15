@@ -17,19 +17,25 @@ import {
 import { summarizeSnapshot } from "@/features/applications/lib/applicant-summary";
 import type { ApplicationSnapshotData } from "@/features/applications/lib/types";
 import { latestResumeIdsByUserId } from "@/features/uploads/server/stored-files";
-import {
-  filterApplicantsBySearch,
-  interpretApplicantQuery,
-  type ApplicantSearchFilters,
-} from "@/features/applications/lib/search";
+import type { ApplicantSearchFilters } from "@/features/applications/lib/search";
 import { buildApplicantEvidence } from "@/features/applications/lib/evidence";
+import { attachRank } from "@/features/applications/lib/rank";
 import {
-  attachRank,
-  rankApplicantAgainstJob,
-} from "@/features/applications/lib/rank";
+  buildSearchIndexFields,
+  searchIndexKey,
+} from "@/features/applications/lib/search-index";
+import { loadApplicantPoolPage } from "@/features/applications/server/applicant-pool";
+import { refreshStaleSearchIndex } from "@/features/applications/server/search-index";
+import { isProofKind } from "@/features/search/lib/proof";
+import { interpretSearchQuery, parseSearchSort } from "@/features/search/lib/query";
+import { RANKING_VERSION, rankAgainstJob } from "@/features/search/lib/rank";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
-import { buildPoolGapReport } from "@/features/applications/lib/pool-gaps";
-import { parsePageParams, paginateSlice } from "@/lib/pagination";
+import { listNamedVouchesForUser } from "@/features/vouches/lib/public";
+import { parseJobSearchProfile } from "@/features/jobs/lib/search-profile";
+import { parsePageParams } from "@/lib/pagination";
+
+/** Stale rows re-scored per pool request; the client polls while `indexing.pending > 0`. */
+const INDEX_PER_REQUEST = 300;
 import {
   parseScreeningAnswers,
   parseScreeningQuestions,
@@ -146,7 +152,18 @@ function parseSearchFilters(query: Record<string, string | undefined>): Applican
     maxExperience: parseOptionalNumber(query.maxExperience),
     appliedAfter: query.appliedAfter?.trim() || undefined,
     appliedBefore: query.appliedBefore?.trim() || undefined,
+    proof: isProofKind(query.proof) ? query.proof : undefined,
+    ids: parseIds(query.ids),
   };
+}
+
+/** Comma-separated application ids, capped for the compare view. */
+function parseIds(raw: string | undefined): string[] | undefined {
+  if (!raw) return undefined;
+  const ids = Array.from(
+    new Set(raw.split(",").map((id) => id.trim()).filter(Boolean)),
+  ).slice(0, 10);
+  return ids.length > 0 ? ids : undefined;
 }
 
 function parseSnapshot(data: unknown): ApplicationSnapshotData | null {
@@ -290,6 +307,8 @@ export const applications = new Elysia({ prefix: "/applications" })
           status: true,
           applicationDeadline: true,
           screeningQuestions: true,
+          searchProfile: true,
+          requirements: { orderBy: { sortOrder: "asc" as const } },
           organization: {
             select: {
               id: true,
@@ -346,15 +365,33 @@ export const applications = new Elysia({ prefix: "/applications" })
         return { error: screening.error };
       }
 
+      const coverNote = optionalTrim(ctx.body.coverNote);
+      const applicant = await prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { name: true, email: true },
+      });
+      // Stored profile only: a submit burst must not trigger AI extraction. A stale
+      // profile hash makes the pool re-score this row later.
+      const storedProfile = parseJobSearchProfile(job.searchProfile);
+      const searchIndex = buildSearchIndexFields(snapshot.data, {
+        key: searchIndexKey(storedProfile, job.requirements),
+        profile: storedProfile,
+        requirements: job.requirements,
+        name: applicant?.name,
+        email: applicant?.email,
+        coverNote,
+      });
+
       const application = await prisma.application.create({
         data: {
           jobId: job.id,
           userId: session.userId,
           portfolioId: snapshot.portfolioId,
-          coverNote: optionalTrim(ctx.body.coverNote),
+          coverNote,
           screeningAnswers: screening.answers,
           status: "applied",
           stage: "new",
+          ...searchIndex,
           snapshot: {
             create: {
               data: snapshotAsJson(snapshot.data),
@@ -398,27 +435,33 @@ export const applications = new Elysia({ prefix: "/applications" })
       return { error: "Forbidden" };
     }
 
-    const stageFilter = ctx.query.stage;
+    const stageFilter =
+      ctx.query.stage && isPipelineStage(ctx.query.stage)
+        ? ctx.query.stage
+        : undefined;
     const searchFilters = parseSearchFilters(ctx.query);
+    const includeReferences =
+      ctx.query.references === "1" || ctx.query.references === "true";
+    const sort = parseSearchSort(ctx.query.sort);
+    const { page: requestedPage, pageSize } = parsePageParams(ctx.query);
 
-    const where = {
-      jobId: job.id,
-      ...(stageFilter && isPipelineStage(stageFilter)
-        ? { stage: stageFilter }
-        : {}),
-    };
+    const searchProfile = await refreshJobSearchProfile(job.id);
+    const index = await refreshStaleSearchIndex(
+      job,
+      searchProfile,
+      INDEX_PER_REQUEST,
+    );
 
-    const [applications, stageGroups] = await Promise.all([
-      prisma.application.findMany({
-        where,
-        include: {
-          snapshot: { select: { data: true } },
-          user: {
-            select: { id: true, name: true, email: true, avatar: true },
-          },
-          _count: { select: { notes: true } },
-        },
-        orderBy: [{ submittedAt: "desc" }],
+    const [pool, stageGroups] = await Promise.all([
+      loadApplicantPoolPage({
+        job,
+        profile: searchProfile,
+        stage: stageFilter,
+        filters: searchFilters,
+        includeReferences,
+        sort,
+        page: requestedPage,
+        pageSize,
       }),
       prisma.application.groupBy({
         by: ["stage"],
@@ -442,68 +485,6 @@ export const applications = new Elysia({ prefix: "/applications" })
       stageCounts[row.stage] = row._count._all;
     }
 
-    const resumeByUser = await latestResumeIdsByUserId(
-      applications.map((app) => app.user.id),
-    );
-    const searchProfile = await refreshJobSearchProfile(job.id);
-
-    const enriched = applications.map((app) => {
-      const snapshot = parseSnapshot(app.snapshot?.data);
-      const summary = summarizeSnapshot(snapshot);
-      const rank = rankApplicantAgainstJob(snapshot, searchProfile, {
-        name: app.user.name,
-        email: app.user.email,
-        coverNote: app.coverNote,
-      });
-      const evidence = attachRank(
-        buildApplicantEvidence(snapshot, job.requirements),
-        rank,
-      );
-      return {
-        id: app.id,
-        stage: app.stage,
-        status: app.status,
-        shortlisted: app.stage === "shortlisted",
-        shortlistedAt: app.shortlistedAt,
-        submittedAt: app.submittedAt,
-        coverNote: app.coverNote,
-        noteCount: app._count.notes,
-        user: app.user,
-        resumeFileId: resumeByUser.get(app.user.id) ?? null,
-        snapshot,
-        evidence,
-        summary: {
-          ...summary,
-          name:
-            summary.name !== "Candidate"
-              ? summary.name
-              : app.user.name || "Candidate",
-          avatarUrl: summary.avatarUrl || app.user.avatar,
-        },
-      };
-    });
-
-    const filtered = filterApplicantsBySearch(enriched, searchFilters).sort(
-      (a, b) => {
-        const rankDiff = b.evidence.rankScore - a.evidence.rankScore;
-        if (rankDiff !== 0) return rankDiff;
-        const reqDiff =
-          b.evidence.matchedRequired - a.evidence.matchedRequired;
-        if (reqDiff !== 0) return reqDiff;
-        const prefDiff =
-          b.evidence.matchedPreferred - a.evidence.matchedPreferred;
-        if (prefDiff !== 0) return prefDiff;
-        return (
-          new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-        );
-      },
-    );
-
-    const { page: requestedPage, pageSize } = parsePageParams(ctx.query);
-    const paged = paginateSlice(filtered, requestedPage, pageSize);
-
-    const gaps = buildPoolGapReport(enriched, job.requirements);
-
     return {
       job: {
         id: job.id,
@@ -515,14 +496,19 @@ export const applications = new Elysia({ prefix: "/applications" })
         requirements: job.requirements,
       },
       stageCounts,
-      matchedCount: filtered.length,
-      page: paged.page,
-      pageSize: paged.pageSize,
-      pageCount: paged.pageCount,
+      matchedCount: pool.matchedCount,
+      truncated: pool.truncated,
+      page: pool.page,
+      pageSize: pool.pageSize,
+      pageCount: pool.pageCount,
       filters: searchFilters,
-      interpreted: interpretApplicantQuery(searchFilters.q),
-      gaps,
-      applicants: paged.items.map(({ snapshot: _snapshot, ...rest }) => rest),
+      sort,
+      rankingVersion: RANKING_VERSION,
+      indexing: { pending: index.pending },
+      interpreted: interpretSearchQuery(searchFilters.q),
+      facets: pool.facets,
+      gaps: pool.gaps,
+      applicants: pool.applicants,
     };
   })
 
@@ -550,13 +536,30 @@ export const applications = new Elysia({ prefix: "/applications" })
       return { error: "Forbidden" };
     }
 
-    const application = await prisma.application.findFirst({
+    let application = await prisma.application.findFirst({
       where: {
         id: ctx.params.applicationId,
         jobId: job.id,
       },
       include: companyApplicationInclude,
     });
+
+    // The hiring agent used to link an application to the new job. Open the
+    // application on the job it actually belongs to, in this same workspace.
+    let resolvedJob = job;
+    if (!application) {
+      application = await prisma.application.findFirst({
+        where: {
+          id: ctx.params.applicationId,
+          job: { organizationId: job.organizationId, workspaceId: job.workspaceId },
+        },
+        include: companyApplicationInclude,
+      });
+      if (application) {
+        const owner = await loadJobForCompany(application.job.id);
+        if (owner) resolvedJob = owner;
+      }
+    }
 
     if (!application) {
       ctx.set.status = 404;
@@ -565,18 +568,22 @@ export const applications = new Elysia({ prefix: "/applications" })
 
     const snapshot = parseSnapshot(application.snapshot?.data);
     const summary = summarizeSnapshot(snapshot);
-    const searchProfile = await refreshJobSearchProfile(job.id);
-    const rank = rankApplicantAgainstJob(snapshot, searchProfile, {
+    const searchProfile = await refreshJobSearchProfile(resolvedJob.id);
+    const rank = rankAgainstJob(snapshot, searchProfile, {
       name: application.user.name,
       email: application.user.email,
       coverNote: application.coverNote,
+      freshnessAt: application.submittedAt,
     });
     const evidence = attachRank(
-      buildApplicantEvidence(snapshot, job.requirements),
+      buildApplicantEvidence(snapshot, application.job.requirements),
       rank,
     );
 
-    const resumeByUser = await latestResumeIdsByUserId([application.user.id]);
+    const [resumeByUser, vouches] = await Promise.all([
+      latestResumeIdsByUserId([application.user.id]),
+      listNamedVouchesForUser(application.user.id),
+    ]);
 
     return {
       id: application.id,
@@ -591,7 +598,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       resumeFileId: resumeByUser.get(application.user.id) ?? null,
       notes: application.notes,
       job: {
-        ...job,
+        ...resolvedJob,
         requirements: application.job.requirements,
       },
       summary: {
@@ -604,6 +611,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       },
       snapshotData: snapshot,
       evidence,
+      vouches,
     };
   })
 

@@ -1,11 +1,12 @@
 import type { Prisma } from "@/db/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { expandSkillTerm } from "@/features/search/lib/skill-families";
 
 function contains(value: string) {
   return { contains: value, mode: "insensitive" as const };
 }
 
-/** Match `q` against every Livefolio section, including custom section items. */
+/** Match one term against every Livefolio section, including custom section items. */
 export function talentTextSearchOr(
   q: string,
   extraIds: string[] = [],
@@ -99,10 +100,7 @@ export function talentTextSearchOr(
  * Custom section `items` are JSON, and project tech / article tags are
  * string arrays — Prisma `contains` does not cover those. Match them in SQL.
  */
-export async function talentIdsMatchingJsonAndArrays(
-  q: string,
-  workspaceId: string,
-): Promise<string[]> {
+export async function talentIdsMatchingJsonAndArrays(q: string): Promise<string[]> {
   const pattern = `%${q.replace(/[\\%_]/g, "\\$&")}%`;
   const rows = await prisma.$queryRaw<{ id: string }[]>`
     SELECT p.id
@@ -110,13 +108,6 @@ export async function talentIdsMatchingJsonAndArrays(
     WHERE p."openToWork" = true
       AND p."isPublished" = true
       AND p.slug IS NOT NULL
-      AND EXISTS (
-        SELECT 1
-        FROM applications a
-        JOIN jobs j ON j.id = a."jobId"
-        WHERE a."userId" = p."userId"
-          AND j."workspaceId" = ${workspaceId}
-      )
       AND (
         EXISTS (
           SELECT 1
@@ -139,4 +130,34 @@ export async function talentIdsMatchingJsonAndArrays(
       )
   `;
   return rows.map((row) => row.id);
+}
+
+const MAX_RECALL_TERMS = 6;
+const MAX_VARIANTS_PER_TERM = 4;
+
+/**
+ * Database recall for a parsed query: each keyword (or any keyword, for OR queries)
+ * must appear somewhere, counting its skill-family synonyms. Exact word-boundary
+ * matching and exclusions run afterwards in memory.
+ */
+export async function talentKeywordWhere(
+  keywords: string[],
+  matchAny: boolean,
+): Promise<Prisma.PortfolioWhereInput | null> {
+  const terms = keywords.slice(0, MAX_RECALL_TERMS);
+  if (terms.length === 0) return null;
+
+  const perTerm = await Promise.all(
+    terms.map(async (term) => {
+      const variants = expandSkillTerm(term).slice(0, MAX_VARIANTS_PER_TERM);
+      const clauses = await Promise.all(
+        variants.map(async (variant) =>
+          talentTextSearchOr(variant, await talentIdsMatchingJsonAndArrays(variant)),
+        ),
+      );
+      return { OR: clauses.flat() } satisfies Prisma.PortfolioWhereInput;
+    }),
+  );
+
+  return matchAny ? { OR: perTerm } : { AND: perTerm };
 }
