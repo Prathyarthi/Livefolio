@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -86,10 +86,14 @@ export default function AdminEmailsPage() {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [logs, setLogs] = useState<EmailLog[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [userTotal, setUserTotal] = useState(0);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [userQuery, setUserQuery] = useState("");
-  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(
-    new Set(),
+  const [selectedUsers, setSelectedUsers] = useState<Map<string, AdminUser>>(
+    () => new Map(),
   );
+  const selectAllRef = useRef<HTMLInputElement>(null);
+  const searchSeq = useRef(0);
   const [csvEmails, setCsvEmails] = useState<string[]>([]);
   const [csvInvalid, setCsvInvalid] = useState<string[]>([]);
 
@@ -126,13 +130,22 @@ export default function AdminEmailsPage() {
     setLogs(data.logs);
   }, []);
 
-  const searchUsers = useCallback(async (q: string) => {
-    const params = new URLSearchParams({ limit: "30" });
-    if (q.trim()) params.set("q", q.trim());
-    const data = await readJson<{ users: AdminUser[] }>(
-      await fetch(`/api/admin/emails/users?${params}`, { cache: "no-store" }),
-    );
-    setUsers(data.users);
+  const searchUsers = useCallback(async (q: string, templateName = "") => {
+    const seq = ++searchSeq.current;
+    setUsersLoading(true);
+    try {
+      const params = new URLSearchParams({ limit: "200" });
+      if (q.trim()) params.set("q", q.trim());
+      if (templateName.trim()) params.set("template", templateName.trim());
+      const data = await readJson<{ users: AdminUser[]; total: number }>(
+        await fetch(`/api/admin/emails/users?${params}`, { cache: "no-store" }),
+      );
+      if (seq !== searchSeq.current) return;
+      setUsers(data.users);
+      setUserTotal(data.total);
+    } finally {
+      if (seq === searchSeq.current) setUsersLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -156,20 +169,53 @@ export default function AdminEmailsPage() {
     };
   }, [loadTemplates, loadLogs, searchUsers]);
 
+  const selectedTemplateName =
+    templates.find((template) => template.id === selectedTemplateId)?.name ??
+    "";
+
+  const skipUserFilter = useRef(true);
   useEffect(() => {
+    if (skipUserFilter.current) {
+      skipUserFilter.current = false;
+      return;
+    }
     const handle = setTimeout(() => {
-      void searchUsers(userQuery).catch(() => undefined);
+      void searchUsers(userQuery, selectedTemplateName).catch((error) => {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to load users",
+        );
+      });
     }, 250);
     return () => clearTimeout(handle);
-  }, [userQuery, searchUsers]);
+  }, [userQuery, selectedTemplateName, searchUsers]);
+
+  const allShownSelected =
+    users.length > 0 && users.every((user) => selectedUsers.has(user.id));
+  const someShownSelected =
+    !allShownSelected && users.some((user) => selectedUsers.has(user.id));
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someShownSelected;
+    }
+  }, [someShownSelected]);
 
   const recipientCount = useMemo(() => {
     const emails = new Set(csvEmails.map((e) => e.toLowerCase()));
-    for (const user of users) {
-      if (selectedUserIds.has(user.id)) emails.add(user.email.toLowerCase());
+    for (const user of selectedUsers.values()) {
+      emails.add(user.email.toLowerCase());
     }
     return emails.size;
-  }, [csvEmails, selectedUserIds, users]);
+  }, [csvEmails, selectedUsers]);
+
+  const selectedOutsideFilter = useMemo(() => {
+    const shown = new Set(users.map((user) => user.id));
+    let count = 0;
+    for (const id of selectedUsers.keys()) {
+      if (!shown.has(id)) count += 1;
+    }
+    return count;
+  }, [selectedUsers, users]);
 
   function applyTemplate(templateId: string) {
     setSelectedTemplateId(templateId);
@@ -198,7 +244,7 @@ export default function AdminEmailsPage() {
       return;
     }
     if (recipientCount === 0) {
-      toast.error("Add recipients via CSV or user search");
+      toast.error("Select users or upload a CSV");
       return;
     }
     if (recipientCount > 200) {
@@ -221,7 +267,7 @@ export default function AdminEmailsPage() {
             bodyHtml,
             templateId: selectedTemplateId || null,
             emails: csvEmails,
-            userIds: [...selectedUserIds],
+            userIds: [...selectedUsers.keys()],
           }),
         }),
       );
@@ -294,11 +340,24 @@ export default function AdminEmailsPage() {
     }
   }
 
-  function toggleUser(id: string) {
-    setSelectedUserIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+  function toggleUser(user: AdminUser) {
+    setSelectedUsers((prev) => {
+      const next = new Map(prev);
+      if (next.has(user.id)) next.delete(user.id);
+      else next.set(user.id, user);
+      return next;
+    });
+  }
+
+  function toggleAllShown() {
+    setSelectedUsers((prev) => {
+      const next = new Map(prev);
+      const everyShown = users.every((user) => next.has(user.id));
+      if (everyShown) {
+        for (const user of users) next.delete(user.id);
+      } else {
+        for (const user of users) next.set(user.id, user);
+      }
       return next;
     });
   }
@@ -343,7 +402,8 @@ export default function AdminEmailsPage() {
               <CardHeader>
                 <CardTitle className="text-base">Recipients</CardTitle>
                 <CardDescription>
-                  CSV upload and/or search existing users. Max 200 per send.
+                  Choose a template to filter this list, then select everyone
+                  shown or upload a CSV. Max 200 per send.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -387,10 +447,37 @@ export default function AdminEmailsPage() {
                     value={userQuery}
                     onChange={(e) => setUserQuery(e.target.value)}
                   />
-                  <div className="mt-3 max-h-64 space-y-2 overflow-y-auto rounded-md border border-border-default p-2">
-                    {users.length === 0 ? (
+                  <div className="mt-3 flex items-center justify-between gap-3 px-1">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        ref={selectAllRef}
+                        type="checkbox"
+                        disabled={users.length === 0 || usersLoading}
+                        checked={allShownSelected}
+                        onChange={toggleAllShown}
+                      />
+                      Select all shown
+                    </label>
+                    {selectedUsers.size > 0 ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedUsers(new Map())}
+                      >
+                        Clear selected
+                      </Button>
+                    ) : null}
+                  </div>
+                  <div className="mt-2 max-h-64 space-y-2 overflow-y-auto rounded-md border border-border-default p-2">
+                    {usersLoading ? (
+                      <p className="flex items-center gap-2 px-2 py-4 text-sm text-text-muted">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Loading users
+                      </p>
+                    ) : users.length === 0 ? (
                       <p className="px-2 py-4 text-sm text-text-muted">
-                        No users found
+                        No users for this template
                       </p>
                     ) : (
                       users.map((user) => (
@@ -401,8 +488,8 @@ export default function AdminEmailsPage() {
                           <input
                             type="checkbox"
                             className="mt-1"
-                            checked={selectedUserIds.has(user.id)}
-                            onChange={() => toggleUser(user.id)}
+                            checked={selectedUsers.has(user.id)}
+                            onChange={() => toggleUser(user)}
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm font-medium">
@@ -424,8 +511,21 @@ export default function AdminEmailsPage() {
                     )}
                   </div>
                   <p className="mt-2 text-xs text-text-muted">
-                    {selectedUserIds.size} selected from search · {recipientCount}{" "}
-                    unique recipients total
+                    {usersLoading
+                      ? "Updating list"
+                      : `Showing ${users.length}${
+                          userTotal > users.length ? ` of ${userTotal}` : ""
+                        }`}
+                    {" · "}
+                    {selectedUsers.size} selected
+                    {selectedOutsideFilter > 0
+                      ? ` (${selectedOutsideFilter} from other templates)`
+                      : ""}
+                    {" · "}
+                    {recipientCount} unique recipients total
+                    {userTotal > users.length
+                      ? ". First 200 only — pick a more specific template before sending."
+                      : ""}
                   </p>
                 </div>
               </CardContent>
