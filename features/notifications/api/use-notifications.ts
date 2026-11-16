@@ -83,7 +83,7 @@ export function useNotifications(enabled = true) {
     initialPageParam: null as string | null,
     getNextPageParam: (last: NotificationPage) => last.nextCursor,
     queryFn: ({ pageParam }) => {
-      const params = new URLSearchParams({ limit: "20" });
+      const params = new URLSearchParams({ limit: "20", unread: "true" });
       if (pageParam) params.set("cursor", pageParam);
       return request<NotificationPage>(`/api/notifications?${params}`, undefined, "Failed to load notifications");
     },
@@ -141,9 +141,8 @@ export function useMarkNotificationRead() {
       request(`/api/notifications/${encodeURIComponent(id)}/read`, { method: "POST" }, "Failed to mark as read"),
     (id, list, count) => {
       const wasUnread = findItem(list, id)?.readAt === null;
-      const now = new Date().toISOString();
       return {
-        list: mapItems(list, (item) => (item.id === id && !item.readAt ? { ...item, readAt: now } : item)),
+        list: mapItems(list, (item) => (item.id === id ? null : item)),
         count: count !== undefined && wasUnread ? Math.max(0, count - 1) : count,
       };
     },
@@ -153,10 +152,10 @@ export function useMarkNotificationRead() {
 export function useMarkAllNotificationsRead() {
   return useOptimisticNotificationMutation(
     () => request("/api/notifications/read-all", { method: "POST" }, "Failed to mark all as read"),
-    (_input, list) => {
-      const now = new Date().toISOString();
-      return { list: mapItems(list, (item) => (item.readAt ? item : { ...item, readAt: now })), count: 0 };
-    },
+    (_input, list) => ({
+      list: mapItems(list, (item) => (item.readAt ? item : null)),
+      count: 0,
+    }),
   );
 }
 

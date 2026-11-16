@@ -2,14 +2,13 @@
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   useMarkAllNotificationsRead,
   useNotifications,
   useUnreadNotificationCount,
 } from "@/features/notifications/api/use-notifications";
 import { NotificationList } from "@/features/notifications/components/notification-list";
-import { NotificationPreferences } from "@/features/notifications/components/notification-preferences";
 
 export default function NotificationsPage() {
   const list = useNotifications();
@@ -51,16 +50,6 @@ export default function NotificationsPage() {
               </Button>
             </div>
           ) : null}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Preferences</CardTitle>
-          <CardDescription>Choose which notifications appear in your dashboard.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <NotificationPreferences />
         </CardContent>
       </Card>
     </div>

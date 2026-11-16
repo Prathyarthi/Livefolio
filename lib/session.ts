@@ -7,8 +7,14 @@ async function resolveUserIdFromToken(token: {
   id?: unknown;
   email?: unknown;
 }) {
+  // Never trust JWT `id` alone — OAuth can leave a provider id in the token,
+  // and deleted users keep a stale UUID. Always resolve to a real `users` row.
   if (typeof token.id === "string" && token.id.length > 0) {
-    return token.id;
+    const byId = await prisma.user.findUnique({
+      where: { id: token.id },
+      select: { id: true },
+    });
+    if (byId) return byId.id;
   }
 
   if (typeof token.email !== "string" || !token.email.trim()) {

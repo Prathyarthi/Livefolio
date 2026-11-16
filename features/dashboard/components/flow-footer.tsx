@@ -91,22 +91,20 @@ export function FlowFooter({
       {message ? (
         <p className="text-body-sm text-text-muted sm:hidden">{message}</p>
       ) : null}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center">
-          {previous ? (
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        {previous ? (
+          <div className="flex max-w-full items-center">
             <FlowNavButton action={previous} direction="previous" />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
 
         {message ? (
           <p className="hidden min-w-0 flex-1 truncate text-center text-body-sm text-text-muted sm:block">
             {message}
           </p>
-        ) : (
-          <div className="min-w-0 flex-1" />
-        )}
+        ) : null}
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex max-w-full items-center justify-end gap-2">
           {actions}
           {next ? <FlowNavButton action={next} direction="next" /> : null}
         </div>

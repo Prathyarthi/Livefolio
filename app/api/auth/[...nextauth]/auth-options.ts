@@ -65,7 +65,21 @@ async function syncOAuthUser(
 }
 
 async function hydrateTokenFromDatabase(token: JWT): Promise<JWT> {
-  if (token.id) return token;
+  // Prefer a live user row. Stale OAuth provider ids (or deleted UUIDs) in
+  // `token.id` must not short-circuit — fall back to email lookup.
+  if (typeof token.id === "string" && token.id.length > 0) {
+    const byId = await prisma.user.findUnique({
+      where: { id: token.id },
+    });
+    if (byId) {
+      token.id = byId.id;
+      token.email = byId.email;
+      token.name = byId.name;
+      token.avatar = byId.avatar ?? undefined;
+      return token;
+    }
+    delete token.id;
+  }
 
   const email = token.email;
   if (typeof email !== "string" || !email.trim()) {

@@ -82,7 +82,7 @@ export function Features() {
               <p className="text-[11px] font-medium tracking-[0.16em] text-[#6a463c]">
                 RESUME
               </p>
-              <h3 className="mt-3 font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em] sm:text-[2.05rem]">
+              <h3 className="mt-3 font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em] text-[#2a241f] sm:text-[2.05rem]">
                 Start from the resume you already have
               </h3>
               <p className="mt-3 text-[14px] leading-relaxed text-[#5c4038]">
@@ -149,7 +149,7 @@ export function Features() {
               <p className="text-[11px] font-medium tracking-[0.16em] text-[#6d675f]">
                 TEMPLATES
               </p>
-              <h3 className="mt-3 font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em]">
+              <h3 className="mt-3 font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em] text-[#2a241f]">
                 Pick a layout, then keep editing
               </h3>
             </div>
