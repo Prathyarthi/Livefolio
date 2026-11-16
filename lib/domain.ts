@@ -162,6 +162,7 @@ export const APP_ROUTE_PREFIXES = [
   "/invite",
   "/pricing",
   "/recruiters",
+  "/blog",
   "/company",
   "/jobs",
   "/_next",
