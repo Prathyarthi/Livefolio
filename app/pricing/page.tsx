@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
 import { PricingPageShell } from "@/features/subscriptions/components/pricing-page-shell";
 import { createPageMetadata } from "@/lib/seo";
+import { getBreadcrumbSchema } from "@/lib/structured-data";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Pricing & Pro Plans",
+  title: "Pricing: Free and Pro Portfolio Plans",
   description:
-    "Compare Livefolio free and Pro plans. Unlock all portfolio templates, resume import, and platform integrations with a flexible subscription.",
+    "Start with a free one-month trial, then stay on Free or upgrade to Pro, billed monthly, quarterly or yearly. Hiring teams: see per-seat plans for recruiters.",
   path: "/pricing",
 });
 
 export default function PricingPage() {
-  return <PricingPageShell />;
+  return (
+    <>
+      <JsonLd data={getBreadcrumbSchema([{ name: "Pricing", path: "/pricing" }])} />
+      <PricingPageShell />
+    </>
+  );
 }

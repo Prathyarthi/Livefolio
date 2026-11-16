@@ -7,6 +7,7 @@ import {
   getAppOrigin,
   getInternalPortfolioPath,
   getPortfolioRootDomain,
+  normalizeHost,
 } from "@/lib/domain";
 import {
   DEFAULT_JSON_BODY_LIMIT_BYTES,
@@ -28,6 +29,15 @@ function redirectToPortfolioSubdomain(request: NextRequest, slug: string) {
 
 export async function proxy(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
+
+  // Canonical host is the apex: send www to it (308 keeps method and path).
+  const rootDomain = getPortfolioRootDomain().toLowerCase();
+  if (normalizeHost(host) === `www.${rootDomain}`) {
+    const apexUrl = request.nextUrl.clone();
+    apexUrl.hostname = rootDomain;
+    return NextResponse.redirect(apexUrl, 308);
+  }
+
   const subdomain = extractPortfolioSubdomain(host);
   const { pathname, search } = request.nextUrl;
   const isResumeUpload =

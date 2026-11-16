@@ -51,7 +51,16 @@ export const SEO_KEYWORDS = [
   "personal website builder",
 ] as const;
 
-const DEFAULT_OG_IMAGE = "/logo.svg";
+/** 1200x630 PNG in /public/og (SVG logos do not unfurl reliably on social apps). */
+const OG_IMAGE = {
+  url: "/og/default.png",
+  width: 1200,
+  height: 630,
+  type: "image/png",
+  alt: `${siteConfig.name}: resume to live portfolio, hire on proof`,
+};
+
+const HOME_TITLE = `${siteConfig.name}: Turn Your Resume Into a Live Portfolio`;
 
 type PageMetadataOptions = {
   title: string;
@@ -60,6 +69,8 @@ type PageMetadataOptions = {
   keywords?: string[];
   noIndex?: boolean;
   openGraphType?: "website" | "article";
+  /** Use `title` as-is instead of appending the "| Livefolio" template. */
+  absoluteTitle?: boolean;
 };
 
 export function createPageMetadata({
@@ -69,11 +80,13 @@ export function createPageMetadata({
   keywords = [...SEO_KEYWORDS],
   noIndex = false,
   openGraphType = "website",
+  absoluteTitle = false,
 }: PageMetadataOptions): Metadata {
   const url = absoluteUrl(path);
+  const socialTitle = absoluteTitle ? title : `${title} | ${siteConfig.name}`;
 
   return {
-    title,
+    title: absoluteTitle ? { absolute: title } : title,
     description,
     keywords,
     alternates: { canonical: url },
@@ -95,22 +108,15 @@ export function createPageMetadata({
       locale: "en_US",
       url,
       siteName: siteConfig.name,
-      title: `${title} | ${siteConfig.name}`,
+      title: socialTitle,
       description,
-      images: [
-        {
-          url: DEFAULT_OG_IMAGE,
-          width: 512,
-          height: 512,
-          alt: `${siteConfig.name} logo`,
-        },
-      ],
+      images: [OG_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | ${siteConfig.name}`,
+      title: socialTitle,
       description,
-      images: [DEFAULT_OG_IMAGE],
+      images: [OG_IMAGE.url],
     },
   };
 }
@@ -119,7 +125,7 @@ export const rootMetadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   applicationName: siteConfig.name,
   title: {
-    default: `${siteConfig.name} — Build & Publish Your Professional Portfolio`,
+    default: HOME_TITLE,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -152,39 +158,32 @@ export const rootMetadata: Metadata = {
     locale: "en_US",
     url: getSiteUrl(),
     siteName: siteConfig.name,
-    title: `${siteConfig.name} — Build & Publish Your Professional Portfolio`,
+    title: HOME_TITLE,
     description: siteConfig.description,
-    images: [
-      {
-        url: DEFAULT_OG_IMAGE,
-        width: 512,
-        height: 512,
-        alt: `${siteConfig.name} — portfolio builder`,
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} — Build & Publish Your Professional Portfolio`,
+    title: HOME_TITLE,
     description: siteConfig.description,
-    images: [DEFAULT_OG_IMAGE],
+    images: [OG_IMAGE.url],
   },
   icons: {
     icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/logo.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 
 /** Public marketing routes included in sitemap.xml */
+/** Indexable routes only: /sign-in and /sign-up are noindex, so they stay out. */
 export const PUBLIC_SITEMAP_ROUTES = [
   { path: "/", changeFrequency: "weekly" as const, priority: 1 },
   { path: "/recruiters", changeFrequency: "weekly" as const, priority: 0.9 },
   { path: "/pricing", changeFrequency: "weekly" as const, priority: 0.9 },
   { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7 },
   { path: "/docs", changeFrequency: "weekly" as const, priority: 0.7 },
+  { path: "/blog", changeFrequency: "weekly" as const, priority: 0.8 },
   { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly" as const, priority: 0.3 },
   { path: "/refund-policy", changeFrequency: "yearly" as const, priority: 0.3 },
-  { path: "/sign-up", changeFrequency: "monthly" as const, priority: 0.8 },
-  { path: "/sign-in", changeFrequency: "monthly" as const, priority: 0.5 },
 ];

@@ -12,7 +12,10 @@ import {
   getDocArticle,
   getDocHref,
 } from "@/features/docs/lib/docs";
+import { JsonLd } from "@/components/json-ld";
+import { getDocMetaDescription } from "@/features/docs/lib/docs-seo";
 import { createPageMetadata } from "@/lib/seo";
+import { getBreadcrumbSchema } from "@/lib/structured-data";
 import { siteConfig } from "@/lib/site";
 
 type Params = { category: string; slug: string };
@@ -34,7 +37,7 @@ export async function generateMetadata({
   if (!ref) return {};
   return createPageMetadata({
     title: `${ref.article.title} | Docs`,
-    description: ref.article.description,
+    description: getDocMetaDescription(ref.href, ref.article.description),
     path: ref.href,
     openGraphType: "article",
   });
@@ -54,6 +57,13 @@ export default async function DocsArticlePage({
 
   return (
     <article className="mx-auto max-w-3xl">
+      <JsonLd
+        data={getBreadcrumbSchema([
+          { name: "Docs", path: "/docs" },
+          { name: category.title, path: getDocHref(category.slug) },
+          { name: article.title, path: ref.href },
+        ])}
+      />
       <DocsBreadcrumbs
         items={[
           { label: category.title, href: getDocHref(category.slug) },

@@ -18,9 +18,10 @@ import { getLandingPageStructuredData } from "@/lib/structured-data";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Build & Publish Your Professional Portfolio",
+  title: `${siteConfig.name}: Turn Your Resume Into a Live Portfolio`,
   description: siteConfig.description,
   path: "/",
+  absoluteTitle: true,
 });
 
 export default function LandingPage() {

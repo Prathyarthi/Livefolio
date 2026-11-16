@@ -11,6 +11,7 @@ const CANDIDATE_NAV = {
     { label: "Examples", href: "/#showcase" },
     { label: "Pricing", href: "/#pricing" },
     { label: "FAQ", href: "/#faq" },
+    { label: "Hire on Livefolio", href: "/recruiters" },
   ],
   Account: [
     { label: "Sign in", href: "/sign-in" },
@@ -19,6 +20,7 @@ const CANDIDATE_NAV = {
   ],
   Resources: [
     { label: "Help & docs", href: "/docs" },
+    { label: "Blog", href: "/blog" },
     { label: "Contact & support", href: "/contact" },
     { label: "Resume import", href: "/sign-up" },
     { label: "All templates", href: "/sign-up" },
@@ -41,6 +43,7 @@ const RECRUITER_NAV = {
     { label: "Hiring workspace", href: "/company" },
   ],
   Resources: [
+    { label: "Blog", href: "/blog" },
     { label: "Contact & support", href: "/contact" },
     { label: "Contact sales", href: "/recruiters#pricing" },
     { label: "For candidates", href: "/" },

@@ -7,7 +7,7 @@ import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Privacy Policy",
-  description: `How ${siteConfig.name} collects, uses, stores, and protects your personal information and portfolio data.`,
+  description: `How ${siteConfig.name} collects, uses, stores and protects your personal information and portfolio data. Last updated November 2, 2026.`,
   path: "/privacy",
   openGraphType: "article",
 });

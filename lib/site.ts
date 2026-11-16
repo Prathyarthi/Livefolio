@@ -5,7 +5,7 @@ export const siteConfig = {
   tagline:
     "A portfolio that grows with you. All your scattered work in one place, connected through integrations.",
   description:
-    "Build and publish a professional portfolio in seconds. Import your resume PDF, connect GitHub, Medium, Dev.to, Hashnode, LeetCode, Stack Overflow, and Codeforces, choose a template, and go live on your own subdomain.",
+    "Upload your resume PDF and publish a live portfolio at yourname.livefolio.me. Add projects, writing, work samples and references. Free to start.",
   supportEmail: "team@livefolio.me",
   legalEntity: "Livefolio",
 } as const;

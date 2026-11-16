@@ -46,7 +46,7 @@ export function PricingPageShell() {
       </header>
 
       <div className="min-h-[calc(100vh-4rem)] px-6 py-[var(--space-9)]">
-        <PricingPlansSection />
+        <PricingPlansSection headingLevel="h1" />
 
         <div className="mx-auto mt-12 max-w-4xl">
           <Card>

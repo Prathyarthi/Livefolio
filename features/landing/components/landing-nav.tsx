@@ -16,6 +16,7 @@ const CANDIDATE_LINKS = [
   { label: "Pricing", href: "/#pricing" },
   // { label: "Hiring", href: "/recruiters" },
   { label: "FAQ", href: "/#faq" },
+  { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -24,6 +25,7 @@ const CANDIDATE_PILL_LINKS = [
   { label: "How it works", href: "/#features" },
   { label: "Templates", href: "/#showcase" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Blog", href: "/blog" },
 ];
 
 const CANDIDATE_PILL_MENU_LINKS = [
@@ -31,7 +33,9 @@ const CANDIDATE_PILL_MENU_LINKS = [
   { label: "Integrations", href: "/#integrations" },
   { label: "Templates", href: "/#showcase" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "For recruiters", href: "/recruiters" },
   { label: "FAQ", href: "/#faq" },
+  { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];
 

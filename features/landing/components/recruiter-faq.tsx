@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
 import { RecruiterSection } from "@/features/landing/components/recruiter-section";
 
-const FAQS = [
+/** Visible /recruiters FAQ. Also the source for the FAQPage JSON-LD, so the markup always matches the page. */
+export const RECRUITER_FAQS = [
   {
     q: "How is the 0–100 score worked out?",
     a: "It mixes skill match, proof of work, coding activity (only for roles that need it), context fit and recency. Each card shows up to four plain reasons, so you can always see why someone ranks where they do.",
@@ -45,7 +46,7 @@ export function RecruiterFAQ() {
       body="How ranking, references, and hiring plans work."
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {FAQS.map((item) => (
+        {RECRUITER_FAQS.map((item) => (
           <details
             key={item.q}
             className="group rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-4 py-1 transition-colors open:border-border-strong"
