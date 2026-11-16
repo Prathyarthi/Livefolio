@@ -68,7 +68,7 @@ const SOCIAL = [
 ] as const;
 
 const RECRUITER_TAGLINE =
-  "Hire on proof and references, not resume keywords. Post a role free and get a ranked shortlist that explains itself.";
+  "Hire on proven impact, not resume keywords. Post a role free and get a ranked shortlist that explains itself.";
 
 export type FooterProps = {
   /**

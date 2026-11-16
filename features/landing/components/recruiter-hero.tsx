@@ -10,7 +10,7 @@ export function RecruiterHero() {
         <h1 className="studio-hero-title mt-4 text-text-primary">
           <span className="block">
             Hire on{" "}
-            <span className="studio-hero-highlight">proof and references</span>,
+            <span className="studio-hero-highlight">proven impact</span>,
           </span>
           <span className="block">not resume keywords</span>
         </h1>

@@ -20,9 +20,9 @@ import {
 } from "@/lib/structured-data";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Hire on Proof: Ranked Shortlists for Any Role",
+  title: "Hire on Impact: Ranked Shortlists for Any Role",
   description:
-    "Rank applicants for any role on proof and named references, not resume keywords. Post a role free and get a ranked shortlist that explains itself.",
+    "Rank applicants for any role on proven impact, not resume keywords. Post a role free and get a ranked shortlist that explains itself.",
   path: "/recruiters",
 });
 
