@@ -4,6 +4,8 @@ import {
   getDocCategories,
   getDocHref,
 } from "@/features/docs/lib/docs";
+import { getAllPosts } from "@/features/blog/lib/posts";
+import { postUrl } from "@/features/blog/lib/seo";
 import { PUBLIC_SITEMAP_ROUTES, absoluteUrl } from "@/lib/seo";
 
 /**
@@ -18,6 +20,7 @@ const LAST_MODIFIED: Record<string, string> = {
   "/pricing": "2026-10-12",
   "/contact": "2026-07-18",
   "/docs": "2026-11-15",
+  "/blog": "2026-11-15",
   "/privacy": "2026-11-02",
   "/terms": "2026-11-02",
   "/refund-policy": "2026-07-18",
@@ -49,5 +52,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
-  return [...pages, ...docs];
+  const posts: MetadataRoute.Sitemap = getAllPosts().map((post) => ({
+    url: postUrl(post.slug),
+    lastModified: new Date(`${post.updated ?? post.date}T00:00:00Z`),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...pages, ...docs, ...posts];
 }
