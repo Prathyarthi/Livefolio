@@ -19,6 +19,16 @@ export function postUrl(slug: string): string {
   return absoluteUrl(postPath(slug));
 }
 
+/** True for absolute http(s) covers (API posts); false for /public paths. */
+export function isExternalCover(cover: string): boolean {
+  return /^https?:\/\//i.test(cover);
+}
+
+/** Absolute URL for a post cover, whether it is a /public path or already absolute. */
+export function coverUrl(cover: string): string {
+  return isExternalCover(cover) ? cover : absoluteUrl(cover);
+}
+
 const ROBOTS = {
   index: true,
   follow: true,
@@ -62,7 +72,7 @@ export function getBlogIndexMetadata(): Metadata {
 
 export function getPostMetadata(post: BlogPost): Metadata {
   const url = postUrl(post.slug);
-  const image = absoluteUrl(post.cover);
+  const image = coverUrl(post.cover);
   return {
     title: post.title,
     description: post.description,
@@ -99,7 +109,7 @@ export function getArticleSchema(post: BlogPost) {
     "@type": "Article",
     headline: post.title,
     description: post.description,
-    image: [absoluteUrl(post.cover)],
+    image: [coverUrl(post.cover)],
     datePublished: `${post.date}T00:00:00Z`,
     dateModified: `${post.updated ?? post.date}T00:00:00Z`,
     keywords: [post.keyword, ...post.tags].join(", "),

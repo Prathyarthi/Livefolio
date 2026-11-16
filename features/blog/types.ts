@@ -9,7 +9,10 @@ export type BlogPost = {
   description: string;
   /** Primary SEO keyword. */
   keyword: string;
-  /** Path under /public, e.g. /blog/my-cover.png (1200x630 recommended). */
+  /**
+   * Path under /public (file posts), e.g. /blog/my-cover.png, or an absolute
+   * https URL (API posts). 1200x630 recommended.
+   */
   cover: string;
   /** Display string, "Name, Role". */
   author: string;

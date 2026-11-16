@@ -907,3 +907,37 @@ model UserBadge {
   @@index([userId, showOnPortfolio])
   @@map("user_badges")
 }
+
+// ============================================================
+// BLOG (posts written through POST /api/blog; file posts live in content/blog)
+// ============================================================
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model BlogPost {
+  id          String         @id @default(uuid())
+  slug        String         @unique
+  title       String
+  description String
+  keyword     String
+  /// Absolute https URL, 1200x630 recommended. Null falls back to the default OG image.
+  cover       String?
+  /// Display string, "Name, Role".
+  author      String
+  tags        String[]       @default([])
+  /// Markdown body. FAQ goes under "## FAQ" with "### Question?" subheadings.
+  body        String
+  status      BlogPostStatus @default(DRAFT)
+  /// Post date shown on the article and used for ordering (stored as midnight UTC).
+  date        DateTime       @db.Date
+  /// Set the first time the post is published; never cleared.
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status, date(sort: Desc)])
+  @@map("blog_posts")
+}
