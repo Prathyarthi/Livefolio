@@ -52,7 +52,7 @@ export const SEO_KEYWORDS = [
 ] as const;
 
 /** 1200x630 PNG in /public/og (SVG logos do not unfurl reliably on social apps). */
-const OG_IMAGE = {
+export const OG_IMAGE = {
   url: "/og/default.png",
   width: 1200,
   height: 630,
