@@ -24,6 +24,7 @@ import { findUserIdsMatchingReferences } from "@/features/search/server/referenc
 import { isProofKind, proofKindsOf } from "@/features/search/lib/proof";
 import { interpretSearchQuery, parseSearchSort } from "@/features/search/lib/query";
 import { RANKING_VERSION, rankCandidate } from "@/features/search/lib/rank";
+import { compareRankKeys } from "@/features/search/lib/rank-order";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import {
   listNamedVouchesByUserIds,
@@ -210,10 +211,29 @@ export const talent = new Elysia({ prefix: "/talent" }).get(
       }))
       .sort((a, b) => {
         if (sort === "relevance") {
-          const diff = b.rank.score - a.rank.score;
-          if (diff !== 0) return diff;
+          // Nobody applied here, so the applied-time step is when the profile was created:
+          // earliest first, and unlike updatedAt it does not move when someone edits.
+          return compareRankKeys(
+            {
+              scoreFine: a.rank.scoreFine,
+              proof: a.rank.proven,
+              skill: a.rank.overlap,
+              at: a.row.createdAt,
+              id: a.row.id,
+            },
+            {
+              scoreFine: b.rank.scoreFine,
+              proof: b.rank.proven,
+              skill: b.rank.overlap,
+              at: b.row.createdAt,
+              id: b.row.id,
+            },
+          );
         }
-        return b.row.updatedAt.getTime() - a.row.updatedAt.getTime();
+        return (
+          b.row.updatedAt.getTime() - a.row.updatedAt.getTime() ||
+          (a.row.id < b.row.id ? -1 : a.row.id > b.row.id ? 1 : 0)
+        );
       });
 
     const paged = paginateSlice(matched, requestedPage, pageSize);

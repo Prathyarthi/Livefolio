@@ -19,7 +19,9 @@ import {
   emptySearchProfile,
   gatesForRole,
 } from "@/features/jobs/lib/search-profile";
-import { rankAgainstJob } from "@/features/search/lib/rank";
+import { rankAgainstJob, rankCandidate } from "@/features/search/lib/rank";
+import { displayScore } from "@/features/search/lib/rank-order";
+import { interpretSearchQuery } from "@/features/search/lib/query";
 
 function snapshot(
   overrides: Partial<Omit<ApplicationSnapshotData, "profile">> & {
@@ -263,4 +265,89 @@ describe("applicant pool SQL", () => {
       if (isExact) expect(recalled.sort()).toEqual([...exact].sort());
     });
   }
+});
+
+describe("fine score and recency", () => {
+  const priya = people[0]!;
+  const daysBefore = (from: Date, days: number) => new Date(from.getTime() - days * 864e5);
+  const indexAt = (profileUpdatedAt: Date | null, submittedAt: Date) =>
+    buildSearchIndexFields(priya.snapshot, {
+      key: searchIndexKey(profile, requirements),
+      profile,
+      requirements,
+      name: priya.name,
+      email: priya.email,
+      profileUpdatedAt,
+      submittedAt,
+    });
+
+  test("the stored integer is round(fine) and subscores are stored as 0-1 values", () => {
+    for (const person of people) {
+      const fields = indexOf(person);
+      expect(fields.rankScore).toBe(displayScore(fields.rankScoreFine));
+      expect(fields.rankScoreFine).toBeGreaterThanOrEqual(0);
+      expect(fields.rankScoreFine).toBeLessThanOrEqual(100);
+      for (const sub of [fields.rankProof, fields.rankOverlap]) {
+        expect(sub).toBeGreaterThanOrEqual(0);
+        expect(sub).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  test("higher stored integer implies higher stored fine score across the pool", () => {
+    const now = new Date();
+    const rows = people.flatMap((person) =>
+      [2, 20, 60, 200, 800].map((age) =>
+        buildSearchIndexFields(person.snapshot, {
+          key: "k",
+          profile,
+          requirements,
+          name: person.name,
+          email: person.email,
+          profileUpdatedAt: daysBefore(now, age),
+          submittedAt: now,
+        }),
+      ),
+    );
+    for (const a of rows) {
+      for (const b of rows) {
+        if (a.rankScore > b.rankScore) expect(a.rankScoreFine).toBeGreaterThan(b.rankScoreFine);
+      }
+    }
+  });
+
+  test("a recently kept profile outscores a stale one with the same content", () => {
+    const applied = new Date("2026-06-01T00:00:00Z");
+    const fresh = indexAt(daysBefore(applied, 2), applied);
+    const stale = indexAt(daysBefore(applied, 400), applied);
+    expect(fresh.rankScoreFine).toBeGreaterThan(stale.rankScoreFine);
+    expect(fresh.rankProof).toBe(stale.rankProof);
+    expect(fresh.rankOverlap).toBe(stale.rankOverlap);
+    expect(fresh.profileUpdatedAt).toEqual(daysBefore(applied, 2));
+  });
+
+  test("age is measured when they applied, so reindexing later gives the same score", () => {
+    const longAgo = new Date("2024-01-01T00:00:00Z");
+    const old = indexAt(daysBefore(longAgo, 3), longAgo);
+    const recent = indexAt(daysBefore(new Date(), 3), new Date());
+    expect(old.rankScoreFine).toBe(recent.rankScoreFine);
+  });
+
+  test("no profile time keeps the neutral default instead of rewarding missing data", () => {
+    const none = indexAt(null, new Date());
+    expect(none.profileUpdatedAt).toBeNull();
+    expect(none.rankScoreFine).toBe(
+      rankAgainstJob(priya.snapshot, profile, { name: priya.name, email: priya.email }).scoreFine,
+    );
+    const fresh = indexAt(new Date(), new Date());
+    expect(fresh.rankScoreFine).toBeGreaterThan(none.rankScoreFine);
+  });
+
+  test("a job plus a recruiter query blends fine scores and keeps score = round(fine)", () => {
+    const query = interpretSearchQuery("seo content");
+    for (const person of people) {
+      const rank = rankCandidate(person.snapshot, { jobProfile: profile, query });
+      expect(rank.score).toBe(Math.round(rank.scoreFine));
+    }
+  });
 });

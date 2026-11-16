@@ -18,6 +18,7 @@ import type { JobSearchProfile } from "@/features/jobs/lib/search-profile";
 import { buildFacetsFromFields } from "@/features/search/lib/facets";
 import { interpretSearchQuery, type SearchSort } from "@/features/search/lib/query";
 import { rankCandidate } from "@/features/search/lib/rank";
+import { compareRankKeys, tiedCounts } from "@/features/search/lib/rank-order";
 import {
   applyReferenceRank,
   referenceMatchTerms,
@@ -56,10 +57,24 @@ const cardSelect = {
 type CardRow = Prisma.ApplicationGetPayload<{ select: typeof cardSelect }>;
 type ApplicantSummary = ReturnType<typeof summarizeSnapshot>;
 
+/**
+ * Relevance order in SQL: fine score, proof of work, skill match, earliest applicant, id.
+ * Same chain as `compareRankKeys` (rank-order.ts) and backed by applications_pool_order_idx.
+ * Rows not yet re-indexed carry their old integer score as the fine score and 0 subscores,
+ * so they still sort by score and fall to the applied-time order among themselves.
+ */
+export const applicantRankOrderBy: Prisma.ApplicationOrderByWithRelationInput[] = [
+  { rankScoreFine: "desc" },
+  { rankProof: "desc" },
+  { rankOverlap: "desc" },
+  { submittedAt: "asc" },
+  { id: "asc" },
+];
+
 function orderFor(sort: SearchSort): Prisma.ApplicationOrderByWithRelationInput[] {
   return sort === "recent"
     ? [{ submittedAt: "desc" }, { id: "asc" }]
-    : [{ rankScore: "desc" }, { submittedAt: "desc" }, { id: "asc" }];
+    : applicantRankOrderBy;
 }
 
 function toCard(
@@ -68,6 +83,7 @@ function toCard(
   resumeFileId: string | null,
   evidenceOverride?: ApplicantEvidenceSummary,
   vouchCount = 0,
+  tiedCount = 0,
 ) {
   const summary =
     (row.searchSummary as ApplicantSummary | null) ?? summarizeSnapshot(null);
@@ -88,6 +104,8 @@ function toCard(
     resumeFileId,
     evidence,
     vouchCount,
+    /** How many applicants in this result share the displayed score; 0 when sorted by date. */
+    tiedCount,
     summary: {
       ...summary,
       name: summary.name !== "Candidate" ? summary.name : row.user.name || "Candidate",
@@ -103,6 +121,7 @@ async function resumesFor(rows: CardRow[]) {
 const recallSelect = {
   ...cardSelect,
   ...facetSelect,
+  profileUpdatedAt: true,
   snapshot: { select: { data: true } },
 } satisfies Prisma.ApplicationSelect;
 
@@ -184,7 +203,7 @@ export async function loadApplicantPoolPage(input: {
     const [matches, gapSource] = await Promise.all([
       prisma.application.findMany({
         where,
-        select: { id: true, ...facetSelect },
+        select: { id: true, rankScore: true, ...facetSelect },
         orderBy: orderFor(sort),
       }),
       gapRows,
@@ -201,6 +220,8 @@ export async function loadApplicantPoolPage(input: {
       resumesFor(ordered),
       countNamedVouchesByUserIds(ordered.map((row) => row.user.id)),
     ]);
+    const tied = sort === "relevance" ? tiedCounts(matches.map((row) => row.rankScore)) : null;
+    const scoreById = new Map(matches.map((row) => [row.id, row.rankScore]));
 
     return {
       matchedCount: matches.length,
@@ -220,6 +241,7 @@ export async function loadApplicantPoolPage(input: {
           resumes.get(row.user.id) ?? null,
           undefined,
           vouchCounts.get(row.user.id) ?? 0,
+          tied?.get(scoreById.get(row.id) ?? -1) ?? 0,
         ),
       ),
     };
@@ -233,6 +255,9 @@ export async function loadApplicantPoolPage(input: {
           id: true,
           userId: true,
           rankScore: true,
+          rankScoreFine: true,
+          rankProof: true,
+          rankOverlap: true,
           rankReasons: true,
           submittedAt: true,
           ...facetSelect,
@@ -248,19 +273,34 @@ export async function loadApplicantPoolPage(input: {
     });
     const scored = matches.map((row) => {
       const references = signals.get(row.userId) ?? [];
-      const applied = applyReferenceRank(row.rankScore, row.rankReasons, references, terms);
-      return { row, score: applied.score, reasons: applied.reasons };
+      const applied = applyReferenceRank(row.rankScoreFine, row.rankReasons, references, terms);
+      return { row, score: applied.score, scoreFine: applied.scoreFine, reasons: applied.reasons };
     });
     scored.sort((a, b) => {
       if (sort === "relevance") {
-        const byScore = b.score - a.score;
-        if (byScore !== 0) return byScore;
+        return compareRankKeys(
+          {
+            scoreFine: a.scoreFine,
+            proof: a.row.rankProof,
+            skill: a.row.rankOverlap,
+            at: a.row.submittedAt,
+            id: a.row.id,
+          },
+          {
+            scoreFine: b.scoreFine,
+            proof: b.row.rankProof,
+            skill: b.row.rankOverlap,
+            at: b.row.submittedAt,
+            id: b.row.id,
+          },
+        );
       }
       return (
         b.row.submittedAt.getTime() - a.row.submittedAt.getTime() ||
-        a.row.id.localeCompare(b.row.id)
+        (a.row.id < b.row.id ? -1 : a.row.id > b.row.id ? 1 : 0)
       );
     });
+    const tied = sort === "relevance" ? tiedCounts(scored.map((item) => item.score)) : null;
 
     const paged = paginateSlice(scored, page, pageSize);
     const ids = paged.items.map((item) => item.row.id);
@@ -304,6 +344,7 @@ export async function loadApplicantPoolPage(input: {
               }
             : stored,
           signals.get(row.user.id)?.length ?? 0,
+          scoredRow ? (tied?.get(scoredRow.score) ?? 0) : 0,
         );
       }),
     };
@@ -350,19 +391,41 @@ export async function loadApplicantPoolPage(input: {
     const rank = rankCandidate(row.snapshot, {
       jobProfile: profile,
       query: interpreted,
-      extras: { name: row.user.name, email: row.user.email, coverNote: row.coverNote },
+      extras: {
+        name: row.user.name,
+        email: row.user.email,
+        coverNote: row.coverNote,
+        // Same recency input as the stored score: profile age at the moment they applied.
+        freshnessAt: row.profileUpdatedAt,
+        freshnessAsOf: row.profileUpdatedAt ? row.submittedAt : null,
+      },
       references,
     });
     return { row, rank };
   });
 
   if (sort === "relevance") {
-    matched.sort(
-      (a, b) =>
-        b.rank.score - a.rank.score ||
-        b.row.submittedAt.getTime() - a.row.submittedAt.getTime(),
+    matched.sort((a, b) =>
+      compareRankKeys(
+        {
+          scoreFine: a.rank.scoreFine,
+          proof: a.rank.proven,
+          skill: a.rank.overlap,
+          at: a.row.submittedAt,
+          id: a.row.id,
+        },
+        {
+          scoreFine: b.rank.scoreFine,
+          proof: b.rank.proven,
+          skill: b.rank.overlap,
+          at: b.row.submittedAt,
+          id: b.row.id,
+        },
+      ),
     );
   }
+  const tied =
+    sort === "relevance" ? tiedCounts(matched.map((item) => item.rank.score)) : null;
 
   const paged = paginateSlice(matched, page, pageSize);
   const pageRows = paged.items.map((item) => item.row);
@@ -394,6 +457,7 @@ export async function loadApplicantPoolPage(input: {
         resumes.get(row.user.id) ?? null,
         attachRank(stored, rank),
         signals?.get(row.user.id)?.length ?? vouchCounts?.get(row.user.id) ?? 0,
+        tied?.get(rank.score) ?? 0,
       );
     }),
   };

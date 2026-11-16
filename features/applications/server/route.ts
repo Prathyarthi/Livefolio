@@ -373,6 +373,10 @@ export const applications = new Elysia({ prefix: "/applications" })
       // Stored profile only: a submit burst must not trigger AI extraction. A stale
       // profile hash makes the pool re-score this row later.
       const storedProfile = parseJobSearchProfile(job.searchProfile);
+      const profileRow = await prisma.portfolio.findUnique({
+        where: { id: snapshot.portfolioId },
+        select: { updatedAt: true },
+      });
       const searchIndex = buildSearchIndexFields(snapshot.data, {
         key: searchIndexKey(storedProfile, job.requirements),
         profile: storedProfile,
@@ -380,6 +384,7 @@ export const applications = new Elysia({ prefix: "/applications" })
         name: applicant?.name,
         email: applicant?.email,
         coverNote,
+        profileUpdatedAt: profileRow?.updatedAt ?? null,
       });
 
       const application = await prisma.application.create({

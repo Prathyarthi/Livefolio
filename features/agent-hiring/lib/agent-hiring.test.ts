@@ -93,6 +93,67 @@ describe("mergeShortlist", () => {
   });
 });
 
+describe("mergeShortlist ties", () => {
+  const ordered = (
+    id: string,
+    over: Partial<NonNullable<PoolCandidate["order"]>>,
+    score = 87,
+  ): PoolCandidate => ({
+    ...cand(id, score),
+    order: {
+      scoreFine: 87.2,
+      proof: 0.5,
+      skill: 0.5,
+      at: new Date("2026-01-10T00:00:00Z"),
+      id,
+      ...over,
+    },
+  });
+
+  test("equal scores order by proof of work, skill match, earliest applicant, then id", () => {
+    const out = mergeShortlist(
+      [],
+      [
+        ordered("e", { at: new Date("2026-02-01T00:00:00Z") }),
+        ordered("d", { at: new Date("2026-01-01T00:00:00Z") }),
+        ordered("c", { skill: 0.9 }),
+        ordered("b", { proof: 0.8 }),
+        ordered("a", { proof: 0.8, skill: 0.7 }),
+        ordered("z", { scoreFine: 87.4 }),
+      ],
+    );
+    expect(out.map((c) => c.userId)).toEqual(["z", "a", "b", "c", "d", "e"]);
+  });
+
+  test("the cut at the shortlist size is the same whatever the input order", () => {
+    const pool = Array.from({ length: 13 }, (_, i) =>
+      ordered(`p${String(i).padStart(2, "0")}`, {
+        proof: (i % 3) / 3,
+        at: new Date(Date.UTC(2026, 0, 1 + i)),
+      }),
+    );
+    const forward = mergeShortlist([], pool).map((c) => c.userId);
+    const backward = mergeShortlist([], [...pool].reverse()).map((c) => c.userId);
+    expect(forward).toHaveLength(10);
+    expect(backward).toEqual(forward);
+  });
+
+  test("an applicant still wins a full tie, and the better of two applications is kept", () => {
+    const out = mergeShortlist(
+      [
+        { ...ordered("x", { id: "app-late", at: new Date("2026-03-01T00:00:00Z") }), ref: "app-late" },
+        { ...ordered("x", { id: "app-early", at: new Date("2026-01-01T00:00:00Z") }), ref: "app-early" },
+      ],
+      [ordered("y", { id: "slug" })],
+    );
+    expect(out.map((c) => [c.userId, c.label])).toEqual([
+      ["x", "Applicant"],
+      ["y", "Sourced"],
+    ]);
+    expect(out[0]!.ref).toBe("app-early");
+  });
+});
+
 test("parseAgentSession keeps a draft and ignores garbage", () => {
   const raw = JSON.stringify({
     brief: "Need a designer for onboarding",

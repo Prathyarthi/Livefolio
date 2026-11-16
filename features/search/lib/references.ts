@@ -3,6 +3,7 @@ import { VOUCH_RELATIONSHIP_LABELS } from "@/features/vouches/lib/constants";
 import { blobHasTerm, matchesInterpretedQuery } from "@/features/search/lib/match";
 import type { InterpretedSearchQuery } from "@/features/search/lib/query";
 import { joinText } from "@/features/search/lib/rank-fields";
+import { displayScore, toFineScore } from "@/features/search/lib/rank-order";
 import { clamp01 } from "@/features/search/lib/rank-signals";
 
 export type ReferenceForSearch = {
@@ -110,24 +111,29 @@ export function referenceMatchTerms(input: {
     .slice(0, 16);
 }
 
-/** Add the reference signal on top of a 0–100 score. An empty list leaves it unchanged. */
+/**
+ * Add the reference signal on top of a 0-100 score. An empty list leaves it unchanged.
+ * The bonus is added unrounded to the fine score; `score` is its rounded display value.
+ */
 export function applyReferenceRank(
   baseScore: number,
   reasons: string[],
   references: ReferenceForSearch[] | undefined,
   terms: string[],
-): { score: number; reasons: string[] } {
-  if (!references?.length) return { score: baseScore, reasons };
+): { score: number; scoreFine: number; reasons: string[] } {
+  const base = toFineScore(baseScore);
+  if (!references?.length) {
+    return { score: displayScore(base), scoreFine: base, reasons };
+  }
   const result = referenceScore(references, terms);
-  if (result.score <= 0) return { score: baseScore, reasons };
-  const score = Math.min(
-    100,
-    Math.max(0, Math.round(baseScore + result.score * REFERENCE_SCORE_POINTS)),
-  );
+  if (result.score <= 0) {
+    return { score: displayScore(base), scoreFine: base, reasons };
+  }
+  const scoreFine = toFineScore(base + result.score * REFERENCE_SCORE_POINTS);
   const nextReasons = result.reason
     ? [result.reason, ...reasons.filter((reason) => reason !== result.reason)].slice(0, 4)
     : reasons;
-  return { score, reasons: nextReasons };
+  return { score: displayScore(scoreFine), scoreFine, reasons: nextReasons };
 }
 
 /** User ids whose reference text satisfies the query, for recall beyond the Livefolio. */
