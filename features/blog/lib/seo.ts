@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, OG_IMAGE } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 import type { FaqItem } from "@/features/blog/lib/markdown";
 import type { BlogPost } from "@/features/blog/types";
@@ -49,13 +49,13 @@ export function getBlogIndexMetadata(): Metadata {
       siteName: siteConfig.name,
       title: BLOG_TITLE,
       description: BLOG_DESCRIPTION,
-      images: [{ url: absoluteUrl("/logo.svg"), alt: `${siteConfig.name} logo` }],
+      images: [OG_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: BLOG_TITLE,
       description: BLOG_DESCRIPTION,
-      images: [absoluteUrl("/logo.svg")],
+      images: [OG_IMAGE.url],
     },
   };
 }

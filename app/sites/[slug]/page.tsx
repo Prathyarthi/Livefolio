@@ -29,9 +29,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     `Professional portfolio published on ${siteConfig.name}.`;
 
   const canonicalUrl = getPortfolioPublicUrl(slug);
-  const ogImages = portfolio.avatarUrl
-    ? [{ url: portfolio.avatarUrl, alt: title }]
-    : [{ url: "/logo.svg", alt: `${siteConfig.name} portfolio` }];
 
   return {
     title,
@@ -43,13 +40,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       siteName: siteConfig.name,
-      images: ogImages,
     },
+    // Images come from opengraph-image.tsx and twitter-image.tsx in this folder.
     twitter: {
-      card: portfolio.avatarUrl ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title,
       description,
-      images: ogImages.map((image) => image.url),
     },
     robots: { index: true, follow: true },
   };
