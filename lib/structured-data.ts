@@ -64,7 +64,7 @@ export function getSoftwareApplicationSchema() {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
-      description: "Free tier with Minimal template; Pro unlocks all templates and imports.",
+      description: "Free tier with free templates and publishing; Pro unlocks all templates and imports.",
     },
     featureList: [
       "AI resume PDF import",

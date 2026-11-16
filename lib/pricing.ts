@@ -120,7 +120,7 @@ export const pricingPlans: PricingPlan[] = [
     pricePeriod: "for 1 month",
     ctaLabel: "Start free",
     ctaHref: "/sign-up",
-    note: "After your free month ends, you can continue on Minimal template with core editing and publishing. Imports require Pro.",
+    note: "After your free month ends, you can continue on the free templates with core editing and publishing. Imports require Pro.",
     features: [
       { label: "Public portfolio at your Livefolio link", included: true },
       { label: "Resume and platform imports during free month", included: true },

@@ -116,14 +116,9 @@ export function SubscriptionFlow() {
     }
   }, [billingInterval, razorpayLoaded]);
 
-  if (authLoading || billingLoading) {
-    return (
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <div className="skeleton-shimmer h-96 rounded-[var(--radius-lg)]" />
-        <div className="skeleton-shimmer h-96 rounded-[var(--radius-lg)]" />
-      </div>
-    );
-  }
+  // Plans and amounts render on the server (static HTML) from lib/pricing.
+  // Only the account-specific buttons wait for the session and /api/billing/me.
+  const stateLoading = authLoading || billingLoading;
 
   return (
     <div className="flex flex-col gap-4">
@@ -139,13 +134,13 @@ export function SubscriptionFlow() {
           </button>
         </p>
       )}
-      {accessTier === "trial" && (
+      {!stateLoading && accessTier === "trial" && (
         <p className="rounded-[var(--radius-md)] bg-success-bg px-4 py-3 text-center text-body-sm text-success">
           You are on your free month. {trialDaysRemaining} day
           {trialDaysRemaining === 1 ? "" : "s"} remaining with full features.
         </p>
       )}
-      {accessTier === "free" && (
+      {!stateLoading && accessTier === "free" && (
         <p className="rounded-[var(--radius-md)] bg-warning-bg px-4 py-3 text-center text-body-sm text-text-secondary">
           Your free month ended. Free essentials remain active; upgrade to Pro
           for resume and platform imports, and premium templates.
@@ -169,6 +164,7 @@ export function SubscriptionFlow() {
       </div>
 
       <PricingCards
+        stateLoading={stateLoading}
         plans={pricingPlans}
         loggedIn={Boolean(user)}
         paidActive={paidActive}

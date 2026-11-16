@@ -8,7 +8,7 @@ export const FAQ_ITEMS = [
   {
     question: "Is there a free plan?",
     answer:
-      "Yes. You can create and publish a portfolio on the Minimal template. A free trial unlocks all templates and imports; Pro keeps those features after the trial.",
+      "Yes. You can create and publish a portfolio for free using the free templates. A free trial unlocks all templates and imports; Pro keeps those features after the trial.",
   },
   {
     question: "Can I use my own subdomain?",

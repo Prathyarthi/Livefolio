@@ -18,7 +18,7 @@ export const accountAndBilling: DocCategory = {
         {
           type: "list",
           items: [
-            "**Free**: create and publish a portfolio with the free templates, and ask up to 3 people for references.",
+            "**Free**: create and publish a portfolio with the [free templates](/docs/design/choose-template), and ask up to 3 people for references.",
             "**Free trial**: every new account gets **30 days** with all templates, imports and analytics unlocked.",
             "**Pro**: keeps all templates, imports and analytics after the trial, plus up to 12 project thumbnails, live project previews and up to 15 reference requests.",
           ],
