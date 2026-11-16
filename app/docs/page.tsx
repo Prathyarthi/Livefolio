@@ -11,12 +11,15 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { getDocCategories, getDocHref } from "@/features/docs/lib/docs";
+import { JsonLd } from "@/components/json-ld";
 import { createPageMetadata } from "@/lib/seo";
+import { getBreadcrumbSchema } from "@/lib/structured-data";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Help & Docs",
-  description: `Step-by-step guides for building, designing and publishing your ${siteConfig.name} portfolio.`,
+  title: "Help and Docs",
+  description:
+    "Step-by-step guides for importing your resume PDF, adding proof, choosing a template, publishing on your subdomain and asking for references.",
   path: "/docs",
 });
 
@@ -39,6 +42,7 @@ export default function DocsHomePage() {
 
   return (
     <div className="mx-auto max-w-4xl">
+      <JsonLd data={getBreadcrumbSchema([{ name: "Docs", path: "/docs" }])} />
       <header className="mb-10">
         <p className="eyebrow uppercase">Help center</p>
         <h1 className="mt-2 text-h1 text-text-primary">

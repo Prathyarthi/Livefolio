@@ -16,7 +16,10 @@ import {
   getDocCategory,
   getDocHref,
 } from "@/features/docs/lib/docs";
+import { JsonLd } from "@/components/json-ld";
+import { getDocMetaDescription } from "@/features/docs/lib/docs-seo";
 import { createPageMetadata } from "@/lib/seo";
+import { getBreadcrumbSchema } from "@/lib/structured-data";
 
 type Params = { category: string };
 
@@ -34,7 +37,10 @@ export async function generateMetadata({
   if (!category) return {};
   return createPageMetadata({
     title: `${category.title} | Docs`,
-    description: category.description,
+    description: getDocMetaDescription(
+      getDocHref(category.slug),
+      category.description,
+    ),
     path: getDocHref(category.slug),
   });
 }
@@ -52,6 +58,12 @@ export default async function DocsCategoryPage({
 
   return (
     <div className="mx-auto max-w-3xl">
+      <JsonLd
+        data={getBreadcrumbSchema([
+          { name: "Docs", path: "/docs" },
+          { name: category.title, path: getDocHref(category.slug) },
+        ])}
+      />
       <DocsBreadcrumbs items={[{ label: category.title }]} />
       <header className="mb-8 flex items-start gap-4">
         <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface-sunken">

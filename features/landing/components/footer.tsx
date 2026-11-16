@@ -11,6 +11,7 @@ const CANDIDATE_NAV = {
     { label: "Examples", href: "/#showcase" },
     { label: "Pricing", href: "/#pricing" },
     { label: "FAQ", href: "/#faq" },
+    { label: "Hire on Livefolio", href: "/recruiters" },
   ],
   Account: [
     { label: "Sign in", href: "/sign-in" },

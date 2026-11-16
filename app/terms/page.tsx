@@ -6,8 +6,8 @@ import { siteConfig } from "@/lib/site";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Terms & Conditions",
-  description: `Terms governing your use of ${siteConfig.name}, including accounts, subscriptions, published portfolios, and acceptable use.`,
+  title: "Terms and Conditions",
+  description: `Terms governing your use of ${siteConfig.name}, including accounts, subscriptions, published portfolios and acceptable use. Last updated November 2, 2026.`,
   path: "/terms",
   openGraphType: "article",
 });

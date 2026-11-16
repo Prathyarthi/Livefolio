@@ -33,6 +33,7 @@ const CANDIDATE_PILL_MENU_LINKS = [
   { label: "Integrations", href: "/#integrations" },
   { label: "Templates", href: "/#showcase" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "For recruiters", href: "/recruiters" },
   { label: "FAQ", href: "/#faq" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
