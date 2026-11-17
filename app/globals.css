@@ -812,11 +812,19 @@ html[data-theme="dark"] .studio-landing .studio-hero-float__tile {
     );
 }
 
+@keyframes orbit-node-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .studio-landing * {
     scroll-behavior: auto !important;
   }
   .studio-landing .studio-hero-float__tile {
+    animation: none !important;
+  }
+  .studio-landing .integration-orbit__node {
     animation: none !important;
   }
 }

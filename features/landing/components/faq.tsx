@@ -45,7 +45,52 @@ const FAQ_RICH_ANSWERS: Partial<
   ),
 };
 
+function splitColumns<T>(items: readonly T[]): [T[], T[]] {
+  const columns: [T[], T[]] = [[], []];
+  items.forEach((item, index) => {
+    columns[index % 2].push(item);
+  });
+  return columns;
+}
+
+function FaqCard({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: ReactNode;
+}) {
+  return (
+    <details className="group rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-4 py-1 transition-colors open:border-border-strong">
+      <summary
+        className={cn(
+          "flex cursor-pointer list-none items-center justify-between gap-3 py-3.5",
+          "text-left text-sm font-semibold text-text-primary",
+          "marker:content-none [&::-webkit-details-marker]:hidden",
+        )}
+      >
+        {question}
+        <span
+          className={cn(
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+            "bg-brand-secondary/12 text-base font-light leading-none text-brand-secondary",
+            "transition-transform duration-200 group-open:rotate-45",
+          )}
+          aria-hidden
+        >
+          +
+        </span>
+      </summary>
+      <div className="border-t border-dashed border-border-default/70 pb-4 pt-3 text-body-sm leading-relaxed text-text-secondary">
+        {answer}
+      </div>
+    </details>
+  );
+}
+
 export function FAQ() {
+  const columns = splitColumns(FAQ_ITEMS);
+
   return (
     <StudioSection id="faq">
       <StudioHeading
@@ -54,35 +99,27 @@ export function FAQ() {
         description="Quick answers about building, publishing, and managing your portfolio."
       />
 
-      <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-10 flex flex-col gap-3 sm:hidden">
         {FAQ_ITEMS.map((item) => (
-          <details
+          <FaqCard
             key={item.question}
-            className="group rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-4 py-1 transition-colors open:border-border-strong"
-          >
-            <summary
-              className={cn(
-                "flex cursor-pointer list-none items-center justify-between gap-3 py-3.5",
-                "text-left text-sm font-semibold text-text-primary",
-                "marker:content-none [&::-webkit-details-marker]:hidden",
-              )}
-            >
-              {item.question}
-              <span
-                className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
-                  "bg-brand-secondary/12 text-base font-light leading-none text-brand-secondary",
-                  "transition-transform duration-200 group-open:rotate-45",
-                )}
-                aria-hidden
-              >
-                +
-              </span>
-            </summary>
-            <div className="border-t border-dashed border-border-default/70 pb-4 pt-3 text-body-sm leading-relaxed text-text-secondary">
-              {FAQ_RICH_ANSWERS[item.question] ?? item.answer}
-            </div>
-          </details>
+            question={item.question}
+            answer={FAQ_RICH_ANSWERS[item.question] ?? item.answer}
+          />
+        ))}
+      </div>
+
+      <div className="mt-10 hidden items-start gap-3 sm:grid sm:grid-cols-2">
+        {columns.map((column, index) => (
+          <div key={index} className="flex flex-col gap-3">
+            {column.map((item) => (
+              <FaqCard
+                key={item.question}
+                question={item.question}
+                answer={FAQ_RICH_ANSWERS[item.question] ?? item.answer}
+              />
+            ))}
+          </div>
         ))}
       </div>
     </StudioSection>

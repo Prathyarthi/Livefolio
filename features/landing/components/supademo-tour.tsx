@@ -12,7 +12,7 @@ export function SupademoTour() {
         description="Walk through how a resume becomes a published portfolio."
       />
 
-      <div className="relative mx-auto mt-8 w-full max-h-[70svh] overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised [aspect-ratio:1.72]">
+      <div className="relative mx-auto mt-8 w-full max-h-[70svh] overflow-hidden rounded-[var(--radius-lg)] bg-surface-raised [aspect-ratio:1.72]">
         <iframe
           src="https://app.supademo.com/embed/cmsim278j2140qmaaj7ypuliv?embed_v=2&utm_source=embed"
           loading="lazy"

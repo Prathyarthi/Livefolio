@@ -120,8 +120,8 @@ export function LandingNav({
           max-w-3xl (~768px) matches reference nav width.
           Slimmer padding / ~16px radius to match studio floating bar.
         */}
-        <div className="relative mx-auto flex w-full max-w-3xl items-center justify-between gap-2 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-2.5 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:gap-3 sm:px-3.5">
-          <div className="relative z-[1] flex shrink-0 items-center lg:min-w-[9rem]">
+        <div className="relative mx-auto grid w-full max-w-3xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-2.5 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:gap-3 sm:px-3.5">
+          <div className="relative z-[1] flex min-w-0 items-center">
             <Logo
               className="shrink-0 gap-1.5 [&_img]:h-7 [&_img]:w-7"
               wordmarkClassName="text-brand-primary font-sans text-[15px] font-semibold tracking-[-0.02em] sm:text-[16px]"
@@ -129,7 +129,7 @@ export function LandingNav({
           </div>
 
           <nav
-            className="absolute left-1/2 top-1/2 z-0 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-2.5 lg:flex"
+            className="hidden min-w-0 items-center justify-center gap-2.5 px-2 lg:flex"
             aria-label="Main navigation"
           >
             {links.map(({ label, href }, index) => (
@@ -150,7 +150,7 @@ export function LandingNav({
             ))}
           </nav>
 
-          <div className="relative z-[1] flex min-w-0 shrink-0 items-center justify-end gap-1 sm:gap-1.5 lg:min-w-[9rem]">
+          <div className="relative z-[1] flex min-w-0 items-center justify-end gap-1 sm:gap-1.5">
             <ThemeToggle className="hidden shrink-0 lg:inline-flex" />
             {!authenticated ? (
               <Button

@@ -1,0 +1,404 @@
+/* Recruiter shortlist hero (recruiter-shortlist-demo.tsx). Livefolio's own
+   look: Source Sans, ink text, coral accent. Fade crop: the window sits a
+   gutter in on three sides and fades out at its foot over filler rows; the
+   reference card straddles its left edge over the sidebar. */
+
+.rsd .ss-stage {
+  --gutter: 32px;
+  --rsd-ease: cubic-bezier(0.45, 0, 0.1, 1);
+  --rsd-arrive: cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+}
+
+.rsd .rsd-icon {
+  flex: none;
+  color: var(--ss-icon);
+}
+
+/* ---- Window ---- */
+
+.rsd .rsd-window {
+  position: absolute;
+  top: var(--gutter);
+  left: 172px;
+  width: 836px;
+  height: 560px;
+  box-shadow: var(--ss-shadow-hero);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 92%);
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-window {
+  top: 16px;
+  left: 16px;
+  width: 326px;
+  height: 400px;
+  background: var(--ss-surface);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 82%);
+}
+
+.rsd .rsd-window .ss-window__bar {
+  gap: 12px;
+  height: 52px;
+  padding: 0 20px;
+  background: var(--ss-surface);
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-window .ss-window__bar {
+  padding: 0 16px 0 12px;
+}
+
+.rsd .rsd-window .ss-window__heading,
+.rsd .rsd-window .ss-window__title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ss-text-strong);
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-window .ss-window__title {
+  flex: 1;
+  margin-right: 0;
+  margin-left: 0;
+  text-align: left;
+  font-size: 14px;
+}
+
+.rsd .rsd-window .ss-window__main {
+  background: var(--ss-surface);
+}
+
+/* ---- Sidebar ---- */
+
+.rsd .rsd-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  height: 100%;
+  padding: 4px 12px 0;
+}
+
+.rsd .rsd-workspace {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 8px;
+}
+
+.rsd .rsd-workspace__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ss-text-strong);
+}
+
+.rsd .rsd-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rsd .rsd-section {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+}
+
+.rsd .rsd-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+}
+
+.rsd .rsd-nav[data-active] {
+  background: var(--ss-surface);
+  box-shadow: 0 0 0 1px var(--ss-line);
+}
+
+.rsd .rsd-nav[data-active] .rsd-icon {
+  color: var(--ss-text-strong);
+}
+
+.rsd .rsd-nav__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ss-text);
+}
+
+.rsd .rsd-nav[data-active] .rsd-nav__label {
+  color: var(--ss-text-strong);
+}
+
+/* ---- Bar: the switch ---- */
+
+.rsd .rsd-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rsd .rsd-switch__label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ss-text-strong);
+}
+
+/* ---- Body ---- */
+
+.rsd .rsd-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px;
+}
+
+.rsd .rsd-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 48px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--ss-line);
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-filters {
+  height: 40px;
+  padding: 0 4px;
+}
+
+.rsd .rsd-filters__terms {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ss-text);
+}
+
+.rsd .rsd-filters__spacer {
+  flex: 1;
+}
+
+.rsd .rsd-filters__count {
+  font-size: 12.5px;
+  color: var(--ss-text-faint);
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-filters__count {
+  font-size: 12px;
+}
+
+/* ---- The list: every row sits at its slot by a transform, so a new order
+   glides instead of reflowing ---- */
+
+.rsd .rsd-list {
+  position: relative;
+  margin-top: 6px;
+}
+
+.rsd .rsd-slot {
+  position: absolute;
+  inset: 0 0 auto;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  height: 76px;
+  border-bottom: 1px solid var(--ss-line);
+  background: var(--ss-surface);
+  transition: transform 0.95s var(--rsd-ease);
+  will-change: transform;
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-slot {
+  grid-template-columns: 18px minmax(0, 1fr);
+  height: 62px;
+}
+
+/* The row climbing past the others leads and travels over them, lifted;
+   the rows making room follow a beat later */
+.rsd .rsd-slot:not([data-rising]) {
+  transition-delay: 0.08s;
+}
+
+.rsd .rsd-slot[data-rising] {
+  z-index: 1;
+  transition:
+    transform 0.95s var(--rsd-ease),
+    box-shadow 0.35s ease,
+    border-color 0.2s ease,
+    border-radius 0.2s ease;
+}
+
+.rsd .rsd-slot[data-lifted] {
+  border-color: transparent;
+  border-radius: 10px;
+  box-shadow: var(--ss-shadow-lift);
+}
+
+.rsd .rsd-rank {
+  display: flex;
+  justify-content: center;
+  font-family: var(--ss-mono);
+  font-size: 12px;
+  color: var(--ss-text-faint);
+}
+
+.rsd .rsd-row {
+  --ss-row-title: 15px;
+  --ss-row-subtitle: 13px;
+  --ss-row-line: 20px;
+  --ss-row-line-2: 18px;
+  --ss-row-gap: 3px;
+  column-gap: 14px;
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-row {
+  --ss-row-title: 14px;
+  --ss-row-subtitle: 12.5px;
+  column-gap: 10px;
+}
+
+.rsd .rsd-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rsd .rsd-name__role {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ss-text-faint);
+}
+
+.rsd .rsd-trail {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-trail {
+  gap: 8px;
+}
+
+/* The chip's slot is reserved on every row, so the scores stay in one
+   column; the chip buds in from just right of where it sits */
+.rsd .rsd-chip {
+  display: flex;
+  justify-content: flex-end;
+  width: 124px;
+  opacity: 0;
+  transform: translateX(6px) scale(0.96);
+  transform-origin: right center;
+  will-change: transform;
+  transition:
+    opacity 0.3s ease,
+    transform 0.6s var(--rsd-arrive);
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-chip {
+  width: 36px;
+}
+
+.rsd .rsd-chip[data-show] {
+  opacity: 1;
+  transform: none;
+}
+
+.rsd .rsd-chip__badge {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rsd .rsd-score {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5px;
+  width: 72px;
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-score {
+  width: 52px;
+}
+
+.rsd .rsd-score__value {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ss-text-strong);
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-score__value {
+  font-size: 19px;
+}
+
+.rsd .rsd-score__of {
+  font-size: 12px;
+  color: var(--ss-text-faint);
+}
+
+/* ---- The reference card, over the sidebar ---- */
+
+.rsd .rsd-ref {
+  position: absolute;
+  top: 246px;
+  left: var(--gutter);
+  width: 280px;
+  background: var(--ss-raised);
+  box-shadow: var(--ss-shadow-satellite);
+}
+
+.rsd .rsd-ref__who {
+  --ss-row-title: 13.5px;
+  --ss-row-subtitle: 12.5px;
+  --ss-row-line: 20px;
+  --ss-row-line-2: 18px;
+  --ss-row-gap: 1px;
+}
+
+.rsd .rsd-ref__quote {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  color: var(--ss-text-strong);
+}
+
+.rsd .rsd-ref__term {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: var(--ss-accent-soft);
+  color: inherit;
+}
+
+.rsd .rsd-ref__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rsd .rsd-ref__main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rsd .rsd-ref__label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ss-text);
+}
+
+.rsd .rsd-rest {
+  position: absolute;
+  top: 470px;
+  left: 640px;
+  width: 1px;
+  height: 1px;
+}
+
+.rsd .ss-stage[data-layout="compact"] .rsd-rest {
+  top: 290px;
+  left: 200px;
+}

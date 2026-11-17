@@ -18,6 +18,7 @@ export const integrationCycle = [
   "LeetCode",
   "Stack Overflow",
   "Codeforces",
+  "LinkedIn",
 ] as const;
 
 export const integrations = [
@@ -58,5 +59,11 @@ export const integrations = [
     id: "codeforces",
     name: "Codeforces",
     description: "Contest rating, rank, and problems you have solved.",
+  },
+  {
+    id: "linkedin",
+    name: "LinkedIn",
+    description:
+      "Experience, education, and posts from your LinkedIn profile.",
   },
 ] as const;

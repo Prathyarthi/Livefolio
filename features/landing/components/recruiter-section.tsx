@@ -49,6 +49,24 @@ export function RecruiterSection({
   );
 }
 
+/** Three short points under a section's figure: no boxes, the figure carries the weight. */
+export function SectionPoints({
+  points,
+}: {
+  points: readonly { title: string; body: string }[];
+}) {
+  return (
+    <ul className="mx-auto mt-8 grid max-w-[60rem] gap-6 px-1 sm:grid-cols-3 sm:gap-8 md:mt-10">
+      {points.map((p) => (
+        <li key={p.title}>
+          <h3 className="text-body font-semibold text-text-primary">{p.title}</h3>
+          <p className="mt-1 text-body-sm text-text-secondary">{p.body}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /** Bento card with hairline border and a subtle inner gradient. */
 export function BentoCard({
   title,

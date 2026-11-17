@@ -5,6 +5,7 @@ import {
   DevtoIcon,
   HashnodeIcon,
   LeetCodeIcon,
+  LinkedinIcon,
   StackOverflowIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -59,6 +60,7 @@ const INTEGRATION_ICONS: Record<
   leetcode: LeetCodeIcon,
   stackoverflow: StackOverflowIcon,
   codeforces: CodeforcesIcon,
+  linkedin: LinkedinIcon,
 };
 
 export const PLATFORM_STYLES: Record<
@@ -91,6 +93,10 @@ export const PLATFORM_STYLES: Record<
   },
   codeforces: {
     accent: "bg-[#1f8acb]",
+    iconClass: "text-white",
+  },
+  linkedin: {
+    accent: "bg-[#0a66c2]",
     iconClass: "text-white",
   },
 };
