@@ -176,8 +176,9 @@ Hiring Business / seat: INR ₹4,999 / ₹14,199 / ₹50,388 USD $59 / $165 / $6
 After creating plans, configure webhook in Razorpay Dashboard:
   POST https://your-domain.com/api/billing/webhook
   Events: subscription.authenticated, subscription.pending, subscription.activated,
-          subscription.charged, subscription.cancelled, subscription.halted,
-          subscription.paused, subscription.resumed, subscription.completed
+          subscription.charged, subscription.updated, subscription.cancelled,
+          subscription.halted, subscription.paused, subscription.resumed,
+          subscription.completed
 `);
 }
 
