@@ -45,3 +45,6 @@ next-env.d.ts
 leads/
 docs/
 svs
+
+# local agent skills
+/.agents/

@@ -16,6 +16,7 @@ import {
   matchedTerms,
   type FieldBlobs,
 } from "@/features/search/lib/rank-fields";
+import { displayScore, toFineScore } from "@/features/search/lib/rank-order";
 import {
   clamp01,
   fitScore,
@@ -31,7 +32,10 @@ import {
 } from "@/features/search/lib/references";
 
 export type CandidateRank = {
+  /** Displayed integer, always `Math.round(scoreFine)`. */
   score: number;
+  /** Unrounded 0-100 score with the reference bonus included. Sort by this. */
+  scoreFine: number;
   overlap: number;
   proven: number;
   platform: number;
@@ -45,10 +49,12 @@ export type RankExtras = {
   email?: string;
   coverNote?: string | null;
   freshnessAt?: Date | string | null;
+  /** Measure freshness at this moment instead of now (applicants: when they applied). */
+  freshnessAsOf?: Date | string | null;
 };
 
 /** Bump whenever weights or scoring change so logged results can be compared across versions. */
-export const RANKING_VERSION = "field-weighted-v6";
+export const RANKING_VERSION = "field-weighted-v7";
 
 const COMPONENT_WEIGHTS = {
   overlap: 0.45,
@@ -125,8 +131,10 @@ function overlapScore(
 }
 
 function emptyRank(freshness = 0): CandidateRank {
+  const scoreFine = toFineScore(freshness * 8);
   return {
-    score: Math.round(freshness * 8),
+    score: displayScore(scoreFine),
+    scoreFine,
     overlap: 0,
     proven: 0,
     platform: 0,
@@ -178,7 +186,7 @@ function combineRank(
   );
   const platform = platformScore(snapshot, profile, reasons);
   const fit = fitScore(snapshot, profile, reasons);
-  const freshness = freshnessScore(extras?.freshnessAt);
+  const freshness = freshnessScore(extras?.freshnessAt, extras?.freshnessAsOf);
 
   // Roles without a platform signal (sales, ops, product, design…) must still be able to score 100.
   const platformWeight = hasPlatformSignal(profile) ? COMPONENT_WEIGHTS.platform : 0;
@@ -195,8 +203,10 @@ function combineRank(
     fit * COMPONENT_WEIGHTS.fit +
     freshness * COMPONENT_WEIGHTS.freshness;
 
+  const scoreFine = toFineScore((weighted / total) * 100);
   return {
-    score: Math.min(100, Math.max(0, Math.round((weighted / total) * 100))),
+    score: displayScore(scoreFine),
+    scoreFine,
     overlap,
     proven,
     platform,
@@ -221,7 +231,7 @@ export function rankAgainstQuery(
   extras?: RankExtras,
 ): CandidateRank {
   if (query.keywords.length === 0 && !query.minExperience) {
-    return emptyRank(freshnessScore(extras?.freshnessAt));
+    return emptyRank(freshnessScore(extras?.freshnessAt, extras?.freshnessAsOf));
   }
   return combineRank(
     snapshot,
@@ -251,8 +261,10 @@ export function rankCandidate(
   if (jobProfile && query && hasQuery) {
     const job = rankAgainstJob(snapshot, jobProfile, extras);
     const byQuery = rankAgainstQuery(snapshot, query, extras);
+    const scoreFine = toFineScore(job.scoreFine * 0.7 + byQuery.scoreFine * 0.3);
     rank = {
-      score: Math.round(job.score * 0.7 + byQuery.score * 0.3),
+      score: displayScore(scoreFine),
+      scoreFine,
       overlap: job.overlap * 0.7 + byQuery.overlap * 0.3,
       proven: Math.max(job.proven, byQuery.proven),
       platform: job.platform,
@@ -265,12 +277,12 @@ export function rankCandidate(
   } else if (query) {
     rank = rankAgainstQuery(snapshot, query, extras);
   } else {
-    rank = emptyRank(freshnessScore(extras?.freshnessAt));
+    rank = emptyRank(freshnessScore(extras?.freshnessAt, extras?.freshnessAsOf));
   }
 
   if (!options.references?.length) return rank;
   const applied = applyReferenceRank(
-    rank.score,
+    rank.scoreFine,
     rank.reasons,
     options.references,
     referenceMatchTerms({
@@ -279,5 +291,10 @@ export function rankCandidate(
       niceToHaves: jobProfile?.niceToHaves,
     }),
   );
-  return { ...rank, score: applied.score, reasons: applied.reasons };
+  return {
+    ...rank,
+    score: applied.score,
+    scoreFine: applied.scoreFine,
+    reasons: applied.reasons,
+  };
 }

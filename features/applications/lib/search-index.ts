@@ -10,6 +10,7 @@ import type { JobSearchProfile } from "@/features/jobs/lib/search-profile";
 import { facetFieldsOf } from "@/features/search/lib/facets";
 import { snapshotSearchBlob } from "@/features/search/lib/match";
 import { RANKING_VERSION, rankAgainstJob } from "@/features/search/lib/rank";
+import { roundFine } from "@/features/search/lib/rank-order";
 
 /** Changes whenever stored scores would: a ranking change, a new job profile, or edited requirements. */
 export function searchIndexKey(
@@ -30,6 +31,10 @@ export function searchIndexKey(
 export type SearchIndexFields = {
   searchKey: string;
   rankScore: number;
+  rankScoreFine: number;
+  rankProof: number;
+  rankOverlap: number;
+  profileUpdatedAt: Date | null;
   rankReasons: string[];
   searchText: string;
   searchSummary: Prisma.InputJsonValue;
@@ -44,8 +49,10 @@ export type SearchIndexFields = {
 /**
  * Everything the pool needs about one applicant, computed once from the snapshot.
  * Snapshots never change after submission, so this only reruns when the job side changes.
- * Freshness is left out of the stored score: it would drift with the clock, and
- * "Most recent" sort covers recency.
+ * Recency is the age of their profile (Portfolio.updatedAt) measured at the moment they
+ * applied, not now, so the stored score does not drift with the clock and reindexing later
+ * gives the same answer. No profile time (deleted portfolio) means the neutral default;
+ * falling back to the apply time would score "0 days old" and reward missing data.
  */
 export function buildSearchIndexFields(
   snapshot: ApplicationSnapshotData | null,
@@ -56,12 +63,19 @@ export function buildSearchIndexFields(
     name?: string;
     email?: string;
     coverNote?: string | null;
+    /** Portfolio.updatedAt of the applicant's profile, when known. */
+    profileUpdatedAt?: Date | null;
+    /** When they applied; the clock for the recency signal. Defaults to now. */
+    submittedAt?: Date;
   },
 ): SearchIndexFields {
+  const profileUpdatedAt = input.profileUpdatedAt ?? null;
   const extras = {
     name: input.name,
     email: input.email,
     coverNote: input.coverNote,
+    freshnessAt: profileUpdatedAt,
+    freshnessAsOf: profileUpdatedAt ? (input.submittedAt ?? new Date()) : null,
   };
   const summary = summarizeSnapshot(snapshot);
   const rank = rankAgainstJob(snapshot, input.profile, extras);
@@ -74,6 +88,10 @@ export function buildSearchIndexFields(
   return {
     searchKey: input.key,
     rankScore: rank.score,
+    rankScoreFine: rank.scoreFine,
+    rankProof: roundFine(rank.proven),
+    rankOverlap: roundFine(rank.overlap),
+    profileUpdatedAt,
     rankReasons: rank.reasons,
     searchText: snapshotSearchBlob(snapshot, extras),
     searchSummary: summary as unknown as Prisma.InputJsonValue,

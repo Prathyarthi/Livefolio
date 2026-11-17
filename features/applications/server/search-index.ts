@@ -34,6 +34,8 @@ export async function refreshStaleSearchIndex(
       where: staleWhere(job.id, key),
       select: {
         id: true,
+        portfolioId: true,
+        submittedAt: true,
         coverNote: true,
         user: { select: { name: true, email: true } },
         snapshot: { select: { data: true } },
@@ -42,6 +44,18 @@ export async function refreshStaleSearchIndex(
       take: Math.min(BATCH_SIZE, limit - processed),
     });
     if (rows.length === 0) break;
+
+    const portfolioIds = [
+      ...new Set(rows.map((row) => row.portfolioId).filter((id): id is string => Boolean(id))),
+    ];
+    const portfolios =
+      portfolioIds.length > 0
+        ? await prisma.portfolio.findMany({
+            where: { id: { in: portfolioIds } },
+            select: { id: true, updatedAt: true },
+          })
+        : [];
+    const updatedAtByPortfolio = new Map(portfolios.map((p) => [p.id, p.updatedAt]));
 
     const batch = rows.map((row) => ({
       id: row.id,
@@ -54,6 +68,10 @@ export async function refreshStaleSearchIndex(
           name: row.user.name,
           email: row.user.email,
           coverNote: row.coverNote,
+          profileUpdatedAt: row.portfolioId
+            ? (updatedAtByPortfolio.get(row.portfolioId) ?? null)
+            : null,
+          submittedAt: row.submittedAt,
         },
       ),
     }));
@@ -62,6 +80,10 @@ export async function refreshStaleSearchIndex(
       UPDATE applications AS a SET
         "searchKey" = x."searchKey",
         "rankScore" = x."rankScore",
+        "rankScoreFine" = x."rankScoreFine",
+        "rankProof" = x."rankProof",
+        "rankOverlap" = x."rankOverlap",
+        "profileUpdatedAt" = x."profileUpdatedAt",
         "rankReasons" = x."rankReasons",
         "searchText" = x."searchText",
         "searchSummary" = x."searchSummary",
@@ -75,6 +97,10 @@ export async function refreshStaleSearchIndex(
         id text,
         "searchKey" text,
         "rankScore" int,
+        "rankScoreFine" double precision,
+        "rankProof" double precision,
+        "rankOverlap" double precision,
+        "profileUpdatedAt" timestamp(3),
         "rankReasons" text[],
         "searchText" text,
         "searchSummary" jsonb,

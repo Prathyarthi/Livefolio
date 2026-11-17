@@ -4,6 +4,7 @@ import { awardBadge } from "@/lib/badges";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { ensureUserPortfolio } from "@/lib/ensure-portfolio";
+import { isReservedSubdomain, sanitizePortfolioSlug } from "@/lib/domain";
 import { validatePortfolioSlug } from "@/lib/slug";
 import { enforceSlugClaimRateLimit } from "@/lib/slug-claim-rate-limit";
 import {
@@ -667,20 +668,33 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
         return { available: true as const, slug: "" };
       }
 
-      const validated = validatePortfolioSlug(ctx.body.slug);
-      if (!validated || validated.length < 3 || validated.length > 30) {
+      const normalized = sanitizePortfolioSlug(ctx.body.slug);
+      const formatOk =
+        normalized.length >= 3 &&
+        normalized.length <= 30 &&
+        /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(normalized);
+
+      if (!formatOk) {
         return { available: false as const, reason: "invalid" as const };
       }
 
+      if (isReservedSubdomain(normalized)) {
+        return {
+          available: false as const,
+          reason: "reserved" as const,
+          slug: normalized,
+        };
+      }
+
       const existing = await prisma.portfolio.findUnique({
-        where: { slug: validated },
+        where: { slug: normalized },
         select: { id: true },
       });
 
       return {
         available: !existing,
         reason: existing ? ("taken" as const) : undefined,
-        slug: validated,
+        slug: normalized,
       };
     },
     {

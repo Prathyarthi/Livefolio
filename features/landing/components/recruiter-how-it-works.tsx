@@ -53,7 +53,7 @@ export function RecruiterHowItWorks() {
           body="Put shortlisted candidates next to each other, requirement by requirement."
         >
           <div className="grid grid-cols-3 gap-px overflow-hidden rounded-[var(--radius-md)] border border-border-default bg-border-default text-xs">
-            {["", "Asha (demo)", "Meera (demo)", "React", "✓", "✓", "Node", "✓", "✓", "References", "0", "2"].map(
+            {["", "Asha K.", "Meera P.", "React", "✓", "–", "Node", "✓", "✓", "References", "0", "2"].map(
               (cell, i) => (
                 <span key={i} className="truncate bg-surface-base px-2 py-1.5 text-text-secondary">
                   {cell}

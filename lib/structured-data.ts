@@ -1,4 +1,5 @@
 import { FAQ_ITEMS } from "@/lib/faq-content";
+import { BILLING_CURRENCY } from "@/lib/pricing";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
@@ -63,7 +64,7 @@ export function getSoftwareApplicationSchema() {
     offers: {
       "@type": "Offer",
       price: "0",
-      priceCurrency: "USD",
+      priceCurrency: BILLING_CURRENCY.toUpperCase(),
       description: "Free tier with free templates and publishing; Pro unlocks all templates and imports.",
     },
     featureList: [
@@ -96,7 +97,7 @@ export function getRecruiterSoftwareApplicationSchema() {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "Describe who you need; get a shortlist backed by their work and references. Rank applicants for any role on proof and named references, not resume keywords, with up to four plain reasons per score. Free plan: 1 seat, 1 open job.",
+      "Describe who you need; get a shortlist backed by their work and references. Rank applicants for any role on proven impact, not resume keywords, with up to four plain reasons per score. Free plan: 1 seat, 1 open job.",
     featureList: [
       "Hiring agent: describe who you need in plain words and get a top-10 shortlist with plain reasons and source labels. The recruiter approves the job and sends the invites.",
       "Proof-based ranking with a 0 to 100 score and up to four plain reasons",
@@ -115,7 +116,7 @@ export function getRecruiterSoftwareApplicationSchema() {
         name: "Free",
         url: pricingUrl,
         price: "0",
-        priceCurrency: "INR",
+        priceCurrency: BILLING_CURRENCY.toUpperCase(),
         description:
           "1 seat, 1 open job (unlimited drafts) and 1 workspace, with proof-based ranking and references. See https://livefolio.me/recruiters for other plans.",
       },

@@ -12,7 +12,6 @@ type ProviderSubscription = {
   status?: string;
   plan_id?: string;
   current_end?: number;
-  has_scheduled_changes?: boolean;
   notes?: Record<string, string | undefined>;
 };
 
@@ -68,9 +67,7 @@ export async function reconcileUserBilling(userId: string) {
       : user.subscriptionCurrentPeriodEnd;
   // An app-confirmed cancellation keeps local paid access through current_end,
   // even though the provider subscription itself is already terminal.
-  const cancelAtPeriodEnd =
-    user.subscriptionCancelAtPeriodEnd ||
-    subscription.has_scheduled_changes === true;
+  const cancelAtPeriodEnd = user.subscriptionCancelAtPeriodEnd;
   const retainPaidAccess =
     terminal &&
     cancelAtPeriodEnd &&

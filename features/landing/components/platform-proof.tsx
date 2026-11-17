@@ -3,6 +3,7 @@ import {
   DevtoIcon,
   HashnodeIcon,
   LeetCodeMark,
+  LinkedinIcon,
   StackOverflowIcon,
 } from "@/components/icons";
 import {
@@ -19,6 +20,7 @@ const ICONS = {
   leetcode: LeetCodeMark,
   stackoverflow: StackOverflowIcon,
   codeforces: CodeforcesIcon,
+  linkedin: LinkedinIcon,
 } as const;
 
 /** Platforms shown in the compact end-of-hero strip (truthful, not customers). */
@@ -30,6 +32,7 @@ const HERO_PLATFORM_IDS = [
   "stackoverflow",
   "hashnode",
   "codeforces",
+  "linkedin",
 ] as const;
 
 /**

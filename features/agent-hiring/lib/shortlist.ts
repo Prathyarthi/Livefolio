@@ -1,3 +1,5 @@
+import { compareRankKeys, type RankOrderKey } from "@/features/search/lib/rank-order";
+
 export type CandidateSource = "applicant" | "sourced";
 
 export type PoolCandidate = {
@@ -15,6 +17,11 @@ export type PoolCandidate = {
   appliedTo?: string | null;
   /** Applicants: id of that job, so the profile opens on the right role. */
   appliedJobId?: string | null;
+  /**
+   * Sort keys for a stable order: fine score, proof, skill match, then applied time
+   * (sourced people: profile created time) and id. Without it only `score` is compared.
+   */
+  order?: RankOrderKey;
 };
 
 export type ShortlistCandidate = PoolCandidate & {
@@ -23,6 +30,13 @@ export type ShortlistCandidate = PoolCandidate & {
 };
 
 export const SHORTLIST_SIZE = 10;
+
+/** Best first. Same chain as every other ranked list; see rank-order.ts. */
+export function compareCandidates(a: PoolCandidate, b: PoolCandidate): number {
+  const keyOf = (c: PoolCandidate): RankOrderKey =>
+    c.order ?? { scoreFine: c.score, proof: 0, skill: 0, at: null, id: "" };
+  return compareRankKeys(keyOf(a), keyOf(b));
+}
 
 /**
  * Merge both pools, one row per person. Someone who already applied stays an
@@ -36,7 +50,7 @@ export function mergeShortlist(
   const byUser = new Map<string, ShortlistCandidate>();
   for (const c of applicants) {
     const prev = byUser.get(c.userId);
-    if (!prev || c.score > prev.score) {
+    if (!prev || compareCandidates(c, prev) < 0) {
       byUser.set(c.userId, { ...c, source: "applicant", label: "Applicant" });
     }
   }
@@ -45,7 +59,12 @@ export function mergeShortlist(
     byUser.set(c.userId, { ...c, source: "sourced", label: "Sourced" });
   }
   return [...byUser.values()]
-    .sort((a, b) => b.score - a.score || (a.source === "applicant" ? -1 : 1))
+    .sort(
+      (a, b) =>
+        compareCandidates(a, b) ||
+        (a.source === b.source ? 0 : a.source === "applicant" ? -1 : 1) ||
+        (a.userId < b.userId ? -1 : a.userId > b.userId ? 1 : 0),
+    )
     .slice(0, limit);
 }
 

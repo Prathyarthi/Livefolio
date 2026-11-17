@@ -17,7 +17,7 @@ export function DomainClaim() {
   const [value, setValue] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [message, setMessage] = useState<string | null>(null);
-  const [tone, setTone] = useState<"muted" | "danger">("muted");
+  const [tone, setTone] = useState<"muted" | "danger" | "success">("muted");
   const [pending, setPending] = useState(false);
   const [readySlug, setReadySlug] = useState<string | null>(null);
   const [mountedAt] = useState(() => Date.now());
@@ -110,6 +110,12 @@ export function DomainClaim() {
         return;
       }
 
+      if (data?.reason === "reserved") {
+        setTone("danger");
+        setMessage("That name is reserved.");
+        return;
+      }
+
       if (!res.ok || !data?.slug) {
         setTone("danger");
         setMessage("Use 3–30 letters, numbers, or hyphens.");
@@ -127,7 +133,7 @@ export function DomainClaim() {
       }
 
       setReadySlug(data.slug);
-      setTone("muted");
+      setTone("success");
       setMessage(`${data.slug}.${suffix} is available.`);
     } catch {
       setTone("danger");
@@ -154,7 +160,10 @@ export function DomainClaim() {
             onChange={(event) => {
               setValue(event.target.value);
               setReadySlug(null);
-              if (message) setMessage(null);
+              if (message) {
+                setMessage(null);
+                setTone("muted");
+              }
             }}
             placeholder="yourname"
             autoCapitalize="none"
@@ -194,8 +203,14 @@ export function DomainClaim() {
           .{suffix}
         </p>
         <p
-          className={`mt-4 text-center text-[14px] ${tone === "danger" ? "text-danger" : "text-text-secondary"}`}
-          role={tone === "danger" ? "alert" : undefined}
+          className={`mt-4 text-center text-[14px] ${
+            tone === "danger"
+              ? "text-danger"
+              : tone === "success"
+                ? "text-[#178a45] dark:text-[#3cbf78]"
+                : "text-text-secondary"
+          }`}
+          role={tone === "danger" ? "alert" : tone === "success" ? "status" : undefined}
         >
           {message ?? "Claim your link before it's taken"}
         </p>

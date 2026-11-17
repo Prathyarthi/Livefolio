@@ -169,15 +169,16 @@ Options:
   --write-env                  Write plan IDs into .env
   -h, --help                   Show this help
 
-Personal Pro (INR): ₹599 / ₹1,599 / ₹5,999
-Hiring Pro / seat:  ₹2,999 / ₹8,499 / ₹29,988
-Hiring Business / seat: ₹4,999 / ₹14,199 / ₹50,388
+Personal Pro:           INR ₹599 / ₹1,599 / ₹5,999    USD $7 / $19 / $70
+Hiring Pro / seat:      INR ₹2,999 / ₹8,499 / ₹29,988 USD $39 / $109 / $420
+Hiring Business / seat: INR ₹4,999 / ₹14,199 / ₹50,388 USD $59 / $165 / $600
 
 After creating plans, configure webhook in Razorpay Dashboard:
   POST https://your-domain.com/api/billing/webhook
   Events: subscription.authenticated, subscription.pending, subscription.activated,
-          subscription.charged, subscription.cancelled, subscription.halted,
-          subscription.paused, subscription.resumed, subscription.completed
+          subscription.charged, subscription.updated, subscription.cancelled,
+          subscription.halted, subscription.paused, subscription.resumed,
+          subscription.completed
 `);
 }
 

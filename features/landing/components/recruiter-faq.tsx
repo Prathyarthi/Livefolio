@@ -37,7 +37,46 @@ export const RECRUITER_FAQS = [
   },
 ] as const;
 
+function splitColumns<T>(items: readonly T[]): [T[], T[]] {
+  const columns: [T[], T[]] = [[], []];
+  items.forEach((item, index) => {
+    columns[index % 2].push(item);
+  });
+  return columns;
+}
+
+function RecruiterFaqCard({ question, answer }: { question: string; answer: string }) {
+  return (
+    <details className="group rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-4 py-1 transition-colors open:border-border-strong">
+      <summary
+        className={cn(
+          "flex cursor-pointer list-none items-center justify-between gap-3 py-3.5",
+          "text-left text-sm font-semibold text-text-primary",
+          "marker:content-none [&::-webkit-details-marker]:hidden",
+        )}
+      >
+        {question}
+        <span
+          className={cn(
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+            "bg-brand-secondary/12 text-base font-light leading-none text-brand-secondary",
+            "transition-transform duration-200 group-open:rotate-45",
+          )}
+          aria-hidden
+        >
+          +
+        </span>
+      </summary>
+      <div className="border-t border-dashed border-border-default/70 pb-4 pt-3 text-body-sm leading-relaxed text-text-secondary">
+        {answer}
+      </div>
+    </details>
+  );
+}
+
 export function RecruiterFAQ() {
+  const columns = splitColumns(RECRUITER_FAQS);
+
   return (
     <RecruiterSection
       id="faq"
@@ -45,35 +84,19 @@ export function RecruiterFAQ() {
       title="Questions, answered"
       body="How ranking, references, and hiring plans work."
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="flex flex-col gap-3 sm:hidden">
         {RECRUITER_FAQS.map((item) => (
-          <details
-            key={item.q}
-            className="group rounded-[var(--radius-lg)] border border-border-default bg-surface-raised px-4 py-1 transition-colors open:border-border-strong"
-          >
-            <summary
-              className={cn(
-                "flex cursor-pointer list-none items-center justify-between gap-3 py-3.5",
-                "text-left text-sm font-semibold text-text-primary",
-                "marker:content-none [&::-webkit-details-marker]:hidden",
-              )}
-            >
-              {item.q}
-              <span
-                className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
-                  "bg-brand-secondary/12 text-base font-light leading-none text-brand-secondary",
-                  "transition-transform duration-200 group-open:rotate-45",
-                )}
-                aria-hidden
-              >
-                +
-              </span>
-            </summary>
-            <div className="border-t border-dashed border-border-default/70 pb-4 pt-3 text-body-sm leading-relaxed text-text-secondary">
-              {item.a}
-            </div>
-          </details>
+          <RecruiterFaqCard key={item.q} question={item.q} answer={item.a} />
+        ))}
+      </div>
+
+      <div className="hidden items-start gap-3 sm:grid sm:grid-cols-2">
+        {columns.map((column, index) => (
+          <div key={index} className="flex flex-col gap-3">
+            {column.map((item) => (
+              <RecruiterFaqCard key={item.q} question={item.q} answer={item.a} />
+            ))}
+          </div>
         ))}
       </div>
     </RecruiterSection>

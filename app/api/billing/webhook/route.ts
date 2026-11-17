@@ -21,7 +21,6 @@ type RazorpayWebhookPayload = {
         plan_id?: string;
         notes?: Record<string, string | undefined>;
         current_end?: number;
-        has_scheduled_changes?: boolean;
       };
     };
     payment?: {
@@ -239,9 +238,10 @@ export async function POST(req: Request) {
       }
       // Preserve an app-confirmed cancellation so terminal provider events do
       // not erase the customer's remaining paid-access window.
+      // has_scheduled_changes is also set by cycle-end seat decreases, so it
+      // cannot be read as a cancellation.
       const cancelAtPeriodEnd =
-        existingSubscription?.cancelAtPeriodEnd === true ||
-        subscriptionEntity?.has_scheduled_changes === true;
+        existingSubscription?.cancelAtPeriodEnd === true;
 
       const billingSubscription =
         await tx.billingSubscription.upsert({

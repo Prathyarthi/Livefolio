@@ -15,12 +15,24 @@ export function clamp01(value: number) {
   return Math.min(1, Math.max(0, value));
 }
 
-export function freshnessScore(freshnessAt?: Date | string | null): number {
+/**
+ * How recently the profile was kept up. `asOf` fixes the clock (stored applicant scores
+ * measure age at the moment they applied, so reindexing later does not change them).
+ */
+export function freshnessScore(
+  freshnessAt?: Date | string | null,
+  asOf?: Date | string | null,
+): number {
   if (!freshnessAt) return 0.35;
   const at =
     freshnessAt instanceof Date ? freshnessAt.getTime() : Date.parse(freshnessAt);
   if (Number.isNaN(at)) return 0.35;
-  const days = (Date.now() - at) / (24 * 60 * 60 * 1000);
+  const now = asOf
+    ? asOf instanceof Date
+      ? asOf.getTime()
+      : Date.parse(asOf)
+    : Date.now();
+  const days = Math.max(0, ((Number.isNaN(now) ? Date.now() : now) - at) / (24 * 60 * 60 * 1000));
   if (days <= 7) return 1;
   if (days <= 30) return 0.75;
   if (days <= 90) return 0.45;

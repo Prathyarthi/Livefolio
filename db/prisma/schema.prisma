@@ -668,6 +668,14 @@ model Application {
   /// Stale when it differs from the job's current ranking version, profile hash and requirements.
   searchKey           String?
   rankScore           Int      @default(0)
+  /// Unrounded 0-100 score (rankScore is its rounded value). The pool sorts on this, then the two subscores.
+  rankScoreFine       Float    @default(0)
+  /// Proof-of-work subscore, 0-1, first tie-break after the fine score
+  rankProof           Float    @default(0)
+  /// Skill-match subscore, 0-1, second tie-break
+  rankOverlap         Float    @default(0)
+  /// Portfolio updatedAt when the row was indexed; feeds the recency signal, measured as of submittedAt
+  profileUpdatedAt    DateTime?
   rankReasons         String[] @default([])
   searchText          String?  @db.Text
   searchSummary       Json?
@@ -690,6 +698,7 @@ model Application {
   @@index([jobId, status])
   @@index([jobId, shortlisted])
   @@index([jobId, rankScore])
+  @@index([jobId, rankScoreFine(sort: Desc), rankProof(sort: Desc), rankOverlap(sort: Desc), submittedAt, id], map: "applications_pool_order_idx")
   @@index([jobId, submittedAt])
   @@index([jobId, searchKey])
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)

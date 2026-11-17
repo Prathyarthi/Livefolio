@@ -16,6 +16,7 @@ import {
 } from "@/features/applications/lib/snapshot";
 import { proofKindsOf } from "@/features/search/lib/proof";
 import { RANKING_VERSION, rankCandidate } from "@/features/search/lib/rank";
+import { compareRankKeys } from "@/features/search/lib/rank-order";
 import { talentKeywordWhere } from "@/features/talent/lib/search";
 import { refreshJobSearchProfile } from "@/features/jobs/lib/extract-search-profile";
 import { BRIEF_MAX, draftJobFromBrief } from "@/features/agent-hiring/lib/brief";
@@ -149,7 +150,7 @@ export const agentHiring = new Elysia({ prefix: "/agent-hiring" })
               jobProfile,
               extras: { name: row.user.name, freshnessAt: row.updatedAt },
             });
-            return {
+            const candidate: PoolCandidate = {
               userId: row.userId,
               name: row.user.name,
               headline: row.headline || row.title,
@@ -160,12 +161,22 @@ export const agentHiring = new Elysia({ prefix: "/agent-hiring" })
               proof: proofKindsOf(snapshot),
               ref: row.slug!,
             };
+            // Sourced people have no applied time; profile created time stands in for it.
+            const order = {
+              scoreFine: rank.scoreFine,
+              proof: rank.proven,
+              skill: rank.overlap,
+              at: row.createdAt,
+              id: row.id,
+            };
+            return { candidate, order };
           })
-          .filter((c) =>
-            c.reasons.some((reason) => /^(Must-have|Matches|Domain):/.test(reason)),
+          .filter(({ candidate }) =>
+            candidate.reasons.some((reason) => /^(Must-have|Matches|Domain):/.test(reason)),
           )
-          .sort((a, b) => b.score - a.score)
-          .slice(0, SHORTLIST_SIZE);
+          .sort((a, b) => compareRankKeys(a.order, b.order))
+          .slice(0, SHORTLIST_SIZE)
+          .map(({ candidate }) => candidate);
       }
 
       return {

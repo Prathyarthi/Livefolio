@@ -205,6 +205,8 @@ export type ApplicantCard = {
   submittedAt: string;
   coverNote: string | null;
   noteCount: number;
+  /** Applicants in this result sharing the displayed score; 0 when sorted by date. */
+  tiedCount?: number;
   user: {
     id: string;
     name: string;

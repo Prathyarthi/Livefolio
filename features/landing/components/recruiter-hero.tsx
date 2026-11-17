@@ -1,5 +1,5 @@
 import { AuthAwareCtas } from "@/features/landing/components/auth-aware-ctas";
-import { RecruiterAppMockup } from "@/features/landing/components/recruiter-app-mockup";
+import { RecruiterShortlistDemo } from "@/features/landing/components/recruiter-shortlist-demo";
 
 export function RecruiterHero() {
   return (
@@ -10,7 +10,7 @@ export function RecruiterHero() {
         <h1 className="studio-hero-title mt-4 text-text-primary">
           <span className="block">
             Hire on{" "}
-            <span className="studio-hero-highlight">proof and references</span>,
+            <span className="studio-hero-highlight">proven impact</span>,
           </span>
           <span className="block">not resume keywords</span>
         </h1>
@@ -28,22 +28,15 @@ export function RecruiterHero() {
         />
       </div>
 
-      <div
+      <figure
         id="ranked-shortlist"
-        className="relative z-[1] mx-auto mt-12 w-full max-w-[1040px] scroll-mt-24 px-0 sm:mt-14 md:mt-16 [perspective:2000px]"
+        className="relative z-[1] mx-auto mt-8 w-full max-w-[1040px] scroll-mt-24 sm:mt-10 md:mt-12"
       >
-        <div
-          className="pointer-events-none absolute -inset-x-6 -top-8 bottom-0 rounded-full bg-brand-secondary/12 blur-3xl"
-          aria-hidden
-        />
-        <div className="relative md:origin-top md:[transform:rotateX(8deg)]">
-          <RecruiterAppMockup />
-        </div>
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-surface-base to-transparent"
-          aria-hidden
-        />
-      </div>
+        <RecruiterShortlistDemo />
+        <figcaption className="mt-1 text-center text-xs text-text-secondary">
+          Sample applicants. Turning on references re-ranks the shortlist.
+        </figcaption>
+      </figure>
     </section>
   );
 }

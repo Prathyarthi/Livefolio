@@ -1,0 +1,318 @@
+/* Stills for the recruiters page (recruiter-stills.tsx), in the hero's look. */
+
+.rss .ss-stage,
+.rvs .ss-stage {
+  --gutter: 32px;
+  overflow: hidden;
+}
+
+/* ---- Score: a window inset top and sides, fading out at its foot ---- */
+
+.rss .rss-window {
+  position: absolute;
+  top: var(--gutter);
+  left: var(--gutter);
+  width: 976px;
+  height: 500px;
+  background: var(--ss-surface);
+  box-shadow: var(--ss-shadow-hero);
+  mask-image: linear-gradient(to bottom, #000 64%, transparent 84%);
+}
+
+.rss .ss-stage[data-layout="compact"] .rss-window {
+  top: 16px;
+  left: 16px;
+  width: 326px;
+  height: 380px;
+  mask-image: none;
+}
+
+.rss .rss-window .ss-window__bar,
+.rvs .rvs-window .ss-window__bar {
+  background: var(--ss-surface);
+}
+
+.rss .rss-window .ss-window__bar {
+  height: 52px;
+  padding-right: 12px;
+}
+
+.rss .rss-window .ss-window__title {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.rss .ss-stage[data-layout="compact"] .rss-window .ss-window__title {
+  margin-right: 0;
+  font-size: 13.5px;
+}
+
+.rss .rss-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 28px;
+  padding: 24px 24px 0;
+}
+
+.rss .ss-stage[data-layout="compact"] .rss-body {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 12px;
+}
+
+.rss .rss-icon {
+  flex: none;
+  color: var(--ss-icon);
+}
+
+.rss .rss-snapshot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rss .rss-snapshot__note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px;
+  margin-bottom: 6px;
+}
+
+.rss .rss-snapshot__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ss-text);
+}
+
+.rss .rss-project {
+  --ss-row-title: 14px;
+  --ss-row-subtitle: 13px;
+  --ss-row-line: 20px;
+  --ss-row-line-2: 18px;
+  column-gap: 14px;
+}
+
+.rss .rss-thumb {
+  display: block;
+  width: 44px;
+  height: 34px;
+  border-radius: 6px;
+  background: var(--ss-ink-2);
+}
+
+.rss .rss-thumb[data-tone="1"] {
+  background: linear-gradient(135deg, #2a2744, #4a4570);
+}
+
+.rss .rss-thumb[data-tone="2"] {
+  background: linear-gradient(135deg, #f3d9d3, #e9a597);
+}
+
+.rss .rss-panel {
+  align-self: start;
+  background: var(--ss-canvas);
+}
+
+.rss .rss-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rss .rss-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ss-text);
+}
+
+.rss .rss-score {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.rss .rss-score__value {
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ss-text-strong);
+}
+
+.rss .rss-score__of {
+  font-size: 14px;
+  color: var(--ss-text-faint);
+}
+
+.rss .rss-meter {
+  height: 6px;
+}
+
+.rss .rss-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.rss .rss-reason {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 10px;
+}
+
+.rss .ss-stage[data-layout="compact"] .rss-reason {
+  grid-template-columns: 22px minmax(0, 1fr);
+}
+
+.rss .rss-reason__icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--ss-accent-soft);
+  color: var(--ss-accent-text);
+}
+
+.rss .rss-reason__text {
+  padding-top: 1px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ss-text-strong);
+}
+
+.rss .rss-reason__from {
+  padding-top: 2px;
+  font-size: 12.5px;
+  color: var(--ss-text-faint);
+}
+
+/* ---- Vouch: a browser inset with the request straddling its left edge ---- */
+
+.rvs .rvs-window {
+  position: absolute;
+  top: var(--gutter);
+  left: 172px;
+  width: 836px;
+  height: 500px;
+  background: var(--ss-surface);
+  box-shadow: var(--ss-shadow-hero);
+  mask-image: linear-gradient(to bottom, #000 80%, transparent 96%);
+}
+
+.rvs .ss-stage[data-layout="compact"] .rvs-window {
+  top: 16px;
+  left: 16px;
+  width: 326px;
+  height: 380px;
+  mask-image: none;
+}
+
+.rvs .rvs-page {
+  display: flex;
+  justify-content: center;
+  padding: 32px 24px 0;
+}
+
+.rvs .ss-stage[data-layout="compact"] .rvs-page {
+  padding: 20px 16px 0;
+}
+
+.rvs .rvs-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 440px;
+}
+
+.rvs .rvs-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--ss-text-strong);
+}
+
+.rvs .ss-stage[data-layout="compact"] .rvs-title {
+  font-size: 20px;
+}
+
+.rvs .rvs-signed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--ss-canvas);
+}
+
+.rvs .rvs-github {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--ss-text-strong);
+}
+
+.rvs .rvs-signed__text {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ss-text-strong);
+}
+
+.rvs .rvs-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rvs .rvs-label {
+  line-height: 1.3;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ss-text);
+}
+
+.rvs .rvs-seg {
+  --ss-row: 32px;
+  font-size: 13px;
+}
+
+.rvs .rvs-story {
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px var(--ss-line);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ss-text-strong);
+}
+
+.rvs .rvs-send {
+  align-self: flex-start;
+}
+
+.rvs .rvs-request {
+  position: absolute;
+  top: 150px;
+  left: var(--gutter);
+  width: 280px;
+  background: var(--ss-raised);
+  box-shadow: var(--ss-shadow-satellite);
+}
+
+.rvs .rvs-request__from {
+  --ss-row-line: 20px;
+  --ss-row-line-2: 18px;
+}
+
+.rvs .rvs-request__text {
+  margin-left: 40px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ss-text-strong);
+}

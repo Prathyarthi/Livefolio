@@ -1,4 +1,7 @@
-import { getAutomatedEmailDemos } from "@/lib/email-templates";
+import {
+  getAutomatedEmailDemos,
+  type AutomatedEmailDemo,
+} from "@/lib/email-templates";
 
 export type AdminEmailAudienceId =
   | "all"
@@ -6,18 +9,21 @@ export type AdminEmailAudienceId =
   | "draft"
   | "published";
 
-const AUDIENCE_BY_DEMO_ID = {
+/** Event-triggered emails (references) have no audience segment and fall back to `all`. */
+const AUDIENCE_BY_DEMO_ID: Partial<
+  Record<AutomatedEmailDemo["id"], AdminEmailAudienceId>
+> = {
   welcome: "all",
   no_portfolio: "no_portfolio",
   unpublished: "draft",
   published: "published",
-} as const satisfies Record<string, AdminEmailAudienceId>;
+};
 
 const AUDIENCE_BY_TEMPLATE_NAME = new Map(
-  getAutomatedEmailDemos().map((demo) => [
-    demo.label.toLowerCase(),
-    AUDIENCE_BY_DEMO_ID[demo.id],
-  ]),
+  getAutomatedEmailDemos().flatMap((demo) => {
+    const audience = AUDIENCE_BY_DEMO_ID[demo.id];
+    return audience ? [[demo.label.toLowerCase(), audience] as const] : [];
+  }),
 );
 
 export function audienceForTemplateName(

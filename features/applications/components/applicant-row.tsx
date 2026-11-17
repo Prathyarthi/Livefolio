@@ -49,6 +49,7 @@ export function ApplicantRow({
   const { summary, evidence } = applicant;
   const score = evidence.rankScore;
   const reasons = evidence.rankReasons ?? [];
+  const tiedCount = applicant.tiedCount ?? 0;
   const refBonus = includeReferences ? (evidence.referenceBonus ?? 0) : 0;
   const stageLabel =
     PIPELINE_STAGE_LABELS[applicant.stage as PipelineStage] ?? applicant.stage;
@@ -161,6 +162,14 @@ export function ApplicantRow({
             <p className="font-mono text-2xl font-semibold leading-none tabular-nums text-text-primary">
               {score}
             </p>
+            {tiedCount > 1 ? (
+              <p
+                className="mt-1 text-[11px] text-text-muted"
+                title="Applicants with the same score are ordered by proof of work, then skill match, then who applied first."
+              >
+                {tiedCount} tied
+              </p>
+            ) : null}
             {refBonus > 0 ? (
               <p className="mt-1 font-mono text-[11px] tabular-nums text-brand-primary">
                 +{refBonus} refs
