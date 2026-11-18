@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { FlowFooter } from "@/features/dashboard/components/flow-footer";
 import {
   usePortfolio,
@@ -31,6 +38,73 @@ import {
 } from "@/features/templates/template-accent-palettes";
 import { portfolioToTemplateData } from "@/features/templates/transform";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  ResumeUploader,
+  type ResumeUploaderHandle,
+} from "@/features/resume/components/resume-uploader";
+
+const EMPTY_PORTFOLIO_PROMPT =
+  "Your portfolio is waiting to be explored. Add your details and discover how your profile looks to the world.";
+
+const EMPTY_PORTFOLIO_PROMPT_KEY = "livefolio.empty-portfolio-prompt-dismissed";
+
+function emptyPromptStorageKey(portfolioId: string | undefined) {
+  return portfolioId
+    ? `${EMPTY_PORTFOLIO_PROMPT_KEY}:${portfolioId}`
+    : EMPTY_PORTFOLIO_PROMPT_KEY;
+}
+
+function hasDismissedEmptyPrompt(portfolioId: string | undefined) {
+  try {
+    return localStorage.getItem(emptyPromptStorageKey(portfolioId)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function rememberEmptyPromptDismissed(portfolioId: string | undefined) {
+  try {
+    localStorage.setItem(emptyPromptStorageKey(portfolioId), "1");
+  } catch {
+    // Storage can be blocked. The in-memory flag still covers this visit.
+  }
+}
+
+function portfolioHasDetails(portfolio: {
+  headline?: string | null;
+  summary?: string | null;
+  phone?: string | null;
+  websiteUrl?: string | null;
+  location?: string | null;
+  experiences?: unknown[] | null;
+  educations?: unknown[] | null;
+  skills?: unknown[] | null;
+  projects?: unknown[] | null;
+  achievements?: unknown[] | null;
+  certifications?: unknown[] | null;
+  customSections?: unknown[] | null;
+  socialProfiles?: unknown[] | null;
+}) {
+  if (
+    portfolio.headline?.trim() ||
+    portfolio.summary?.trim() ||
+    portfolio.phone?.trim() ||
+    portfolio.websiteUrl?.trim() ||
+    portfolio.location?.trim()
+  ) {
+    return true;
+  }
+  return [
+    portfolio.experiences,
+    portfolio.educations,
+    portfolio.skills,
+    portfolio.projects,
+    portfolio.achievements,
+    portfolio.certifications,
+    portfolio.customSections,
+    portfolio.socialProfiles,
+  ].some((items) => Array.isArray(items) && items.length > 0);
+}
 
 export default function PreviewPage() {
   const { data: portfolio, isLoading } = usePortfolio();
@@ -51,10 +125,21 @@ export default function PreviewPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [detailsPromptOpen, setDetailsPromptOpen] = useState(false);
+  const [emptyPromptDismissed, setEmptyPromptDismissed] = useState(false);
+  const resumeImportRef = useRef<ResumeUploaderHandle>(null);
+  const pendingTemplateRef = useRef<string | null>(null);
+  const closingPromptForUploadRef = useRef(false);
+  const portfolioId =
+    typeof portfolio?.id === "string" ? portfolio.id : undefined;
 
   useEffect(() => {
     setEditOpen(!isMobile);
   }, [isMobile]);
+
+  useEffect(() => {
+    if (hasDismissedEmptyPrompt(portfolioId)) setEmptyPromptDismissed(true);
+  }, [portfolioId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,19 +173,49 @@ export default function PreviewPage() {
     }
   }, [allowedTemplateIds, previewTemplate]);
 
-  const handleTemplatePreview = (next: string) => {
-    if (allowedTemplateIds && !allowedTemplateIds.includes(next)) {
-      toast.error("Your free month has ended. Upgrade to Pro to unlock this template.");
-      return;
-    }
-    const current =
-      previewTemplate ?? portfolio?.templateId ?? "pulse";
+  const applyTemplatePreview = useCallback((next: string) => {
+    const current = previewTemplate ?? portfolio?.templateId ?? "pulse";
     setPreviewTemplate(next);
     // Preview template switches always land on that template's default accent.
     if (next !== current) {
       setPreviewPrimaryColor(getTemplateDefaultAccent(next));
     }
+  }, [portfolio?.templateId, previewTemplate]);
+
+  const handleTemplatePreview = (next: string) => {
+    if (allowedTemplateIds && !allowedTemplateIds.includes(next)) {
+      toast.error("Your free month has ended. Upgrade to Pro to unlock this template.");
+      return;
+    }
+    // Pulse is already the default preview. An empty portfolio only prompts
+    // when another template is chosen.
+    if (
+      portfolio &&
+      !portfolioHasDetails(portfolio) &&
+      next !== "pulse" &&
+      !emptyPromptDismissed &&
+      !hasDismissedEmptyPrompt(portfolioId)
+    ) {
+      pendingTemplateRef.current = next;
+      setDetailsPromptOpen(true);
+      return;
+    }
+    applyTemplatePreview(next);
   };
+
+  const dismissEmptyPrompt = () => {
+    setEmptyPromptDismissed(true);
+    rememberEmptyPromptDismissed(portfolioId);
+    const next = pendingTemplateRef.current;
+    pendingTemplateRef.current = null;
+    if (next) applyTemplatePreview(next);
+  };
+
+  const finishImportOnPreview = useCallback(() => {
+    const next = pendingTemplateRef.current;
+    pendingTemplateRef.current = null;
+    if (next) applyTemplatePreview(next);
+  }, [applyTemplatePreview]);
 
   const savedTemplateId = portfolio?.templateId ?? "pulse";
 
@@ -382,6 +497,46 @@ export default function PreviewPage() {
           currentSlug={slug}
         />
       </div>
+
+      <Dialog
+        open={detailsPromptOpen}
+        onOpenChange={(open) => {
+          setDetailsPromptOpen(open);
+          if (open) return;
+          if (closingPromptForUploadRef.current) {
+            closingPromptForUploadRef.current = false;
+            return;
+          }
+          dismissEmptyPrompt();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-balance text-lg font-medium leading-snug">
+              {EMPTY_PORTFOLIO_PROMPT}
+            </DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => resumeImportRef.current?.openFilePicker()}
+            >
+              Upload resume
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ResumeUploader
+        ref={resumeImportRef}
+        embedded
+        redirectToPreview={false}
+        onUploadStart={() => {
+          closingPromptForUploadRef.current = true;
+          setDetailsPromptOpen(false);
+        }}
+        onImportFinished={finishImportOnPreview}
+      />
     </div>
   );
 }

@@ -36,7 +36,6 @@ import { ArticleSourceLabel, RichText,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
-  TechIcon,
   HeroProfileButtons,
   ProfileLinksSection,
   SocialPills,
@@ -591,8 +590,7 @@ function SkillMarquee({ skills, primaryColor }: { skills: Skill[]; primaryColor:
     <div aria-hidden={hidden || undefined} className="flex shrink-0 items-center">
       {names.map((name) => (
         <span key={name} className="flex items-center">
-          <span className="inline-flex items-center gap-3 whitespace-nowrap px-6 font-serif text-3xl italic text-[var(--veil-paper)] @md:text-4xl">
-            <TechIcon name={name} className="h-6 w-6" />
+          <span className="inline-flex items-center whitespace-nowrap px-6 font-serif text-3xl italic text-[var(--veil-paper)] @md:text-4xl">
             {name}
           </span>
           <span className="text-sm" style={{ color: primaryColor }}>✦</span>
@@ -815,12 +813,12 @@ function ProjectsSection({
                   {project.techStack.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {project.techStack.map((tech) => (
-                        <span
+                        <TechChip
                           key={tech}
+                          name={tech}
                           className={cn("rounded-full border px-2.5 py-1 font-mono text-[10px] text-[var(--veil-muted)]", LINE)}
-                        >
-                          {tech}
-                        </span>
+                          iconClassName="h-3 w-3"
+                        />
                       ))}
                     </div>
                   )}

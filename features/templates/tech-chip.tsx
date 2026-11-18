@@ -18,6 +18,26 @@ export function TechIcon({
     setShowIcon(Boolean(slug));
   }, [slug]);
 
+  if (slug === "local/websocket" && showIcon) {
+    const url = techIconUrl(slug);
+    return (
+      <span
+        aria-hidden
+        className={cn("inline-block h-3.5 w-3.5 shrink-0 bg-current", className)}
+        style={{
+          WebkitMaskImage: `url(${url})`,
+          maskImage: `url(${url})`,
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskPosition: "center",
+          maskPosition: "center",
+          WebkitMaskSize: "contain",
+          maskSize: "contain",
+        }}
+      />
+    );
+  }
+
   if (slug && showIcon) {
     return (
       <img
