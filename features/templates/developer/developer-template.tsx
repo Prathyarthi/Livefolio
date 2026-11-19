@@ -1,8 +1,11 @@
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import {
+  developerPlexMono as plexMono,
+  developerPlexSans as plexSans,
+} from "@/features/templates/fonts/ibm-plex";
 import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
@@ -48,17 +51,6 @@ import styles from "./developer-template.module.css";
  * Type: IBM Plex Mono for shell chrome, IBM Plex Sans for readable prose.
  * Layout: restrained terminal frame, one lead project, log-like career history.
  */
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-developer-mono",
-});
-
-const plexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-developer-sans",
-});
 
 const shellText = "text-[#d7e0c8]";
 const shellMuted = "text-[#7f8a78]";

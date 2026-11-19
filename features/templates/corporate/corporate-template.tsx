@@ -1,5 +1,8 @@
-import { IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import {
+  corporatePlexSans as plexSans,
+  corporatePlexSerif as plexSerif,
+} from "@/features/templates/fonts/ibm-plex";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
@@ -42,17 +45,6 @@ import { LinkedInSection } from "@/features/templates/components/linkedin-sectio
  * Type: IBM Plex Serif for names and section titles, IBM Plex Sans for body copy.
  * Layout: one lead work sample with a quiet index of supporting evidence.
  */
-const plexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-corporate-sans",
-});
-
-const plexSerif = IBM_Plex_Serif({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-corporate-serif",
-});
 
 const paper = "bg-[#f4f5f7]";
 const ink = "text-[#0b1220]";
