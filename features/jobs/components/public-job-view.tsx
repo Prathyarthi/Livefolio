@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
 import {
   ArrowUpRight,
+  BadgeCheck,
   Banknote,
   Briefcase,
   Building2,
   Calendar,
   CircleCheck,
+  Gift,
   GraduationCap,
   Info,
   MapPin,
-  Shield,
-  Sparkles,
 } from "lucide-react";
 import { RichText } from "@/components/rich-text";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import {
   formatSalaryRange,
   splitRichLines,
 } from "@/features/jobs/constants/labels";
+import { OrgBanner, OrgLogo } from "@/features/organization/components/org-logo";
 import { cn } from "@/lib/utils";
 
 type Stat = {
@@ -79,6 +80,7 @@ export function CandidateJobBody({
   titlePlaceholder = false,
   showEmptyAbout = false,
   showCompany = false,
+  showBanner = true,
   paused = false,
   footer,
 }: {
@@ -88,6 +90,8 @@ export function CandidateJobBody({
   titlePlaceholder?: boolean;
   showEmptyAbout?: boolean;
   showCompany?: boolean;
+  /** Set false when the parent already paints a full-bleed org banner. */
+  showBanner?: boolean;
   paused?: boolean;
   footer?: ReactNode;
 }) {
@@ -179,6 +183,10 @@ export function CandidateJobBody({
   const benefits = job.benefits?.trim() ?? "";
   const description = job.description?.trim() ?? "";
   const copy = bodyCopyClass(compact);
+  const hasBannerAsset = Boolean(org.bannerUrl);
+  const paintBanner = showBanner && hasBannerAsset;
+  const hasLogo = Boolean(org.logoUrl);
+  const showBrandHeader = hasLogo || hasBannerAsset;
 
   return (
     <article
@@ -187,13 +195,61 @@ export function CandidateJobBody({
           "overflow-hidden rounded-[20px] border border-border-default bg-surface-raised",
       )}
     >
-      <div className="h-1 bg-brand-secondary" />
+      {paintBanner ? (
+        <div
+          className={cn(
+            "relative w-full overflow-hidden",
+            compact ? "aspect-[4/1]" : "h-40 md:h-52",
+          )}
+        >
+          <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-raised to-transparent" />
+        </div>
+      ) : showBanner || !hasBannerAsset ? (
+        <div className="h-1 bg-brand-secondary" />
+      ) : null}
       <div
         className={cn(
           "space-y-8",
           compact ? "px-4 py-5" : "px-5 py-6 md:px-7 md:py-8",
         )}
       >
+        {showBrandHeader ? (
+          <div className="flex flex-wrap items-start gap-4">
+            {hasLogo ? (
+              <div
+                className={cn(
+                  "relative z-10 shrink-0",
+                  paintBanner && (compact ? "-mt-10" : "-mt-12"),
+                )}
+              >
+                <OrgLogo
+                  name={org.name}
+                  logoUrl={org.logoUrl}
+                  brandColor={org.brandColor}
+                  size="lg"
+                />
+              </div>
+            ) : null}
+            <div className={cn("min-w-0", hasLogo && paintBanner && "pt-1")}>
+              <p className="flex items-center gap-1.5 font-medium text-text-primary">
+                <RichText as="span" text={org.name} />
+                {org.verified ? (
+                  <BadgeCheck
+                    className="size-4 shrink-0 text-sky-500"
+                    aria-label="Verified company"
+                  />
+                ) : null}
+              </p>
+              {org.location ? (
+                <p className="text-sm text-text-secondary">
+                  <RichText as="span" text={org.location} />
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         {pills.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {pills.map((pill, index) => (
@@ -226,10 +282,18 @@ export function CandidateJobBody({
             {paused ? <Badge variant="neutral">Applications paused</Badge> : null}
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary">
-            <span className="inline-flex items-center gap-1.5">
-              <Building2 className="size-3.5 shrink-0 text-text-muted" />
-              <RichText as="span" text={org.name} />
-            </span>
+            {!showBrandHeader ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Building2 className="size-3.5 shrink-0 text-text-muted" />
+                <RichText as="span" text={org.name} />
+                {org.verified ? (
+                  <BadgeCheck
+                    className="size-3.5 shrink-0 text-sky-500"
+                    aria-label="Verified company"
+                  />
+                ) : null}
+              </span>
+            ) : null}
             {job.location ? (
               <span className="inline-flex items-center gap-1.5">
                 <MapPin className="size-3.5 shrink-0 text-text-muted" />
@@ -363,7 +427,7 @@ export function CandidateJobBody({
               )}
             >
               <span className="flex h-[1lh] shrink-0 items-center text-brand-secondary">
-                <Sparkles className="size-4" />
+                <Gift className="size-4" />
               </span>
               <RichText
                 as="p"

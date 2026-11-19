@@ -125,7 +125,11 @@ export function splitRichLines(text: string | null | undefined): string[] {
   if (!text?.trim()) return [];
   const lines = text
     .split(/\n+/)
-    .map((line) => line.replace(/^[-•*]\s+/, "").trim())
+    .map((line) =>
+      // Markdown hard breaks leave a trailing "\"; strip those so list
+      // items don't render a visible backslash.
+      line.replace(/^[-•*]\s+/, "").replace(/\s*\\$/, "").trim(),
+    )
     .filter(Boolean);
   return lines.length > 0 ? lines : [];
 }

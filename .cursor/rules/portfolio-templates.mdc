@@ -1,0 +1,42 @@
+---
+description: Portfolio template UI work in features/templates — keep data contracts; polish with frontend-design taste and shadcn primitives.
+globs: features/templates/**
+alwaysApply: false
+---
+
+# Portfolio templates
+
+When editing `features/templates/**`, load **frontend-design** for taste, **shadcn** for components, and take craft inspiration from **stageshow** (`references/craft.md`: restraint, compose objects not card inventories, say it once, eye on the subject). Do not mount the stageshow kit inside portfolio templates.
+
+## Do not change (structure / data)
+
+- `PortfolioData`, `types.ts`, transform, registry IDs, catalog IDs
+- Section keys, `renderSections` / `resolveSectionLayout`, navbar section IDs (`#about`, `#work`, …)
+- Analytics attrs: `data-lf-track`, `data-lf-label`, `data-lf-id`
+- Accent system: `resolveAccentColor`, `accentRootStyle`, `--lf-accent`
+- Live preview / Microlink wiring, LinkedIn section data shape
+
+## UI stack
+
+- Prefer existing shadcn primitives from `@/components/ui/*`: `Button`, `Badge`, `Separator`, `Avatar`, `Card` (only when the template theme can restyle it), `Tooltip`
+- Never introduce daisyUI or a second component library
+- Template public sites are **not** the Livefolio app chrome: override brand colors with `className` so the template palette wins (`variant="ghost"` / `outline` + theme classes). Do not force `bg-brand-*` onto portfolios
+- Keep each template’s personality (Retro ≠ Minimal ≠ Cyberpunk). frontend-design means distinctive execution, not one shared look
+
+## Projects layout
+
+- **Equal-weight project cards on every template** — no lead-big first project.
+- **Every project card mounts `TemplateProjectPreview`** with `imageUrl`, `liveUrl`, `projectId`, and `livePreviewProjectIds` so uploaded thumbnails always show (live screenshot → thumbnail → placeholder). Do not make supporting projects text-only.
+
+## Visual direction (frontend-design)
+
+- Avoid AI defaults: ALL-CAPS tracked eyebrows on every heading, identical soft cards everywhere, decorative purple/glow washes, hover-lift on every card, middle-dot meta chrome
+- One strong focal idea per template; quiet the rest
+- Sentence-case labels; real hierarchy in type size/weight, not tracking tricks
+- Motion only for user-driven feedback or one intentional moment; respect reduced motion
+
+## Process
+
+1. Name the template’s subject and visual plan (palette, type, layout) in a few lines
+2. Restyle presentation only; leave section wiring and data maps intact
+3. Prefer shared helpers (`ProjectActions`, `TechChip`, `DescriptionBlock`, …) over per-template copy-paste when adding shadcn
