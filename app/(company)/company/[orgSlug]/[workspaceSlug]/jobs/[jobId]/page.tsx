@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ExternalLink, Copy } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useWorkspace } from "@/features/organization/api/use-organization";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,8 +29,6 @@ import {
 } from "@/features/jobs/lib/role-fields";
 import { JOB_STATUS_LABELS } from "@/features/jobs/constants/labels";
 import { getAppOrigin } from "@/lib/domain";
-import { PdfExtractField } from "@/features/uploads/components/pdf-extract-field";
-import { uploadStoredFile } from "@/features/uploads/api/client";
 
 export default function ManageJobPage() {
   const params = useParams<{ orgSlug: string; workspaceSlug: string; jobId: string }>();
@@ -43,7 +40,6 @@ export default function ManageJobPage() {
   const { data: workspace } = useWorkspace(orgSlug, workspaceSlug);
   const updateJob = useUpdateJob(orgSlug);
   const deleteJob = useDeleteJob(orgSlug);
-  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<JobRoleFormState | null>(null);
 
@@ -256,22 +252,6 @@ export default function ManageJobPage() {
           <JobRoleFields
             values={form}
             onChange={(patch) => setForm((prev) => (prev ? { ...prev, ...patch } : prev))}
-            descriptionExtra={
-              <PdfExtractField
-                hint="Replace the description from a PDF. You can still edit the text afterward."
-                onExtracted={async (text, file) => {
-                  setForm((prev) => (prev ? { ...prev, description: text } : prev));
-                  await uploadStoredFile({
-                    kind: "job_source",
-                    file,
-                    jobId,
-                  });
-                  await queryClient.invalidateQueries({
-                    queryKey: ["jobs", "id", jobId],
-                  });
-                }}
-              />
-            }
           />
           <div className="flex flex-wrap gap-2 border-t border-border-default pt-6">
             <Button onClick={() => void handleSaveEdits()} disabled={updateJob.isPending}>

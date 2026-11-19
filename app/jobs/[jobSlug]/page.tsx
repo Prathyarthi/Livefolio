@@ -6,10 +6,8 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { usePublicJob } from "@/features/jobs/api/use-jobs";
 import { CandidateJobBody } from "@/features/jobs/components/public-job-view";
-import { OrgBanner } from "@/features/organization/components/org-logo";
 import { LogoMark } from "@/components/logo";
 import { siteConfig } from "@/lib/site";
-import { cn } from "@/lib/utils";
 
 export default function PublicJobPage() {
   const params = useParams<{ jobSlug: string }>();
@@ -44,8 +42,6 @@ export default function PublicJobPage() {
       ? `/jobs/${job.slug}/apply`
       : `/sign-in?callbackUrl=${encodeURIComponent(`/jobs/${job.slug}/apply`)}`;
   const isPaused = job.status === "paused";
-  const org = job.organization;
-  const hasBanner = Boolean(org.bannerUrl);
 
   return (
     <div className="min-h-screen bg-surface-base">
@@ -63,25 +59,11 @@ export default function PublicJobPage() {
         </div>
       </header>
 
-      {hasBanner ? (
-        <div className="relative h-40 overflow-hidden md:h-52">
-          <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
-          <div className="absolute inset-0 bg-gradient-to-t from-surface-base to-transparent" />
-        </div>
-      ) : null}
-
-      <main
-        className={cn(
-          "mx-auto w-full max-w-3xl px-4 md:px-6",
-          hasBanner ? "-mt-10 pb-16" : "py-8 md:py-12",
-        )}
-      >
+      <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6 md:py-12">
         <CandidateJobBody
           job={job}
           paused={isPaused}
           showCompany
-          // Page already paints the full-bleed banner above.
-          showBanner={false}
           footer={
             <Button asChild size="lg" disabled={isPaused}>
               <Link href={applyHref}>Apply with Livefolio</Link>

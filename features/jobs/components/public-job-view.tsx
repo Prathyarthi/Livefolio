@@ -80,7 +80,6 @@ export function CandidateJobBody({
   titlePlaceholder = false,
   showEmptyAbout = false,
   showCompany = false,
-  showBanner = true,
   paused = false,
   footer,
 }: {
@@ -90,8 +89,6 @@ export function CandidateJobBody({
   titlePlaceholder?: boolean;
   showEmptyAbout?: boolean;
   showCompany?: boolean;
-  /** Set false when the parent already paints a full-bleed org banner. */
-  showBanner?: boolean;
   paused?: boolean;
   footer?: ReactNode;
 }) {
@@ -183,10 +180,9 @@ export function CandidateJobBody({
   const benefits = job.benefits?.trim() ?? "";
   const description = job.description?.trim() ?? "";
   const copy = bodyCopyClass(compact);
-  const hasBannerAsset = Boolean(org.bannerUrl);
-  const paintBanner = showBanner && hasBannerAsset;
+  const hasBanner = Boolean(org.bannerUrl);
   const hasLogo = Boolean(org.logoUrl);
-  const showBrandHeader = hasLogo || hasBannerAsset;
+  const showBrandHeader = hasLogo || hasBanner;
 
   return (
     <article
@@ -195,7 +191,7 @@ export function CandidateJobBody({
           "overflow-hidden rounded-[20px] border border-border-default bg-surface-raised",
       )}
     >
-      {paintBanner ? (
+      {hasBanner ? (
         <div
           className={cn(
             "relative w-full overflow-hidden",
@@ -205,9 +201,9 @@ export function CandidateJobBody({
           <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
           <div className="absolute inset-0 bg-gradient-to-t from-surface-raised to-transparent" />
         </div>
-      ) : showBanner || !hasBannerAsset ? (
+      ) : (
         <div className="h-1 bg-brand-secondary" />
-      ) : null}
+      )}
       <div
         className={cn(
           "space-y-8",
@@ -220,7 +216,7 @@ export function CandidateJobBody({
               <div
                 className={cn(
                   "relative z-10 shrink-0",
-                  paintBanner && (compact ? "-mt-10" : "-mt-12"),
+                  hasBanner && (compact ? "-mt-10" : "-mt-12"),
                 )}
               >
                 <OrgLogo
@@ -231,7 +227,7 @@ export function CandidateJobBody({
                 />
               </div>
             ) : null}
-            <div className={cn("min-w-0", hasLogo && paintBanner && "pt-1")}>
+            <div className={cn("min-w-0", hasLogo && hasBanner && "pt-1")}>
               <p className="flex items-center gap-1.5 font-medium text-text-primary">
                 <RichText as="span" text={org.name} />
                 {org.verified ? (

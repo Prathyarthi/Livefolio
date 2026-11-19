@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { CandidateJobBody } from "@/features/jobs/components/public-job-view";
 import type { Job, JobOrganization } from "@/features/jobs/api/use-jobs";
 import {
@@ -95,6 +96,11 @@ export function JobCandidatePreview({
         framed={false}
         titlePlaceholder={!hasTitle}
         showEmptyAbout
+        footer={
+          <Button size={compact ? "sm" : "lg"} disabled>
+            Apply with Livefolio
+          </Button>
+        }
       />
     </aside>
   );
