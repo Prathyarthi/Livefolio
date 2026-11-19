@@ -204,6 +204,18 @@ const TEMPLATE_PREVIEW_THEMES: Record<string, TemplatePreviewTheme> = {
     dark: true,
   },
   artdeco: {
+    canvas: "#070705",
+    blobA: "rgba(197, 164, 92, 0.18)",
+    blobB: "rgba(241, 234, 215, 0.08)",
+    surface: "#10100d",
+    hero: "rgba(197, 164, 92, 0.22)",
+    cards: ["rgba(197, 164, 92, 0.16)", "rgba(16, 16, 13, 0.95)", "rgba(197, 164, 92, 0.1)"],
+    lines: "rgba(197, 164, 92, 0.28)",
+    chrome: "#0c0c0a",
+    urlBar: "#10100d",
+    dark: true,
+  },
+  gatsby: {
     canvas: "#0b132b",
     blobA: "rgba(212, 175, 55, 0.18)",
     blobB: "rgba(212, 175, 55, 0.1)",

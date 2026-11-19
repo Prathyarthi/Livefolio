@@ -47,6 +47,9 @@ export default function PreviewPage() {
   const [allowedTemplateIds, setAllowedTemplateIds] = useState<string[] | null>(
     null
   );
+  const [accessTier, setAccessTier] = useState<"free" | "trial" | "pro" | null>(
+    null,
+  );
   const isMobile = useIsMobile();
   const [editOpen, setEditOpen] = useState(false);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
@@ -63,13 +66,18 @@ export default function PreviewPage() {
         const res = await fetch("/api/billing/me", { cache: "no-store" });
         if (!res.ok) return;
         const data = (await res.json().catch(() => ({}))) as {
-          access?: { allowedTemplateIds?: string[] };
+          access?: {
+            allowedTemplateIds?: string[];
+            tier?: "free" | "trial" | "pro";
+          };
         };
         if (cancelled) return;
         setAllowedTemplateIds(data.access?.allowedTemplateIds ?? null);
+        setAccessTier(data.access?.tier ?? null);
       } catch {
         if (cancelled) return;
         setAllowedTemplateIds(null);
+        setAccessTier(null);
       }
     };
     loadAccess();
@@ -80,16 +88,23 @@ export default function PreviewPage() {
 
   useEffect(() => {
     if (
+      accessTier !== "pro" &&
+      accessTier !== "trial" &&
       previewTemplate &&
       allowedTemplateIds &&
       !allowedTemplateIds.includes(previewTemplate)
     ) {
       setPreviewTemplate("minimal");
     }
-  }, [allowedTemplateIds, previewTemplate]);
+  }, [accessTier, allowedTemplateIds, previewTemplate]);
 
   const handleTemplatePreview = (next: string) => {
-    if (allowedTemplateIds && !allowedTemplateIds.includes(next)) {
+    if (
+      accessTier !== "pro" &&
+      accessTier !== "trial" &&
+      allowedTemplateIds &&
+      !allowedTemplateIds.includes(next)
+    ) {
       toast.error("Your free month has ended. Upgrade to Pro to unlock this template.");
       return;
     }
@@ -186,7 +201,11 @@ export default function PreviewPage() {
   );
 
   const isTemplateLocked = (templateId: string) =>
-    allowedTemplateIds ? !allowedTemplateIds.includes(templateId) : false;
+    accessTier === "pro" || accessTier === "trial"
+      ? false
+      : Boolean(
+          allowedTemplateIds && !allowedTemplateIds.includes(templateId),
+        );
 
   if (isLoading) {
     return (
@@ -225,7 +244,10 @@ export default function PreviewPage() {
 
   const effectiveTemplate = previewTemplate ?? portfolio.templateId ?? "pulse";
   const templateId =
-    allowedTemplateIds && !allowedTemplateIds.includes(effectiveTemplate)
+    accessTier !== "pro" &&
+    accessTier !== "trial" &&
+    allowedTemplateIds &&
+    !allowedTemplateIds.includes(effectiveTemplate)
       ? "minimal"
       : effectiveTemplate;
   const hasUnsavedTemplate =

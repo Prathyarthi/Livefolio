@@ -230,6 +230,19 @@ export const TEMPLATE_PROJECT_PREVIEW: Record<string, TemplateProjectPreviewConf
   },
   artdeco: {
     palette: {
+      bg: "#070705",
+      bgAlt: "#10100d",
+      primary: "#c5a45c",
+      secondary: "#f1ead7",
+      accent: "#1a1810",
+      surface: "#10100d",
+      muted: "#2a2618",
+      stroke: "#c5a45c",
+    },
+    variant: "dark",
+  },
+  gatsby: {
+    palette: {
       bg: "#0b132b",
       bgAlt: "#111c3d",
       primary: "#d4af37",

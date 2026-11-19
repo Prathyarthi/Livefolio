@@ -17,6 +17,7 @@ const TEMPLATE_PREVIEW_FILES: Record<string, string> = {
   monochrome: "monochrome.webp",
   synthwave: "synthwave.webp",
   artdeco: "artdeco.webp",
+  gatsby: "artdeco.webp",
   blueprint: "blueprint.webp",
   airy: "airy.webp",
   terracotta: "terracotta.webp",

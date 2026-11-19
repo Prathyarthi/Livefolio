@@ -73,6 +73,7 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
   monochrome: singleColumn(STANDARD_SINGLE),
   synthwave: singleColumn(STANDARD_SINGLE),
   artdeco: singleColumn(STANDARD_SINGLE),
+  gatsby: singleColumn(STANDARD_SINGLE),
   blueprint: singleColumn(STANDARD_SINGLE),
   windows: singleColumn(STANDARD_SINGLE),
 

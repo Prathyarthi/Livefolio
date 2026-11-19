@@ -3,6 +3,7 @@ import { parseDescription, normalizeDescription } from "@/lib/description";
 import ExpandableText from "@/components/expandable-text";
 import { RichText } from "@/components/rich-text";
 import { PlatformIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import type {
   PortfolioCustomization,
   PortfolioData,
@@ -497,30 +498,32 @@ export function ProjectActions({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {liveUrl && (
-        <a
-          href={liveUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={liveClassName}
-          data-lf-track="project_live"
-          data-lf-label={label || undefined}
-          data-lf-id={projectId || undefined}
-        >
-          Live Demo
-        </a>
+        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans", liveClassName)}>
+          <a
+            href={liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-lf-track="project_live"
+            data-lf-label={label || undefined}
+            data-lf-id={projectId || undefined}
+          >
+            Live Demo
+          </a>
+        </Button>
       )}
       {sourceUrl && (
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={sourceClassName}
-          data-lf-track="project_source"
-          data-lf-label={label || undefined}
-          data-lf-id={projectId || undefined}
-        >
-          Source
-        </a>
+        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans", sourceClassName)}>
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-lf-track="project_source"
+            data-lf-label={label || undefined}
+            data-lf-id={projectId || undefined}
+          >
+            Source
+          </a>
+        </Button>
       )}
     </div>
   );

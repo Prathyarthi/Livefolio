@@ -15,6 +15,7 @@ import { PastelTemplate } from "./pastel/pastel-template";
 import { MonochromeTemplate } from "./monochrome/monochrome-template";
 import { SynthwaveTemplate } from "./synthwave/synthwave-template";
 import { ArtDecoTemplate } from "./artdeco/artdeco-template";
+import { GatsbyTemplate } from "./gatsby/gatsby-template";
 import { BlueprintTemplate } from "./blueprint/blueprint-template";
 import { AiryTemplate } from "./airy/airy-template";
 import { TerracottaTemplate } from "./terracotta/terracotta-template";
@@ -52,6 +53,7 @@ const TEMPLATE_COMPONENTS: Record<
   monochrome: MonochromeTemplate,
   synthwave: SynthwaveTemplate,
   artdeco: ArtDecoTemplate,
+  gatsby: GatsbyTemplate,
   blueprint: BlueprintTemplate,
   airy: AiryTemplate,
   terracotta: TerracottaTemplate,

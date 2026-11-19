@@ -17,9 +17,10 @@ const FREE_TEMPLATE_IDS = [
   "airy",
 ] as const;
 const FREE_TEMPLATE_ID_SET = new Set<string>(FREE_TEMPLATE_IDS);
-const PREMIUM_TEMPLATE_IDS = Object.keys(templateCatalog).filter(
-  (id) => !FREE_TEMPLATE_ID_SET.has(id)
-);
+
+function allTemplateIds(): string[] {
+  return Object.keys(templateCatalog);
+}
 
 export type AccessTier = "free" | "trial" | "pro";
 
@@ -94,7 +95,7 @@ export function resolveAccessForUser(
   const canUseLinkedInImport =
     paidPro || (!billingConfigured && allowUnconfiguredBillingAccess);
   const allowedTemplateIds = canUsePremiumTemplates
-    ? [...FREE_TEMPLATE_IDS, ...PREMIUM_TEMPLATE_IDS]
+    ? allTemplateIds()
     : [...FREE_TEMPLATE_IDS];
   const unlocked =
     paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
@@ -121,7 +122,10 @@ export function canUseTemplate(
   snapshot: AccessSnapshot,
   templateId: string
 ): boolean {
-  return snapshot.allowedTemplateIds.includes(templateId);
+  if (snapshot.canUsePremiumTemplates) {
+    return templateId in templateCatalog || FREE_TEMPLATE_ID_SET.has(templateId);
+  }
+  return FREE_TEMPLATE_ID_SET.has(templateId);
 }
 
 export function getPlanLimitMessage(snapshot: AccessSnapshot): string {

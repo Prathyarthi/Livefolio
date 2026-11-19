@@ -32,7 +32,7 @@ import { ArticleSourceLabel, RichText,
   HERO_HEADER_COLUMN,
   HERO_HEADLINE_SCALE,
   HERO_TITLE_BASE,
-  HERO_TITLE_SCALE_6XL,
+  HERO_TITLE_SCALE_7XL,
   PROJECTS_GRID_2,
   PROJECTS_GRID_3,
   TEMPLATE_CONTAINER,
@@ -82,11 +82,6 @@ function getInitials(title: string): string {
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
-}
-
-function shellName(title: string): string {
-  const first = stripRichTextToPlain(title).trim().split(/\s+/).filter(Boolean)[0];
-  return first ? first.toLowerCase() : "portfolio";
 }
 
 function certificationLine(cert: PortfolioData["certifications"][number]): string {
@@ -192,7 +187,6 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       : data.projects;
   const groupedSkills = groupSkillsByCategory(data.skills);
   const experiences = sortExperiencesNewestFirst(data.experiences);
-  const topSkills = data.skills.slice(0, 6).map((s) => s.name).filter(Boolean);
   const visibleSocials = visibleSocialProfiles(data.socialProfiles, {
     excludeHeroPlatforms: true,
   });
@@ -810,101 +804,53 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           id="about"
           className="min-h-0 flex items-center pt-8 pb-12 @sm:pt-10 @sm:pb-14 px-4 @sm:px-6 @md:px-12 max-w-7xl mx-auto scroll-mt-24"
         >
-          <div className="grid @lg:grid-cols-2 gap-10 @lg:gap-16 items-center w-full">
-            <div className={cn(HERO_HEADER_COLUMN, "w-full")}>
-              {data.portfolio.headline && (
-                <p className="text-xs font-bold text-[var(--lf-accent)] uppercase tracking-widest mb-4 @sm:mb-6 leading-relaxed">
-                  <RichText text={data.portfolio.headline} />
-                </p>
+          <div className={cn(HERO_HEADER_COLUMN, "w-full max-w-3xl space-y-4")}>
+            <h1
+              className={cn(
+                HERO_TITLE_BASE,
+                HERO_TITLE_SCALE_7XL,
+                "font-bold leading-tight tracking-tight !text-[#09090b]",
               )}
-              <h1
-                className={cn(
-                  HERO_TITLE_BASE,
-                  HERO_TITLE_SCALE_6XL,
-                  "mb-5 font-bold leading-[1.1] !text-[#09090b] @sm:mb-8",
-                )}
-              >
-                <RichText text={data.portfolio.title} />
-              </h1>
-              {!resolved.isHidden("about") && data.portfolio.summary && (
-                <DescriptionBlock
-                  text={data.portfolio.summary}
-                  paragraphClassName={cn(MUTED, HERO_HEADLINE_SCALE, "max-w-xl mb-5 @sm:mb-6 leading-relaxed")}
-                  listClassName={cn(MUTED, "space-y-2 pl-5 max-w-xl mb-5 marker:text-[var(--lf-accent)]")}
-                />
-              )}
-              <ContactChips
-                portfolio={data.portfolio}
-                chipClassName="px-3 py-1.5 rounded-full bg-white border border-black/10 text-xs font-medium text-gray-600"
+            >
+              <RichText text={data.portfolio.title} />
+            </h1>
+            {data.portfolio.headline && (
+              <h2 className={cn(HERO_HEADLINE_SCALE, "font-medium tracking-tight text-[var(--lf-accent)]")}>
+                <RichText text={data.portfolio.headline} />
+              </h2>
+            )}
+            {!resolved.isHidden("about") && data.portfolio.summary && (
+              <DescriptionBlock
+                text={data.portfolio.summary}
+                paragraphClassName={cn(MUTED, "max-w-2xl text-base leading-relaxed @sm:text-lg")}
+                listClassName={cn(MUTED, "max-w-2xl space-y-2 pl-5 text-base leading-relaxed marker:text-[var(--lf-accent)] @sm:text-lg")}
               />
-              <div className="flex flex-wrap gap-3 @sm:gap-4 items-center mt-6 @sm:mt-8">
-                {visibleProjects.length > 0 && (
-                  <a
-                    href="#work"
-                    className="px-5 py-3 @sm:px-8 @sm:py-4 bg-[var(--lf-accent)] text-white rounded-xl font-bold hover:opacity-90 hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] transition-all flex items-center gap-2 text-sm @sm:text-base active:scale-[0.98]"
-                  >
-                    View Projects <ChevronRight size={16} />
-                  </a>
-                )}
-                <HeroProfileButtons
+            )}
+            <ContactChips
+              portfolio={data.portfolio}
+              chipClassName="rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-gray-600"
+            />
+            <div className="flex flex-wrap items-center gap-3 @sm:gap-4">
+              {visibleProjects.length > 0 && (
+                <a
+                  href="#work"
+                  className="flex items-center gap-2 rounded-xl bg-[var(--lf-accent)] px-5 py-3 text-sm font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] active:scale-[0.98] @sm:px-8 @sm:py-4 @sm:text-base"
+                >
+                  View Projects <ChevronRight size={16} />
+                </a>
+              )}
+              <HeroProfileButtons
+                profiles={data.socialProfiles}
+                className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-bold transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]"
+              />
+              {hasNonHeroSocialProfiles(data.socialProfiles) && (
+                <SocialPills
                   profiles={data.socialProfiles}
-                  className="px-3 py-1.5 rounded-full border border-black/10 text-xs font-bold hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors"
+                  showUsername
+                  excludeHeroPlatforms
+                  className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-bold transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]"
                 />
-                {hasNonHeroSocialProfiles(data.socialProfiles) && (
-                  <SocialPills
-                    profiles={data.socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="px-3 py-1.5 rounded-full border border-black/10 text-xs font-bold hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors"
-                  />
-                )}
-              </div>
-            </div>
-
-            <div className="relative hidden @md:block">
-              <div className="absolute -inset-4 bg-gradient-to-br from-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] to-purple-500/20 rounded-3xl blur-2xl" />
-              <div className={cn(CARD, "relative rounded-2xl shadow-2xl overflow-hidden font-mono text-sm")}>
-                <div className="bg-gray-50 px-4 py-3 border-b border-black/5 flex items-center justify-between">
-                  <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                  </div>
-                  <span className="text-xs text-gray-400">
-                    ~/{shellName(data.portfolio.title)}
-                  </span>
-                </div>
-                <div className="p-5 @lg:p-6 space-y-4">
-                  <div className="flex gap-3">
-                    <span className="text-[var(--lf-accent)]">➜</span>
-                    <span className="text-purple-600">~</span>
-                    <span className={INK}>whoami</span>
-                  </div>
-                  <div className={cn(MUTED, "ml-7 text-xs @lg:text-sm")}>
-                    <RichText text={data.portfolio.title} />
-                    {data.portfolio.headline ? ` — ${stripRichTextToPlain(data.portfolio.headline)}` : ""}
-                  </div>
-                  {topSkills.length > 0 && (
-                    <>
-                      <div className="flex gap-3">
-                        <span className="text-[var(--lf-accent)]">➜</span>
-                        <span className="text-purple-600">~</span>
-                        <span className={INK}>shuf -n {topSkills.length} stack.txt</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 ml-7 text-[var(--lf-accent)] text-xs @lg:text-sm">
-                        {topSkills.map((skill) => (
-                          <span key={skill}>{skill.toLowerCase()}</span>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  <div className="flex gap-3">
-                    <span className="text-[var(--lf-accent)]">➜</span>
-                    <span className="text-purple-600">~</span>
-                    <span className="animate-pulse bg-[var(--lf-accent)] w-2 h-5 inline-block" />
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </section>
