@@ -46,9 +46,7 @@ leads/
 docs/
 svs
 
-# local agent / outreach artifacts (keep scripts/search-qa and razorpay tracked)
+# local agent skills / scripts (not tracked)
+/scripts
 /.agents/
 .cursor/
-scripts/Prospects.csv
-scripts/bulk-email-out/
-scripts/bulk-smtp-email.mjs
