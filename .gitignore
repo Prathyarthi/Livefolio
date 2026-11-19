@@ -48,3 +48,7 @@ svs
 
 # local agent skills
 /.agents/
+
+/scripts
+.cursor
+skills-lock.json

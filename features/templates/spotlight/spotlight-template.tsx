@@ -1,8 +1,15 @@
 "use client";
-import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
-import { stripRichTextToPlain } from "@/lib/rich-text";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import { Fredoka, Nunito } from "next/font/google";
+import { Menu, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { stripRichTextToPlain } from "@/lib/rich-text";
+import { cn } from "@/lib/utils";
+import { accentRootStyle, resolveAccentColor } from "@/features/templates/template-accent-palettes";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
 import {
@@ -10,40 +17,50 @@ import {
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "../section-order";
-import { motion } from "motion/react";
-import { ExternalLink, Menu, X } from "lucide-react";
-import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/icons";
-import { cn } from "@/lib/utils";
-import { getCustomSectionLabel } from "@/features/templates/section-labels";
 import { CollapsibleList } from "../collapsible-list";
-import { ArticleSourceLabel, RichText,
+import {
+  GitHubContributionHeatmap,
+  parseContributionCalendar,
+} from "../github-contribution-heatmap";
+import {
+  ArticleSourceLabel,
+  RichText,
+  buildTemplateSections,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
   TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
+  ProjectActions,
+  PROJECT_CARD,
+  HERO_TITLE_BASE,
   SocialPills,
   hasNonHeroSocialProfiles,
-  PROJECT_CARD,
-  PROJECT_CARD_HEADER,
-  PROJECT_CARD_TITLE,
-  PROJECTS_GRID_2,
   TEMPLATE_CONTAINER,
-  getSectionLabel,
   getSectionLabels,
-  hasContactOrSocialProfiles,
-  isHeroProfilePlatform,
 } from "../shared";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
-import {
-  GitHubContributionHeatmap,
-  parseContributionCalendar,
-} from "../github-contribution-heatmap";
-import { LivePreviewImage } from "@/components/live-preview-image";
-import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
-const MADE_TOMMY_LINK_ID = "made-tommy-spotlight-font";
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  variable: "--font-spotlight-display",
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  variable: "--font-spotlight-sans",
+});
+
+const mint = "bg-[#fbfffe]";
+const ink = "text-[#17231f]";
+const muted = "text-[#66756f]";
+const line = "border-[#17231f]/12";
+const paper = "border-[#17231f]/12 bg-white";
+const yellow = "#ffcc33";
+const moreButton =
+  "mt-6 self-start rounded-full border border-[#17231f]/15 bg-white px-5 py-2 text-sm font-semibold text-[#17231f] transition-colors hover:border-[var(--lf-accent)] hover:bg-[color-mix(in_srgb,var(--lf-accent)_16%,white)]";
+
 export function SpotlightTemplate({ data }: { data: PortfolioData }) {
   const {
     portfolio,
@@ -60,753 +77,432 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("spotlight", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  // Projects normally shows a tagline instead of a heading; a rename replaces it.
-  const customProjectsTitle = getCustomSectionLabel(portfolio.customization, "projects");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [showFloatSocial, setShowFloatSocial] = useState(false);
   const groupedSkills = groupSkillsByCategory(skills);
   const githubProfile = socialProfiles.find(
-    (profile) => profile.platform.toLowerCase() === "github"
+    (profile) => profile.platform.toLowerCase() === "github",
   );
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(
-    githubStats?.contributionCalendar
+    githubStats?.contributionCalendar,
   );
-  const hasProfiles = hasContactOrSocialProfiles(portfolio, socialProfiles, {
-    excludeHeroPlatforms: true,
-  });
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    if (document.getElementById(MADE_TOMMY_LINK_ID)) return;
-    const link = document.createElement("link");
-    link.id = MADE_TOMMY_LINK_ID;
-    link.rel = "stylesheet";
-    link.href = "https://fonts.cdnfonts.com/css/made-tommy";
-    document.head.appendChild(link);
-  }, []);
-
-  useEffect(() => {
-    const el = heroRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => setShowFloatSocial(!entry?.isIntersecting),
-      { threshold: 0.35 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  const milestones = useMemo(() => buildMilestones(achievements, certifications), [achievements, certifications]);
-
-  const navItems = useMemo(() => {
-    const items: { name: string; link: string }[] = [{ name: "home", link: "#top" }];
-    if (portfolio.summary?.trim()) {
-      items.push({ name: getSectionLabel("about", portfolio.customization).toLowerCase(), link: "#about" });
-    }
-    if (projects.length > 0) {
-      items.push({ name: getSectionLabel("projects", portfolio.customization).toLowerCase(), link: "#projects" });
-    }
-    if (experiences.length > 0) {
-      items.push({ name: getSectionLabel("experience", portfolio.customization).toLowerCase(), link: "#experience" });
-    }
-    if (educations.length > 0) {
-      items.push({ name: getSectionLabel("education", portfolio.customization).toLowerCase(), link: "#education" });
-    }
-    if (skills.length > 0) {
-      items.push({ name: getSectionLabel("skills", portfolio.customization).toLowerCase(), link: "#skills" });
-    }
-    if (articles.length > 0) {
-      items.push({ name: getSectionLabel("articles", portfolio.customization).toLowerCase(), link: "#writing" });
-    }
-    if (milestones.length > 0) {
-      items.push({ name: getSectionLabel("achievements", portfolio.customization).toLowerCase(), link: "#achievements" });
-    }
-    if (hasProfiles) {
-      items.push({ name: getSectionLabel("profiles", portfolio.customization).toLowerCase(), link: "#profiles" });
-    }
-    for (const section of customSections) {
-      items.push({ name: section.label.toLowerCase(), link: `#${section.id}` });
-    }
-    return items;
-  }, [
-    portfolio.summary,
-    portfolio.customization,
-    projects.length,
-    experiences.length,
-    educations.length,
-    skills.length,
-    articles.length,
-    milestones.length,
-    hasProfiles,
-    customSections,
-  ]);
-
-  const headlineLines = splitHeadline(portfolio.headline);
-
+  const featuredProjects = projects.filter((project) => project.featured);
+  const orderedProjects =
+    featuredProjects.length > 0
+      ? [...featuredProjects, ...projects.filter((p) => !p.featured)]
+      : projects;
+  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const navItems = useMemo(
+    () => [
+      { label: "Home", href: "#top" },
+      ...sections.map((section) => ({ label: section.label, href: `#${section.id}` })),
+      ...customSections.map((section) => ({ label: section.label, href: `#${section.id}` })),
+    ],
+    [sections, customSections],
+  );
+  const heroTagline = portfolio.customization.heroTagline?.trim() || portfolio.headline;
   const resolved = resolveSectionLayout(
     getTemplateSectionLayout("spotlight"),
     portfolio.customization,
   );
+
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
       heading={<SpotlightSectionHeading title={labels.linkedin} />}
       classes={{
-            aboutList: "space-y-2 pl-5 text-base leading-relaxed text-gray-600 marker:text-[var(--lf-accent)] md:text-lg",
-            aboutParagraph: "text-base leading-relaxed text-gray-600 md:text-lg",
-            postList: "list-disc space-y-2 pl-5 text-xl font-bold text-gray-950",
-            postParagraph: "text-xl font-bold text-gray-950",
-            descriptionParagraph: "text-sm leading-relaxed text-gray-600",
-            descriptionList: "space-y-2 pl-5 text-sm leading-relaxed text-gray-600 marker:text-gray-300",
-          card: "rounded-lg border border-gray-200 bg-white p-6",
-          title: "text-xl font-bold text-gray-950",
-          text: "text-sm leading-relaxed text-gray-600",
-          muted: "text-xs font-medium text-gray-500",
-          chip: "rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700",
-          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
-          section: "container mx-auto mb-16 scroll-mt-24 px-0",
+        aboutList: `flex flex-col gap-2 pl-5 text-base leading-7 ${muted} marker:text-[var(--lf-accent)]`,
+        aboutParagraph: `text-base leading-7 ${muted}`,
+        postList: `list-disc flex flex-col gap-2 pl-5 text-base font-semibold ${ink}`,
+        postParagraph: `text-base font-semibold ${ink}`,
+        descriptionParagraph: `text-sm leading-7 ${muted}`,
+        descriptionList: `flex flex-col gap-2 pl-5 text-sm leading-7 ${muted} marker:text-[var(--lf-accent)]`,
+        card: `rounded-[1.4rem] border ${paper} p-5`,
+        title: `font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold ${ink}`,
+        text: `text-sm leading-7 ${muted}`,
+        muted: `text-sm ${muted}`,
+        chip: `rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1 text-sm ${ink}`,
+        link: "text-sm font-semibold text-[#17231f] decoration-[var(--lf-accent)] decoration-2 underline-offset-4 hover:underline",
+        section: "scroll-mt-28",
       }}
     />
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
-    about: portfolio.summary?.trim() && (
-                <section key="about" className="container mx-auto mb-16 px-0" id="about">
-                  <SpotlightSectionHeading title={labels.about} />
-                  <div className="rounded-lg border border-gray-200 bg-white p-6 md:p-8">
-                    <DescriptionBlock
-                      text={portfolio.summary}
-                      paragraphClassName="text-base leading-relaxed text-gray-600 md:text-lg"
-                      listClassName="space-y-2 pl-5 text-base leading-relaxed text-gray-600 marker:text-[var(--lf-accent)] md:text-lg"
-                    />
-                  </div>
-                </section>
-              ),
-    projects: projects.length > 0 && (
-                <section key="projects" className="container mx-auto mb-16 mt-8 px-0 scroll-mt-32">
-                  <div
-                    className="-mt-24 mb-10 flex flex-col pt-28 text-center leading-[150%] text-gray-950 lg:-mt-32 lg:pt-32 lg:text-left"
-                    id="projects"
-                  >
-                    <h2 className="text-3xl text-[38px] font-extrabold leading-[140%] lg:text-5xl lg:font-medium">
-                      {customProjectsTitle ?? (
-                        <>
-                          Where <span className="text-[var(--lf-accent)]">logic</span>{" "}
-                          <span className="m-0 block h-0 p-0 md:block lg:hidden">
-                            <br />
-                          </span>
-                          meets <span className="text-[var(--lf-accent)]">pixel</span>
-                          <span>.</span>
-                        </>
-                      )}
-                    </h2>
-                  </div>
+    about: portfolio.summary?.trim() ? (
+      <section key="about" id="about" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.about} />
+        <div className={cn("grid gap-6 rounded-[1.6rem] border p-6 @lg:grid-cols-[14rem_minmax(0,1fr)] @lg:p-8", paper)}>
+          <p className="font-[family-name:var(--font-spotlight-display)] text-3xl font-semibold leading-tight text-[#17231f]">
+            The short version
+          </p>
+          <DescriptionBlock
+            text={portfolio.summary}
+            paragraphClassName={cn("text-lg leading-8", muted)}
+            listClassName={cn("flex flex-col gap-3 pl-5 text-lg leading-8", muted, "marker:text-[var(--lf-accent)]")}
+          />
+        </div>
+      </section>
+    ) : null,
 
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName={cn(PROJECTS_GRID_2, "mb-16 gap-8")}
-                    buttonClassName="@md:col-span-2 rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[var(--lf-accent)]"
-                  >
-                    {projects.map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        project={project}
-                        livePreviewProjectIds={livePreviewProjectIds}
-                      />
-                    ))}
-                  </CollapsibleList>
-                </section>
-              ),
-    experience: experiences.length > 0 && (
-                <section key="experience" className="container mx-auto mb-16 px-0" id="experience">
-                  <SpotlightSectionHeading title={labels.experience} />
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="space-y-6"
-                    buttonClassName="mx-auto mt-4 block rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[var(--lf-accent)]"
-                  >
-                    {experiences.map((exp) => (
-                      <article
-                        key={exp.id}
-                        className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[var(--lf-accent)]"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-950"><RichText text={exp.role} /></h3>
-                            <p className="mt-1 text-sm font-medium text-gray-600">
-                              <RichText text={exp.company} />
-                              {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
-                            </p>
-                          </div>
-                          {(exp.startDate || exp.endDate) && (
-                            <span className="text-xs font-medium text-gray-500">
-                              {formatDateRange(exp.startDate, exp.endDate)}
-                            </span>
-                          )}
-                        </div>
-                        {exp.description && (
-                          <DescriptionBlock
-                            text={exp.description}
-                            paragraphClassName="mt-4 text-sm leading-relaxed text-gray-600"
-                            listClassName="mt-4 space-y-2 pl-5 text-sm leading-relaxed text-gray-600 marker:text-gray-300"
-                          />
-                        )}
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              ),
-    education: educations.length > 0 && (
-                <section key="education" className="container mx-auto mb-16 px-0" id="education">
-                  <SpotlightSectionHeading title={labels.education} />
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="grid gap-6 sm:grid-cols-1 md:grid-cols-2"
-                    buttonClassName="md:col-span-2 mx-auto mt-4 block rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[var(--lf-accent)]"
-                  >
-                    {educations.map((edu) => (
-                      <article
-                        key={edu.id}
-                        className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[var(--lf-accent)]"
-                      >
-                        <h3 className="text-lg font-bold text-gray-950">
-                          <RichText text={edu.degree} />
-                          {edu.field ? (
-                            <span className="font-medium text-gray-600"> in <RichText text={edu.field} /></span>
-                          ) : null}
-                        </h3>
-                        <p className="mt-2 text-sm font-medium text-gray-600"><RichText text={edu.institution} /></p>
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                          {(edu.startDate || edu.endDate) && (
-                            <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
-                          )}
-                          {edu.gpa ? <span>{edu.gpa}</span> : null}
-                        </div>
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              ),
-    skills: skills.length > 0 && (
-                <section key="skills" className="container mx-auto mb-16 px-0" id="skills">
-                  <SpotlightSectionHeading title={labels.skills} />
-                  <div className="space-y-8 rounded-lg border border-gray-200 bg-white p-6 md:p-8">
-                    {Object.entries(groupedSkills).map(([category, names]) => (
-                      <div key={category}>
-                        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                          {category}
-                        </h3>
-                        <div className="flex flex-wrap gap-2">
-                          {names.map((name) => (
-                            <TechChip
-                              key={name}
-                              name={name}
-                              className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ),
-    achievements: milestones.length > 0 && (
-                <section key="achievements" className="container mx-auto mb-16 px-0 text-gray-950" id="achievements">
-                  <SpotlightSectionHeading title={labels.achievements} />
-
-                  <div className="relative">
-                    <div className="pointer-events-none absolute bottom-16 left-4 top-0 w-0.5 bg-[var(--lf-accent)] md:left-1/2 md:-translate-x-px" />
-                    <CollapsibleList
-                      initial={4}
-                      buttonClassName="relative z-10 mx-auto mt-4 block rounded-full border border-gray-200 bg-[#fbfffe] px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[var(--lf-accent)]"
-                    >
-                      {milestones.map((m, t) => (
-                        <motion.div
-                          key={m.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.5, delay: t * 0.1 }}
-                          className={cn(
-                            "relative mb-12 flex flex-col gap-8 md:flex-row",
-                            t % 2 === 0 ? "md:flex-row-reverse" : ""
-                          )}
-                        >
-                          <div className="absolute left-4 z-10 mt-1.5 h-4 w-4 -translate-x-2 rounded-full bg-[var(--lf-accent)] md:left-1/2 md:-translate-x-1/2" />
-                          <div className="ml-12 p-4 md:ml-0 md:w-1/2">
-                            <div className="rounded-lg border border-[var(--lf-accent)] bg-[#fbfffe] p-6 shadow-lg">
-                              <span className="font-bold text-[var(--lf-accent)]">{m.year}</span>
-                              <h3 className="mt-2 text-xl font-bold text-gray-950">{m.title}</h3>
-                              {m.body ? (
-                                <p className="mt-2 text-gray-500">{m.body}</p>
-                              ) : null}
-                              <span className="mt-3 inline-block rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] px-3 py-1 text-sm capitalize text-gray-950">
-                                {m.kind}
-                              </span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </CollapsibleList>
-                  </div>
-                </section>
-              ),
-    articles: articles.length > 0 && (
-                <section key="articles" className="container mx-auto mb-16 px-0" id="writing">
-                  <SpotlightSectionHeading title={labels.articles} />
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="grid gap-8 sm:grid-cols-1 md:mx-auto md:grid-cols-2 lg:grid-cols-2"
-                    buttonClassName="md:col-span-2 rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[var(--lf-accent)]"
-                  >
-                    {articles.map((article) => (
-                      <a
-                        key={article.id}
-                        href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-[var(--lf-accent)]"
-                      >
-                        <ArticleSourceLabel source={article.source} className="mb-2" />
-                        <h3 className="text-xl font-bold text-gray-950"><RichText text={article.title} /></h3>
-                        {article.description && (
-                          <p className="mt-2 text-sm text-gray-500">{article.description}</p>
-                        )}
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                          {article.publishedAt && (
-                            <span>
-                              {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })}
-                            </span>
-                          )}
-                          {article.readTime != null && <span>{article.readTime} min read</span>}
-                        </div>
-                        {article.tags.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {article.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] px-2.5 py-1 text-xs capitalize text-gray-950"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </a>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              ),
-    profiles: hasProfiles && (
-                <section key="profiles" className="container mx-auto mb-16 px-0" id="profiles">
-                  <SpotlightSectionHeading title={labels.profiles} />
-                  <div className="rounded-lg border border-gray-200 bg-white p-6 md:p-8">
-                    <ContactChips
-                      portfolio={portfolio}
-                      chipClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[var(--lf-accent)]"
-                    />
-                    <div className="mt-6">
-                      <ProfileLinksSection
-                        portfolio={portfolio}
-                        profiles={socialProfiles}
-                        chipClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[var(--lf-accent)]"
-                        pillClassName="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-[var(--lf-accent)]"
-                        titleClassName="font-semibold text-gray-950"
-                        textClassName="text-sm text-gray-600"
-                      />
-                    </div>
-                  </div>
-                </section>
-              ),
-    github: contributionCalendar && (
-                <section key="github" className="container mx-auto mb-16 px-0" id="activity">
-                  <SpotlightSectionHeading title={labels.github} />
-                  <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white p-6">
-                    <GitHubContributionHeatmap
-                      calendar={contributionCalendar}
-                      profileUrl={githubProfile?.url}
-                      username={githubProfile?.username}
-                      variant="minimal"
-                      label="GitHub Contributions"
-                    />
-                  </div>
-                </section>
-              ),
-  };
-
-  return (
-    <>
-      <style>{`
-        .spotlight-root .custom-underline {
-          position: relative;
-          display: inline-block;
-          text-decoration: none;
-        }
-        .spotlight-root .custom-underline:after {
-          content: "";
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: -4px;
-          height: 3px;
-          background-color: #fc3;
-          transform: scaleX(0);
-          transform-origin: bottom right;
-          transition: transform 0.3s ease-in-out;
-        }
-        .spotlight-root .custom-underline:hover:after {
-          transform: scaleX(1);
-          transform-origin: bottom left;
-        }
-      `}</style>
-
-      <div
-        id="top"
-        className={cn(TEMPLATE_CONTAINER, "spotlight-root min-h-screen bg-[#fbfffe] text-gray-950")}
-        style={{
-          fontFamily: "'Made Tommy', 'Made Tommy 2', ui-sans-serif, system-ui, sans-serif",
-          ...accentRootStyle(primaryColor),
-        }}
-      >
-        <header className="sticky top-0 z-20 w-full border-b border-gray-100 bg-[#fbfffe] px-2 md:px-[200px]">
-          <nav className="pb-5 pt-5">
-            <div className="flex w-full flex-wrap items-center justify-between">
-              <a href="#top" className="flex items-center" aria-label="Home">
-                {!logoFailed ? (
-                  <img
-                    src="/logo.svg"
-                    alt=""
-                    className="h-8 w-auto"
-                    onError={() => setLogoFailed(true)}
+    projects: orderedProjects.length > 0 ? (
+      <section key="projects" id="work" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.projects} />
+        <CollapsibleList initial={4} wrapperClassName="grid gap-5 @md:grid-cols-2" buttonClassName={cn(moreButton, "@md:col-span-2")}>
+          {orderedProjects.map((project) => (
+            <article key={project.id} className={cn(PROJECT_CARD, "overflow-hidden rounded-[1.5rem] border bg-white", line)}>
+              <div className="bg-[#eefbf7] p-3">
+                <div className="overflow-hidden rounded-[1rem] border border-[#17231f]/10 bg-white">
+                  <TemplateProjectPreview
+                    templateId="spotlight"
+                    liveUrl={project.liveUrl ?? null}
+                    imageUrl={project.imageUrl ?? null}
+                    projectId={project.id}
+                    livePreviewProjectIds={livePreviewProjectIds}
+                    alt={stripRichTextToPlain(project.title)}
+                    loading="lazy"
+                    accentColor={primaryColor}
                   />
-                ) : (
-                  <span className="text-sm font-semibold tracking-tight text-gray-950">
-                    {stripRichTextToPlain(portfolio.title).slice(0, 2).toUpperCase()}
-                  </span>
-                )}
-              </a>
-
-              <button
-                type="button"
-                onClick={() => setMenuOpen((o) => !o)}
-                className="relative block rounded-md p-2 text-gray-950 lg:hidden"
-                aria-expanded={menuOpen}
-                aria-label="Toggle menu"
-              >
-                {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-
-              {menuOpen ? (
-                <div className="absolute left-0 top-[72px] z-30 flex w-full md:hidden">
-                  <div className="absolute mt-2 flex h-48 w-full flex-col items-end text-start">
-                    <div className="space-y-5 rounded-lg bg-[#fbfffe] p-6 pr-5 text-[20px] font-semibold shadow-lg">
-                      {navItems.map((item) => (
-                        <a
-                          key={item.name}
-                          href={item.link}
-                          className="custom-underline relative block font-normal capitalize text-gray-950 underline-offset-8 decoration-[var(--lf-accent)]"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          {item.name}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
                 </div>
-              ) : null}
+              </div>
+              <div className="flex flex-col gap-4 p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.03em] text-[#17231f]">
+                    <RichText text={project.title} />
+                  </h3>
+                  {project.featured ? (
+                    <Badge variant="outline" className="h-auto rounded-full border-[#17231f]/15 bg-[color-mix(in_srgb,var(--lf-accent)_28%,white)] px-2.5 py-0.5 font-sans text-xs font-semibold tracking-normal text-[#17231f]">
+                      Featured
+                    </Badge>
+                  ) : null}
+                </div>
+                {project.language ? <p className={cn("text-sm font-semibold", muted)}>{project.language}</p> : null}
+                {project.description ? (
+                  <DescriptionBlock
+                    text={project.description}
+                    paragraphClassName={cn("text-sm leading-6", muted)}
+                    listClassName={cn("flex flex-col gap-1.5 pl-5 text-sm leading-6", muted)}
+                  />
+                ) : null}
+                {(project.techStack.length > 0 || project.githubStars !== null || project.githubForks !== null) ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {project.techStack.slice(0, 6).map((tech) => (
+                      <TechChip key={tech} name={tech} className="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1 text-xs font-semibold text-[#66756f]" />
+                    ))}
+                    {project.githubStars !== null ? <span className={cn("text-xs font-semibold", muted)}>{project.githubStars} stars</span> : null}
+                    {project.githubForks !== null ? <span className={cn("text-xs font-semibold", muted)}>{project.githubForks} forks</span> : null}
+                  </div>
+                ) : null}
+                <ProjectActions
+                  liveUrl={project.liveUrl}
+                  sourceUrl={project.sourceUrl}
+                  label={stripRichTextToPlain(project.title)}
+                  projectId={project.id}
+                  liveClassName="rounded-full bg-[#17231f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#24352f]"
+                  sourceClassName="rounded-full border border-[#17231f]/15 bg-white px-3 py-1.5 text-xs font-semibold text-[#17231f] hover:border-[var(--lf-accent)]"
+                />
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
 
-              <div
-                className={cn(
-                  "mt-4 w-full lg:mt-0 lg:flex lg:w-auto lg:items-center lg:space-x-12 lg:space-y-0",
-                  menuOpen ? "hidden" : "hidden lg:flex"
-                )}
-              >
-                {navItems.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.link}
-                    className="custom-underline relative block font-normal capitalize text-gray-950 underline-offset-8 decoration-[var(--lf-accent)]"
-                  >
-                    {item.name}
-                  </a>
+    experience: experiences.length > 0 ? (
+      <section key="experience" id="experience" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.experience} />
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
+          {experiences.map((exp) => (
+            <article key={exp.id} className={cn("grid gap-4 border-t py-6 @md:grid-cols-[11rem_minmax(0,1fr)]", line)}>
+              <p className={cn("text-sm font-semibold tabular-nums", muted)}>{formatDateRange(exp.startDate, exp.endDate) || "Undated"}</p>
+              <div className="min-w-0">
+                <h3 className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.03em] text-[#17231f]"><RichText text={exp.role} /></h3>
+                <p className={cn("mt-1 text-sm font-semibold", muted)}>
+                  <RichText text={exp.company} />
+                  {exp.location ? <span> / <RichText text={exp.location} /></span> : null}
+                </p>
+                {exp.description ? (
+                  <DescriptionBlock
+                    text={exp.description}
+                    paragraphClassName={cn("mt-4 max-w-[42rem] text-sm leading-7", muted)}
+                    listClassName={cn("mt-4 flex max-w-[42rem] flex-col gap-2 pl-5 text-sm leading-7", muted)}
+                  />
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    education: educations.length > 0 ? (
+      <section key="education" id="education" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.education} />
+        <CollapsibleList initial={4} wrapperClassName="grid gap-5 @md:grid-cols-2" buttonClassName={cn(moreButton, "@md:col-span-2")}>
+          {educations.map((edu) => (
+            <article key={edu.id} className={cn("rounded-[1.4rem] border p-5", paper)}>
+              <h3 className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.03em] text-[#17231f]">
+                <RichText text={edu.degree} />
+                {edu.field ? <span className={muted}> in <RichText text={edu.field} /></span> : null}
+              </h3>
+              <p className={cn("mt-2 text-sm font-semibold", muted)}><RichText text={edu.institution} /></p>
+              <p className={cn("mt-3 text-sm", muted)}>{formatDateRange(edu.startDate, edu.endDate) || "Undated"}</p>
+              {edu.gpa ? <p className={cn("mt-2 text-sm", muted)}>{edu.gpa}</p> : null}
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    skills: skills.length > 0 ? (
+      <section key="skills" id="skills" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.skills} />
+        <div className={cn("grid gap-6 rounded-[1.6rem] border p-6 @md:grid-cols-2 @lg:grid-cols-3", paper)}>
+          {Object.entries(groupedSkills).map(([category, names]) => (
+            <div key={category} className="min-w-0">
+              <h3 className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.03em] text-[#17231f]">{category}</h3>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {names.map((name) => (
+                  <TechChip key={name} name={name} className="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1 text-sm font-semibold text-[#66756f]" />
                 ))}
               </div>
             </div>
-          </nav>
-        </header>
-
-        <div className="ml-4 mr-4 min-h-screen pb-16 md:pb-24 lg:ml-[200px] lg:mr-[200px]">
-          <div ref={heroRef}>
-            <section className="flex h-screen flex-col place-content-center place-items-center gap-y-4 px-2">
-              <h1 className="-mt-7 text-center text-4xl font-extrabold leading-[130%] text-gray-950 md:font-semibold lg:mt-0 lg:text-6xl lg:font-semibold lg:leading-[128%]">
-                Hey! <br />
-                I am <RichText text={portfolio.title} />
-                <span className="text-[var(--lf-accent)]">.</span>
-              </h1>
-              <p
-                className="-mt-[140px] h-[256px] w-[3px] rotate-90 rounded-full bg-[var(--lf-accent)]"
-                aria-hidden
-              />
-              <div className="-mt-[125px] text-[20px] text-[rgb(53,53,58)] lg:leading-[140%]">
-                <p className="text-balance text-center">
-                  {headlineLines[0]}
-                  {headlineLines[1] ? (
-                    <>
-                      <br />
-                      {headlineLines[1]}
-                    </>
-                  ) : null}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="text-gray-950 transition duration-300 hover:opacity-70"
-                />
-                {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="text-sm text-gray-700 transition duration-300 hover:opacity-70"
-                  />
-                )}
-              </div>
-
-              <div className="mt-[150px] animate-bounce">
-                <a href="#projects" aria-label="Scroll to projects">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    width={22}
-                    height={22}
-                    viewBox="0 0 21.33 21.33"
-                    className="text-[#1B1B1E]"
-                  >
-                    <g transform="matrix(0,-1,1,0,-21.33,21.33)">
-                      <path
-                        d="M10.6667,33.33333396911621L10.6667,42.66663396911621L0,32.00003396911621L10.6667,21.33333396911621L10.6667,30.66666396911621L21.3333,30.66666396911621L21.3333,33.33333396911621L10.6667,33.33333396911621Z"
-                        fill="currentColor"
-                        fillOpacity={1}
-                      />
-                    </g>
-                  </svg>
-                </a>
-              </div>
-            </section>
-          </div>
-
-          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
-
-          {customSections.map((section) => (
-            <section
-              key={section.id}
-              className="container mx-auto mb-16 px-0"
-              id={section.id}
-            >
-              <SpotlightSectionHeading title={section.label} />
-              <div className="rounded-lg border border-gray-200 bg-white p-6 md:p-8">
-                <CustomSectionItems
-                  items={section.items}
-                  titleClassName="text-lg font-bold text-gray-950"
-                  textClassName="mt-2 text-sm leading-relaxed text-gray-600"
-                  chipClassName="rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] px-2.5 py-1 text-xs capitalize text-gray-950"
-                  buttonClassName="mx-auto mt-4 block rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-950 transition-colors hover:border-[var(--lf-accent)]"
-                />
-              </div>
-            </section>
           ))}
-
-          {showFloatSocial &&
-            socialProfiles.some((profile) => isHeroProfilePlatform(profile.platform)) && (
-            <div className="absolute right-0 top-[290px] z-20 hidden lg:block">
-              <div className="relative -z-10 mb-4 justify-center">
-                <div className="rounded-lg bg-[#fbfffe] px-3 py-6 shadow-2xl drop-shadow-2xl">
-                  <div className="flex flex-col gap-3">
-                    {socialProfiles
-                      .filter((profile) => isHeroProfilePlatform(profile.platform))
-                      .map((p) => (
-                      <a
-                        key={`${p.platform}-${p.url}`}
-                        href={p.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-950 transition-colors duration-300 hover:opacity-70"
-                        aria-label={p.platform}
-                      >
-                        <SocialIcon platform={p.platform} />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
-    </>
+      </section>
+    ) : null,
+
+    achievements: achievements.length > 0 || certifications.length > 0 ? (
+      <section key="achievements" id="achievements" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.achievements} />
+        <CollapsibleList initial={5} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
+          {[...achievements.map((achievement) => ({ id: `achievement-${achievement.id}`, title: achievement.title, detail: achievement.date ? new Date(achievement.date).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "Achievement" })), ...certifications.map((certification) => ({ id: `certification-${certification.id}`, title: certification.name, detail: certification.issuer }))].map((item) => (
+            <article key={item.id} className={cn("grid gap-3 border-t py-5 @md:grid-cols-[minmax(0,1fr)_12rem]", line)}>
+              <p className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.03em] text-[#17231f]">{item.title}</p>
+              <p className={cn("text-sm font-semibold @md:text-right", muted)}>{item.detail}</p>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    articles: articles.length > 0 ? (
+      <section key="articles" id="writing" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.articles} />
+        <CollapsibleList initial={4} wrapperClassName="grid gap-5 @md:grid-cols-2" buttonClassName={cn(moreButton, "@md:col-span-2")}>
+          {articles.map((article) => (
+            <a
+              key={article.id}
+              href={article.url}
+              data-lf-track="article"
+              data-lf-label={stripRichTextToPlain(article.title)}
+              data-lf-id={article.id}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn("block rounded-[1.4rem] border p-5 transition-colors hover:border-[var(--lf-accent)]", paper)}
+            >
+              <ArticleSourceLabel source={article.source} className={cn("mb-3", muted)} />
+              <h3 className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold leading-tight tracking-[-0.03em] text-[#17231f]"><RichText text={article.title} /></h3>
+              {article.description ? <p className={cn("mt-3 text-sm leading-6", muted)}>{article.description}</p> : null}
+              <p className={cn("mt-4 text-sm", muted)}>
+                {article.publishedAt
+                  ? new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                  : null}
+                {article.readTime != null ? `${article.publishedAt ? " / " : ""}${article.readTime} min read` : null}
+              </p>
+              {article.tags.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {article.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="h-auto rounded-full border-[#17231f]/12 bg-[#fbfffe] px-2.5 py-0.5 font-sans text-xs font-semibold tracking-normal text-[#66756f]">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
+            </a>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    profiles: hasProfiles ? (
+      <section key="profiles" id="profiles" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.profiles} />
+        <div className={cn("rounded-[1.6rem] border p-6 @md:p-8", paper)}>
+          <ContactChips
+            portfolio={portfolio}
+            chipClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#66756f]"
+          />
+          <div className="mt-6">
+            <ProfileLinksSection
+              portfolio={portfolio}
+              profiles={socialProfiles}
+              chipClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#66756f]"
+              pillClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#17231f] transition-colors hover:border-[var(--lf-accent)]"
+              titleClassName="font-semibold text-[#17231f]"
+              textClassName="text-sm text-[#66756f]"
+            />
+          </div>
+        </div>
+      </section>
+    ) : null,
+
+    github: contributionCalendar ? (
+      <section key="github" id="activity" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.github} />
+        <div className={cn("overflow-x-auto rounded-[1.4rem] border p-5", paper)}>
+          <GitHubContributionHeatmap
+            calendar={contributionCalendar}
+            profileUrl={githubProfile?.url}
+            username={githubProfile?.username}
+            variant="minimal"
+            label={labels.github}
+          />
+        </div>
+      </section>
+    ) : null,
+  };
+
+  return (
+    <div
+      id="top"
+      className={cn(
+        TEMPLATE_CONTAINER,
+        fredoka.variable,
+        nunito.variable,
+        mint,
+        "min-h-screen font-[family-name:var(--font-spotlight-sans)] antialiased selection:bg-[var(--lf-accent)] selection:text-[#17231f]",
+        ink,
+      )}
+      style={{
+        ...accentRootStyle(primaryColor),
+        ["--lf-accent" as string]: primaryColor || yellow,
+      }}
+    >
+      <header className="sticky top-0 z-20 border-b border-[#17231f]/10 bg-[#fbfffe]/92 backdrop-blur">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-6 md:px-8">
+          <a href="#top" className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.04em] text-[#17231f]" aria-label="Home">
+            <RichText text={portfolio.title} />
+          </a>
+          {navbarEnabled ? (
+            <div className="hidden items-center gap-6 lg:flex">
+              {navItems.map((item) => (
+                <a key={`${item.href}-${item.label}`} href={item.href} className="text-sm font-semibold text-[#66756f] underline-offset-4 hover:text-[#17231f] hover:decoration-[var(--lf-accent)] hover:decoration-2 hover:underline">
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          ) : null}
+          {navbarEnabled ? (
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              className="rounded-full border border-[#17231f]/12 bg-white p-2 text-[#17231f] lg:hidden"
+              aria-expanded={menuOpen}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </button>
+          ) : null}
+        </nav>
+        {navbarEnabled && menuOpen ? (
+          <div className="border-t border-[#17231f]/10 bg-[#fbfffe] px-5 py-4 lg:hidden">
+            <div className="mx-auto flex max-w-6xl flex-col gap-3">
+              {navItems.map((item) => (
+                <a key={`${item.href}-${item.label}-mobile`} href={item.href} className="text-base font-semibold text-[#17231f]" onClick={() => setMenuOpen(false)}>
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </header>
+
+      <main className="mx-auto min-w-0 max-w-6xl px-5 pb-16 pt-10 sm:px-6 md:px-8 md:pb-28 md:pt-16">
+        <section className="grid min-h-[70vh] gap-8 pb-12 @lg:grid-cols-[minmax(0,1fr)_20rem] @lg:items-center">
+          <div className="min-w-0">
+            <div className="mb-6 inline-flex rounded-full border border-[#17231f]/12 bg-white px-4 py-2 text-sm font-semibold text-[#17231f]">
+              Product stage / portfolio
+            </div>
+            <h1 className={cn(HERO_TITLE_BASE, "max-w-[58rem] font-[family-name:var(--font-spotlight-display)] text-5xl font-semibold leading-[0.92] tracking-[-0.06em] text-[#17231f] @md:text-7xl @lg:text-8xl")}>
+              <RichText text={portfolio.title} />
+            </h1>
+            {heroTagline ? (
+              <p className="mt-6 max-w-[43rem] text-balance text-2xl font-semibold leading-tight text-[#17231f] @md:text-3xl">
+                {heroTagline}
+              </p>
+            ) : null}
+            {portfolio.headline && heroTagline !== portfolio.headline ? (
+              <p className={cn("mt-4 max-w-[36rem] text-lg leading-8", muted)}>
+                <RichText text={portfolio.headline} />
+              </p>
+            ) : null}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <HeroProfileButtons
+                profiles={socialProfiles}
+                className="rounded-full bg-[#17231f] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#24352f]"
+              />
+              {hasNonHeroSocialProfiles(socialProfiles) ? (
+                <SocialPills
+                  profiles={socialProfiles}
+                  showUsername
+                  excludeHeroPlatforms
+                  className="rounded-full border border-[#17231f]/12 bg-white px-3 py-1.5 text-sm font-semibold text-[#66756f] transition-colors hover:border-[var(--lf-accent)] hover:text-[#17231f]"
+                />
+              ) : null}
+            </div>
+          </div>
+          <aside className="rounded-[2rem] border border-[#17231f]/12 bg-white p-5">
+            <div className="rounded-[1.4rem] bg-[color-mix(in_srgb,var(--lf-accent)_42%,white)] p-5">
+              <p className="font-[family-name:var(--font-spotlight-display)] text-4xl font-semibold leading-none tracking-[-0.05em] text-[#17231f]">
+                Built to feel usable before it is explained.
+              </p>
+            </div>
+            <Separator className="my-5 bg-[#17231f]/12" />
+            <div className="flex flex-col gap-3">
+              <ContactChips
+                portfolio={portfolio}
+                chipClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#66756f]"
+              />
+            </div>
+          </aside>
+        </section>
+
+        <div className="flex min-w-0 flex-col gap-14">
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
+        </div>
+
+        {customSections.length > 0 ? (
+          <div className="mt-14 grid gap-8 @md:grid-cols-2">
+            {customSections.map((section) => (
+              <section key={section.id} id={section.id} className="scroll-mt-28">
+                <SpotlightSectionHeading title={section.label} />
+                <div className={cn("rounded-[1.4rem] border p-5", paper)}>
+                  <CustomSectionItems
+                    items={section.items}
+                    titleClassName="text-lg font-semibold text-[#17231f]"
+                    textClassName={cn("mt-2 text-sm leading-6", muted)}
+                    chipClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-2.5 py-1 text-xs font-semibold text-[#66756f]"
+                    buttonClassName={moreButton}
+                  />
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : null}
+      </main>
+    </div>
   );
 }
 
 function SpotlightSectionHeading({ title }: { title: string }) {
   return (
-    <div className="mb-12">
-      <h2 className="text-5xl font-medium tracking-wide">
+    <div className="mb-6">
+      <h2 className="font-[family-name:var(--font-spotlight-display)] text-4xl font-semibold tracking-[-0.05em] text-[#17231f] @md:text-5xl">
         {title}
         <span className="text-[var(--lf-accent)]">.</span>
       </h2>
+      <Separator className="mt-4 bg-[#17231f]/12" />
     </div>
   );
-}
-
-function SocialIcon({ platform }: { platform: string }) {
-  const p = platform.toLowerCase();
-  const className = "h-7 w-7";
-  if (p.includes("github")) return <GithubIcon className={className} />;
-  if (p.includes("linkedin")) return <LinkedinIcon className={className} />;
-  if (p.includes("instagram")) return <InstagramIcon className={className} />;
-  return <ExternalLink className={className} />;
-}
-
-function ProjectCard({
-  project,
-  livePreviewProjectIds,
-}: {
-  project: PortfolioData["projects"][number];
-  livePreviewProjectIds: string[];
-}) {
-  const hasLinks = Boolean(project.liveUrl || project.sourceUrl);
-
-  return (
-    <article className={cn(PROJECT_CARD, "group flex h-full w-full flex-col rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--lf-accent)] hover:shadow-lg")}>
-      <div className="h-1 w-full bg-[color-mix(in_srgb,var(--lf-accent)_70%,transparent)]" />
-
-      <LivePreviewImage
-        liveUrl={project.liveUrl ?? null}
-        imageUrl={project.imageUrl ?? null}
-        projectId={project.id}
-        livePreviewProjectIds={livePreviewProjectIds}
-        alt={stripRichTextToPlain(project.title)}
-        templateId="spotlight"
-        loading="lazy"
-      />
-
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        <div className={PROJECT_CARD_HEADER}>
-          <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-semibold tracking-tight text-gray-950")}><RichText text={project.title} /></h3>
-          {hasLinks ? (
-            <ExternalLink size={18} className="mt-0.5 shrink-0 text-gray-700 transition-colors group-hover:text-gray-950" />
-          ) : null}
-        </div>
-
-        <DescriptionBlock
-          text={project.description || "A private project with implementation details available on request."}
-          paragraphClassName="text-sm leading-relaxed text-gray-600"
-          listClassName="space-y-2 pl-5 text-sm leading-relaxed text-gray-600 marker:text-gray-300"
-        />
-
-        {project.techStack.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {project.techStack.map((tech) => (
-              <TechChip
-                key={tech}
-                name={tech}
-                className="rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs font-medium capitalize text-gray-700"
-              />
-            ))}
-          </div>
-        ) : null}
-
-        <div className="mt-auto flex items-center gap-2 pt-1">
-          {project.liveUrl ? (
-            <a
-              href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center rounded-md bg-gray-950 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-85"
-            >
-              Live Demo
-            </a>
-          ) : null}
-          {project.sourceUrl ? (
-            <a
-              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 transition-colors hover:border-gray-300"
-            >
-              Source
-            </a>
-          ) : null}
-          {!hasLinks ? <span className="text-xs font-medium text-gray-500">Private project</span> : null}
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function splitHeadline(headline: string): [string, string | null] {
-  if (!headline) return ["", null];
-  const parts = headline.split(/\n+/).map((p) => p.trim()).filter(Boolean);
-  if (parts.length >= 2) return [parts[0], parts.slice(1).join(" ")];
-  const dot = headline.indexOf(". ");
-  if (dot > 0 && dot < headline.length - 2) {
-    return [headline.slice(0, dot + 1).trim(), headline.slice(dot + 1).trim()];
-  }
-  return [headline, null];
-}
-
-type Milestone = { id: string; year: string; title: string; body: string; kind: string };
-
-function buildMilestones(
-  achievements: PortfolioData["achievements"],
-  certifications: PortfolioData["certifications"]
-): Milestone[] {
-  const items: Milestone[] = [];
-  for (const a of achievements) {
-    items.push({
-      id: `ach-${a.id}`,
-      year: yearFromIso(a.date),
-      title: a.title,
-      body: "",
-      kind: inferAchievementKind(a.title),
-    });
-  }
-  for (const c of certifications) {
-    items.push({
-      id: `cert-${c.id}`,
-      year: yearFromIso(c.issueDate),
-      title: c.name,
-      body: c.issuer,
-      kind: "certification",
-    });
-  }
-  items.sort((a, b) => {
-    const ya = parseInt(a.year, 10);
-    const yb = parseInt(b.year, 10);
-    if (!Number.isNaN(ya) && !Number.isNaN(yb) && ya !== yb) return yb - ya;
-    return a.id.localeCompare(b.id);
-  });
-  return items;
-}
-
-function yearFromIso(date: string | null): string {
-  if (!date) return "—";
-  const y = new Date(date).getFullYear();
-  return Number.isNaN(y) ? "—" : String(y);
-}
-
-function inferAchievementKind(title: string): string {
-  const t = title.toLowerCase();
-  if (t.includes("hackathon") || t.includes("place") || t.includes("wave")) return "award";
-  if (t.includes("cert")) return "certification";
-  return "award";
 }

@@ -1,3 +1,4 @@
+import { Inter_Tight, Newsreader } from "next/font/google";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
@@ -7,25 +8,19 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  ArticleSourceLabel,
+  RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
-  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
-  PROJECT_CARD,
-  PROJECT_CARD_BODY,
-  PROJECT_CARD_HEADER,
-  PROJECT_CARD_META,
-  PROJECT_CARD_TITLE,
-  HERO_HEADER_COLUMN,
-  HERO_HEADLINE_SCALE,
   HERO_TITLE_BASE,
-  HERO_TITLE_SCALE_7XL,
-  PROJECTS_GRID_2,
   SocialPills,
   hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
@@ -43,6 +38,28 @@ import {
   type ReorderableSectionKey,
 } from "../section-order";
 
+/**
+ * Minimal — gallery wall
+ * Color: cool paper #f7f7f5 (not cream), ink #171614, mute #6a6760
+ * Type: Newsreader (name / titles) + Inter Tight (UI)
+ * Layout: long measure, one lead exhibit, indexes for the rest
+ * Avoids the cream + terracotta + serif AI cluster
+ */
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-minimal-display",
+});
+
+const interTight = Inter_Tight({
+  subsets: ["latin"],
+  variable: "--font-minimal-sans",
+});
+
+const ink = "text-[#171614]";
+const mute = "text-[#6a6760]";
+const hairline = "border-[#171614]/12";
+const moreBtn =
+  "mt-6 self-start rounded-none border-0 bg-transparent px-0 py-1.5 font-sans text-sm text-[#6a6760] underline-offset-4 hover:text-[#171614] hover:underline";
 
 export function MinimalTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -62,17 +79,18 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
   const labels = getSectionLabels(portfolio.customization);
   const groupedSkills = groupSkillsByCategory(skills);
   const githubProfile = socialProfiles.find(
-    (profile) => profile.platform.toLowerCase() === "github"
+    (profile) => profile.platform.toLowerCase() === "github",
   );
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(
-    githubStats?.contributionCalendar
+    githubStats?.contributionCalendar,
   );
   const featuredProjects = projects.filter((project) => project.featured);
   const visibleProjects =
     featuredProjects.length > 0
       ? [...featuredProjects, ...projects.filter((p) => !p.featured)]
       : projects;
+  const orderedProjects = visibleProjects;
   const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const resolved = resolveSectionLayout(
     getTemplateSectionLayout("minimal"),
@@ -84,129 +102,108 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
-            aboutList: "space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-stone-300",
-            aboutParagraph: "text-base leading-8 text-stone-600",
-            postList: "list-disc space-y-2 pl-5 text-sm text-stone-900 leading-relaxed",
-            postParagraph: "text-sm text-stone-900 leading-relaxed",
-            descriptionParagraph: "text-sm leading-7 text-stone-600",
-            descriptionList: "space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-stone-300",
-          section: "scroll-mt-24 rounded-[1.75rem] border border-stone-200/80 bg-white/70 p-8",
-          card: "rounded-2xl border border-stone-200/80 bg-white p-5",
-          title: "font-serif text-xl font-semibold text-stone-900",
-          text: "text-sm leading-7 text-stone-600",
-          muted: "text-xs uppercase tracking-[0.22em] text-stone-400",
-          chip: "rounded-full border border-stone-200/80 bg-stone-50 px-3 py-1.5 text-sm text-stone-600",
-          link: "text-sm text-stone-600 underline-offset-4 hover:text-stone-900 hover:underline",
+        aboutList: `flex flex-col gap-3 pl-5 text-base leading-8 ${mute} marker:text-[#171614]/25`,
+        aboutParagraph: `text-base leading-8 ${mute}`,
+        postList: `list-disc flex flex-col gap-2 pl-5 text-sm leading-relaxed ${ink}`,
+        postParagraph: `text-sm leading-relaxed ${ink}`,
+        descriptionParagraph: `text-sm leading-7 ${mute}`,
+        descriptionList: `flex flex-col gap-2 pl-5 text-sm leading-7 ${mute} marker:text-[#171614]/25`,
+        section: `scroll-mt-28 border-t ${hairline} pt-12`,
+        card: `rounded-none border ${hairline} bg-white p-5`,
+        title: `font-[family-name:var(--font-minimal-display)] text-xl font-medium ${ink}`,
+        text: `text-sm leading-7 ${mute}`,
+        muted: `text-sm ${mute}`,
+        chip: `rounded-none border ${hairline} bg-transparent px-2.5 py-1 text-sm ${mute}`,
+        link: "text-sm text-[var(--lf-accent)] underline-offset-4 hover:underline",
       }}
     />
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
-      <section
-        key="about"
-        id="about"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+      <section key="about" id="about" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName="whitespace-pre-line text-base leading-8 text-stone-600"
-          listClassName="space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-stone-300"
+          paragraphClassName={cn("max-w-[38rem] whitespace-pre-line text-lg leading-8", mute)}
+          listClassName={cn(
+            "max-w-[38rem] flex flex-col gap-3 pl-5 text-lg leading-8",
+            mute,
+            "marker:text-[#171614]/25",
+          )}
         />
       </section>
     ) : null,
 
-    projects: visibleProjects.length > 0 ? (
-      <section
-        key="projects"
-        id="work"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+    projects: orderedProjects.length > 0 ? (
+      <section key="projects" id="work" className={cn("scroll-mt-28 min-w-0 border-t pt-12", hairline)}>
         <SectionHeading>{labels.projects}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName={PROJECTS_GRID_2}
-          buttonClassName="col-span-full mt-2 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.2em] text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-        >
-          {visibleProjects.map((project) => (
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {orderedProjects.map((project) => (
             <article
               key={project.id}
               className={cn(
-                PROJECT_CARD,
-                "rounded-[1.6rem] border border-stone-200/80 bg-[#fffdf9] shadow-[0_14px_40px_rgba(28,25,23,0.05)] transition-transform duration-300 hover:-translate-y-1"
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 @md:grid-cols-[minmax(0,1.15fr)_minmax(0,1.35fr)_auto] @md:items-start @md:gap-8",
+                hairline,
               )}
             >
-              <TemplateProjectPreview templateId="minimal"
-                liveUrl={project.liveUrl ?? null}
-                imageUrl={project.imageUrl ?? null}
-                projectId={project.id}
-                livePreviewProjectIds={livePreviewProjectIds}
-                alt={stripRichTextToPlain(project.title)}
-                loading="lazy"
-                containerClassName="overflow-hidden bg-stone-100"
-               accentColor={primaryColor} />
-              <div className={PROJECT_CARD_BODY}>
-                <div className={PROJECT_CARD_HEADER}>
-                  <div className="min-w-0 flex-1">
-                    <div className={PROJECT_CARD_META}>
-                      <h3 className={cn(PROJECT_CARD_TITLE, "font-serif text-2xl font-semibold text-[var(--lf-accent)]")}>
-                        <RichText text={project.title} />
-                      </h3>
-                      {project.featured && (
-                        <span className="rounded-full border border-stone-900 bg-[var(--lf-accent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-stone-100">
-                          Featured
-                        </span>
-                      )}
-                    </div>
-                    {project.language && (
-                      <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
-                        {project.language}
-                      </p>
+              <div className={cn("overflow-hidden border", hairline)}>
+                <TemplateProjectPreview
+                  templateId="minimal"
+                  liveUrl={project.liveUrl ?? null}
+                  imageUrl={project.imageUrl ?? null}
+                  projectId={project.id}
+                  livePreviewProjectIds={livePreviewProjectIds}
+                  alt={stripRichTextToPlain(project.title)}
+                  loading="lazy"
+                  accentColor={primaryColor}
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <h3
+                    className={cn(
+                      "font-[family-name:var(--font-minimal-display)] text-xl font-medium",
+                      ink,
                     )}
-                  </div>
-
-                  <ProjectActions
-                    liveUrl={project.liveUrl}
-                    sourceUrl={project.sourceUrl}
-                    label={stripRichTextToPlain(project.title)}
-                    projectId={project.id}
-                    liveClassName="rounded-full bg-[var(--lf-accent)] px-4 py-2 text-xs font-medium text-stone-100 transition-colors hover:bg-[color-mix(in_srgb,var(--lf-accent)_85%,black)]"
-                    sourceClassName="rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-                  />
+                  >
+                    <RichText text={project.title} />
+                  </h3>
+                  {project.featured && (
+                    <Badge
+                      variant="outline"
+                      className="h-auto rounded-none border-[var(--lf-accent)]/50 bg-transparent px-1.5 py-0 font-sans text-[11px] font-medium tracking-normal text-[var(--lf-accent)]"
+                    >
+                      Featured
+                    </Badge>
+                  )}
                 </div>
-
                 {project.description && (
                   <DescriptionBlock
                     text={project.description}
-                    paragraphClassName="mt-4 text-sm leading-7 text-stone-600"
-                    listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-stone-300"
+                    paragraphClassName={cn("mt-2 max-w-[34rem] text-sm leading-6", mute)}
+                    listClassName={cn("mt-2 max-w-[34rem] flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
                   />
                 )}
-
-                {(project.techStack.length > 0 ||
-                  project.githubStars !== null ||
-                  project.githubForks !== null) && (
-                    <div className="mt-5 flex flex-wrap items-center gap-2">
-                      {project.techStack.map((tech) => (
-                        <TechChip
-                          key={tech}
-                          name={tech}
-                          className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs text-stone-500"
-                        />
-                      ))}
-                      {project.githubStars !== null && (
-                        <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-500">
-                          {project.githubStars} stars
-                        </span>
-                      )}
-                      {project.githubForks !== null && (
-                        <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-500">
-                          {project.githubForks} forks
-                        </span>
-                      )}
-                    </div>
+                {project.techStack.length > 0 && (
+                  <p className={cn("mt-3 text-xs", mute)}>
+                    {project.techStack.slice(0, 6).join(" · ")}
+                  </p>
+                )}
+              </div>
+              <div className="shrink-0 @md:pt-1">
+                <ProjectActions
+                  liveUrl={project.liveUrl}
+                  sourceUrl={project.sourceUrl}
+                  label={stripRichTextToPlain(project.title)}
+                  projectId={project.id}
+                  liveClassName={cn(
+                    "rounded-none border bg-transparent px-3 py-1.5 text-xs font-medium hover:bg-[#171614]/[0.04]",
+                    hairline,
+                    ink,
                   )}
+                  sourceClassName={cn("rounded-none px-3 py-1.5 text-xs font-medium hover:underline", mute)}
+                />
               </div>
             </article>
           ))}
@@ -218,42 +215,49 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
       <section
         key="experience"
         id="experience"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
+        className={cn("scroll-mt-28 border-t pt-12", hairline)}
       >
         <SectionHeading>{labels.experience}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-6"
-          buttonClassName="mt-2 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.2em] text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {experiences.map((exp) => (
             <article
               key={exp.id}
-              className="rounded-[1.6rem] border border-stone-200/80 bg-[#fffdf9] p-5 shadow-[0_10px_30px_rgba(28,25,23,0.04)]"
+              className={cn(
+                "grid grid-cols-1 gap-2 border-t py-7 @md:grid-cols-[8.5rem_minmax(0,1fr)] @md:gap-10",
+                hairline,
+              )}
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-serif text-xl font-semibold text-stone-900">
-                    <RichText text={exp.role} />
-                  </h3>
-                  <p className="mt-1 text-sm text-stone-500">
+              <p className={cn("pt-1 text-sm tabular-nums", mute)}>
+                {formatDateRange(exp.startDate, exp.endDate) || "—"}
+              </p>
+              <div>
+                <h3
+                  className={cn(
+                    "font-[family-name:var(--font-minimal-display)] text-xl font-medium",
+                    ink,
+                  )}
+                >
+                  <RichText text={exp.role} />
+                </h3>
+                <p className="mt-1 text-sm">
+                  <span className="text-[var(--lf-accent)]">
                     <RichText text={exp.company} />
-                    {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
-                  </p>
-                </div>
-                {(exp.startDate || exp.endDate) && (
-                  <p className="text-xs uppercase tracking-[0.22em] text-stone-400">
-                    {formatDateRange(exp.startDate, exp.endDate)}
-                  </p>
+                  </span>
+                  {exp.location ? (
+                    <span className={mute}>
+                      {" · "}
+                      <RichText text={exp.location} />
+                    </span>
+                  ) : null}
+                </p>
+                {exp.description && (
+                  <DescriptionBlock
+                    text={exp.description}
+                    paragraphClassName={cn("mt-4 max-w-[36rem] text-sm leading-7", mute)}
+                    listClassName={cn("mt-4 max-w-[36rem] flex flex-col gap-2 pl-5 text-sm leading-7", mute)}
+                  />
                 )}
               </div>
-              {exp.description && (
-                <DescriptionBlock
-                  text={exp.description}
-                  paragraphClassName="mt-4 text-sm leading-7 text-stone-600"
-                  listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-stone-300"
-                />
-              )}
             </article>
           ))}
         </CollapsibleList>
@@ -261,59 +265,48 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     articles: articles.length > 0 ? (
-      <section
-        key="articles"
-        id="writing"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+      <section key="articles" id="writing" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.articles}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-4"
-          buttonClassName="mt-2 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.2em] text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {articles.map((article) => (
-            <article
-              key={article.id}
-              className="rounded-[1.6rem] border border-stone-200/80 bg-[#fffdf9] p-5 shadow-[0_10px_30px_rgba(28,25,23,0.04)]"
-            >
-              <ArticleSourceLabel source={article.source} className="mb-2" />
-              <h3 className="font-serif text-lg font-semibold text-stone-900">
-                <a
-                  href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-stone-600"
+            <article key={article.id} className={cn("border-t py-5", hairline)}>
+              <ArticleSourceLabel source={article.source} className={cn("mb-1 opacity-80", mute)} />
+              <div className="flex flex-col gap-1 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8">
+                <h3
+                  className={cn(
+                    "font-[family-name:var(--font-minimal-display)] text-lg font-medium",
+                    ink,
+                  )}
                 >
-                  <RichText text={article.title} />
-                </a>
-              </h3>
-              {article.description && (
-                <p className="mt-2 text-sm leading-7 text-stone-600">{article.description}</p>
-              )}
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-stone-500">
-                {article.publishedAt && (
-                  <span>
-                    {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
-                )}
-                {article.readTime != null && <span>{article.readTime} min read</span>}
-              </div>
-              {article.tags.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {article.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs text-stone-500"
-                    >
-                      {tag}
+                  <a
+                    href={article.url}
+                    data-lf-track="article"
+                    data-lf-label={stripRichTextToPlain(article.title)}
+                    data-lf-id={article.id}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline-offset-4 hover:underline"
+                  >
+                    <RichText text={article.title} />
+                  </a>
+                </h3>
+                <p className={cn("shrink-0 text-sm tabular-nums", mute)}>
+                  {article.publishedAt
+                    ? new Date(article.publishedAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : null}
+                  {article.readTime != null ? (
+                    <span>
+                      {article.publishedAt ? " · " : null}
+                      {article.readTime} min
                     </span>
-                  ))}
-                </div>
+                  ) : null}
+                </p>
+              </div>
+              {article.description && (
+                <p className={cn("mt-2 max-w-[36rem] text-sm leading-6", mute)}>{article.description}</p>
               )}
             </article>
           ))}
@@ -322,26 +315,13 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     skills: skills.length > 0 ? (
-      <section
-        key="skills"
-        className="rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+      <section key="skills" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.skills}</SectionHeading>
-        <div className="space-y-6">
+        <div className="flex flex-col gap-6">
           {Object.entries(groupedSkills).map(([category, names]) => (
             <div key={category}>
-              <h3 className="mb-3 text-xs uppercase tracking-[0.22em] text-stone-400">
-                {category}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {names.map((name) => (
-                  <TechChip
-                    key={name}
-                    name={name}
-                    className="rounded-full border border-stone-200/80 bg-stone-50 px-3 py-1.5 text-sm text-stone-600"
-                  />
-                ))}
-              </div>
+              <h3 className={cn("mb-2 text-sm", mute)}>{category}</h3>
+              <p className={cn("max-w-[40rem] text-base leading-7", ink)}>{names.join(" · ")}</p>
             </div>
           ))}
         </div>
@@ -349,32 +329,40 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     education: educations.length > 0 ? (
-      <section
-        key="education"
-        className="rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+      <section key="education" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.education}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-5"
-          buttonClassName="mt-2 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.2em] text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {educations.map((edu) => (
             <article
               key={edu.id}
-              className="rounded-[1.6rem] border border-stone-200/80 bg-[#fffdf9] p-5 shadow-[0_10px_30px_rgba(28,25,23,0.04)]"
-            >
-              <h3 className="font-serif text-lg font-semibold text-stone-900">
-                <RichText text={edu.degree} />
-                {edu.field && <span className="text-stone-500"> in <RichText text={edu.field} /></span>}
-              </h3>
-              <p className="mt-2 text-sm text-stone-500"><RichText text={edu.institution} /></p>
-              {(edu.startDate || edu.endDate) && (
-                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-stone-400">
-                  {formatDateRange(edu.startDate, edu.endDate)}
-                </p>
+              className={cn(
+                "grid grid-cols-1 gap-2 border-t py-6 @md:grid-cols-[8.5rem_minmax(0,1fr)] @md:gap-10",
+                hairline,
               )}
-              {edu.gpa && <p className="mt-3 text-xs text-stone-500">{edu.gpa}</p>}
+            >
+              <p className={cn("pt-1 text-sm tabular-nums", mute)}>
+                {formatDateRange(edu.startDate, edu.endDate) || "—"}
+              </p>
+              <div>
+                <h3
+                  className={cn(
+                    "font-[family-name:var(--font-minimal-display)] text-lg font-medium",
+                    ink,
+                  )}
+                >
+                  <RichText text={edu.degree} />
+                  {edu.field && (
+                    <span className={mute}>
+                      {" "}
+                      in <RichText text={edu.field} />
+                    </span>
+                  )}
+                </h3>
+                <p className={cn("mt-1 text-sm", mute)}>
+                  <RichText text={edu.institution} />
+                </p>
+                {edu.gpa && <p className={cn("mt-2 text-xs", mute)}>{edu.gpa}</p>}
+              </div>
             </article>
           ))}
         </CollapsibleList>
@@ -382,28 +370,18 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     certifications: certifications.length > 0 ? (
-      <section
-        key="certifications"
-        className="rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+      <section key="certifications" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.certifications}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-4"
-          buttonClassName="mt-2 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.2em] text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {certifications.map((cert) => (
-            <article
-              key={cert.id}
-              className="rounded-[1.6rem] border border-stone-200/80 bg-[#fffdf9] p-5 shadow-[0_10px_30px_rgba(28,25,23,0.04)]"
-            >
-              <h3 className="font-medium text-stone-900">
+            <article key={cert.id} className={cn("border-t py-5", hairline)}>
+              <h3 className={cn("text-base font-medium", ink)}>
                 {cert.url ? (
                   <a
                     href={cert.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="transition-colors hover:text-stone-600"
+                    className="underline-offset-4 hover:underline"
                   >
                     {cert.name}
                   </a>
@@ -411,15 +389,15 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
                   cert.name
                 )}
               </h3>
-              <p className="mt-1 text-sm text-stone-500">{cert.issuer}</p>
-              {cert.issueDate && (
-                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-stone-400">
-                  {new Date(cert.issueDate).toLocaleDateString("en-US", {
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
-              )}
+              <p className={cn("mt-1 text-sm", mute)}>
+                {cert.issuer}
+                {cert.issueDate
+                  ? ` · ${new Date(cert.issueDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })}`
+                  : null}
+              </p>
             </article>
           ))}
         </CollapsibleList>
@@ -427,26 +405,18 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     achievements: achievements.length > 0 ? (
-      <section
-        key="achievements"
-        className="rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+      <section key="achievements" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.achievements}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-3"
-          buttonClassName="mt-2 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.2em] text-stone-600 transition-colors hover:border-stone-300 hover:text-stone-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {achievements.map((ach) => (
-            <article
-              key={ach.id}
-              className="flex items-start gap-3 rounded-[1.6rem] border border-stone-200/80 bg-[#fffdf9] p-5 shadow-[0_10px_30px_rgba(28,25,23,0.04)]"
-            >
-              <Trophy className="h-4 w-4 text-stone-500 mt-0.5 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-stone-900 leading-relaxed"><RichText text={ach.title} /></p>
+            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5", hairline)}>
+              <Trophy className="mt-0.5 size-4 shrink-0 text-[var(--lf-accent)]" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className={cn("text-sm leading-relaxed", ink)}>
+                  <RichText text={ach.title} />
+                </p>
                 {ach.date && (
-                  <p className="mt-1 text-xs text-stone-500">
+                  <p className={cn("mt-1 text-xs", mute)}>
                     {new Date(ach.date).toLocaleDateString("en-US", {
                       month: "short",
                       year: "numeric",
@@ -461,28 +431,25 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     profiles: hasProfiles ? (
-      <section
-        key="profiles"
-        id="profiles"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+      <section key="profiles" id="profiles" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.profiles}</SectionHeading>
         <ProfileLinksSection
           portfolio={portfolio}
           profiles={socialProfiles}
-          chipClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_28%,white)]/80 bg-stone-50 px-3 py-1.5 text-sm text-stone-500"
-          pillClassName="rounded-full border border-stone-200/80 bg-white px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
-          titleClassName="text-stone-900"
-          textClassName="text-stone-500"
+          chipClassName={cn("rounded-none border px-2.5 py-1 text-sm", hairline, mute)}
+          pillClassName={cn(
+            "rounded-none border px-2.5 py-1 text-sm transition-colors hover:bg-[#171614]/[0.04]",
+            hairline,
+            ink,
+          )}
+          titleClassName={ink}
+          textClassName={mute}
         />
       </section>
     ) : null,
 
     github: contributionCalendar ? (
-      <section
-        key="github"
-        className="rounded-[1.9rem] border border-white/80 bg-white/72 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
+      <section key="github" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.github}</SectionHeading>
         <GitHubContributionHeatmap
           calendar={contributionCalendar}
@@ -496,79 +463,92 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
   };
 
   return (
-    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.14),transparent_34%),linear-gradient(180deg,#f8f7f4_0%,#efede6_100%)] text-stone-800 selection:bg-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)]")} style={accentRootStyle(primaryColor)}>
-      <div className="mx-auto max-w-7xl px-5 pb-16 pt-8 sm:px-6 md:px-10 md:pb-24 md:pt-14">
-        <header className="relative overflow-hidden rounded-[2.25rem] border border-white/80 bg-white/75 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl @md:p-10">
-          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-linear-to-r from-transparent via-stone-300/70 to-transparent" />
-          <div className="min-w-0">
-            <div className={HERO_HEADER_COLUMN}>
-              <h1
+    <div
+      className={cn(
+        TEMPLATE_CONTAINER,
+        newsreader.variable,
+        interTight.variable,
+        "min-h-screen bg-[#f7f7f5] font-[family-name:var(--font-minimal-sans)] antialiased",
+        ink,
+      )}
+      style={accentRootStyle(primaryColor)}
+    >
+      <div className="relative mx-auto min-w-0 max-w-[44rem] overflow-x-clip px-5 pb-16 pt-12 sm:px-6 md:pb-28 md:pt-20">
+        <header className="min-w-0">
+          <h1
+            className={cn(
+              HERO_TITLE_BASE,
+              "font-[family-name:var(--font-minimal-display)] text-4xl font-medium leading-[1.08] tracking-[-0.03em] @sm:text-5xl @md:text-6xl",
+              ink,
+            )}
+          >
+            <RichText text={portfolio.title} />
+          </h1>
+          {portfolio.headline && (
+            <p className={cn("mt-5 max-w-[28rem] text-lg leading-8", mute)}>
+              <RichText text={portfolio.headline} />
+            </p>
+          )}
+
+          <div className="mt-8 flex flex-col gap-3">
+            <ContactChips
+              portfolio={portfolio}
+              chipClassName={cn(
+                "rounded-none border-0 bg-transparent px-0 py-0 text-sm underline-offset-4 hover:underline",
+                mute,
+              )}
+            />
+            <HeroProfileButtons
+              profiles={socialProfiles}
+              className={cn(
+                "rounded-none border px-3 py-1.5 text-sm transition-colors hover:bg-[#171614]/[0.04]",
+                hairline,
+                ink,
+              )}
+            />
+            {hasNonHeroSocialProfiles(socialProfiles) && (
+              <SocialPills
+                profiles={socialProfiles}
+                showUsername
+                excludeHeroPlatforms
                 className={cn(
-                  HERO_TITLE_BASE,
-                  HERO_TITLE_SCALE_7XL,
-                  "max-w-3xl font-serif font-semibold tracking-tight text-[var(--lf-accent)]"
+                  "rounded-none border px-2.5 py-1 text-sm transition-colors hover:bg-[#171614]/[0.04]",
+                  hairline,
+                  mute,
                 )}
-              >
-                <RichText text={portfolio.title} />
-              </h1>
-              {portfolio.headline && (
-                <p className={cn(HERO_HEADLINE_SCALE, "mt-5 max-w-2xl text-stone-600")}>
-                  <RichText text={portfolio.headline} />
-                </p>
-              )}
-
-              <div className="mt-7">
-                <ContactChips
-                  portfolio={portfolio}
-                  chipClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_28%,white)]/80 bg-stone-50/90 px-3.5 py-1.5 text-sm text-stone-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
-                />
-              </div>
-
-              <div className="mt-4">
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="rounded-full border border-stone-200/80 bg-[var(--lf-accent)] px-4 py-2 text-sm text-stone-100 transition-colors hover:bg-[color-mix(in_srgb,var(--lf-accent)_85%,black)]"
-                />
-              </div>
-
-              {hasNonHeroSocialProfiles(socialProfiles) && (
-                <div className="mt-6">
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="rounded-full border border-stone-200/80 bg-white/85 px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-stone-300 hover:bg-white hover:text-stone-900"
-                  />
-                </div>
-              )}
-            </div>
+              />
+            )}
           </div>
         </header>
 
         {navbarEnabled && (
-          <div className="mt-6">
+          <div className="mt-12">
             <TemplateNavbar
               items={sections}
-              className="rounded-full border-white/80 bg-white/80 shadow-[0_12px_30px_rgba(15,23,42,0.05)]"
-              linkClassName="rounded-full px-4 py-2 text-sm text-stone-500 transition-colors hover:bg-[var(--lf-accent)] hover:text-stone-50"
+              className={cn("rounded-none border-x-0 border-b border-t-0 bg-transparent", hairline)}
+              linkClassName={cn(
+                "rounded-none px-0 py-3 text-sm transition-colors hover:text-[#171614]",
+                mute,
+              )}
             />
           </div>
         )}
 
-        <div className="mt-8 space-y-8 md:mt-10 md:space-y-10">
+        <div className="mt-12 flex min-w-0 flex-col gap-2 md:mt-16">
           {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
 
         {customSections.length > 0 && (
-          <div className="mt-8 grid gap-8 md:mt-10 md:gap-10 md:grid-cols-2">
+          <div className={cn("mt-2 flex flex-col gap-12 border-t pt-12", hairline)}>
             {customSections.map((cs) => (
-              <section key={cs.id} className="rounded-[1.75rem] border border-stone-200/80 bg-white/70 p-8">
+              <section key={cs.id}>
                 <SectionHeading>{cs.label}</SectionHeading>
                 <CustomSectionItems
                   items={cs.items}
-                  titleClassName="font-medium text-stone-900"
-                  textClassName="text-sm text-stone-500"
-                  chipClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_28%,white)] bg-white px-2.5 py-1 text-xs text-stone-500"
+                  titleClassName={cn("font-medium", ink)}
+                  textClassName={cn("text-sm", mute)}
+                  chipClassName={cn("rounded-none border px-2 py-0.5 text-xs", hairline, mute)}
+                  buttonClassName={moreBtn}
                 />
               </section>
             ))}
@@ -581,9 +561,16 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-5 flex items-center gap-3 font-serif text-2xl font-semibold tracking-tight text-stone-900 md:mb-6 md:text-3xl">
-      <span className="h-px w-8 bg-[var(--lf-accent)]" />
-      {children}
-    </h2>
+    <div className="mb-8">
+      <h2
+        className={cn(
+          "font-[family-name:var(--font-minimal-display)] text-2xl font-medium tracking-tight md:text-[1.65rem]",
+          ink,
+        )}
+      >
+        {children}
+      </h2>
+      <Separator className="mt-4 bg-[#171614]/12" />
+    </div>
   );
 }

@@ -1,10 +1,13 @@
+import { DM_Sans, Fraunces } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "@/features/templates/github-contribution-heatmap";
-import { ArticleSourceLabel, RichText,
+import {
+  ArticleSourceLabel,
+  RichText,
   buildTemplateSections,
   ContactChips,
   getSectionLabels,
@@ -14,16 +17,10 @@ import { ArticleSourceLabel, RichText,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
-  PROJECT_CARD,
-  PROJECT_CARD_BODY,
-  PROJECT_CARD_HEADER,
-  PROJECT_CARD_META,
-  PROJECT_CARD_TITLE,
   HERO_HEADER_COLUMN,
   HERO_HEADLINE_SCALE,
   HERO_TITLE_BASE,
   HERO_TITLE_SCALE_7XL,
-  PROJECTS_GRID_2,
   SocialPills,
   hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
@@ -34,7 +31,7 @@ import type { PortfolioData } from "@/features/templates/types";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
 import { formatDate, formatDateRange, groupSkillsByCategory } from "@/features/templates/utils";
 import { Trophy } from "lucide-react";
-// import { getPreviewImage } from "@/lib/link-preview-code";
+import { Badge } from "@/components/ui/badge";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { getTemplateSectionLayout } from "../section-layouts";
 import {
@@ -44,22 +41,59 @@ import {
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
+/**
+ * Creative — print studio collage
+ * Subject: a working designer's desk — color scraps, soft mats, bold display type.
+ * Expressive without the SaaS frosted-card kit or a flat quiet gallery.
+ *
+ * Color: wash lilac→peach→paper, ink #171412, mats peach/lilac/mint/blush, accent --lf-accent
+ * Type: Fraunces (display, soft) + DM Sans (body)
+ * Layout: scrap shapes in hero; equal project mats with cycling color; open bands below
+ */
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  axes: ["SOFT", "WONK"],
+  variable: "--font-creative-display",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-creative-sans",
+});
+
+const MATS = ["#ffd8c2", "#e4d4f5", "#c8eadc", "#ffd0da"] as const;
+
+const ink = "text-[#171412]";
+const mute = "text-[#6d645c]";
+const moreBtn =
+  "mt-8 self-start rounded-full border border-[#171412]/15 bg-white/80 px-4 py-2 text-sm font-medium text-[#6d645c] transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]";
 
 export default function CreativeTemplate({ data }: { data: PortfolioData }) {
-  const { portfolio, experiences, educations, skills, projects, articles, socialProfiles, certifications, achievements, customSections, livePreviewProjectIds } =
-    data;
+  const {
+    portfolio,
+    experiences,
+    educations,
+    skills,
+    projects,
+    articles,
+    socialProfiles,
+    certifications,
+    achievements,
+    customSections,
+    livePreviewProjectIds,
+  } = data;
   const primaryColor = resolveAccentColor("creative", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
   const skillsByCategory = groupSkillsByCategory(skills);
   const githubProfile = socialProfiles.find(
-    (profile) => profile.platform.toLowerCase() === "github"
+    (profile) => profile.platform.toLowerCase() === "github",
   );
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(
-    githubStats?.contributionCalendar
+    githubStats?.contributionCalendar,
   );
   const featuredProjects = projects.filter((project) => project.featured);
-  const visibleProjects =
+  const orderedProjects =
     featuredProjects.length > 0
       ? [...featuredProjects, ...projects.filter((p) => !p.featured)]
       : projects;
@@ -72,174 +106,155 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading accent="fuchsia">{labels.linkedin}</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
-            aboutList: "space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-[var(--lf-accent)]",
-            aboutParagraph: "text-base leading-8 text-stone-600",
-            postList: "list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-900",
-            postParagraph: "text-sm leading-relaxed text-stone-900",
-            descriptionParagraph: "text-sm leading-7 text-stone-600",
-            descriptionList: "space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-[var(--lf-accent)]",
-          card: "rounded-2xl border border-fuchsia-100 bg-white p-5",
-          title: "text-xl font-semibold text-stone-950",
-          text: "text-sm leading-7 text-stone-600",
-          muted: "text-xs uppercase tracking-[0.22em] text-stone-400",
-          chip: "rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-3 py-1.5 text-sm text-stone-700",
-          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
-          section: "scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8",
+        aboutList: cn("flex max-w-[40rem] flex-col gap-3 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]", mute),
+        aboutParagraph: cn("max-w-[40rem] text-base leading-8", mute),
+        postList: cn("flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed", ink),
+        postParagraph: cn("text-sm leading-relaxed", ink),
+        descriptionParagraph: cn("text-sm leading-7", mute),
+        descriptionList: cn("flex flex-col gap-2 pl-5 text-sm leading-7 marker:text-[var(--lf-accent)]", mute),
+        card: "rounded-[1.5rem] border border-[#171412]/08 bg-white/85 p-5 shadow-[0_18px_50px_-28px_rgba(23,20,18,0.25)]",
+        title: "font-[family-name:var(--font-creative-display)] text-xl font-medium text-[#171412]",
+        text: cn("text-sm leading-7", mute),
+        muted: "text-sm text-[#8a8076]",
+        chip: "rounded-full border border-[#171412]/10 bg-[#fff6ee] px-3 py-1.5 text-sm text-[#6d645c]",
+        link: "text-sm font-medium text-[var(--lf-accent)] underline-offset-4 hover:underline",
+        section: "scroll-mt-28",
       }}
     />
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
-      <section
-        key="about"
-        id="about"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="rose">{labels.about}</SectionHeading>
-        <DescriptionBlock
-          text={portfolio.summary}
-          paragraphClassName="whitespace-pre-line text-base leading-8 text-stone-600"
-          listClassName="space-y-3 pl-5 text-base leading-8 text-stone-600 marker:text-[var(--lf-accent)]"
-        />
+      <section key="about" id="about" className="scroll-mt-28">
+        <SectionHeading>{labels.about}</SectionHeading>
+        <div className="relative max-w-[42rem]">
+          <div
+            aria-hidden
+            className="absolute -left-3 -top-3 h-16 w-16 rounded-[1.25rem] bg-[#e4d4f5]/70"
+          />
+          <DescriptionBlock
+            text={portfolio.summary}
+            paragraphClassName={cn("relative text-lg leading-9", mute)}
+            listClassName={cn("relative flex flex-col gap-3 pl-5 text-lg leading-9 marker:text-[var(--lf-accent)]", mute)}
+          />
+        </div>
       </section>
     ) : null,
 
-    projects: visibleProjects.length > 0 ? (
-      <section
-        key="projects"
-        id="work"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="orange">{labels.projects}</SectionHeading>
+    projects: orderedProjects.length > 0 ? (
+      <section key="projects" id="work" className="scroll-mt-28 min-w-0">
+        <SectionHeading>{labels.projects}</SectionHeading>
         <CollapsibleList
           initial={4}
-          wrapperClassName={PROJECTS_GRID_2}
-          buttonClassName="col-span-full mt-2 rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_55%,white)] hover:text-stone-900"
+          wrapperClassName="grid min-w-0 grid-cols-1 gap-8 @md:grid-cols-2 [&>*]:min-w-0"
+          buttonClassName={cn(moreBtn, "col-span-full")}
         >
-          {visibleProjects.map((project, index) => (
-            <article
-              key={project.id}
-              className={cn(
-                PROJECT_CARD,
-                "rounded-[1.6rem] border border-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] bg-[#fffaf7] shadow-[0_14px_40px_color-mix(in_srgb,var(--lf-accent)_8%,transparent)]"
-              )}
-            >
-              <TemplateProjectPreview templateId="creative"
-                liveUrl={project.liveUrl ?? null}
-                imageUrl={project.imageUrl ?? null}
-                projectId={project.id}
-                livePreviewProjectIds={livePreviewProjectIds}
-                alt={stripRichTextToPlain(project.title)}
-                loading="lazy"
-                accentColor={primaryColor}
-              />
-              <div className={PROJECT_CARD_BODY}>
-                <div className={PROJECT_CARD_HEADER}>
-                  <div className="min-w-0 flex-1">
-                    <div className={PROJECT_CARD_META}>
-                      <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-semibold tracking-tight text-stone-950")}>
-                        <RichText text={project.title} />
-                      </h3>
-                      {project.featured && (
-                        <span className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--lf-accent)]">
-                          Featured
-                        </span>
-                      )}
-                    </div>
-                    {project.language && (
-                      <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
-                        {project.language}
-                      </p>
+          {orderedProjects.map((project, index) => {
+            const mat = MATS[index % MATS.length];
+            return (
+              <article
+                key={project.id}
+                className="flex min-w-0 flex-col overflow-hidden rounded-[1.75rem] border border-[#171412]/08 bg-white shadow-[0_22px_60px_-30px_rgba(23,20,18,0.35)]"
+              >
+                <div className="p-3 pb-0" style={{ backgroundColor: mat }}>
+                  <div className="overflow-hidden rounded-[1.25rem] bg-white/40">
+                    <TemplateProjectPreview
+                      templateId="creative"
+                      liveUrl={project.liveUrl ?? null}
+                      imageUrl={project.imageUrl ?? null}
+                      projectId={project.id}
+                      livePreviewProjectIds={livePreviewProjectIds}
+                      alt={stripRichTextToPlain(project.title)}
+                      loading="lazy"
+                      accentColor={primaryColor}
+                      containerClassName="bg-white/50"
+                    />
+                  </div>
+                </div>
+                <div className="flex grow flex-col gap-3 p-5">
+                  <div className="flex flex-wrap items-baseline gap-2">
+                    <h3 className={cn("font-[family-name:var(--font-creative-display)] text-2xl font-medium tracking-[-0.02em]", ink)}>
+                      <RichText text={project.title} />
+                    </h3>
+                    {project.featured && (
+                      <Badge
+                        variant="outline"
+                        className="h-auto rounded-full border-[var(--lf-accent)]/45 bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-2 py-0 font-sans text-[11px] font-medium tracking-normal text-[var(--lf-accent)]"
+                      >
+                        Featured
+                      </Badge>
                     )}
                   </div>
-
-                  <ProjectActions
-                    liveUrl={project.liveUrl}
-                    sourceUrl={project.sourceUrl}
-                    label={stripRichTextToPlain(project.title)}
-                    projectId={project.id}
-                    liveClassName="rounded-full bg-stone-950 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-stone-800"
-                    sourceClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-white px-4 py-2 text-xs font-medium text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_55%,white)] hover:text-stone-900"
-                  />
-                </div>
-
-                {project.description && (
-                  <DescriptionBlock
-                    text={project.description}
-                    paragraphClassName="mt-4 text-sm leading-7 text-stone-600"
-                    listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-[var(--lf-accent)]"
-                  />
-                )}
-
-                {(project.techStack.length > 0 ||
-                  project.githubStars !== null ||
-                  project.githubForks !== null) && (
-                    <div className="mt-5 flex flex-wrap items-center gap-2">
-                      {project.techStack.map((tech) => (
-                        <TechChip
-                          key={tech}
-                          name={tech}
-                          className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-white px-3 py-1 text-xs text-stone-500"
-                        />
-                      ))}
-                      {project.githubStars !== null && (
-                        <span className="rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] px-3 py-1 text-xs text-stone-500">
-                          {project.githubStars} stars
-                        </span>
-                      )}
-                      {project.githubForks !== null && (
-                        <span className="rounded-full bg-orange-50 px-3 py-1 text-xs text-stone-500">
-                          {project.githubForks} forks
-                        </span>
-                      )}
-                    </div>
+                  {project.description && (
+                    <DescriptionBlock
+                      text={project.description}
+                      paragraphClassName={cn("text-sm leading-6", mute)}
+                      listClassName={cn("flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
+                    />
                   )}
-              </div>
-            </article>
-          ))}
+                  {project.techStack.length > 0 && (
+                    <p className="text-xs text-[#8a8076]">
+                      {project.techStack.slice(0, 6).join("  ·  ")}
+                    </p>
+                  )}
+                  <div className="mt-auto pt-2">
+                    <ProjectActions
+                      liveUrl={project.liveUrl}
+                      sourceUrl={project.sourceUrl}
+                      label={stripRichTextToPlain(project.title)}
+                      projectId={project.id}
+                      liveClassName="rounded-full bg-[#171412] px-4 py-1.5 text-xs font-semibold text-[#fff8f1] hover:bg-black"
+                      sourceClassName="rounded-full border border-[#171412]/12 bg-[#fff6ee] px-4 py-1.5 text-xs font-semibold text-[#6d645c] hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]"
+                    />
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </CollapsibleList>
       </section>
     ) : null,
 
     experience: experiences.length > 0 ? (
-      <section
-        key="experience"
-        id="experience"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="amber">{labels.experience}</SectionHeading>
+      <section key="experience" id="experience" className="scroll-mt-28">
+        <SectionHeading>{labels.experience}</SectionHeading>
         <CollapsibleList
           initial={4}
-          wrapperClassName="space-y-5"
-          buttonClassName="mt-2 rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_55%,white)] hover:text-stone-900"
+          wrapperClassName="grid grid-cols-1 gap-4 @md:grid-cols-2"
+          buttonClassName={cn(moreBtn, "col-span-full")}
         >
-          {experiences.map((exp) => (
+          {experiences.map((exp, index) => (
             <article
               key={exp.id}
-              className="rounded-[1.55rem] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] bg-[#fffaf7] p-5"
+              className="rounded-[1.5rem] border border-[#171412]/08 bg-white/90 p-5 shadow-[0_14px_40px_-24px_rgba(23,20,18,0.3)]"
+              style={{ borderTopWidth: 4, borderTopColor: MATS[index % MATS.length] }}
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-xl font-semibold text-stone-950"><RichText text={exp.role} /></h3>
-                  <p className="mt-1 text-sm font-medium text-[var(--lf-accent)]">
-                    <RichText text={exp.company} />
-                    {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
-                  </p>
-                </div>
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className={cn("font-[family-name:var(--font-creative-display)] text-xl font-medium", ink)}>
+                  <RichText text={exp.role} />
+                </h3>
                 {(exp.startDate || exp.endDate) && (
-                  <p className="text-xs uppercase tracking-[0.22em] text-stone-400">
+                  <span className="rounded-full bg-[#fff6ee] px-2.5 py-1 text-xs tabular-nums text-[#6d645c]">
                     {formatDateRange(exp.startDate, exp.endDate)}
-                  </p>
+                  </span>
                 )}
               </div>
+              <p className="mt-1 text-sm font-medium text-[var(--lf-accent)]">
+                <RichText text={exp.company} />
+                {exp.location ? (
+                  <span className={cn("font-normal", mute)}>
+                    {" · "}
+                    <RichText text={exp.location} />
+                  </span>
+                ) : null}
+              </p>
               {exp.description && (
                 <DescriptionBlock
                   text={exp.description}
-                  paragraphClassName="mt-4 text-sm leading-7 text-stone-600"
-                  listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-stone-600 marker:text-[var(--lf-accent)]"
+                  paragraphClassName={cn("mt-3 text-sm leading-7", mute)}
+                  listClassName={cn("mt-3 flex flex-col gap-2 pl-5 text-sm leading-7", mute)}
                 />
               )}
             </article>
@@ -249,60 +264,52 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     articles: articles.length > 0 ? (
-      <section
-        key="articles"
-        id="writing"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="fuchsia">{labels.articles}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-4"
-          buttonClassName="mt-2 rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_55%,white)] hover:text-stone-900"
-        >
-          {articles.map((article) => (
+      <section key="articles" id="writing" className="scroll-mt-28">
+        <SectionHeading>{labels.articles}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col gap-3" buttonClassName={moreBtn}>
+          {articles.map((article, index) => (
             <article
               key={article.id}
-              className="rounded-[1.55rem] border border-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] bg-[#fffaf7] p-5"
+              className="flex gap-4 rounded-[1.35rem] border border-[#171412]/08 bg-white/90 p-4"
             >
-              <ArticleSourceLabel source={article.source} className="mb-2" />
-              <h3 className="text-lg font-semibold text-stone-950">
-                <a
-                  href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-[var(--lf-accent)]"
-                >
-                  <RichText text={article.title} />
-                </a>
-              </h3>
-              {article.description && (
-                <p className="mt-2 text-sm leading-7 text-stone-600">{article.description}</p>
-              )}
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-stone-500">
-                {article.publishedAt && (
-                  <span>
-                    {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
+              <span
+                aria-hidden
+                className="mt-1 size-3 shrink-0 rounded-full"
+                style={{ backgroundColor: MATS[index % MATS.length] }}
+              />
+              <div className="min-w-0 flex-1">
+                <ArticleSourceLabel source={article.source} className={cn("mb-1", mute)} />
+                <h3 className={cn("font-[family-name:var(--font-creative-display)] text-lg font-medium", ink)}>
+                  <a
+                    href={article.url}
+                    data-lf-track="article"
+                    data-lf-label={stripRichTextToPlain(article.title)}
+                    data-lf-id={article.id}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline-offset-4 hover:text-[var(--lf-accent)] hover:underline"
+                  >
+                    <RichText text={article.title} />
+                  </a>
+                </h3>
+                {article.description && (
+                  <p className={cn("mt-1 text-sm leading-6", mute)}>{article.description}</p>
                 )}
-                {article.readTime != null && <span>{article.readTime} min read</span>}
-              </div>
-              {article.tags.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {article.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-white px-3 py-1 text-xs text-stone-500"
-                    >
-                      {tag}
+                <p className="mt-2 text-xs tabular-nums text-[#8a8076]">
+                  {article.publishedAt
+                    ? new Date(article.publishedAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : null}
+                  {article.readTime != null ? (
+                    <span>
+                      {article.publishedAt ? " · " : null}
+                      {article.readTime} min
                     </span>
-                  ))}
-                </div>
-              )}
+                  ) : null}
+                </p>
+              </div>
             </article>
           ))}
         </CollapsibleList>
@@ -310,15 +317,16 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     skills: skills.length > 0 ? (
-      <section
-        key="skills"
-        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="fuchsia">{labels.skills}</SectionHeading>
-        <div className="space-y-6">
-          {Object.entries(skillsByCategory).map(([category, names]) => (
-            <div key={category}>
-              <h3 className="mb-3 text-xs uppercase tracking-[0.22em] text-stone-400">
+      <section key="skills">
+        <SectionHeading>{labels.skills}</SectionHeading>
+        <div className="grid gap-6 @md:grid-cols-2">
+          {Object.entries(skillsByCategory).map(([category, names], index) => (
+            <div
+              key={category}
+              className="rounded-[1.5rem] border border-[#171412]/08 bg-white/90 p-5"
+              style={{ backgroundImage: `linear-gradient(135deg, ${MATS[index % MATS.length]}55, transparent 55%)` }}
+            >
+              <h3 className={cn("mb-3 font-[family-name:var(--font-creative-display)] text-lg font-medium", ink)}>
                 {category}
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -326,7 +334,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                   <TechChip
                     key={name}
                     name={name}
-                    className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-3 py-1.5 text-sm text-stone-700"
+                    className="rounded-full border border-[#171412]/10 bg-white/90 px-3 py-1.5 text-sm text-[#6d645c]"
                   />
                 ))}
               </div>
@@ -337,32 +345,32 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     education: educations.length > 0 ? (
-      <section
-        key="education"
-        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="rose">{labels.education}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-4"
-          buttonClassName="mt-2 rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_55%,white)] hover:text-stone-900"
-        >
+      <section key="education">
+        <SectionHeading>{labels.education}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col gap-3" buttonClassName={moreBtn}>
           {educations.map((edu) => (
             <article
               key={edu.id}
-              className="rounded-[1.55rem] border border-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] bg-[#fffaf7] p-5"
+              className="rounded-[1.35rem] border border-[#171412]/08 bg-white/90 px-5 py-4"
             >
-              <h3 className="text-lg font-semibold text-stone-950">
+              <h3 className={cn("font-[family-name:var(--font-creative-display)] text-lg font-medium", ink)}>
                 <RichText text={edu.degree} />
-                {edu.field && <span className="text-stone-500"> in <RichText text={edu.field} /></span>}
+                {edu.field ? (
+                  <span className={cn("font-normal", mute)}>
+                    {" "}
+                    in <RichText text={edu.field} />
+                  </span>
+                ) : null}
               </h3>
-              <p className="mt-2 text-sm text-stone-600"><RichText text={edu.institution} /></p>
-              {(edu.startDate || edu.endDate) && (
-                <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
-                  {formatDateRange(edu.startDate, edu.endDate)}
-                </p>
-              )}
-              {edu.gpa && <p className="mt-3 text-xs text-stone-500">{edu.gpa}</p>}
+              <p className={cn("mt-1 text-sm", mute)}>
+                <RichText text={edu.institution} />
+              </p>
+              <div className="mt-2 flex flex-wrap gap-3 text-xs text-[#8a8076]">
+                {(edu.startDate || edu.endDate) && (
+                  <span className="tabular-nums">{formatDateRange(edu.startDate, edu.endDate)}</span>
+                )}
+                {edu.gpa && <span>{edu.gpa}</span>}
+              </div>
             </article>
           ))}
         </CollapsibleList>
@@ -370,40 +378,33 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     certifications: certifications.length > 0 ? (
-      <section
-        key="certifications"
-        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="orange">{labels.certifications}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-4"
-          buttonClassName="mt-2 rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_55%,white)] hover:text-stone-900"
-        >
+      <section key="certifications">
+        <SectionHeading>{labels.certifications}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col gap-2" buttonClassName={moreBtn}>
           {certifications.map((cert) => (
             <article
               key={cert.id}
-              className="rounded-[1.55rem] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] bg-[#fffaf7] p-5"
+              className="flex flex-wrap items-baseline justify-between gap-2 rounded-full border border-[#171412]/08 bg-white/90 px-5 py-3"
             >
-              <h3 className="text-base font-semibold text-stone-950">
-                {cert.url ? (
-                  <a
-                    href={cert.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-[var(--lf-accent)]"
-                  >
-                    {cert.name}
-                  </a>
-                ) : (
-                  cert.name
-                )}
-              </h3>
-              <p className="mt-1 text-sm text-stone-500">{cert.issuer}</p>
+              <div>
+                <h3 className={cn("text-sm font-semibold", ink)}>
+                  {cert.url ? (
+                    <a
+                      href={cert.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--lf-accent)] hover:underline"
+                    >
+                      {cert.name}
+                    </a>
+                  ) : (
+                    cert.name
+                  )}
+                </h3>
+                <p className="text-xs text-[#8a8076]">{cert.issuer}</p>
+              </div>
               {cert.issueDate && (
-                <p className="mt-2 text-xs uppercase tracking-[0.22em] text-stone-400">
-                  {formatDate(cert.issueDate)}
-                </p>
+                <span className="text-xs tabular-nums text-[#8a8076]">{formatDate(cert.issueDate)}</span>
               )}
             </article>
           ))}
@@ -412,26 +413,20 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     achievements: achievements.length > 0 ? (
-      <section
-        key="achievements"
-        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="amber">{labels.achievements}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-3"
-          buttonClassName="mt-2 rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-white px-5 py-2.5 text-xs font-medium uppercase tracking-[0.22em] text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_55%,white)] hover:text-stone-900"
-        >
+      <section key="achievements">
+        <SectionHeading>{labels.achievements}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col gap-3" buttonClassName={moreBtn}>
           {achievements.map((ach) => (
-            <article
-              key={ach.id}
-              className="flex items-start gap-3 rounded-[1.55rem] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] bg-[#fffaf7] p-5"
-            >
-              <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lf-accent)]" />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm leading-relaxed text-stone-900"><RichText text={ach.title} /></p>
+            <article key={ach.id} className="flex items-start gap-3">
+              <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#ffd0da]/80">
+                <Trophy className="size-3.5 text-[var(--lf-accent)]" aria-hidden />
+              </span>
+              <div>
+                <p className={cn("text-sm font-medium", ink)}>
+                  <RichText text={ach.title} />
+                </p>
                 {ach.date && (
-                  <p className="mt-1 text-xs text-stone-500">
+                  <p className="mt-0.5 text-xs text-[#8a8076]">
                     {new Date(ach.date).toLocaleDateString("en-US", {
                       month: "short",
                       year: "numeric",
@@ -446,30 +441,23 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     profiles: hasProfiles ? (
-      <section
-        key="profiles"
-        id="profiles"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="fuchsia">{labels.profiles}</SectionHeading>
+      <section key="profiles" id="profiles" className="scroll-mt-28">
+        <SectionHeading>{labels.profiles}</SectionHeading>
         <ProfileLinksSection
           portfolio={portfolio}
           profiles={socialProfiles}
-          chipClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-3 py-1.5 text-sm text-stone-500"
-          pillClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-white px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] hover:text-stone-900"
-          titleClassName="text-stone-950"
-          textClassName="text-stone-500"
+          chipClassName="rounded-full border border-[#171412]/10 bg-[#fff6ee] px-3 py-1.5 text-sm text-[#6d645c]"
+          pillClassName="rounded-full border border-[#171412]/10 bg-white px-3 py-1.5 text-sm text-[#171412] hover:border-[var(--lf-accent)]"
+          titleClassName={ink}
+          textClassName="text-[#8a8076]"
         />
       </section>
     ) : null,
 
     github: contributionCalendar ? (
-      <section
-        key="github"
-        className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8"
-      >
-        <SectionHeading accent="rose">{labels.github}</SectionHeading>
-        <div className="rounded-[1.5rem] border border-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] bg-[#fffaf7] p-4 md:p-6">
+      <section key="github">
+        <SectionHeading>{labels.github}</SectionHeading>
+        <div className="overflow-x-auto rounded-[1.5rem] border border-[#171412]/08 bg-white/90 p-4 shadow-[0_18px_50px_-28px_rgba(23,20,18,0.25)]">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
@@ -483,104 +471,131 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
   };
 
   return (
-    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[linear-gradient(180deg,#fffaf7_0%,#fff7fb_45%,#ffffff_100%)] text-stone-900 selection:bg-[color-mix(in_srgb,var(--lf-accent)_35%,transparent)]")} style={accentRootStyle(primaryColor)}>
-      <div className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_35%,transparent)] blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-24 h-96 w-96 rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_18%,transparent)] blur-3xl" />
-        <div className="pointer-events-none absolute left-1/3 top-64 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_14%,transparent)] blur-3xl" />
+    <div
+      className={cn(
+        TEMPLATE_CONTAINER,
+        fraunces.variable,
+        dmSans.variable,
+        "relative min-h-screen overflow-hidden font-[family-name:var(--font-creative-sans)] antialiased",
+        ink,
+      )}
+      style={accentRootStyle(primaryColor)}
+    >
+      {/* Print-wash ground */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#ebe4f4_0%,#ffe8d6_38%,#fff6ee_68%,#ffffff_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_12%,color-mix(in_srgb,var(--lf-accent)_22%,transparent),transparent_42%)]" />
 
-        <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-8 sm:px-6 md:px-10 md:pb-24 md:pt-14">
-          <header className="overflow-hidden rounded-[2.25rem] border border-white/80 bg-white/75 p-6 shadow-[0_24px_80px_color-mix(in_srgb,var(--lf-accent)_12%,transparent)] backdrop-blur-xl @md:p-10">
-            <div className="min-w-0">
-              <div className={HERO_HEADER_COLUMN}>
-                <h1
-                  className={cn(
-                    HERO_TITLE_BASE,
-                    HERO_TITLE_SCALE_7XL,
-                    "max-w-3xl font-semibold tracking-tight text-stone-950"
-                  )}
-                >
-                  <RichText text={portfolio.title} />
-                </h1>
-                {portfolio.headline && (
-                  <p className={cn(HERO_HEADLINE_SCALE, "mt-5 max-w-2xl text-stone-600")}>
-                    <RichText text={portfolio.headline} />
-                  </p>
-                )}
+      <style>{`
+        @keyframes creative-bob {
+          0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+          50% { transform: translateY(-0.6rem) rotate(var(--r, 0deg)); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .creative-scrap { animation: none !important; }
+        }
+      `}</style>
 
-                <div className="mt-7">
-                  <ContactChips
-                    portfolio={portfolio}
-                    chipClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-3.5 py-1.5 text-sm text-stone-600"
-                  />
-                </div>
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-24 pt-8 sm:px-8 md:pb-32 md:pt-10">
+        {navbarEnabled && (
+          <div className="mb-10 flex justify-center">
+            <TemplateNavbar
+              items={sections}
+              className="rounded-full border border-[#171412]/08 bg-white/75 shadow-[0_14px_40px_-18px_rgba(23,20,18,0.35)] backdrop-blur-md"
+              linkClassName="rounded-full px-4 py-2 text-sm font-medium text-[#6d645c] transition-colors hover:bg-[#fff6ee] hover:text-[var(--lf-accent)]"
+            />
+          </div>
+        )}
 
-                <div className="mt-4">
-                  <HeroProfileButtons
-                    profiles={socialProfiles}
-                    className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] bg-stone-950 px-4 py-2 text-sm text-white transition-colors hover:bg-stone-800"
-                  />
-                </div>
-
+        <header className="relative mb-20 grid min-h-[20rem] items-end gap-10 @lg:mb-28 @lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div className={cn(HERO_HEADER_COLUMN, "relative z-10")}>
+            <h1
+              className={cn(
+                HERO_TITLE_BASE,
+                HERO_TITLE_SCALE_7XL,
+                "font-[family-name:var(--font-creative-display)] font-medium leading-[0.98] tracking-[-0.035em]",
+                ink,
+              )}
+            >
+              <RichText text={portfolio.title} />
+            </h1>
+            {portfolio.headline && (
+              <p className={cn(HERO_HEADLINE_SCALE, "mt-6 max-w-[34rem] leading-8", mute)}>
+                <RichText text={portfolio.headline} />
+              </p>
+            )}
+            <div className="mt-8 flex flex-col gap-3">
+              <ContactChips
+                portfolio={portfolio}
+                chipClassName="rounded-full border border-[#171412]/10 bg-white/85 px-3 py-1.5 text-sm text-[#6d645c]"
+              />
+              <div className="flex flex-wrap gap-2">
+                <HeroProfileButtons
+                  profiles={socialProfiles}
+                  className="rounded-full bg-[#171412] px-4 py-2 text-sm font-medium text-[#fff8f1] hover:bg-black"
+                />
                 {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <div className="mt-6">
-                    <SocialPills
-                      profiles={socialProfiles}
-                      showUsername
-                      excludeHeroPlatforms
-                      className="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-white/90 px-3 py-1.5 text-sm text-stone-600 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,white)] hover:text-stone-900"
-                    />
-                  </div>
+                  <SocialPills
+                    profiles={socialProfiles}
+                    showUsername
+                    excludeHeroPlatforms
+                    className="rounded-full border border-[#171412]/10 bg-white/85 px-3 py-1.5 text-sm text-[#171412] hover:border-[var(--lf-accent)]"
+                  />
                 )}
               </div>
             </div>
-          </header>
-
-          {navbarEnabled && (
-            <div className="mt-6">
-              <TemplateNavbar
-                items={sections}
-                className="rounded-full border-white/90 bg-white/85 shadow-[0_12px_32px_rgba(15,23,42,0.05)]"
-                linkClassName="rounded-full px-4 py-2 text-sm text-stone-500 transition-colors hover:bg-stone-950 hover:text-white"
-              />
-            </div>
-          )}
-
-          <div className="mt-8 space-y-8">
-            {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
           </div>
 
-          {customSections.length > 0 && (
-            <div className="mt-8 grid gap-8 md:grid-cols-2">
-              {customSections.map((cs) => (
-                <section key={cs.id} className="rounded-[1.9rem] border border-white/90 bg-white/80 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.05)] backdrop-blur-xl md:p-8">
-                  <SectionHeading accent="fuchsia">{cs.label}</SectionHeading>
-                  <CustomSectionItems
-                    items={cs.items}
-                    titleClassName="font-medium text-stone-900"
-                    textClassName="text-sm text-stone-500"
-                    chipClassName="rounded-full border border-[color-mix(in_srgb,var(--lf-accent)_22%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-2.5 py-1 text-xs text-stone-500"
-                  />
-                </section>
-              ))}
-            </div>
-          )}
+          {/* Color scraps — the creative signal at thumbnail size */}
+          <div className="relative mx-auto hidden h-64 w-full max-w-sm @lg:block @lg:h-80" aria-hidden>
+            <span
+              className="creative-scrap absolute left-6 top-8 size-28 rounded-[2rem] bg-[#e4d4f5] shadow-lg [--r:8deg] [animation:creative-bob_7s_ease-in-out_infinite]"
+              style={{ transform: "rotate(8deg)" }}
+            />
+            <span
+              className="creative-scrap absolute right-4 top-16 size-36 rounded-full bg-[#ffd8c2] shadow-lg [--r:-6deg] [animation:creative-bob_9s_ease-in-out_infinite_0.4s]"
+            />
+            <span
+              className="creative-scrap absolute bottom-10 left-16 h-24 w-40 rounded-[1.5rem] bg-[#c8eadc] shadow-md [--r:4deg] [animation:creative-bob_8s_ease-in-out_infinite_0.8s]"
+              style={{ transform: "rotate(-4deg)" }}
+            />
+            <span
+              className="absolute right-10 bottom-16 size-16 rounded-[1rem] bg-[var(--lf-accent)] opacity-90 shadow-md"
+              style={{ transform: "rotate(12deg)" }}
+            />
+          </div>
+        </header>
+
+        <div className="flex min-w-0 flex-col gap-16 @md:gap-20">
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
+
+        {customSections.length > 0 && (
+          <div className="mt-16 grid gap-6 @md:grid-cols-2">
+            {customSections.map((cs, index) => (
+              <section
+                key={cs.id}
+                className="rounded-[1.5rem] border border-[#171412]/08 bg-white/90 p-6"
+                style={{ borderTopWidth: 4, borderTopColor: MATS[index % MATS.length] }}
+              >
+                <SectionHeading>{cs.label}</SectionHeading>
+                <CustomSectionItems
+                  items={cs.items}
+                  titleClassName={cn("font-medium", ink)}
+                  textClassName={cn("text-sm", mute)}
+                  chipClassName="rounded-full border border-[#171412]/10 bg-[#fff6ee] px-2.5 py-1 text-xs text-[#6d645c]"
+                />
+              </section>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function SectionHeading({
-  children,
-}: {
-  children: React.ReactNode;
-  /** Kept for call-site compatibility; all headings use the shared accent. */
-  accent?: "rose" | "orange" | "amber" | "fuchsia";
-}) {
+function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-5 flex items-center gap-3 text-2xl font-semibold tracking-tight text-stone-950 md:mb-6 md:text-3xl">
-      <span className="h-px w-8 bg-[var(--lf-accent)]" />
+    <h2 className="mb-7 font-[family-name:var(--font-creative-display)] text-3xl font-medium tracking-[-0.02em] text-[#171412] @md:text-[2rem]">
       {children}
     </h2>
   );

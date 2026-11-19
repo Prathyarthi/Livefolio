@@ -1,3 +1,4 @@
+import { Chakra_Petch, JetBrains_Mono } from "next/font/google";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
@@ -6,8 +7,11 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
-import { Terminal, Zap, Cpu } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  ArticleSourceLabel,
+  RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -16,12 +20,7 @@ import { ArticleSourceLabel, RichText,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
-  PROJECT_CARD,
-  PROJECT_CARD_BODY,
-  PROJECT_CARD_HEADER,
-  PROJECT_CARD_META,
-  PROJECT_CARD_TITLE,
-  PROJECTS_GRID_2,
+  HERO_TITLE_BASE,
   SocialPills,
   hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
@@ -39,6 +38,46 @@ import {
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
+/**
+ * Cyberpunk — neon on asphalt
+ * Subject: a dense status readout. Asphalt black, one neon (the accent) used as
+ * a thin rule or marker, and exactly one glitch moment: the name in the hero.
+ * Type: Chakra Petch (display + body) + JetBrains Mono (dates, stack, meta)
+ * Layout: table-like rows, mono key/value metadata, a single boxed lead project
+ */
+const chakra = Chakra_Petch({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-cyber-display",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-cyber-mono",
+});
+
+const ink = "text-zinc-100";
+const body = "text-zinc-300";
+const mute = "text-zinc-500";
+const line = "border-white/10";
+const monoFont = "font-[family-name:var(--font-cyber-mono)]";
+const displayFont = "font-[family-name:var(--font-cyber-display)]";
+const moreBtn = cn(
+  "mt-5 self-start border border-white/15 bg-transparent px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]",
+  monoFont,
+);
+const metaChip = cn(
+  "rounded-none border bg-transparent px-2 py-0.5 text-[11px] text-zinc-400",
+  line,
+  monoFont,
+);
+
+function formatMonthYear(value: string | Date) {
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -58,11 +97,11 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
   const labels = getSectionLabels(portfolio.customization);
   const groupedSkills = groupSkillsByCategory(skills);
   const githubProfile = socialProfiles.find(
-    (profile) => profile.platform.toLowerCase() === "github"
+    (profile) => profile.platform.toLowerCase() === "github",
   );
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(
-    githubStats?.contributionCalendar
+    githubStats?.contributionCalendar,
   );
   const featuredProjects = projects.filter((project) => project.featured);
   const visibleProjects =
@@ -75,25 +114,24 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
-
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
       heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
-            aboutList: "space-y-2 pl-5 text-sm md:text-base leading-relaxed text-slate-300 marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]",
-            aboutParagraph: "text-sm md:text-base leading-relaxed text-slate-300",
-            postList: "list-disc space-y-2 pl-5 text-sm font-bold text-white uppercase tracking-wider",
-            postParagraph: "text-sm font-bold text-white uppercase tracking-wider",
-            descriptionParagraph: "text-sm text-slate-400 leading-relaxed",
-            descriptionList: "space-y-2 pl-5 text-sm text-slate-400 leading-relaxed marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]",
-          card: "border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] p-6",
-          title: "text-lg font-bold text-white uppercase tracking-wider",
-          text: "text-sm leading-relaxed text-slate-300",
-          muted: "text-[10px] text-slate-500 uppercase tracking-widest",
-          chip: "text-xs font-bold uppercase tracking-wider bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-slate-300 px-3 py-1",
-          link: "text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] hover:underline",
-          section: "scroll-mt-24",
+        aboutList: `flex flex-col gap-2 pl-5 text-sm leading-7 ${body} marker:text-[var(--lf-accent)]`,
+        aboutParagraph: `text-sm leading-7 ${body}`,
+        postList: `list-disc flex flex-col gap-2 pl-5 text-sm leading-relaxed ${ink}`,
+        postParagraph: `text-sm leading-relaxed ${ink}`,
+        descriptionParagraph: `text-sm leading-7 ${body}`,
+        descriptionList: `flex flex-col gap-2 pl-5 text-sm leading-7 ${body} marker:text-[var(--lf-accent)]`,
+        card: `border ${line} bg-white/[0.02] p-4`,
+        title: `${displayFont} text-base font-semibold ${ink}`,
+        text: `text-sm leading-7 ${body}`,
+        muted: `${monoFont} text-xs ${mute}`,
+        chip: metaChip,
+        link: `${monoFont} text-xs text-[var(--lf-accent)] underline-offset-4 hover:underline`,
+        section: "scroll-mt-24",
       }}
     />
   ) : null;
@@ -101,408 +139,461 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
       <section key="about" id="about" className="scroll-mt-24">
-
-            <SectionHeading icon={<Cpu className="w-5 h-5" />}>{labels.about}</SectionHeading>
-            <div className="border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] p-6 md:p-8 shadow-[inset_0_0_20px_rgba(0,255,0,0.05)]">
-              <DescriptionBlock
-                text={portfolio.summary}
-                paragraphClassName="text-sm md:text-base leading-relaxed text-slate-300"
-                listClassName="space-y-2 pl-5 text-sm md:text-base leading-relaxed text-slate-300 marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]"
-              />
-            </div>
+        <SectionHeading>{labels.about}</SectionHeading>
+        <DescriptionBlock
+          text={portfolio.summary}
+          paragraphClassName={cn("max-w-3xl whitespace-pre-line text-base leading-8", body)}
+          listClassName={cn(
+            "max-w-3xl flex flex-col gap-2 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]",
+            body,
+          )}
+        />
       </section>
     ) : null,
 
     projects: visibleProjects.length > 0 ? (
-      <section key="projects" id="work" className="scroll-mt-24">
+      <section key="projects" id="work" className="scroll-mt-24 min-w-0">
+        <SectionHeading>{labels.projects}</SectionHeading>
 
-            <SectionHeading icon={<Zap className="w-5 h-5" />}>{labels.projects}</SectionHeading>
-            <CollapsibleList
-              initial={4}
-              wrapperClassName={PROJECTS_GRID_2}
-              buttonClassName="col-span-full mt-8 mx-auto block border border-[var(--lf-accent)] bg-transparent px-8 py-3 text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] transition-colors hover:bg-[var(--lf-accent)] hover:text-black shadow-[0_0_15px_rgba(0,255,255,0.3)]"
+        <CollapsibleList
+          initial={4}
+          wrapperClassName="grid min-w-0 grid-cols-1 gap-5 @md:grid-cols-2 [&>*]:min-w-0"
+          buttonClassName={cn(moreBtn, "col-span-full justify-self-start")}
+        >
+          {visibleProjects.map((project) => (
+            <article
+              key={project.id}
+              className="flex min-w-0 flex-col overflow-hidden border border-white/10 bg-black/30"
             >
-              {visibleProjects.map((project) => (
-                <article key={project.id} className={cn(PROJECT_CARD, "group relative border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] bg-[#050505] hover:border-[var(--lf-accent)] transition-colors")}>
-                  <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[var(--lf-accent)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                  <div className="relative border-b border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)]">
-                    <TemplateProjectPreview templateId="cyberpunk"
-                      liveUrl={project.liveUrl ?? null}
-                      imageUrl={project.imageUrl ?? null}
-                      projectId={project.id}
-                      livePreviewProjectIds={livePreviewProjectIds}
-                      alt={stripRichTextToPlain(project.title)}
-                      loading="lazy"
-                      containerClassName="bg-[#050505]"
-                      className="h-full w-full object-cover object-top opacity-70 filter contrast-125 transition-all duration-500 group-hover:opacity-100"
-                     accentColor={primaryColor} />
-                    <div className="pointer-events-none absolute inset-0 bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] mix-blend-overlay" />
-                  </div>
-
-                  <div className={cn(PROJECT_CARD_BODY, "flex flex-col grow")}>
-                    <div className={cn(PROJECT_CARD_HEADER, "mb-4")}>
-                      <div className={PROJECT_CARD_META}>
-                        <h3 className={cn(PROJECT_CARD_TITLE, "text-xl font-bold text-white uppercase tracking-wider group-hover:text-[var(--lf-accent)] transition-colors")}>
-                          <RichText text={project.title} />
-                        </h3>
-                        {project.featured && (
-                          <span className="text-[10px] font-bold uppercase tracking-widest bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] text-white px-2 py-1 shrink-0 shadow-[0_0_10px_rgba(255,0,255,0.5)]">
-                            Prime
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {project.description && (
-                      <DescriptionBlock
-                        text={project.description}
-                        paragraphClassName="text-sm text-slate-400 leading-relaxed mb-6 grow"
-                        listClassName="mb-6 grow space-y-2 pl-5 text-sm text-slate-400 leading-relaxed marker:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)]"
-                      />
-                    )}
-
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {project.techStack.map((tech) => (
-                        <TechChip
-                          key={tech}
-                          name={tech}
-                          className="text-[10px] font-bold uppercase tracking-widest border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-[var(--lf-accent)] px-2 py-1 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)]"
-                        />
-                      ))}
-                    </div>
-
-                    <div className="mt-auto">
-                      <ProjectActions
-                        liveUrl={project.liveUrl}
-                        sourceUrl={project.sourceUrl}
-                        label={stripRichTextToPlain(project.title)}
-                        projectId={project.id}
-                        liveClassName="text-xs font-bold uppercase tracking-widest bg-[var(--lf-accent)] text-black px-4 py-2 hover:bg-white transition-colors mr-3 shadow-[0_0_10px_rgba(0,255,0,0.4)]"
-                        sourceClassName="text-xs font-bold uppercase tracking-widest border border-[var(--lf-accent)] text-[var(--lf-accent)] px-4 py-2 hover:bg-[var(--lf-accent)] hover:text-black transition-colors"
-                      />
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </CollapsibleList>
+              <TemplateProjectPreview
+                templateId="cyberpunk"
+                liveUrl={project.liveUrl ?? null}
+                imageUrl={project.imageUrl ?? null}
+                projectId={project.id}
+                livePreviewProjectIds={livePreviewProjectIds}
+                alt={stripRichTextToPlain(project.title)}
+                loading="lazy"
+                containerClassName="overflow-hidden border-b border-white/10 bg-[#0a0a0c]"
+                accentColor={primaryColor}
+              />
+              <div className="flex min-w-0 grow flex-col p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className={cn(displayFont, "text-lg font-semibold", ink)}>
+                    <RichText text={project.title} />
+                  </h3>
+                  {project.featured && (
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "h-auto rounded-none border-[var(--lf-accent)]/60 bg-transparent px-1.5 py-0 text-[10px] font-medium tracking-normal text-[var(--lf-accent)]",
+                        monoFont,
+                      )}
+                    >
+                      Featured
+                    </Badge>
+                  )}
+                </div>
+                {project.description && (
+                  <DescriptionBlock
+                    text={project.description}
+                    paragraphClassName={cn("mt-2 text-sm leading-6", mute, "text-zinc-400")}
+                    listClassName="mt-2 flex flex-col gap-1 pl-5 text-sm leading-6 text-zinc-400 marker:text-[var(--lf-accent)]"
+                  />
+                )}
+                {project.techStack.length > 0 && (
+                  <p className={cn("mt-3 text-[11px]", monoFont, mute)}>
+                    {project.techStack.slice(0, 6).join(" / ")}
+                  </p>
+                )}
+                <div className="mt-auto pt-5">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName="rounded-none border border-white/20 bg-transparent px-3 py-1.5 text-xs font-medium text-zinc-100 hover:border-[var(--lf-accent)] hover:bg-transparent hover:text-[var(--lf-accent)]"
+                    sourceClassName="rounded-none px-2 py-1.5 text-xs font-medium text-zinc-400 hover:bg-transparent hover:text-[var(--lf-accent)]"
+                  />
+                </div>
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
       </section>
     ) : null,
 
     experience: experiences.length > 0 ? (
       <section key="experience" id="experience" className="scroll-mt-24">
-
-              <SectionHeading>{labels.experience}</SectionHeading>
-              <CollapsibleList
-                initial={4}
-                wrapperClassName="space-y-6"
-                buttonClassName="mt-6 border border-[color-mix(in_srgb,var(--lf-accent)_65%,white)] bg-transparent px-6 py-2 text-xs font-bold uppercase tracking-widest text-[color-mix(in_srgb,var(--lf-accent)_65%,white)] transition-colors hover:bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] hover:text-white shadow-[0_0_10px_rgba(255,0,255,0.2)]"
-              >
-                {experiences.map((exp) => (
-                  <article key={exp.id} className="border-l-2 border-[color-mix(in_srgb,var(--lf-accent)_65%,white)] pl-4 py-2 relative group">
-                    <div className="absolute left-[-5px] top-3 w-2 h-2 bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_65%,white)] group-hover:bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] transition-colors" />
-                    <h3 className="text-lg font-bold text-white uppercase tracking-wider"><RichText text={exp.role} /></h3>
-                    <p className="text-[var(--lf-accent)] text-sm mt-1 uppercase tracking-widest"><RichText text={exp.company} /></p>
-                    {(exp.startDate || exp.endDate) && (
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-2">
-                        [{formatDateRange(exp.startDate, exp.endDate)}]
-                      </p>
+        <SectionHeading>{labels.experience}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {experiences.map((exp, index) => (
+            <article
+              key={exp.id}
+              className={cn(
+                "relative grid grid-cols-1 gap-2 border-t py-6 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                line,
+              )}
+            >
+              {index === 0 && (
+                <span
+                  aria-hidden
+                  className="absolute -top-px left-0 h-px w-16 bg-[var(--lf-accent)]"
+                />
+              )}
+              <p className={cn("pt-1 text-xs", monoFont, index === 0 ? "text-[var(--lf-accent)]" : mute)}>
+                {formatDateRange(exp.startDate, exp.endDate) || "—"}
+              </p>
+              <div className="min-w-0">
+                <h3 className={cn(displayFont, "text-xl font-semibold", ink)}>
+                  <RichText text={exp.role} />
+                </h3>
+                <p className="mt-0.5 text-sm text-zinc-400">
+                  <RichText text={exp.company} />
+                  {exp.location ? (
+                    <span className="text-zinc-600">
+                      , <RichText text={exp.location} />
+                    </span>
+                  ) : null}
+                </p>
+                {exp.description && (
+                  <DescriptionBlock
+                    text={exp.description}
+                    paragraphClassName={cn("mt-3 max-w-3xl text-sm leading-7", body)}
+                    listClassName={cn(
+                      "mt-3 max-w-3xl flex flex-col gap-1.5 pl-5 text-sm leading-7 marker:text-[var(--lf-accent)]",
+                      body,
                     )}
-                    {exp.description && (
-                      <div className="mt-3 text-sm text-slate-400 leading-relaxed">
-                        <DescriptionBlock
-                          text={exp.description}
-                          paragraphClassName="mb-2"
-                          listClassName="list-disc pl-4 space-y-1 marker:text-[var(--lf-accent)]"
-                        />
-                      </div>
-                    )}
-                  </article>
-                ))}
-              </CollapsibleList>
+                  />
+                )}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
       </section>
     ) : null,
 
     skills: skills.length > 0 ? (
       <section key="skills">
-
-                <SectionHeading>{labels.skills}</SectionHeading>
-                <div className="space-y-6 border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-6 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)]">
-                  {Object.entries(groupedSkills).map(([category, names]) => (
-                    <div key={category}>
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] mb-3">
-                        {"//"} {category}
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {names.map((name) => (
-                          <TechChip
-                            key={name}
-                            name={name}
-                            className="text-xs font-bold uppercase tracking-wider bg-[#050505] border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] text-slate-300 px-3 py-1 hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)] transition-colors cursor-default"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        <SectionHeading>{labels.skills}</SectionHeading>
+        <div className="flex flex-col">
+          {Object.entries(groupedSkills).map(([category, names]) => (
+            <div
+              key={category}
+              className={cn(
+                "grid grid-cols-1 gap-3 border-t py-4 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                line,
+              )}
+            >
+              <h3 className={cn("text-xs", monoFont, mute)}>{category}</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {names.map((name) => (
+                  <TechChip
+                    key={name}
+                    name={name}
+                    className="cursor-default rounded-none border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs text-zinc-200 transition-colors hover:border-[var(--lf-accent)]/60"
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     ) : null,
 
     education: educations.length > 0 ? (
       <section key="education">
-
-                <SectionHeading>{labels.education}</SectionHeading>
-                <CollapsibleList
-                  initial={3}
-                  wrapperClassName="space-y-4"
-                  buttonClassName="mt-6 border border-[var(--lf-accent)] bg-transparent px-6 py-2 text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] transition-colors hover:bg-[var(--lf-accent)] hover:text-black shadow-[0_0_10px_rgba(0,255,255,0.2)]"
-                >
-                  {educations.map((edu) => (
-                    <article key={edu.id} className="border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-4 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] hover:border-[var(--lf-accent)] transition-colors">
-                      <h3 className="text-base font-bold text-white uppercase tracking-wider"><RichText text={edu.degree} /></h3>
-                      <p className="text-[var(--lf-accent)] text-sm mt-1"><RichText text={edu.institution} /></p>
-                      <div className="flex justify-between items-center mt-3 text-[10px] uppercase tracking-widest text-slate-500">
-                        {(edu.startDate || edu.endDate) && (
-                          <span>[{formatDateRange(edu.startDate, edu.endDate)}]</span>
-                        )}
-                        {edu.gpa && <span className="border border-slate-700 px-2 py-1">{edu.gpa}</span>}
-                      </div>
-                    </article>
-                  ))}
-                </CollapsibleList>
+        <SectionHeading>{labels.education}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {educations.map((edu) => (
+            <article
+              key={edu.id}
+              className={cn(
+                "grid grid-cols-1 gap-2 border-t py-5 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                line,
+              )}
+            >
+              <p className={cn("pt-0.5 text-xs", monoFont, mute)}>
+                {formatDateRange(edu.startDate, edu.endDate) || "—"}
+              </p>
+              <div className="min-w-0">
+                <h3 className={cn(displayFont, "text-base font-semibold", ink)}>
+                  <RichText text={edu.degree} />
+                  {edu.field && (
+                    <span className="font-normal text-zinc-400">
+                      {" "}
+                      in <RichText text={edu.field} />
+                    </span>
+                  )}
+                </h3>
+                <p className="mt-0.5 text-sm text-zinc-400">
+                  <RichText text={edu.institution} />
+                </p>
+                {edu.gpa && <p className={cn("mt-2 text-xs", monoFont, mute)}>{edu.gpa}</p>}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
       </section>
     ) : null,
 
     certifications: certifications.length > 0 ? (
       <section key="certifications">
-
-                <SectionHeading>{labels.certifications}</SectionHeading>
-                <CollapsibleList
-                  initial={4}
-                  wrapperClassName="space-y-4"
-                  buttonClassName="mt-6 border border-[color-mix(in_srgb,var(--lf-accent)_65%,white)] bg-transparent px-6 py-2 text-xs font-bold uppercase tracking-widest text-[color-mix(in_srgb,var(--lf-accent)_65%,white)] transition-colors hover:bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] hover:text-white"
-                >
-                  {certifications.map((cert) => (
-                    <article key={cert.id} className="flex justify-between items-center border-b border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] pb-3 group">
-                      <div>
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                          {cert.url ? (
-                            <a href={cert.url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--lf-accent)] transition-colors">
-                              {cert.name}
-                            </a>
-                          ) : (
-                            cert.name
-                          )}
-                        </h3>
-                        <p className="text-xs text-[var(--lf-accent)] mt-1">{cert.issuer}</p>
-                      </div>
-                      {cert.issueDate && (
-                        <span className="text-[10px] font-bold uppercase tracking-widest bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)]/20 text-[color-mix(in_srgb,var(--lf-accent)_65%,white)] px-2 py-1 border border-[color-mix(in_srgb,var(--lf-accent)_65%,white)]/50">
-                          {new Date(cert.issueDate).getFullYear()}
-                        </span>
-                      )}
-                    </article>
-                  ))}
-                </CollapsibleList>
+        <SectionHeading>{labels.certifications}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {certifications.map((cert) => (
+            <article
+              key={cert.id}
+              className={cn(
+                "grid grid-cols-1 gap-1 border-t py-4 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                line,
+              )}
+            >
+              <p className={cn("text-xs", monoFont, mute)}>
+                {cert.issueDate ? formatMonthYear(cert.issueDate) : "—"}
+              </p>
+              <div className="min-w-0">
+                <h3 className={cn("text-base font-medium", ink)}>
+                  {cert.url ? (
+                    <a
+                      href={cert.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline-offset-4 hover:text-[var(--lf-accent)] hover:underline"
+                    >
+                      {cert.name}
+                    </a>
+                  ) : (
+                    cert.name
+                  )}
+                </h3>
+                <p className="mt-0.5 text-sm text-zinc-400">{cert.issuer}</p>
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
       </section>
     ) : null,
 
     achievements: achievements.length > 0 ? (
       <section key="achievements">
-
-                <SectionHeading>{labels.achievements}</SectionHeading>
-                <CollapsibleList
-                  initial={4}
-                  wrapperClassName="space-y-4"
-                  buttonClassName="mt-6 border border-[var(--lf-accent)] bg-transparent px-6 py-2 text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] transition-colors hover:bg-[var(--lf-accent)] hover:text-black"
-                >
-                  {achievements.map((ach) => (
-                    <article key={ach.id} className="flex items-start gap-4 border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-4 bg-[#050505] group hover:border-[var(--lf-accent)] transition-colors">
-                      <div className="text-[color-mix(in_srgb,var(--lf-accent)_65%,white)] mt-0.5 group-hover:animate-pulse">
-                        <Zap className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider"><RichText text={ach.title} /></h3>
-                        {ach.date && (
-                          <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-2">
-                            [{new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}]
-                          </p>
-                        )}
-                      </div>
-                    </article>
-                  ))}
-                </CollapsibleList>
+        <SectionHeading>{labels.achievements}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {achievements.map((ach) => (
+            <article
+              key={ach.id}
+              className={cn(
+                "grid grid-cols-1 gap-1 border-t py-4 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                line,
+              )}
+            >
+              <p className={cn("text-xs", monoFont, mute)}>
+                {ach.date ? formatMonthYear(ach.date) : "—"}
+              </p>
+              <p className={cn("min-w-0 text-base leading-relaxed", ink)}>
+                <RichText text={ach.title} />
+              </p>
+            </article>
+          ))}
+        </CollapsibleList>
       </section>
     ) : null,
 
     articles: articles.length > 0 ? (
       <section key="articles" id="writing" className="scroll-mt-24">
-
-            <SectionHeading>{labels.articles}</SectionHeading>
-            <CollapsibleList
-              initial={4}
-              wrapperClassName="grid grid-cols-1 sm:grid-cols-2 gap-6"
-              buttonClassName="col-span-full mt-8 mx-auto block border border-[var(--lf-accent)] bg-transparent px-8 py-3 text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] transition-colors hover:bg-[var(--lf-accent)] hover:text-black shadow-[0_0_15px_rgba(0,255,0,0.3)]"
+        <SectionHeading>{labels.articles}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {articles.map((article) => (
+            <article
+              key={article.id}
+              className={cn(
+                "grid grid-cols-1 gap-2 border-t py-5 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                line,
+              )}
             >
-              {articles.map((article) => (
-                <article key={article.id} className="border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-5 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] hover:border-[var(--lf-accent)] transition-colors group flex flex-col">
-                  <ArticleSourceLabel source={article.source} className="mb-2" />
-                  <h3 className="text-lg font-bold text-white uppercase tracking-wider mb-3 group-hover:text-[var(--lf-accent)] transition-colors">
-                    <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer">
-                      <RichText text={article.title} />
-                    </a>
-                  </h3>
-                  {article.description && (
-                    <p className="text-sm text-slate-400 leading-relaxed mb-4 grow">
-                      {article.description}
-                    </p>
-                  )}
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--lf-accent)] flex gap-4 mt-auto pt-4 border-t border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)]">
-                    {article.publishedAt && (
-                      <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
-                    )}
-                    {article.readTime != null && <span>{article.readTime} MIN_READ</span>}
-                  </div>
-                </article>
-              ))}
-            </CollapsibleList>
+              <p className={cn("pt-1 text-xs", monoFont, mute)}>
+                {article.publishedAt ? formatMonthYear(article.publishedAt) : "—"}
+                {article.readTime != null ? (
+                  <span className="block">{article.readTime} min read</span>
+                ) : null}
+              </p>
+              <div className="min-w-0">
+                <ArticleSourceLabel source={article.source} className="mb-1 text-zinc-600" />
+                <h3 className={cn(displayFont, "text-lg font-semibold", ink)}>
+                  <a
+                    href={article.url}
+                    data-lf-track="article"
+                    data-lf-label={stripRichTextToPlain(article.title)}
+                    data-lf-id={article.id}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline-offset-4 hover:text-[var(--lf-accent)] hover:underline"
+                  >
+                    <RichText text={article.title} />
+                  </a>
+                </h3>
+                {article.description && (
+                  <p className="mt-1.5 max-w-3xl text-sm leading-7 text-zinc-400">
+                    {article.description}
+                  </p>
+                )}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
       </section>
     ) : null,
 
     profiles: hasProfiles ? (
       <section key="profiles" id="profiles" className="scroll-mt-24">
-
-            <SectionHeading>{labels.profiles}</SectionHeading>
-            <div className="border border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)] p-8 bg-[color-mix(in_srgb,var(--lf-accent)_5%,transparent)] text-center">
-              <ProfileLinksSection
-                portfolio={portfolio}
-                profiles={socialProfiles}
-                chipClassName="text-xs font-bold uppercase tracking-widest border border-[var(--lf-accent)] text-[var(--lf-accent)] px-4 py-2 hover:bg-[var(--lf-accent)] hover:text-black transition-colors"
-                pillClassName="text-xs font-bold uppercase tracking-widest border border-[var(--lf-accent)] text-[var(--lf-accent)] px-4 py-2 hover:bg-[var(--lf-accent)] hover:text-black transition-colors"
-                titleClassName="text-white font-bold uppercase tracking-wider"
-                textClassName="text-slate-400"
-              />
-            </div>
+        <SectionHeading>{labels.profiles}</SectionHeading>
+        <ProfileLinksSection
+          portfolio={portfolio}
+          profiles={socialProfiles}
+          chipClassName={cn("rounded-none border px-2.5 py-1 text-xs text-zinc-300", line, monoFont)}
+          pillClassName={cn(
+            "rounded-none border px-2.5 py-1 text-xs text-zinc-100 transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]",
+            line,
+            monoFont,
+          )}
+          titleClassName={cn(displayFont, "text-xl font-semibold", ink)}
+          textClassName="text-zinc-400"
+        />
       </section>
     ) : null,
 
     github: contributionCalendar ? (
       <section key="github" className="scroll-mt-24">
-
-            <SectionHeading>{labels.github}</SectionHeading>
-            <div className="border border-[var(--lf-accent)] p-6 bg-[#050505] overflow-x-auto custom-scrollbar shadow-[0_0_20px_rgba(0,255,0,0.1)]">
-              <GitHubContributionHeatmap
-                calendar={contributionCalendar}
-                profileUrl={githubProfile?.url}
-                username={githubProfile?.username}
-                variant="minimal"
-                label="// GITHUB_CONTRIBUTIONS"
-              />
-            </div>
+        <SectionHeading>{labels.github}</SectionHeading>
+        <div className={cn("overflow-x-auto border p-5 custom-scrollbar", line)}>
+          <GitHubContributionHeatmap
+            calendar={contributionCalendar}
+            profileUrl={githubProfile?.url}
+            username={githubProfile?.username}
+            variant="minimal"
+            label={labels.github}
+          />
+        </div>
       </section>
     ) : null,
   };
 
   return (
-    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[#050505] text-[var(--lf-accent)] font-mono selection:bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] selection:text-white overflow-hidden relative pb-20")} style={accentRootStyle(primaryColor)}>
-      {/* Grid Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-20"
+    <div
+      className={cn(
+        TEMPLATE_CONTAINER,
+        chakra.variable,
+        mono.variable,
+        "relative min-h-screen bg-[#0a0a0c] font-[family-name:var(--font-cyber-display)] antialiased selection:bg-[var(--lf-accent)] selection:text-black",
+        ink,
+      )}
+      style={accentRootStyle(primaryColor)}
+    >
+      {/* Faint street grid, hero only, fading into asphalt. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[560px] opacity-[0.07]"
         style={{
-          backgroundImage: `linear-gradient(#00ff00 1px, transparent 1px), linear-gradient(90deg, #00ff00 1px, transparent 1px)`,
-          backgroundSize: '40px 40px',
-          transform: 'perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px)',
+          backgroundImage:
+            "linear-gradient(var(--lf-accent) 1px, transparent 1px), linear-gradient(90deg, var(--lf-accent) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+          maskImage: "linear-gradient(to bottom, black, transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, black, transparent)",
         }}
       />
-      <div className="absolute inset-0 z-0 pointer-events-none bg-linear-to-b from-[#050505] via-transparent to-[#050505]" />
 
-      <div className="mx-auto max-w-5xl px-4 py-12 relative z-10 space-y-16">
+      {navbarEnabled && (
+        <TemplateNavbar
+          items={sections}
+          className="border-x-0 border-t-0 border-white/10 bg-[#0a0a0c]/85"
+          linkClassName={cn(
+            "px-3 py-2 text-xs text-zinc-400 transition-colors hover:text-[var(--lf-accent)]",
+            monoFont,
+          )}
+        />
+      )}
 
-        {navbarEnabled && (
-          <div className="sticky top-4 z-50 flex justify-center mb-16">
-            <TemplateNavbar
-              items={sections}
-              className="flex gap-2 bg-[#050505]/90 border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] p-2 backdrop-blur-md shadow-[0_0_15px_rgba(0,255,0,0.2)]"
-              linkClassName="px-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] hover:bg-[var(--lf-accent)] hover:text-black transition-colors"
+      <div className="relative mx-auto min-w-0 max-w-5xl px-5 pb-20 pt-14 sm:px-6 md:px-8 md:pb-32 md:pt-24">
+        <header className="min-w-0">
+          <h1
+            className={cn(
+              HERO_TITLE_BASE,
+              "text-5xl font-bold leading-[0.95] tracking-[-0.03em] @sm:text-6xl @md:text-7xl @lg:text-8xl",
+              ink,
+            )}
+          >
+            <RichText text={portfolio.title} />
+          </h1>
+
+          {portfolio.headline && (
+            <p className={cn("mt-6 max-w-2xl text-sm leading-7 text-zinc-300 @md:text-base", monoFont)}>
+              <span className="text-[var(--lf-accent)]">&gt;</span>{" "}
+              <RichText text={portfolio.headline} />
+            </p>
+          )}
+
+          <div className={cn("mt-8 flex flex-col gap-4 border-t pt-6", line)}>
+            <HeroProfileButtons
+              profiles={socialProfiles}
+              className="rounded-none bg-[var(--lf-accent)] px-4 py-2 text-xs font-semibold text-black transition-colors hover:bg-white"
             />
-          </div>
-        )}
-
-        <header className="relative border-l-4 border-[var(--lf-accent)] pl-6 md:pl-10">
-          <div className="absolute top-0 left-[-14px] w-6 h-6 bg-[#050505] border-2 border-[var(--lf-accent)] flex items-center justify-center">
-            <div className="w-2 h-2 bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] animate-pulse" />
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="grow">
-              <div className="inline-flex items-center border border-[color-mix(in_srgb,var(--lf-accent)_65%,white)] bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)]/10 px-3 py-1 text-xs font-bold text-[color-mix(in_srgb,var(--lf-accent)_65%,white)] mb-6 uppercase tracking-widest shadow-[0_0_10px_rgba(255,0,255,0.3)]">
-                <Terminal className="w-3 h-3 mr-2" />
-                System.Init()
-              </div>
-              <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-black uppercase tracking-tighter text-white drop-shadow-[0_0_10px_rgba(0,255,0,0.8)] mb-4">
-                <RichText text={portfolio.title} />
-              </h1>
-              {portfolio.headline && (
-                <p className="text-xl text-[var(--lf-accent)] font-medium max-w-2xl mb-8 uppercase tracking-wide">
-                  &gt; <RichText text={portfolio.headline} />_
-                </p>
-              )}
-
-              <div className="flex flex-wrap gap-4 mb-6">
-                <ContactChips
-                  portfolio={portfolio}
-                  chipClassName="border border-[var(--lf-accent)] bg-transparent px-4 py-2 text-xs font-bold text-[var(--lf-accent)] uppercase tracking-widest hover:bg-[var(--lf-accent)] hover:text-black transition-colors shadow-[0_0_10px_rgba(0,255,0,0.2)]"
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-4">
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)] text-white px-6 py-2 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-[color-mix(in_srgb,var(--lf-accent)_65%,white)] transition-colors shadow-[0_0_15px_rgba(255,0,255,0.5)]"
-                />
-              </div>
-            </div>
-
-          </div>
-
-          {hasNonHeroSocialProfiles(socialProfiles) && (
-            <div className="mt-8 pt-6 border-t border-[color-mix(in_srgb,var(--lf-accent)_30%,transparent)]">
+            <ContactChips
+              portfolio={portfolio}
+              chipClassName={cn("text-xs text-zinc-400", monoFont)}
+            />
+            {hasNonHeroSocialProfiles(socialProfiles) && (
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
                 excludeHeroPlatforms
-                className="text-xs font-bold uppercase tracking-widest text-[#008800] hover:text-[var(--lf-accent)] transition-colors"
+                className={cn(
+                  "text-xs text-zinc-400 transition-colors hover:text-[var(--lf-accent)]",
+                  monoFont,
+                )}
               />
-            </div>
-          )}
+            )}
+          </div>
         </header>
 
-        {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
+        <div className="relative mt-20 flex min-w-0 flex-col gap-20 md:mt-28 md:gap-24">
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
-        {customSections.length > 0 && customSections.map((cs) => (
-          <section key={cs.id} className="scroll-mt-24">
-            <SectionHeading>{cs.label}</SectionHeading>
-            <div className="border border-[color-mix(in_srgb,var(--lf-accent)_65%,white)]/30 p-6 bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)]/5">
-              <CustomSectionItems
-                items={cs.items}
-                titleClassName="text-base font-bold text-white uppercase tracking-wider mb-2"
-                textClassName="text-sm text-slate-400 leading-relaxed"
-                chipClassName="text-[10px] font-bold uppercase tracking-widest border border-[color-mix(in_srgb,var(--lf-accent)_65%,white)]/50 text-[color-mix(in_srgb,var(--lf-accent)_65%,white)] px-2 py-1 bg-[color-mix(in_srgb,var(--lf-accent)_65%,white)]/5"
-              />
-            </div>
-          </section>
-        ))}
-
+          {customSections.length > 0 &&
+            customSections.map((cs) => (
+              <section key={cs.id} className="scroll-mt-24">
+                <SectionHeading>{cs.label}</SectionHeading>
+                <CustomSectionItems
+                  items={cs.items}
+                  titleClassName={cn(displayFont, "text-base font-semibold", ink)}
+                  textClassName="text-sm leading-7 text-zinc-400"
+                  chipClassName={metaChip}
+                  buttonClassName={moreBtn}
+                />
+              </section>
+            ))}
+        </div>
       </div>
     </div>
   );
 }
 
-function SectionHeading({ children, icon }: { children: React.ReactNode, icon?: React.ReactNode }) {
+function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-base @md:text-lg @lg:text-2xl font-bold uppercase tracking-widest text-white mb-8 flex items-center gap-3">
-      <span className="text-[var(--lf-accent)]">{icon || <Terminal className="w-5 h-5" />}</span>
-      {children}
-      <span className="ml-4 h-px grow bg-[linear-gradient(90deg,#00ff00_0%,transparent_100%)] opacity-50" />
-    </h2>
+    <div className="mb-8">
+      <h2
+        className={cn(
+          "flex items-baseline gap-3 font-[family-name:var(--font-cyber-display)] text-2xl font-semibold tracking-tight md:text-3xl",
+          ink,
+        )}
+      >
+        <span
+          aria-hidden
+          className="font-[family-name:var(--font-cyber-mono)] text-base text-[var(--lf-accent)]"
+        >
+          {"//"}
+        </span>
+        {children}
+      </h2>
+      <Separator className="mt-4 bg-white/10" />
+    </div>
   );
 }

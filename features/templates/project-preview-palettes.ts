@@ -230,6 +230,19 @@ export const TEMPLATE_PROJECT_PREVIEW: Record<string, TemplateProjectPreviewConf
   },
   artdeco: {
     palette: {
+      bg: "#070705",
+      bgAlt: "#10100d",
+      primary: "#c5a45c",
+      secondary: "#f1ead7",
+      accent: "#1a1810",
+      surface: "#10100d",
+      muted: "#2a2618",
+      stroke: "#c5a45c",
+    },
+    variant: "dark",
+  },
+  gatsby: {
+    palette: {
       bg: "#0b132b",
       bgAlt: "#111c3d",
       primary: "#d4af37",
@@ -238,6 +251,19 @@ export const TEMPLATE_PROJECT_PREVIEW: Record<string, TemplateProjectPreviewConf
       surface: "#111c3d",
       muted: "#2a3a5c",
       stroke: "#d4af37",
+    },
+    variant: "dark",
+  },
+  lantern: {
+    palette: {
+      bg: "#0a0a0a",
+      bgAlt: "#100f0d",
+      primary: "#bbaa78",
+      secondary: "#e8e8e8",
+      accent: "#1a1610",
+      surface: "#161513",
+      muted: "#303033",
+      stroke: "#bbaa78",
     },
     variant: "dark",
   },

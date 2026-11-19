@@ -7,8 +7,22 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
-import { Terminal, FolderOpen, FileText, Globe } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import {
+  FileText,
+  FolderOpen,
+  Globe,
+  LayoutGrid,
+  Minus,
+  Square,
+  Terminal,
+  Trophy,
+  X,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  ArticleSourceLabel,
+  RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -17,11 +31,7 @@ import { ArticleSourceLabel, RichText,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
-  PROJECT_CARD,
-  PROJECT_CARD_HEADER,
-  PROJECT_CARD_META,
-  PROJECT_CARD_TITLE,
-  PROJECTS_GRID_2,
+  HERO_TITLE_BASE,
   SocialPills,
   hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
@@ -39,6 +49,36 @@ import {
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
+/**
+ * Windows — a desktop, windows as the framing device
+ * Subject: one calm desktop with one window per section. Title bars carry the
+ * accent; bevels are used only on the window frame and buttons. Content sits in
+ * flat white wells with plain ruled rows instead of nested bevel boxes.
+ * Type: system UI stack (Tahoma / Segoe UI), real mono only inside Notepad
+ * Layout: lead project in a preview pane, an Explorer-style list, taskbar nav
+ */
+const SYSTEM_FONT = "Tahoma, Verdana, 'Segoe UI', system-ui, sans-serif";
+
+const frame =
+  "border border-black bg-[#ececec] shadow-[inset_1px_1px_0_#ffffff,inset_-1px_-1px_0_#808080,5px_5px_0_rgba(0,0,0,0.28)]";
+const well =
+  "border border-[#808080] bg-white text-black shadow-[inset_1px_1px_0_#404040,1px_1px_0_#ffffff]";
+const bevel =
+  "shadow-[inset_1px_1px_0_#ffffff,inset_-1px_-1px_0_#808080] active:shadow-[inset_1px_1px_0_#808080,inset_-1px_-1px_0_#ffffff]";
+const button = cn(
+  "rounded-none border border-black bg-[#ececec] px-3 py-1 text-xs font-semibold text-black hover:bg-white hover:text-black",
+  bevel,
+);
+const moreBtn = cn(button, "mt-3 self-start");
+const rowRule = "border-[#d0d0d0]";
+const chip = "border border-[#808080] bg-[#ececec] px-2 py-0.5 text-xs text-black";
+
+function formatMonthYear(value: string | Date) {
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export function WindowsTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -58,11 +98,11 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
   const labels = getSectionLabels(portfolio.customization);
   const groupedSkills = groupSkillsByCategory(skills);
   const githubProfile = socialProfiles.find(
-    (profile) => profile.platform.toLowerCase() === "github"
+    (profile) => profile.platform.toLowerCase() === "github",
   );
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(
-    githubStats?.contributionCalendar
+    githubStats?.contributionCalendar,
   );
   const featuredProjects = projects.filter((project) => project.featured);
   const visibleProjects =
@@ -75,27 +115,26 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
     portfolio.customization,
   );
 
-
   const linkedinSection = data.linkedin ? (
-    <Window key="linkedin" id="linkedin" title={`${labels.linkedin} - Profile`}>
-      <div className="win95-inset bg-white p-4">
+    <Window key="linkedin" id="linkedin" title={`${labels.linkedin} — Profile`}>
+      <div className={cn(well, "p-4")}>
         <LinkedInSection
           data={data.linkedin}
           heading={null}
           classes={{
-            aboutList: "space-y-1 pl-4 font-mono text-sm leading-relaxed text-black",
-            aboutParagraph: "font-mono text-sm leading-relaxed text-black",
-            postList: "list-disc space-y-2 pl-5 font-bold",
-            postParagraph: "font-bold",
-            descriptionParagraph: "text-xs",
-            descriptionList: "space-y-1 pl-4 text-xs",
+            aboutList: "flex flex-col gap-1.5 pl-4 text-sm leading-relaxed text-black",
+            aboutParagraph: "text-sm leading-relaxed text-black",
+            postList: "list-disc flex flex-col gap-1.5 pl-5 text-sm",
+            postParagraph: "text-sm",
+            descriptionParagraph: "text-xs text-black/80",
+            descriptionList: "flex flex-col gap-1 pl-4 text-xs text-black/80",
             section: "space-y-4",
-            card: "win95-outset bg-[#c0c0c0] p-3",
-            title: "font-bold",
+            card: cn("border border-[#808080] bg-[#ececec] p-3", bevel),
+            title: "text-sm font-bold text-black",
             text: "text-sm text-black",
-            muted: "text-xs",
-            chip: "win95-outset bg-[#c0c0c0] px-2 py-0.5 text-xs",
-            link: "text-sm font-bold text-[#000080] underline",
+            muted: "text-xs text-black/70",
+            chip,
+            link: "text-sm font-semibold text-[var(--lf-accent)] underline underline-offset-2",
           }}
         />
       </div>
@@ -104,416 +143,509 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
-      <Window key="about" id="about" title={`Notepad - ${labels.about}.txt`} icon={<FileText className="w-4 h-4" />}>
-
-            <div className="bg-white win95-inset p-4">
-              <DescriptionBlock
-                text={portfolio.summary}
-                paragraphClassName="font-mono text-sm leading-relaxed whitespace-pre-wrap text-black"
-                listClassName="space-y-1 pl-4 font-mono text-sm leading-relaxed text-black"
-              />
-            </div>
+      <Window
+        key="about"
+        id="about"
+        title={`Notepad — ${labels.about}.txt`}
+        icon={<FileText className="size-4" />}
+      >
+        <div className={cn(well, "p-4 @md:p-6")}>
+          <DescriptionBlock
+            text={portfolio.summary}
+            paragraphClassName="max-w-3xl whitespace-pre-wrap font-mono text-sm leading-7 text-black"
+            listClassName="max-w-3xl flex flex-col gap-1.5 pl-5 font-mono text-sm leading-7 text-black"
+          />
+        </div>
       </Window>
     ) : null,
 
     projects: visibleProjects.length > 0 ? (
-      <Window key="projects" id="work" title={`Explorer - ${labels.projects}`} icon={<FolderOpen className="w-4 h-4" />}>
-
-            <CollapsibleList
-              initial={4}
-              wrapperClassName={cn(PROJECTS_GRID_2, "gap-4")}
-              buttonClassName="col-span-full mt-4 win95-button px-4 py-1 text-sm font-bold mx-auto block"
-            >
-              {visibleProjects.map((project) => (
-                <div key={project.id} className={cn(PROJECT_CARD, "win95-outset bg-[#c0c0c0] flex flex-col")}>
-                  <div className="group m-2">
-                    <TemplateProjectPreview
-                      templateId="windows"
-                      liveUrl={project.liveUrl ?? null}
-                      imageUrl={project.imageUrl ?? null}
+      <Window
+        key="projects"
+        id="work"
+        title={`Explorer — ${labels.projects}`}
+        icon={<FolderOpen className="size-4" />}
+        status={`${visibleProjects.length} ${visibleProjects.length === 1 ? "object" : "objects"}`}
+      >
+        <div className={cn(well, "p-3 @md:p-4")}>
+          <CollapsibleList
+            initial={4}
+            wrapperClassName="grid min-w-0 grid-cols-1 gap-3 @md:grid-cols-2 [&>*]:min-w-0"
+            buttonClassName={cn(moreBtn, "col-span-full justify-self-start")}
+          >
+            {visibleProjects.map((project) => (
+              <article
+                key={project.id}
+                className="flex min-w-0 flex-col border border-[#808080] bg-[#ececec] p-1.5"
+              >
+                <TemplateProjectPreview
+                  templateId="windows"
+                  liveUrl={project.liveUrl ?? null}
+                  imageUrl={project.imageUrl ?? null}
+                  projectId={project.id}
+                  livePreviewProjectIds={livePreviewProjectIds}
+                  alt={stripRichTextToPlain(project.title)}
+                  loading="lazy"
+                  containerClassName="overflow-hidden border border-[#808080] bg-[#ececec]"
+                  accentColor={primaryColor}
+                />
+                <div className="flex min-w-0 grow flex-col px-1 pb-1 pt-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-base font-bold text-black">
+                      <RichText text={project.title} />
+                    </h3>
+                    {project.featured && (
+                      <Badge
+                        variant="outline"
+                        className="h-auto rounded-none border-black bg-[var(--lf-accent)] px-1.5 py-0 font-sans text-[10px] font-semibold tracking-normal text-white"
+                      >
+                        Featured
+                      </Badge>
+                    )}
+                  </div>
+                  {project.description && (
+                    <DescriptionBlock
+                      text={project.description}
+                      paragraphClassName="mt-1.5 text-xs leading-6 text-black/80"
+                      listClassName="mt-1.5 flex flex-col gap-1 pl-4 text-xs leading-6 text-black/80"
+                    />
+                  )}
+                  {project.techStack.length > 0 && (
+                    <p className="mt-2 text-[11px] text-black/60">
+                      {project.techStack.slice(0, 6).join(", ")}
+                    </p>
+                  )}
+                  <div className="mt-auto pt-3">
+                    <ProjectActions
+                      liveUrl={project.liveUrl}
+                      sourceUrl={project.sourceUrl}
+                      label={stripRichTextToPlain(project.title)}
                       projectId={project.id}
-                      livePreviewProjectIds={livePreviewProjectIds}
-                      alt={stripRichTextToPlain(project.title)}
-                      loading="lazy"
-                      containerClassName="win95-inset aspect-[16/10] min-h-[140px] bg-[#c0c0c0]"
-                      className="h-full w-full object-cover object-top"
-                      accentColor={primaryColor}
+                      liveClassName={button}
+                      sourceClassName={button}
                     />
                   </div>
-                  <div className="p-3 flex flex-col grow text-black">
-                    <div className={cn(PROJECT_CARD_HEADER, "mb-2")}>
-                      <h3 className={cn(PROJECT_CARD_TITLE, "font-bold text-sm pr-2")}><RichText text={project.title} /></h3>
-                      {project.featured && (
-                        <span className="bg-[var(--lf-accent)] text-white text-[10px] px-1">★</span>
-                      )}
-                    </div>
-                    {project.description && (
-                      <DescriptionBlock
-                        text={project.description}
-                        paragraphClassName="text-xs mb-4 grow"
-                        listClassName="mb-4 grow space-y-1 pl-4 text-xs"
-                      />
-                    )}
-                    {project.techStack.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {project.techStack.map((tech) => (
-                          <TechChip
-                            key={tech}
-                            name={tech}
-                            className="bg-white win95-inset px-1 text-[10px]"
-                            iconClassName="h-3 w-3"
-                          />
-                        ))}
-                      </div>
-                    )}
-                    <div className="mt-auto">
-                      <ProjectActions
-                        liveUrl={project.liveUrl}
-                        sourceUrl={project.sourceUrl}
-                        label={stripRichTextToPlain(project.title)}
-                        projectId={project.id}
-                        liveClassName="win95-button px-2 py-1 text-xs font-bold mr-2"
-                        sourceClassName="win95-button px-2 py-1 text-xs"
-                      />
-                    </div>
-                  </div>
                 </div>
-              ))}
-            </CollapsibleList>
+              </article>
+            ))}
+          </CollapsibleList>
+        </div>
       </Window>
     ) : null,
 
     experience: experiences.length > 0 ? (
-      <Window key="experience" id="experience" title={`Task Manager - ${labels.experience}`}>
-
-              <CollapsibleList
-                initial={3}
-                wrapperClassName="space-y-4"
-                buttonClassName="mt-4 win95-button px-4 py-1 text-sm font-bold w-full"
+      <Window
+        key="experience"
+        id="experience"
+        title={`Task Manager — ${labels.experience}`}
+        icon={<LayoutGrid className="size-4" />}
+        status={`${experiences.length} ${experiences.length === 1 ? "entry" : "entries"}`}
+      >
+        <div className={cn(well, "p-3 @md:p-4")}>
+          <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+            {experiences.map((exp, index) => (
+              <article
+                key={exp.id}
+                className={cn(
+                  "grid grid-cols-1 gap-1.5 border-t py-4 first:border-t-0 first:pt-0 @md:grid-cols-[9rem_minmax(0,1fr)] @md:gap-4",
+                  rowRule,
+                )}
               >
-                {experiences.map((exp) => (
-                  <div key={exp.id} className="win95-inset bg-white p-3 text-sm">
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-bold"><RichText text={exp.role} /></h3>
-                      {(exp.startDate || exp.endDate) && (
-                        <span className="text-xs">{formatDateRange(exp.startDate, exp.endDate)}</span>
-                      )}
-                    </div>
-                    <p className="text-[var(--lf-accent)] mb-2"><RichText text={exp.company} /></p>
-                    {exp.description && (
-                      <div className="text-xs leading-relaxed">
-                        <DescriptionBlock
-                          text={exp.description}
-                          paragraphClassName="mb-1"
-                          listClassName="list-disc pl-4 space-y-1"
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </CollapsibleList>
+                <p className="pt-0.5 text-xs tabular-nums text-black/70">
+                  {index === 0 && (
+                    <span
+                      aria-hidden
+                      className="mr-1.5 inline-block size-2 bg-[var(--lf-accent)] align-middle"
+                    />
+                  )}
+                  {formatDateRange(exp.startDate, exp.endDate) || "—"}
+                </p>
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-black">
+                    <RichText text={exp.role} />
+                  </h3>
+                  <p className="mt-0.5 text-sm text-black/70">
+                    <RichText text={exp.company} />
+                    {exp.location ? (
+                      <span className="text-black/50">
+                        , <RichText text={exp.location} />
+                      </span>
+                    ) : null}
+                  </p>
+                  {exp.description && (
+                    <DescriptionBlock
+                      text={exp.description}
+                      paragraphClassName="mt-2 max-w-2xl text-sm leading-7 text-black"
+                      listClassName="mt-2 max-w-2xl flex flex-col gap-1.5 pl-5 text-sm leading-7 text-black"
+                    />
+                  )}
+                </div>
+              </article>
+            ))}
+          </CollapsibleList>
+        </div>
       </Window>
     ) : null,
 
     skills: skills.length > 0 ? (
-      <Window key="skills" title={`Control Panel - ${labels.skills}`}>
-
-                <div className="win95-inset bg-white p-4 space-y-4">
-                  {Object.entries(groupedSkills).map(([category, names]) => (
-                    <div key={category}>
-                      <h3 className="font-bold text-xs mb-2 border-b border-black pb-1">{category}</h3>
-                      <div className="flex flex-wrap gap-1">
-                        {names.map((name) => (
-                          <TechChip
-                            key={name}
-                            name={name}
-                            className="win95-outset bg-[#c0c0c0] px-2 py-0.5 text-xs"
-                            iconClassName="h-3 w-3"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      <Window key="skills" title={`Control Panel — ${labels.skills}`}>
+        <div className={cn(well, "grid grid-cols-1 gap-4 p-4 @md:grid-cols-2")}>
+          {Object.entries(groupedSkills).map(([category, names]) => (
+            <fieldset
+              key={category}
+              className="min-w-0 border border-[#808080] px-3 pb-3 pt-1 shadow-[1px_1px_0_#ffffff]"
+            >
+              <legend className="px-1 text-xs font-bold text-black">{category}</legend>
+              <div className="flex flex-wrap gap-1.5">
+                {names.map((name) => (
+                  <TechChip
+                    key={name}
+                    name={name}
+                    className={cn(chip, "cursor-default")}
+                    iconClassName="h-3 w-3"
+                  />
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
       </Window>
     ) : null,
 
     education: educations.length > 0 ? (
-      <Window key="education" title={`Registry - ${labels.education}`}>
-
-                <CollapsibleList
-                  initial={3}
-                  wrapperClassName="space-y-2"
-                  buttonClassName="mt-4 win95-button px-4 py-1 text-sm font-bold w-full"
-                >
-                  {educations.map((edu) => (
-                    <div key={edu.id} className="win95-inset bg-white p-3 text-sm">
-                      <h3 className="font-bold"><RichText text={edu.degree} /></h3>
-                      <p className="text-xs mt-1"><RichText text={edu.institution} /></p>
-                      <div className="flex justify-between items-center mt-2 text-xs">
-                        {(edu.startDate || edu.endDate) && (
-                          <span>{formatDateRange(edu.startDate, edu.endDate)}</span>
-                        )}
-                        {edu.gpa && <span>{edu.gpa}</span>}
-                      </div>
-                    </div>
-                  ))}
-                </CollapsibleList>
+      <Window key="education" title={`Registry — ${labels.education}`}>
+        <div className={cn(well, "p-3 @md:p-4")}>
+          <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+            {educations.map((edu) => (
+              <article
+                key={edu.id}
+                className={cn(
+                  "grid grid-cols-1 gap-1.5 border-t py-3 first:border-t-0 first:pt-0 @md:grid-cols-[9rem_minmax(0,1fr)] @md:gap-4",
+                  rowRule,
+                )}
+              >
+                <p className="pt-0.5 text-xs tabular-nums text-black/70">
+                  {formatDateRange(edu.startDate, edu.endDate) || "—"}
+                </p>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-black">
+                    <RichText text={edu.degree} />
+                    {edu.field && (
+                      <span className="font-normal text-black/70">
+                        {" "}
+                        in <RichText text={edu.field} />
+                      </span>
+                    )}
+                  </h3>
+                  <p className="mt-0.5 text-xs text-black/70">
+                    <RichText text={edu.institution} />
+                  </p>
+                  {edu.gpa && <p className="mt-1 text-xs text-black/60">{edu.gpa}</p>}
+                </div>
+              </article>
+            ))}
+          </CollapsibleList>
+        </div>
       </Window>
     ) : null,
 
     certifications: certifications.length > 0 ? (
       <Window key="certifications" title={`${labels.certifications}.exe`}>
-
-                <CollapsibleList
-                  initial={3}
-                  wrapperClassName="space-y-2"
-                  buttonClassName="mt-4 win95-button px-4 py-1 text-sm font-bold w-full"
-                >
-                  {certifications.map((cert) => (
-                    <div key={cert.id} className="win95-inset bg-white p-3 text-sm flex justify-between items-center">
-                      <div>
-                        <h3 className="font-bold">
-                          {cert.url ? (
-                            <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-[var(--lf-accent)] underline hover:text-[#ff0000]">
-                              {cert.name}
-                            </a>
-                          ) : (
-                            cert.name
-                          )}
-                        </h3>
-                        <p className="text-xs mt-1 text-[var(--lf-accent)]">{cert.issuer}</p>
-                      </div>
-                      {cert.issueDate && (
-                        <span className="text-xs bg-[#c0c0c0] win95-outset px-2 py-1">
-                          {new Date(cert.issueDate).getFullYear()}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </CollapsibleList>
+        <div className={cn(well, "p-3 @md:p-4")}>
+          <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+            {certifications.map((cert) => (
+              <article
+                key={cert.id}
+                className={cn(
+                  "flex min-w-0 flex-col gap-1 border-t py-3 first:border-t-0 first:pt-0 @md:flex-row @md:items-baseline @md:justify-between @md:gap-4",
+                  rowRule,
+                )}
+              >
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-black">
+                    {cert.url ? (
+                      <a
+                        href={cert.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[var(--lf-accent)] underline underline-offset-2"
+                      >
+                        {cert.name}
+                      </a>
+                    ) : (
+                      cert.name
+                    )}
+                  </h3>
+                  <p className="mt-0.5 text-xs text-black/70">{cert.issuer}</p>
+                </div>
+                {cert.issueDate && (
+                  <p className="shrink-0 text-xs tabular-nums text-black/60">
+                    {formatMonthYear(cert.issueDate)}
+                  </p>
+                )}
+              </article>
+            ))}
+          </CollapsibleList>
+        </div>
       </Window>
     ) : null,
 
     achievements: achievements.length > 0 ? (
       <Window key="achievements" title={`${labels.achievements}.sys`}>
-
-                <CollapsibleList
-                  initial={3}
-                  wrapperClassName="space-y-2"
-                  buttonClassName="mt-4 win95-button px-4 py-1 text-sm font-bold w-full"
-                >
-                  {achievements.map((ach) => (
-                    <div key={ach.id} className="win95-inset bg-white p-3 text-sm flex items-start gap-3">
-                      <span className="text-lg">🏆</span>
-                      <div>
-                        <h3 className="font-bold"><RichText text={ach.title} /></h3>
-                        {ach.date && (
-                          <p className="text-xs mt-1">
-                            {new Date(ach.date).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </CollapsibleList>
+        <div className={cn(well, "p-3 @md:p-4")}>
+          <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+            {achievements.map((ach) => (
+              <article
+                key={ach.id}
+                className={cn(
+                  "flex items-start gap-3 border-t py-3 first:border-t-0 first:pt-0",
+                  rowRule,
+                )}
+              >
+                <Trophy className="mt-0.5 size-4 shrink-0 text-[var(--lf-accent)]" aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold leading-relaxed text-black">
+                    <RichText text={ach.title} />
+                  </p>
+                  {ach.date && (
+                    <p className="mt-0.5 text-xs text-black/60">{formatMonthYear(ach.date)}</p>
+                  )}
+                </div>
+              </article>
+            ))}
+          </CollapsibleList>
+        </div>
       </Window>
     ) : null,
 
     articles: articles.length > 0 ? (
-      <Window key="articles" id="writing" title={`Internet Explorer - ${labels.articles}`} icon={<Globe className="w-4 h-4" />}>
-
-            <CollapsibleList
-              initial={4}
-              wrapperClassName={cn(PROJECTS_GRID_2, "gap-4")}
-              buttonClassName="col-span-full mt-4 win95-button px-4 py-1 text-sm font-bold mx-auto block"
-            >
-              {articles.map((article) => (
-                <div key={article.id} className="win95-inset bg-white p-3 text-sm flex flex-col">
-                  <ArticleSourceLabel source={article.source} className="mb-1" />
-                  <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="text-[var(--lf-accent)] underline hover:text-[#ff0000] font-bold mb-2">
+      <Window
+        key="articles"
+        id="writing"
+        title={`Internet Explorer — ${labels.articles}`}
+        icon={<Globe className="size-4" />}
+      >
+        <div className={cn(well, "p-3 @md:p-4")}>
+          <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+            {articles.map((article) => (
+              <article
+                key={article.id}
+                className={cn("border-t py-4 first:border-t-0 first:pt-0", rowRule)}
+              >
+                <ArticleSourceLabel source={article.source} className="mb-1 text-black/50" />
+                <h3 className="text-base font-bold text-black">
+                  <a
+                    href={article.url}
+                    data-lf-track="article"
+                    data-lf-label={stripRichTextToPlain(article.title)}
+                    data-lf-id={article.id}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--lf-accent)] underline underline-offset-2"
+                  >
                     <RichText text={article.title} />
                   </a>
-                  {article.description && (
-                    <p className="text-xs mb-2 grow">{article.description}</p>
-                  )}
-                  <div className="text-[10px] text-gray-600 flex gap-2">
-                    {article.publishedAt && (
-                      <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
-                    )}
-                    {article.readTime != null && <span>{article.readTime} min</span>}
-                  </div>
-                </div>
-              ))}
-            </CollapsibleList>
+                </h3>
+                {article.description && (
+                  <p className="mt-1 max-w-2xl text-xs leading-6 text-black/80">
+                    {article.description}
+                  </p>
+                )}
+                <p className="mt-1.5 text-[11px] text-black/60">
+                  {article.publishedAt ? formatMonthYear(article.publishedAt) : null}
+                  {article.readTime != null ? (
+                    <span>
+                      {article.publishedAt ? ", " : null}
+                      {article.readTime} min read
+                    </span>
+                  ) : null}
+                </p>
+              </article>
+            ))}
+          </CollapsibleList>
+        </div>
       </Window>
     ) : null,
 
     profiles: hasProfiles ? (
-      <Window key="profiles" id="profiles" title={`Network - ${labels.profiles}`}>
-
-            <div className="win95-inset bg-white p-4">
-              <ProfileLinksSection
-                portfolio={portfolio}
-                profiles={socialProfiles}
-                chipClassName="win95-button px-3 py-1 text-xs font-bold text-black"
-                pillClassName="win95-button px-3 py-1 text-xs font-bold text-black"
-                titleClassName="font-bold text-black"
-                textClassName="text-xs text-black/80"
-              />
-            </div>
+      <Window key="profiles" id="profiles" title={`Network — ${labels.profiles}`}>
+        <div className={cn(well, "p-4")}>
+          <ProfileLinksSection
+            portfolio={portfolio}
+            profiles={socialProfiles}
+            chipClassName={chip}
+            pillClassName={cn(button, "py-1")}
+            titleClassName="text-sm font-bold text-black"
+            textClassName="text-xs text-black/70"
+          />
+        </div>
       </Window>
     ) : null,
 
     github: contributionCalendar ? (
-      <Window key="github" title={`MS-DOS Prompt - ${labels.github}`}>
-
-            <div className="win95-inset bg-black text-[#c0c0c0] p-4 overflow-x-auto custom-scrollbar">
-              <GitHubContributionHeatmap
-                calendar={contributionCalendar}
-                profileUrl={githubProfile?.url}
-                username={githubProfile?.username}
-                variant="minimal"
-                label={labels.github}
-              />
-            </div>
+      <Window
+        key="github"
+        title={`MS-DOS Prompt — ${labels.github}`}
+        icon={<Terminal className="size-4" />}
+      >
+        <div className="overflow-x-auto border border-[#808080] bg-black p-4 text-[#c0c0c0] shadow-[inset_1px_1px_0_#404040] custom-scrollbar">
+          <GitHubContributionHeatmap
+            calendar={contributionCalendar}
+            profileUrl={githubProfile?.url}
+            username={githubProfile?.username}
+            variant="minimal"
+            label={labels.github}
+          />
+        </div>
       </Window>
     ) : null,
   };
 
   return (
-    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[#3a6ea5] font-sans text-black selection:bg-[var(--lf-accent)] selection:text-white pb-16 relative")} style={accentRootStyle(primaryColor)}>
-      <div className="mx-auto max-w-5xl p-4 md:p-8 space-y-8">
-
-        {/* Header Window */}
+    <div
+      className={cn(
+        TEMPLATE_CONTAINER,
+        "relative flex min-h-screen flex-col bg-[#2d5a87] text-black selection:bg-[var(--lf-accent)] selection:text-white",
+      )}
+      style={{ ...accentRootStyle(primaryColor), fontFamily: SYSTEM_FONT }}
+    >
+      <main className="mx-auto w-full min-w-0 max-w-5xl grow space-y-6 p-4 pb-10 md:space-y-8 md:p-8 md:pb-14">
         <Window title="System Properties">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="grow">
-              <h1 className="text-3xl font-bold mb-2"><RichText text={portfolio.title} /></h1>
-              {portfolio.headline && (
-                <p className="text-sm mb-4"><RichText text={portfolio.headline} /></p>
+          <div className={cn(well, "min-w-0 p-5 @md:p-8")}>
+            <h1
+              className={cn(
+                HERO_TITLE_BASE,
+                "text-3xl font-bold leading-tight text-black @md:text-5xl",
               )}
+            >
+              <RichText text={portfolio.title} />
+            </h1>
+            {portfolio.headline && (
+              <p className="mt-3 max-w-2xl text-base leading-7 text-black/80 @md:text-lg">
+                <RichText text={portfolio.headline} />
+              </p>
+            )}
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                <ContactChips
-                  portfolio={portfolio}
-                  chipClassName="win95-button px-2 py-1 text-xs"
-                />
-              </div>
+            <Separator className="my-5 bg-[#d0d0d0]" />
 
-              <div className="flex flex-col gap-2">
-                <HeroProfileButtons
+            <div className="flex flex-col gap-3">
+              <HeroProfileButtons
+                profiles={socialProfiles}
+                className={cn(button, "py-1.5")}
+              />
+              <ContactChips
+                portfolio={portfolio}
+                chipClassName="text-sm text-black/70"
+              />
+              {hasNonHeroSocialProfiles(socialProfiles) && (
+                <SocialPills
                   profiles={socialProfiles}
-                  className="win95-button px-3 py-1 text-xs font-bold"
+                  showUsername
+                  excludeHeroPlatforms
+                  className="text-sm text-[var(--lf-accent)] underline underline-offset-2"
                 />
-                {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="win95-button px-3 py-1 text-xs font-bold"
-                  />
-                )}
-              </div>
+              )}
             </div>
           </div>
         </Window>
 
         {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
-        {customSections.length > 0 && customSections.map((cs) => (
-          <Window key={cs.id} title={`Custom - ${cs.label}`}>
-            <div className="win95-inset bg-white p-4">
-              <CustomSectionItems
-                items={cs.items}
-                titleClassName="font-bold text-sm"
-                textClassName="text-xs mt-1"
-                chipClassName="win95-outset bg-[#c0c0c0] px-2 py-0.5 text-[10px]"
-              />
-            </div>
-          </Window>
-        ))}
+        {customSections.length > 0 &&
+          customSections.map((cs) => (
+            <Window key={cs.id} title={`Custom — ${cs.label}`}>
+              <div className={cn(well, "p-4")}>
+                <CustomSectionItems
+                  items={cs.items}
+                  titleClassName="text-sm font-bold text-black"
+                  textClassName="text-xs leading-6 text-black/80"
+                  chipClassName={chip}
+                  buttonClassName={moreBtn}
+                />
+              </div>
+            </Window>
+          ))}
+      </main>
 
-      </div>
-
-      {/* Taskbar */}
+      {/* Taskbar: the template navigation. */}
       {navbarEnabled && (
-        <div className="sticky bottom-0 left-0 right-0 h-10 bg-[#c0c0c0] border-t-2 border-white z-50 flex items-center px-1 gap-1">
-          <div className="win95-button px-2 py-1 font-bold flex items-center gap-2 mr-4">
-            <div className="w-4 h-4 bg-linear-to-br from-[var(--lf-accent)] via-red-500 to-yellow-500" />
+        <div
+          className={cn(
+            "sticky bottom-0 z-50 flex h-11 items-center gap-2 border-t border-white bg-[#ececec] px-1.5",
+            "shadow-[0_-1px_0_#808080]",
+          )}
+        >
+          <div
+            aria-hidden
+            className={cn("flex shrink-0 items-center gap-2 border border-black bg-[#ececec] px-2.5 py-1 text-sm font-bold text-black", bevel)}
+          >
+            <span className="size-3.5 bg-[var(--lf-accent)]" />
             Start
           </div>
-          <div className="w-px h-6 bg-gray-400 border-r border-white mx-1" />
-          <TemplateNavbar
-            items={sections}
-            className="flex gap-1"
-            linkClassName="win95-button px-3 py-1 text-xs font-bold active:bg-[#c0c0c0]"
-          />
-          <div className="ml-auto win95-inset px-2 py-1 text-xs flex items-center">
-            {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <Separator orientation="vertical" className="h-6 bg-[#808080]" />
+          <div className="min-w-0 flex-1">
+            <TemplateNavbar
+              items={sections}
+              className="border-0 bg-transparent backdrop-blur-none"
+              linkClassName={cn(
+                "border border-black bg-[#ececec] px-3 py-1 text-xs font-semibold text-black hover:bg-white",
+                bevel,
+              )}
+            />
+          </div>
+          <div
+            aria-hidden
+            suppressHydrationWarning
+            className="hidden shrink-0 items-center border border-[#808080] px-2.5 py-1 text-xs text-black shadow-[inset_1px_1px_0_#808080] @md:flex"
+          >
+            {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </div>
         </div>
       )}
-
-      {/* Global Win95 Styles */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .win95-outset {
-          border-top: 2px solid #ffffff;
-          border-left: 2px solid #ffffff;
-          border-right: 2px solid #000000;
-          border-bottom: 2px solid #000000;
-          box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf;
-        }
-        .win95-inset {
-          border-top: 2px solid #808080;
-          border-left: 2px solid #808080;
-          border-right: 2px solid #ffffff;
-          border-bottom: 2px solid #ffffff;
-          box-shadow: inset 1px 1px 0 #000000, inset -1px -1px 0 #dfdfdf;
-        }
-        .win95-button {
-          background: #c0c0c0;
-          border-top: 2px solid #ffffff;
-          border-left: 2px solid #ffffff;
-          border-right: 2px solid #000000;
-          border-bottom: 2px solid #000000;
-          box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf;
-          cursor: pointer;
-        }
-        .win95-button:active {
-          border-top: 2px solid #000000;
-          border-left: 2px solid #000000;
-          border-right: 2px solid #ffffff;
-          border-bottom: 2px solid #ffffff;
-          box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf;
-          padding-top: calc(0.25rem + 1px);
-          padding-left: calc(0.75rem + 1px);
-          padding-bottom: calc(0.25rem - 1px);
-          padding-right: calc(0.75rem - 1px);
-        }
-      `}} />
     </div>
   );
 }
 
-function Window({ title, children, id, icon }: { title: string; children: ReactNode; id?: string; icon?: ReactNode }) {
+function Window({
+  title,
+  children,
+  id,
+  icon,
+  status,
+}: {
+  title: string;
+  children: ReactNode;
+  id?: string;
+  icon?: ReactNode;
+  status?: string;
+}) {
+  const control =
+    "flex size-5 items-center justify-center border border-black bg-[#ececec] text-black shadow-[inset_1px_1px_0_#ffffff,inset_-1px_-1px_0_#808080]";
   return (
-    <section id={id} className="win95-outset bg-[#c0c0c0] p-[2px] scroll-mt-12">
-      <div className="bg-[var(--lf-accent)] text-white px-2 py-1 flex items-center justify-between mb-[2px]">
-        <div className="flex items-center gap-2 font-bold text-sm">
-          {icon || <Terminal className="w-4 h-4" />}
-          {title}
+    <section id={id} className={cn("scroll-mt-12 min-w-0 p-[3px]", frame)}>
+      <div className="flex items-center justify-between gap-3 bg-[linear-gradient(90deg,var(--lf-accent),color-mix(in_srgb,var(--lf-accent)_45%,#000))] px-2 py-1 text-white">
+        <div className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+          <span className="shrink-0">{icon || <Terminal className="size-4" />}</span>
+          <span className="truncate">{title}</span>
         </div>
-        <div className="flex gap-[2px]">
-          <div className="win95-button w-4 h-4 flex items-center justify-center text-[10px] font-bold">_</div>
-          <div className="win95-button w-4 h-4 flex items-center justify-center text-[10px] font-bold">□</div>
-          <div className="win95-button w-4 h-4 flex items-center justify-center text-[10px] font-bold">×</div>
+        <div aria-hidden className="flex shrink-0 gap-1">
+          <span className={control}>
+            <Minus className="size-3" />
+          </span>
+          <span className={control}>
+            <Square className="size-2.5" />
+          </span>
+          <span className={control}>
+            <X className="size-3" />
+          </span>
         </div>
       </div>
-      <div className="p-2">
-        {children}
-      </div>
+      <div className="p-2.5 @md:p-3">{children}</div>
+      {status && (
+        <div className="mx-2.5 mb-2.5 border border-[#808080] px-2 py-0.5 text-[11px] text-black/70 shadow-[inset_1px_1px_0_#808080] @md:mx-3 @md:mb-3">
+          {status}
+        </div>
+      )}
     </section>
   );
 }
