@@ -28,6 +28,7 @@ const TEMPLATE_PREVIEW_GRADIENTS: Record<string, string> = {
   synthwave: "from-[#120458] to-[#000000]",
   artdeco: "from-[#070705] to-[#10100d]",
   gatsby: "from-[#0b132b] to-[#111c3d]",
+  lantern: "from-[#0a0a0a] to-[#1a1610]",
   blueprint: "from-[#003366] to-[#002244]",
   airy: "from-sky-100 to-slate-200",
   terracotta: "from-[#F4F1DE] to-[#E07A5F]/40",

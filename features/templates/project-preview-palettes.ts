@@ -254,6 +254,19 @@ export const TEMPLATE_PROJECT_PREVIEW: Record<string, TemplateProjectPreviewConf
     },
     variant: "dark",
   },
+  lantern: {
+    palette: {
+      bg: "#0a0a0a",
+      bgAlt: "#100f0d",
+      primary: "#bbaa78",
+      secondary: "#e8e8e8",
+      accent: "#1a1610",
+      surface: "#161513",
+      muted: "#303033",
+      stroke: "#bbaa78",
+    },
+    variant: "dark",
+  },
   blueprint: {
     palette: {
       bg: "#003366",

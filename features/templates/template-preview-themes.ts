@@ -227,6 +227,18 @@ const TEMPLATE_PREVIEW_THEMES: Record<string, TemplatePreviewTheme> = {
     urlBar: "#111c3d",
     dark: true,
   },
+  lantern: {
+    canvas: "#0a0a0a",
+    blobA: "rgba(187, 170, 120, 0.2)",
+    blobB: "rgba(187, 170, 120, 0.1)",
+    surface: "#100f0d",
+    hero: "rgba(187, 170, 120, 0.24)",
+    cards: ["rgba(187, 170, 120, 0.14)", "rgba(16, 15, 13, 0.95)", "rgba(48, 48, 51, 0.9)"],
+    lines: "rgba(187, 170, 120, 0.28)",
+    chrome: "#100f0d",
+    urlBar: "#161513",
+    dark: true,
+  },
   blueprint: {
     canvas: "#003366",
     blobA: "rgba(255, 255, 255, 0.08)",

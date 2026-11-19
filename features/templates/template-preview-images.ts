@@ -18,6 +18,7 @@ const TEMPLATE_PREVIEW_FILES: Record<string, string> = {
   synthwave: "synthwave.webp",
   artdeco: "artdeco.webp",
   gatsby: "artdeco.webp",
+  lantern: "lantern/cover.jpg",
   blueprint: "blueprint.webp",
   airy: "airy.webp",
   terracotta: "terracotta.webp",

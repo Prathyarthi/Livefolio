@@ -161,6 +161,14 @@ export const templateCatalog: Record<string, TemplateMeta> = {
     previewImage: getTemplatePreviewImagePath("gatsby"),
     category: "designer",
   },
+  lantern: {
+    id: "lantern",
+    name: "Lantern",
+    description:
+      "Soft dark homepage with a scenic cover, work chips, contribution panel, and rounded project shelves.",
+    previewImage: getTemplatePreviewImagePath("lantern"),
+    category: "general",
+  },
   blueprint: {
     id: "blueprint",
     name: "Blueprint",

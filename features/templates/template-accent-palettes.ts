@@ -44,6 +44,7 @@ const TEMPLATE_DEFAULT_ACCENTS: Record<string, string> = {
   synthwave: "#00f0ff",
   artdeco: "#c5a45c",
   gatsby: "#d4af37",
+  lantern: "#bbaa78",
   blueprint: "#60a5fa",
   airy: "#38bdf8",
   terracotta: "#e07a5f",
