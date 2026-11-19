@@ -71,7 +71,12 @@ export default function TemplatesPage() {
   }, []);
 
   const handleSelect = async (templateId: string) => {
-    if (allowedTemplateIds && !allowedTemplateIds.includes(templateId)) {
+    if (
+      accessTier !== "pro" &&
+      accessTier !== "trial" &&
+      allowedTemplateIds &&
+      !allowedTemplateIds.includes(templateId)
+    ) {
       toast.error("Upgrade to Pro to unlock this template.", {
         action: {
           label: "View Billing",
@@ -174,9 +179,13 @@ export default function TemplatesPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {templateCatalogList.map((template) => {
           const isActive = currentTemplate === template.id;
-          const isLocked = allowedTemplateIds
-            ? !allowedTemplateIds.includes(template.id)
-            : false;
+          const isLocked =
+            accessTier === "pro" || accessTier === "trial"
+              ? false
+              : Boolean(
+                  allowedTemplateIds &&
+                    !allowedTemplateIds.includes(template.id),
+                );
 
           return (
             <Card

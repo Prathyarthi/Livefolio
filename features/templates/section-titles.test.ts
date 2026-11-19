@@ -53,8 +53,8 @@ describe("every template renders the LinkedIn heading from labels", () => {
       }
     });
 
-  it("found all 27 templates", () => {
-    expect(templates.length).toBe(27);
+  it("found all 29 templates", () => {
+    expect(templates.length).toBe(29);
   });
 
   for (const file of templates) {

@@ -110,6 +110,9 @@ export default function PreviewPage() {
   const [allowedTemplateIds, setAllowedTemplateIds] = useState<string[] | null>(
     null
   );
+  const [accessTier, setAccessTier] = useState<"free" | "trial" | "pro" | null>(
+    null,
+  );
   const isMobile = useIsMobile();
   const [editOpen, setEditOpen] = useState(false);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
@@ -137,13 +140,18 @@ export default function PreviewPage() {
         const res = await fetch("/api/billing/me", { cache: "no-store" });
         if (!res.ok) return;
         const data = (await res.json().catch(() => ({}))) as {
-          access?: { allowedTemplateIds?: string[] };
+          access?: {
+            allowedTemplateIds?: string[];
+            tier?: "free" | "trial" | "pro";
+          };
         };
         if (cancelled) return;
         setAllowedTemplateIds(data.access?.allowedTemplateIds ?? null);
+        setAccessTier(data.access?.tier ?? null);
       } catch {
         if (cancelled) return;
         setAllowedTemplateIds(null);
+        setAccessTier(null);
       }
     };
     loadAccess();
@@ -154,13 +162,15 @@ export default function PreviewPage() {
 
   useEffect(() => {
     if (
+      accessTier !== "pro" &&
+      accessTier !== "trial" &&
       previewTemplate &&
       allowedTemplateIds &&
       !allowedTemplateIds.includes(previewTemplate)
     ) {
       setPreviewTemplate("minimal");
     }
-  }, [allowedTemplateIds, previewTemplate]);
+  }, [accessTier, allowedTemplateIds, previewTemplate]);
 
   const applyTemplatePreview = useCallback((next: string) => {
     const current = previewTemplate ?? portfolio?.templateId ?? "pulse";
@@ -172,7 +182,12 @@ export default function PreviewPage() {
   }, [portfolio?.templateId, previewTemplate]);
 
   const handleTemplatePreview = (next: string) => {
-    if (allowedTemplateIds && !allowedTemplateIds.includes(next)) {
+    if (
+      accessTier !== "pro" &&
+      accessTier !== "trial" &&
+      allowedTemplateIds &&
+      !allowedTemplateIds.includes(next)
+    ) {
       toast.error("Your free month has ended. Upgrade to Pro to unlock this template.");
       return;
     }
@@ -292,7 +307,11 @@ export default function PreviewPage() {
   );
 
   const isTemplateLocked = (templateId: string) =>
-    allowedTemplateIds ? !allowedTemplateIds.includes(templateId) : false;
+    accessTier === "pro" || accessTier === "trial"
+      ? false
+      : Boolean(
+          allowedTemplateIds && !allowedTemplateIds.includes(templateId),
+        );
 
   if (isLoading) {
     return (
@@ -331,7 +350,10 @@ export default function PreviewPage() {
 
   const effectiveTemplate = previewTemplate ?? portfolio.templateId ?? "pulse";
   const templateId =
-    allowedTemplateIds && !allowedTemplateIds.includes(effectiveTemplate)
+    accessTier !== "pro" &&
+    accessTier !== "trial" &&
+    allowedTemplateIds &&
+    !allowedTemplateIds.includes(effectiveTemplate)
       ? "minimal"
       : effectiveTemplate;
   const hasUnsavedTemplate =
@@ -389,17 +411,17 @@ export default function PreviewPage() {
   const showAccentPicker = true;
 
   return (
-    <div className="flex min-h-0 w-full max-w-full flex-1 flex-col gap-4 overflow-hidden lg:flex-row">
+    <div className="flex w-full max-w-full flex-1 flex-col gap-4 max-md:gap-0 lg:min-h-0 lg:flex-row lg:overflow-hidden">
       <PreviewEditSidebar
         open={editOpen}
         onOpenChange={setEditOpen}
         {...panelProps}
       />
 
-      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col gap-4 lg:overflow-hidden">
-        <div className="flex shrink-0 flex-col gap-3 rounded-[var(--radius-lg)] glass-panel p-3">
+      <div className="flex min-w-0 w-full flex-1 flex-col gap-4 max-md:gap-0 lg:min-h-0 lg:overflow-hidden">
+        <div className="flex shrink-0 flex-col gap-3 rounded-[var(--radius-lg)] glass-panel p-3 max-md:mx-[var(--space-5)] max-md:mt-[var(--space-5)] max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:shadow-none md:rounded-[var(--radius-lg)]">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between xl:items-center">
-            <div className="min-w-0 flex-1 px-2">
+            <div className="min-w-0 flex-1 px-2 max-md:px-0">
               <div className="flex items-center gap-2">
                 <span
                   className={cn(
@@ -453,7 +475,7 @@ export default function PreviewPage() {
             />
           </div>
             {showAccentPicker ? (
-              <div className="flex justify-end px-2">
+              <div className="flex justify-end px-2 max-md:px-0">
                 <AccentSwatches
                   value={effectiveAccent}
                   defaultHex={getTemplateDefaultAccent(templateId)}
@@ -463,11 +485,13 @@ export default function PreviewPage() {
             ) : null}
         </div>
 
-        <div className="-mx-[var(--space-5)] flex min-h-0 flex-1 flex-col overflow-hidden bg-surface-sunken sm:mx-0 sm:rounded-[var(--radius-lg)] sm:border sm:border-border-default sm:p-3 sm:shadow-[var(--shadow-modal)]">
+        <div className="flex flex-1 flex-col bg-surface-sunken max-md:mt-4 md:-mx-0 md:min-h-0 md:overflow-hidden md:rounded-[var(--radius-lg)] md:border md:border-border-default md:p-3 md:shadow-[var(--shadow-modal)] lg:min-h-0">
           <div
             className={cn(
-              "@container mx-auto min-h-0 min-w-0 w-full flex-1 overflow-x-clip overflow-y-auto bg-surface-base transition-[max-width] duration-200 ease-[var(--ease-out)] sm:rounded-[var(--radius-md)]",
-              device === "mobile" ? "max-w-[390px] sm:px-1" : "max-w-full"
+              "@container mx-auto min-w-0 w-full bg-surface-base transition-[max-width] duration-200 ease-[var(--ease-out)] max-md:max-w-none md:min-h-0 md:flex-1 md:overflow-x-clip md:overflow-y-auto md:rounded-[var(--radius-md)]",
+              device === "mobile"
+                ? "max-md:max-w-none md:max-w-[390px] md:px-1"
+                : "max-w-full"
             )}
           >
             <div className="min-w-0 overflow-x-clip">
@@ -476,7 +500,7 @@ export default function PreviewPage() {
           </div>
         </div>
 
-        <div className="shrink-0">
+        <div className="shrink-0 max-md:px-[var(--space-5)] max-md:pb-[var(--space-5)] max-md:pt-4">
           <FlowFooter
             previous={{ href: "/dashboard/import", label: "Previous: Import" }}
           />

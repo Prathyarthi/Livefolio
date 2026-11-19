@@ -1,555 +1,470 @@
-import { cn } from "@/lib/utils";
-import { getCustomSectionLabel, type SectionKey } from "@/features/templates/section-labels";
-import { stripRichTextToPlain } from "@/lib/rich-text";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 import {
-  formatDateRange,
-  groupSkillsByCategory,
-  getPlatformIcon,
-} from "@/features/templates/utils";
-import type { PortfolioData } from "@/features/templates/types";
+  developerPlexMono as plexMono,
+  developerPlexSans as plexSans,
+} from "@/features/templates/fonts/ibm-plex";
+import {
+  GitHubContributionHeatmap,
+  parseContributionCalendar,
+} from "@/features/templates/github-contribution-heatmap";
 import { getTemplateSectionLayout } from "@/features/templates/section-layouts";
 import {
   renderSections,
   resolveSectionLayout,
   type ReorderableSectionKey,
 } from "@/features/templates/section-order";
+import { getCustomSectionLabel, type SectionKey } from "@/features/templates/section-labels";
 import { resolveAccentColor } from "@/features/templates/template-accent-palettes";
-import styles from "./developer-template.module.css";
+import type { PortfolioData } from "@/features/templates/types";
 import {
-  GitHubContributionHeatmap,
-  parseContributionCalendar,
-} from "@/features/templates/github-contribution-heatmap";
+  formatDateRange,
+  getPlatformIcon,
+  groupSkillsByCategory,
+} from "@/features/templates/utils";
+import { cn } from "@/lib/utils";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import { Trophy } from "lucide-react";
-import { RichText,
+import {
+  RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
-  TechChip,
-  TechIcon,
   HeroProfileButtons,
-  PROJECT_CARD,
-  PROJECT_CARD_BODY,
-  PROJECT_CARD_HEADER,
-  PROJECT_CARD_META,
-  PROJECT_CARD_TITLE,
-  PROJECTS_GRID_2,
+  ProjectActions,
+  SocialPills,
+  TechChip,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
-  SocialPills,
   hasNonHeroSocialProfiles,
   visibleSocialProfiles,
 } from "@/features/templates/shared";
 import { CollapsibleList } from "@/features/templates/collapsible-list";
+import styles from "./developer-template.module.css";
 
-// import { getPreviewImage } from "@/lib/link-preview-code";
-import { TemplateProjectPreview } from "@/components/template-project-preview";
-import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+/**
+ * Developer — phosphor terminal
+ * Color: #0b0d0c console glass, #d7e0c8 warm phosphor, #7f8a78 muted output.
+ * Type: IBM Plex Mono for shell chrome, IBM Plex Sans for readable prose.
+ * Layout: restrained terminal frame, one lead project, log-like career history.
+ */
 
+const shellText = "text-[#d7e0c8]";
+const shellMuted = "text-[#7f8a78]";
+const shellFaint = "text-[#5f6a5a]";
+const shellLine = "border-[#d7e0c8]/12";
+const shellPanel = "border-[#d7e0c8]/10 bg-[#101410]/72";
+const bodyCopy = "font-[family-name:var(--font-developer-sans)] text-[#aeb9a4]";
+const mono = "font-[family-name:var(--font-developer-mono)]";
+const chipClass =
+  "rounded-none border border-[#d7e0c8]/12 bg-[#d7e0c8]/[0.025] px-2 py-0.5 font-[family-name:var(--font-developer-mono)] text-xs text-[#9faa96]";
+const moreButtonClass =
+  "mt-5 self-start rounded-none border border-[#d7e0c8]/14 bg-transparent px-3 py-1.5 font-[family-name:var(--font-developer-mono)] text-xs text-[#7f8a78] transition-colors hover:border-[var(--lf-accent)]/40 hover:text-[#d7e0c8]";
 
 export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
+  const {
+    portfolio,
+    experiences,
+    educations,
+    skills,
+    projects,
+    socialProfiles,
+    certifications,
+    achievements,
+    customSections,
+    livePreviewProjectIds,
+  } = data;
+
   // Terminal headings are shell commands; a renamed section shows as a comment.
   const customTitle = (key: SectionKey) => {
-    const title = getCustomSectionLabel(data.portfolio.customization, key);
-    return title ? <span className="ml-2 text-gray-500"># {title}</span> : null;
+    const title = getCustomSectionLabel(portfolio.customization, key);
+    return title ? <span className={cn("ml-2", shellFaint)}># {title}</span> : null;
   };
-  const { portfolio, experiences, educations, skills, projects, socialProfiles, certifications, achievements, customSections, livePreviewProjectIds } =
-    data;
+
   const skillsByCategory = groupSkillsByCategory(skills);
   const primaryColor = resolveAccentColor("developer", portfolio.customization);
-
-  // Extract stats from social profiles
   const githubProfile = socialProfiles.find(
-    (p) => p.platform.toLowerCase() === "github"
+    (profile) => profile.platform.toLowerCase() === "github",
   );
   const leetcodeProfile = socialProfiles.find(
-    (p) => p.platform.toLowerCase() === "leetcode"
+    (profile) => profile.platform.toLowerCase() === "leetcode",
   );
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const leetcodeStats = leetcodeProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(
-    githubStats?.contributionCalendar
+    githubStats?.contributionCalendar,
   );
+  const featuredProjects = projects.filter((project) => project.featured);
+  const orderedProjects =
+    featuredProjects.length > 0
+      ? [...featuredProjects, ...projects.filter((project) => !project.featured)]
+      : projects;
   const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const extraSocials = visibleSocialProfiles(socialProfiles, {
     excludeHeroPlatforms: true,
   });
-
   const resolved = resolveSectionLayout(
     getTemplateSectionLayout("developer"),
     portfolio.customization,
   );
+
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<p className="text-sm text-gray-600">guest@portfolio:~$ cat linkedin.json{customTitle("linkedin")}</p>}
+      heading={<ShellPrompt command="cat linkedin.json">{customTitle("linkedin")}</ShellPrompt>}
       classes={{
-            aboutList: "space-y-2 pl-5 text-[var(--lf-g-300-90)] leading-relaxed marker:text-[var(--lf-g-700)]",
-            aboutParagraph: "text-[var(--lf-g-300-90)] leading-relaxed",
-            postList: "list-disc space-y-2 pl-5 text-sm text-gray-300 leading-relaxed",
-            postParagraph: "text-sm text-gray-300 leading-relaxed",
-            descriptionParagraph: "text-sm text-gray-400 leading-relaxed",
-            descriptionList: "space-y-2 pl-5 text-sm text-gray-400 leading-relaxed marker:text-[var(--lf-g-900)]",
-          card: "rounded-lg border border-[var(--lf-g-900-40)] bg-gray-900/50 p-5",
-          title: "text-lg font-semibold text-[var(--lf-g-300)]",
-          text: "text-sm text-gray-400 leading-relaxed",
-          muted: "text-gray-600 text-xs",
-          chip: "rounded border border-[var(--lf-g-900-40)] px-2 py-0.5 text-xs text-[var(--lf-g-500-80)]",
-          link: "text-sm text-[var(--lf-g-300)] hover:underline",
-          section: "mx-auto max-w-5xl scroll-mt-24 px-5 py-14 sm:px-6 md:py-16",
+        aboutList: cn(
+          "flex flex-col gap-2 pl-5 leading-7 marker:text-[var(--lf-accent)]/70",
+          bodyCopy,
+        ),
+        aboutParagraph: cn("leading-7", bodyCopy),
+        postList: cn("list-disc flex flex-col gap-2 pl-5 text-sm leading-6 marker:text-[var(--lf-accent)]/70", bodyCopy),
+        postParagraph: cn("text-sm leading-6", bodyCopy),
+        descriptionParagraph: cn("text-sm leading-6", bodyCopy),
+        descriptionList: cn("flex flex-col gap-2 pl-5 text-sm leading-6 marker:text-[var(--lf-accent)]/70", bodyCopy),
+        card: cn("rounded-none border p-5", shellPanel),
+        title: cn("text-lg font-semibold", shellText),
+        text: cn("text-sm leading-6", bodyCopy),
+        muted: cn("text-xs", shellFaint),
+        chip: chipClass,
+        link: "text-sm text-[var(--lf-accent)] underline-offset-4 hover:underline",
+        section: "scroll-mt-28",
       }}
     />
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
-    about: portfolio.summary && (
-            <section key="about" id="about" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)] bg-gray-950/50">
-              <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
-                <p className="mb-4 text-sm text-gray-600">
-                  guest@portfolio:~$ cat summary.md{customTitle("about")}
-                </p>
-                <div className="rounded-lg border border-[var(--lf-g-900-50)] bg-gray-900/60 overflow-hidden">
-                  <div className="flex items-center gap-2 border-b border-[var(--lf-g-900-30)] bg-gray-900 px-4 py-2">
-                    <span className="h-3 w-3 rounded-full bg-red-500/60" />
-                    <span className="h-3 w-3 rounded-full bg-yellow-500/60" />
-                    <span className="h-3 w-3 rounded-full bg-green-500/60" />
-                    <span className="ml-3 text-xs text-gray-600">summary.md</span>
-                  </div>
-                  <div className="flex">
-                    <div className="hidden select-none border-r border-[var(--lf-g-900-30)] px-4 py-4 text-right text-sm text-gray-700 sm:block">
-                      {portfolio.summary.split("\n").length > 1
-                        ? portfolio.summary.split("\n").map((_, i) => (
-                          <div key={i}>{i + 1}</div>
-                        ))
-                        : [1, 2, 3].map((n) => <div key={n}>{n}</div>)}
-                    </div>
-                    <div className="p-4">
-                      <DescriptionBlock
-                        text={portfolio.summary}
-                        paragraphClassName="text-[var(--lf-g-300-90)] leading-relaxed whitespace-pre-wrap"
-                        listClassName="space-y-2 pl-5 text-[var(--lf-g-300-90)] leading-relaxed marker:text-[var(--lf-g-700)]"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          ),
-    projects: projects.length > 0 && (
-            <section key="projects" id="work" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)]">
-              <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
-                <p className="mb-8 text-sm text-gray-600">
-                  guest@portfolio:~$ ls -la ~/projects/{customTitle("projects")}
-                </p>
-                <CollapsibleList
-                  initial={4}
-                  wrapperClassName={cn(PROJECTS_GRID_2, "gap-5 @md:gap-6")}
-                  showLabel="cat ./more ({n})"
-                  hideLabel="collapse"
-                  buttonClassName="@md:col-span-2 mt-2 rounded border border-[var(--lf-g-900-40)] bg-gray-900/50 px-4 py-2 font-mono text-xs text-[var(--lf-g-500)] hover:border-[var(--lf-g-700-60)] hover:text-[var(--lf-g-300)] transition-colors"
-                >
-                  {projects.map((project) => (
-                    <div
-                      key={project.id}
-                      className={cn(
-                        PROJECT_CARD,
-                        "group rounded-lg border border-[var(--lf-g-900-40)] bg-gray-900/50 hover:border-[var(--lf-g-700-60)] hover:bg-gray-900/80 transition-all duration-300"
-                      )}
-                    >
-                      <TemplateProjectPreview
-                        templateId="developer"
-                        liveUrl={project.liveUrl ?? null}
-                        imageUrl={project.imageUrl ?? null}
-                        projectId={project.id}
-                        livePreviewProjectIds={livePreviewProjectIds}
-                        alt={stripRichTextToPlain(project.title)}
-                        loading="lazy"
-                        accentColor={primaryColor}
-                        containerClassName="bg-gray-950/80 border-b border-[var(--lf-g-900-40)]"
-                      />
-                      <div className={PROJECT_CARD_BODY}>
-                        <div className={PROJECT_CARD_HEADER}>
-                          <div className="min-w-0 flex-1">
-                            <div className={PROJECT_CARD_META}>
-                              <h3 className={cn(PROJECT_CARD_TITLE, "text-base font-semibold text-[var(--lf-g-300)] group-hover:text-[var(--lf-g-200)] transition-colors")}>
-                                <RichText text={project.title} />
-                              </h3>
-                              {project.featured && (
-                                <span className="shrink-0 rounded border border-yellow-700/50 bg-yellow-900/20 px-1.5 py-0.5 text-[10px] text-yellow-500 uppercase tracking-wider">
-                                  featured
-                                </span>
-                              )}
-                            </div>
-                            {project.language && (
-                              <div className="mt-1.5 flex items-center gap-1.5">
-                                <span className="h-2.5 w-2.5 rounded-full bg-[var(--lf-g-500)]" />
-                                <span className="text-xs text-gray-500">
-                                  {project.language}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex shrink-0 items-center gap-3 text-xs text-gray-500">
-                            {project.githubStars != null && project.githubStars > 0 && (
-                              <span className="flex items-center gap-1" title="Stars">
-                                <svg
-                                  className="h-3.5 w-3.5 text-yellow-500/70"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                {project.githubStars}
-                              </span>
-                            )}
-                            {project.githubForks != null && project.githubForks > 0 && (
-                              <span className="flex items-center gap-1" title="Forks">
-                                <svg
-                                  className="h-3.5 w-3.5 text-gray-500"
-                                  fill="currentColor"
-                                  viewBox="0 0 16 16"
-                                >
-                                  <path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm0 9.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm7.5-9.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM5 12.75v-1a4 4 0 0 1 4-4h1.25v-1A2.25 2.25 0 0 1 12.5 4.5V3.25a2.25 2.25 0 1 0-4.5 0v1.25A4 4 0 0 0 4 8.5v1a2.25 2.25 0 1 0 1 3.25ZM4.25 11a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM11.5 1a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z" />
-                                </svg>
-                                {project.githubForks}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+    about: portfolio.summary ? (
+      <SectionFrame key="about" id="about" command="cat summary.md" title={customTitle("about")}>
+        <div className={cn("overflow-hidden rounded-sm border", shellPanel)}>
+          <TerminalChrome title="summary.md" />
+          <div className="grid min-w-0 grid-cols-1 @md:grid-cols-[3.5rem_minmax(0,1fr)]">
+            <div className={cn("hidden select-none border-r px-4 py-5 text-right text-sm leading-7 @md:block", shellLine, shellFaint)}>
+              {lineNumbers(portfolio.summary).map((line) => (
+                <div key={line}>{line}</div>
+              ))}
+            </div>
+            <div className="min-w-0 p-5 @md:p-6">
+              <DescriptionBlock
+                text={portfolio.summary}
+                paragraphClassName={cn("whitespace-pre-line text-base leading-8 @md:text-lg", bodyCopy)}
+                listClassName={cn("flex flex-col gap-2 pl-5 text-base leading-8 @md:text-lg", bodyCopy, "marker:text-[var(--lf-accent)]/70")}
+              />
+            </div>
+          </div>
+        </div>
+      </SectionFrame>
+    ) : null,
 
-                        <DescriptionBlock
-                          text={project.description}
-                          paragraphClassName="mt-3 text-sm text-gray-400 leading-relaxed"
-                          listClassName="mt-3 space-y-2 pl-5 text-sm text-gray-400 leading-relaxed marker:text-[var(--lf-g-900)]"
-                        />
+    github: githubStats || leetcodeStats || contributionCalendar ? (
+      <SectionFrame key="github" command="neofetch --stats" title={customTitle("github")}>
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-[#d7e0c8]/10 bg-[#d7e0c8]/10 @md:grid-cols-4">
+          {githubStats?.public_repos != null && (
+            <StatBlock label="repos" value={String(githubStats.public_repos)} />
+          )}
+          {githubStats?.followers != null && (
+            <StatBlock label="followers" value={String(githubStats.followers)} />
+          )}
+          {githubStats?.following != null && (
+            <StatBlock label="following" value={String(githubStats.following)} />
+          )}
+          {githubStats?.stars != null && (
+            <StatBlock label="stars" value={String(githubStats.stars)} />
+          )}
+          {leetcodeStats?.solved != null && (
+            <StatBlock label="LC solved" value={String(leetcodeStats.solved)} />
+          )}
+          {leetcodeStats?.ranking != null && (
+            <StatBlock label="LC rank" value={String(leetcodeStats.ranking)} />
+          )}
+          {leetcodeStats?.acceptanceRate != null && (
+            <StatBlock label="acceptance" value={`${leetcodeStats.acceptanceRate}%`} />
+          )}
+        </div>
+        {contributionCalendar ? (
+          <GitHubContributionHeatmap
+            calendar={contributionCalendar}
+            profileUrl={githubProfile?.url}
+            username={githubProfile?.username}
+            variant="developer"
+            label="guest@portfolio:~$ gh activity --year"
+          />
+        ) : null}
+      </SectionFrame>
+    ) : null,
 
-                        {project.techStack.length > 0 && (
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {project.techStack.map((tech) => (
-                              <TechChip
-                                key={tech}
-                                name={tech}
-                                className="rounded bg-[var(--lf-g-900-20)] px-2 py-0.5 text-[11px] text-[var(--lf-g-500-80)] border border-[var(--lf-g-900-30)]"
-                              />
-                            ))}
-                          </div>
-                        )}
-
-                        <div className="mt-4 flex items-center gap-4">
-                          {project.sourceUrl && (
-                            <a
-                              href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-[var(--lf-g-600)] underline decoration-[var(--lf-g-900)] hover:text-[var(--lf-g-400)] transition-colors"
-                            >
-                              source
-                            </a>
-                          )}
-                          {project.liveUrl && (
-                            <a
-                              href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-[var(--lf-g-600)] underline decoration-[var(--lf-g-900)] hover:text-[var(--lf-g-400)] transition-colors"
-                            >
-                              live demo
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </CollapsibleList>
-              </div>
-            </section>
-          ),
-    experience: experiences.length > 0 && (
-            <section key="experience" id="experience" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)]">
-              <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
-                <p className="mb-8 text-sm text-gray-600">
-                  guest@portfolio:~$ git log --oneline --graph career.log{customTitle("experience")}
-                </p>
-                <div className="relative space-y-8 border-l-2 border-[var(--lf-g-900-50)] pl-6 ml-2">
-                  {experiences.map((exp) => {
-                    const hash = exp.id.slice(0, 7);
-                    return (
-                      <div key={exp.id} className="relative group">
-                        {/* Dot on timeline */}
-                        <div className="absolute -left-8 top-1 h-3 w-3 rounded-full border-2 border-[var(--lf-g-700)] bg-gray-950 group-hover:bg-[var(--lf-g-600)] transition-colors" />
-                        <div className="rounded-lg border border-[var(--lf-g-900-30)] bg-gray-900/40 p-5 hover:border-[var(--lf-g-800-60)] transition-colors">
-                          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                            <span className="text-yellow-500/80 text-xs">
-                              commit {hash}
-                            </span>
-                            {(exp.startDate || exp.endDate) && (
-                              <span className="text-gray-600 text-xs">
-                                {formatDateRange(exp.startDate, exp.endDate)}
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="mt-2 text-lg font-semibold text-[var(--lf-g-300)]">
-                            <RichText text={exp.role} />
-                          </h3>
-                          <p className="text-sm text-[var(--lf-g-600)]">
-                            @ <RichText text={exp.company} />
-                            {exp.location && (
-                              <span className="text-gray-600"> (<RichText text={exp.location} />)</span>
-                            )}
-                          </p>
-                          {exp.description && (
-                            <DescriptionBlock
-                              text={exp.description}
-                              paragraphClassName="mt-3 text-sm text-gray-400 leading-relaxed"
-                              listClassName="mt-3 space-y-2 pl-5 text-sm text-gray-400 leading-relaxed marker:text-[var(--lf-g-900)]"
-                            />
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </section>
-          ),
-    education: educations.length > 0 && (
-            <section key="education" className="border-b border-[var(--lf-g-900-30)]">
-              <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
-                <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ cat education.log{customTitle("education")}
-                </p>
-                <div className="space-y-4">
-                  {educations.map((edu) => (
-                    <div
-                      key={edu.id}
-                      className="rounded-lg border border-[var(--lf-g-900-30)] bg-gray-900/40 p-4"
-                    >
-                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                        <h3 className="text-[var(--lf-g-300)] font-semibold">
-                          <RichText text={edu.degree} />
-                          {edu.field && <span className="text-[var(--lf-g-500-70)]"> in <RichText text={edu.field} /></span>}
-                        </h3>
-                        {edu.gpa && (
-                          <span className="text-xs text-yellow-500/70">{edu.gpa}</span>
-                        )}
-                      </div>
-                      <p className="mt-1 text-sm text-gray-500">
-                        <RichText text={edu.institution} />
-                        {(edu.startDate || edu.endDate) && (
-                          <>
-                            <span className="text-gray-700"> | </span>
-                            <span className="text-gray-600">
-                              {formatDateRange(edu.startDate, edu.endDate)}
-                            </span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          ),
-    skills: skills.length > 0 && (
-            <section key="skills" className="border-b border-[var(--lf-g-900-30)]">
-              <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
-                <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ cat package.json | jq &apos;.dependencies&apos;{customTitle("skills")}
-                </p>
-                <div className="rounded-lg border border-[var(--lf-g-900-50)] bg-gray-900/60 overflow-hidden">
-                  <div className="flex items-center gap-2 border-b border-[var(--lf-g-900-30)] bg-gray-900 px-4 py-2">
-                    <span className="h-3 w-3 rounded-full bg-red-500/60" />
-                    <span className="h-3 w-3 rounded-full bg-yellow-500/60" />
-                    <span className="h-3 w-3 rounded-full bg-green-500/60" />
-                    <span className="ml-3 text-xs text-gray-600">skills.json</span>
-                  </div>
-                  <div className="p-5">
-                    <pre className="text-sm leading-7">
-                      <span className="text-gray-600">{"{"}</span>
-                      {"\n"}
-                      {Object.entries(skillsByCategory).map(([category, categorySkills], catIdx, catArr) => (
-                        <span key={category}>
-                          <span className="text-gray-600">{"  "}</span>
-                          <span className="text-[var(--lf-g-500-60)]">
-                            {"// "}
-                            {category}
-                          </span>
-                          {"\n"}
-                          {categorySkills.map((skill, i) => {
-                            const isLastSkill =
-                              catIdx === catArr.length - 1 &&
-                              i === categorySkills.length - 1;
-                            return (
-                              <span key={skill}>
-                                <span className="text-gray-600">{"  "}</span>
-                                <TechIcon name={skill} className="mr-1.5 inline h-3.5 w-3.5 align-[-2px]" />
-                                <span className="text-[var(--lf-g-300)]">
-                                  &quot;{skill}&quot;
-                                </span>
-                                <span className="text-gray-600">: </span>
-                                <span className="text-yellow-500/80">
-                                  &quot;*&quot;
-                                </span>
-                                {!isLastSkill && (
-                                  <span className="text-gray-600">,</span>
-                                )}
-                                {"\n"}
-                              </span>
-                            );
-                          })}
-                        </span>
-                      ))}
-                      <span className="text-gray-600">{"}"}</span>
-                    </pre>
-                  </div>
-                </div>
-              </div>
-            </section>
-          ),
-    certifications: certifications.length > 0 && (
-            <section key="certifications" className="border-b border-[var(--lf-g-900-30)]">
-              <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
-                <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ ls ~/certifications/{customTitle("certifications")}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  {certifications.map((cert) => (
-                    <div
-                      key={cert.id}
-                      className="rounded border border-[var(--lf-g-900-40)] bg-gray-900/40 px-4 py-3"
-                    >
-                      <p className="text-sm text-[var(--lf-g-300)]">
-                        {cert.url ? (
-                          <a
-                            href={cert.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline decoration-[var(--lf-g-900)] hover:text-[var(--lf-g-200)] transition-colors"
-                          >
-                            {cert.name}
-                          </a>
-                        ) : (
-                          cert.name
-                        )}
-                      </p>
-                      <p className="mt-0.5 text-xs text-gray-600">
-                        {cert.issuer}
-                        {cert.issueDate && ` | ${formatDateRange(cert.issueDate, null).split(" - ")[0]}`}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          ),
-    achievements: achievements.length > 0 && (
-            <section key="achievements" className="border-b border-[var(--lf-g-900-30)] bg-gray-950">
-              <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
-                <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ cat ~/achievements.txt{customTitle("achievements")}
-                </p>
-                <div className="space-y-3">
-                  {achievements.map((ach) => (
-                    <div key={ach.id} className="flex items-start gap-3 rounded border border-[var(--lf-g-900-40)] bg-gray-900/40 px-4 py-3">
-                      <Trophy className="h-4 w-4 text-[var(--lf-g-400)] mt-0.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-300 leading-relaxed"><RichText text={ach.title} /></p>
-                        {ach.date && (
-                          <p className="mt-1 text-xs text-gray-600">
-                            {new Date(ach.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          ),
-    profiles: hasProfiles && (
-            <section key="profiles" id="profiles" className="scroll-mt-24 border-b border-[var(--lf-g-900-30)] bg-gray-950/60">
-              <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-16">
-                <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ cat profiles.json{customTitle("profiles")}
-                </p>
-                <div className="rounded-lg border border-[var(--lf-g-900-40)] bg-gray-900/50 p-5">
-                  <p className="text-sm text-[var(--lf-g-300)]">connect</p>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Open the profiles below to verify identity, code, and contact details.
+    experience: experiences.length > 0 ? (
+      <SectionFrame key="experience" id="experience" command="tail -f career.log" title={customTitle("experience")}>
+        <CollapsibleList initial={5} wrapperClassName="flex flex-col" buttonClassName={moreButtonClass}>
+          {experiences.map((exp) => (
+            <article
+              key={exp.id}
+              className={cn(
+                "grid min-w-0 grid-cols-1 gap-3 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[15rem_minmax(0,1fr)] @md:gap-8",
+                shellLine,
+              )}
+            >
+              <p className={cn("text-sm tabular-nums", mono, shellFaint)}>
+                {formatDateRange(exp.startDate, exp.endDate) || "present"} | role @ company
+              </p>
+              <div className="min-w-0">
+                <h3 className={cn("text-xl font-semibold leading-snug", shellText)}>
+                  <RichText text={exp.role} />
+                  <span className={shellMuted}> @ </span>
+                  <RichText text={exp.company} />
+                </h3>
+                {exp.location ? (
+                  <p className={cn("mt-1 text-sm", mono, shellFaint)}>
+                    host: <RichText text={exp.location} />
                   </p>
-                  <div className="mt-5">
-                    <ContactChips
-                      portfolio={portfolio}
-                      chipClassName="rounded border border-[var(--lf-g-900-40)] bg-gray-950 px-3 py-1.5 text-sm text-gray-400"
-                    />
-                  </div>
-                  {extraSocials.length > 0 && (
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      {extraSocials.map((profile) => (
-                        <a
-                          key={`${profile.platform}-${profile.url}`}
-                          href={profile.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded border border-[var(--lf-g-900-40)] bg-gray-950 px-3 py-1.5 text-sm text-[var(--lf-g-400-80)] transition-colors hover:text-[var(--lf-g-300)]"
+                ) : null}
+                {exp.description ? (
+                  <DescriptionBlock
+                    text={exp.description}
+                    paragraphClassName={cn("mt-4 text-sm leading-7", bodyCopy)}
+                    listClassName={cn("mt-4 flex flex-col gap-2 pl-5 text-sm leading-7", bodyCopy, "marker:text-[var(--lf-accent)]/70")}
+                  />
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </SectionFrame>
+    ) : null,
+
+    skills: skills.length > 0 ? (
+      <SectionFrame key="skills" command="cat package.json | jq '.dependencies'" title={customTitle("skills")}>
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-sm border border-[#d7e0c8]/10 bg-[#d7e0c8]/10 @md:grid-cols-2 @lg:grid-cols-3">
+          {Object.entries(skillsByCategory).map(([category, categorySkills]) => (
+            <div key={category} className="min-w-0 bg-[#0d110e] p-5">
+              <p className={cn("mb-4 text-sm", mono, shellFaint)}>
+                <span className="text-[var(--lf-accent)]">~/</span>
+                {category}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {categorySkills.map((skill) => (
+                  <TechChip
+                    key={skill}
+                    name={skill}
+                    className={cn(chipClass, "inline-flex items-center gap-1.5")}
+                    iconClassName="size-3.5"
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </SectionFrame>
+    ) : null,
+
+    projects: orderedProjects.length > 0 ? (
+      <SectionFrame key="projects" id="work" command="ls -la ~/projects" title={customTitle("projects")}>
+        <CollapsibleList
+          initial={4}
+          wrapperClassName="grid grid-cols-1 gap-5 @lg:grid-cols-2"
+          showLabel="cat ./more ({n})"
+          hideLabel="collapse"
+          buttonClassName={moreButtonClass}
+        >
+          {orderedProjects.map((project) => (
+            <article key={project.id} className={cn("min-w-0 overflow-hidden rounded-sm border", shellPanel)}>
+              <TerminalChrome title={`./${stripRichTextToPlain(project.title)}`} />
+              <TemplateProjectPreview
+                templateId="developer"
+                liveUrl={project.liveUrl ?? null}
+                imageUrl={project.imageUrl ?? null}
+                projectId={project.id}
+                livePreviewProjectIds={livePreviewProjectIds}
+                alt={stripRichTextToPlain(project.title)}
+                loading="lazy"
+                accentColor={primaryColor}
+                containerClassName="border-b border-[#d7e0c8]/10 bg-[#090b09]"
+              />
+              <div className="p-5">
+                <div className="flex min-w-0 flex-col gap-4">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className={cn("min-w-0 text-xl font-semibold tracking-[-0.02em]", shellText)}>
+                        <RichText text={project.title} />
+                      </h3>
+                      {project.featured ? (
+                        <Badge
+                          variant="outline"
+                          className="h-auto rounded-none border-[var(--lf-accent)]/45 bg-transparent px-2 py-0.5 font-[family-name:var(--font-developer-mono)] text-xs font-medium tracking-normal text-[var(--lf-accent)]"
                         >
-                          {getPlatformIcon(profile.platform)}
-                          {profile.username && (
-                            <span className="text-gray-500"> ({profile.username})</span>
-                          )}
-                        </a>
+                          featured
+                        </Badge>
+                      ) : null}
+                    </div>
+                    {project.language ? (
+                      <p className={cn("mt-2 text-sm", mono, shellFaint)}>
+                        runtime: <span className={shellMuted}>{project.language}</span>
+                      </p>
+                    ) : null}
+                  </div>
+                  {project.description ? (
+                    <DescriptionBlock
+                      text={project.description}
+                      paragraphClassName={cn("text-sm leading-6", bodyCopy)}
+                      listClassName={cn("flex flex-col gap-1.5 pl-5 text-sm leading-6", bodyCopy, "marker:text-[var(--lf-accent)]/70")}
+                    />
+                  ) : null}
+                  {(project.techStack.length > 0 ||
+                    (project.githubStars != null && project.githubStars > 0) ||
+                    (project.githubForks != null && project.githubForks > 0)) && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {project.techStack.slice(0, 6).map((tech) => (
+                        <TechChip key={tech} name={tech} className={chipClass} />
                       ))}
+                      {project.githubStars != null && project.githubStars > 0 ? (
+                        <Badge variant="outline" className={cn("h-auto rounded-none px-2 py-0.5 tracking-normal", chipClass)}>
+                          {project.githubStars} stars
+                        </Badge>
+                      ) : null}
+                      {project.githubForks != null && project.githubForks > 0 ? (
+                        <Badge variant="outline" className={cn("h-auto rounded-none px-2 py-0.5 tracking-normal", chipClass)}>
+                          {project.githubForks} forks
+                        </Badge>
+                      ) : null}
                     </div>
                   )}
-                </div>
-              </div>
-            </section>
-          ),
-    github: (githubStats || leetcodeStats || contributionCalendar) && (
-            <section key="github" className="border-b border-[var(--lf-g-900-30)]">
-              <div className="mx-auto max-w-5xl px-5 py-10 sm:px-6 md:py-12">
-                <p className="mb-6 text-sm text-gray-600">
-                  guest@portfolio:~$ neofetch --stats{customTitle("github")}
-                </p>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                  {githubStats?.public_repos != null && (
-                    <StatBlock label="repos" value={String(githubStats.public_repos)} />
-                  )}
-                  {githubStats?.followers != null && (
-                    <StatBlock label="followers" value={String(githubStats.followers)} />
-                  )}
-                  {githubStats?.following != null && (
-                    <StatBlock label="following" value={String(githubStats.following)} />
-                  )}
-                  {githubStats?.stars != null && (
-                    <StatBlock label="total stars" value={String(githubStats.stars)} />
-                  )}
-                  {leetcodeStats?.solved != null && (
-                    <StatBlock label="LC solved" value={String(leetcodeStats.solved)} />
-                  )}
-                  {leetcodeStats?.ranking != null && (
-                    <StatBlock label="LC rank" value={String(leetcodeStats.ranking)} />
-                  )}
-                  {leetcodeStats?.acceptanceRate != null && (
-                    <StatBlock
-                      label="acceptance"
-                      value={`${leetcodeStats.acceptanceRate}%`}
-                    />
-                  )}
-                </div>
-                {contributionCalendar && (
-                  <GitHubContributionHeatmap
-                    calendar={contributionCalendar}
-                    profileUrl={githubProfile?.url}
-                    username={githubProfile?.username}
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName="rounded-none bg-[var(--lf-accent)] px-3 py-1.5 font-[family-name:var(--font-developer-mono)] text-xs text-[#0b0d0c] hover:bg-[var(--lf-accent)]/85"
+                    sourceClassName="rounded-none border border-[#d7e0c8]/16 bg-transparent px-3 py-1.5 font-[family-name:var(--font-developer-mono)] text-xs text-[#d7e0c8] hover:bg-[#d7e0c8]/5"
                   />
-                )}
+                </div>
               </div>
-            </section>
-          ),
+            </article>
+          ))}
+        </CollapsibleList>
+      </SectionFrame>
+    ) : null,
+
+    profiles: hasProfiles ? (
+      <SectionFrame key="profiles" id="profiles" command="cat profiles.json" title={customTitle("profiles")}>
+        <div className={cn("rounded-sm border p-5", shellPanel)}>
+          <p className={cn("text-sm", mono, shellText)}>connect</p>
+          <p className={cn("mt-2 max-w-[36rem] text-sm leading-6", bodyCopy)}>
+            Open the profiles below to verify identity, code, and contact details.
+          </p>
+          <div className="mt-5 flex flex-col gap-4">
+            <ContactChips portfolio={portfolio} chipClassName={chipClass} />
+            {extraSocials.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {extraSocials.map((profile) => (
+                  <a
+                    key={`${profile.platform}-${profile.url}`}
+                    href={profile.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(chipClass, "transition-colors hover:border-[var(--lf-accent)]/35 hover:text-[#d7e0c8]")}
+                  >
+                    {getPlatformIcon(profile.platform)}
+                    {profile.username ? <span className={shellFaint}> / {profile.username}</span> : null}
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </SectionFrame>
+    ) : null,
+
+    education: educations.length > 0 ? (
+      <SectionFrame key="education" command="cat education.log" title={customTitle("education")}>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreButtonClass}>
+          {educations.map((edu) => (
+            <article
+              key={edu.id}
+              className={cn("grid grid-cols-1 gap-3 border-t py-5 first:border-t-0 first:pt-0 @md:grid-cols-[12rem_minmax(0,1fr)]", shellLine)}
+            >
+              <p className={cn("text-sm tabular-nums", mono, shellFaint)}>
+                {formatDateRange(edu.startDate, edu.endDate) || "archived"}
+              </p>
+              <div className="min-w-0">
+                <h3 className={cn("text-base font-semibold", shellText)}>
+                  <RichText text={edu.degree} />
+                  {edu.field ? (
+                    <span className={shellMuted}>
+                      {" "}
+                      in <RichText text={edu.field} />
+                    </span>
+                  ) : null}
+                </h3>
+                <p className={cn("mt-1 text-sm", bodyCopy)}>
+                  <RichText text={edu.institution} />
+                  {edu.gpa ? <span className={shellFaint}> / {edu.gpa}</span> : null}
+                </p>
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </SectionFrame>
+    ) : null,
+
+    certifications: certifications.length > 0 ? (
+      <SectionFrame key="certifications" command="ls ~/certifications" title={customTitle("certifications")}>
+        <CollapsibleList initial={6} wrapperClassName="grid grid-cols-1 gap-px overflow-hidden rounded-sm border border-[#d7e0c8]/10 bg-[#d7e0c8]/10 @md:grid-cols-2" buttonClassName={moreButtonClass}>
+          {certifications.map((cert) => (
+            <article key={cert.id} className="min-w-0 bg-[#0d110e] p-5">
+              <h3 className={cn("text-sm font-semibold", shellText)}>
+                {cert.url ? (
+                  <a
+                    href={cert.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {cert.name}
+                  </a>
+                ) : (
+                  cert.name
+                )}
+              </h3>
+              <p className={cn("mt-1 text-xs", mono, shellFaint)}>
+                {cert.issuer}
+                {cert.issueDate ? ` | ${formatDateRange(cert.issueDate, null).split(" - ")[0]}` : null}
+              </p>
+            </article>
+          ))}
+        </CollapsibleList>
+      </SectionFrame>
+    ) : null,
+
+    achievements: achievements.length > 0 ? (
+      <SectionFrame key="achievements" command="cat ~/achievements.txt" title={customTitle("achievements")}>
+        <CollapsibleList initial={5} wrapperClassName="flex flex-col" buttonClassName={moreButtonClass}>
+          {achievements.map((ach) => (
+            <article
+              key={ach.id}
+              className={cn("flex items-start gap-3 border-t py-4 first:border-t-0 first:pt-0", shellLine)}
+            >
+              <Trophy className="mt-0.5 size-4 shrink-0 text-[var(--lf-accent)]" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className={cn("text-sm leading-6", bodyCopy)}>
+                  <RichText text={ach.title} />
+                </p>
+                {ach.date ? (
+                  <p className={cn("mt-1 text-xs", mono, shellFaint)}>
+                    {new Date(ach.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </p>
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </SectionFrame>
+    ) : null,
   };
 
   return (
@@ -557,170 +472,235 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
       className={cn(
         TEMPLATE_CONTAINER,
         styles.root,
-        "relative min-h-screen overflow-hidden bg-gray-950 font-mono text-[var(--lf-g-400)] selection:bg-[var(--lf-g-400-20)]",
+        plexMono.variable,
+        plexSans.variable,
+        "relative min-h-screen overflow-hidden bg-[#0b0d0c] font-[family-name:var(--font-developer-mono)] text-[#d7e0c8] antialiased selection:bg-[var(--lf-accent)]/25",
       )}
       style={{ ["--lf-accent" as string]: primaryColor }}
     >
-      <div className="pointer-events-none absolute inset-0 z-50 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)]" />
-      <header className="relative border-b border-[var(--lf-g-900-50)] bg-gray-950">
-        <div className="mx-auto max-w-5xl px-5 py-14 sm:px-6 md:py-20">
-          <div className="mb-2 text-sm text-gray-600">
-            guest@portfolio:~$
-          </div>
-          <div className="flex items-start gap-6 md:gap-8">
-            <div className="flex-1">
-              <p className="mb-1 text-gray-500 text-xs tracking-widest uppercase">
-                $ whoami
-              </p>
-              <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-xl @sm:text-2xl @md:text-3xl @lg:text-5xl font-bold text-[var(--lf-g-300)]">
-                <RichText text={portfolio.title} />
-              </h1>
-              <p className="mt-3 text-lg text-[var(--lf-g-500-80)]">
-                <span className="text-gray-600">{"// "}</span>
-                <RichText text={portfolio.headline} />
-              </p>
-              {portfolio.location && (
-                <p className="mt-2 text-sm text-gray-500">
-                  <span className="text-[var(--lf-g-700)]">location:</span> {portfolio.location}
-                </p>
-              )}
-              {portfolio.contactEmail && (
-                <p className="text-sm text-gray-500">
-                  <span className="text-[var(--lf-g-700)]">email:</span>{" "}
-                  <a
-                    href={`mailto:${portfolio.contactEmail}`}
-                    className="text-[var(--lf-g-400-70)] underline decoration-[var(--lf-g-800)] hover:text-[var(--lf-g-300)] transition-colors"
-                  >
-                    {portfolio.contactEmail}
-                  </a>
-                </p>
-              )}
-              <div className="mt-4 space-y-3">
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="rounded border border-[var(--lf-g-900-40)] bg-gray-900/70 px-3 py-1.5 text-sm text-[var(--lf-g-400-80)] transition-colors hover:text-[var(--lf-g-300)]"
-                />
-                {hasNonHeroSocialProfiles(socialProfiles) && (
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="rounded border border-[var(--lf-g-900-40)] bg-gray-900/70 px-3 py-1.5 text-sm text-[var(--lf-g-400-80)] transition-colors hover:text-[var(--lf-g-300)]"
-                  />
-                )}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(215,224,200,0.045),transparent_34rem)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(215,224,200,0.2)_1px,transparent_1px)] [background-size:100%_3px]" />
+
+      <div className="relative mx-auto max-w-5xl px-4 py-5 sm:px-6 md:px-8 md:py-8">
+        <div className={cn("overflow-hidden rounded-sm border shadow-[0_24px_80px_rgba(0,0,0,0.35)]", shellPanel)}>
+          <TerminalChrome title="~/portfolio" />
+          <header className="min-w-0 px-5 py-10 @md:px-8 @md:py-14">
+            <ShellPrompt command="whoami" />
+            <div className="mt-5 grid min-w-0 grid-cols-1 gap-8 @lg:grid-cols-[minmax(0,1fr)_18rem]">
+              <div className="min-w-0">
+                <h1 className="min-w-0 text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.04em] [overflow-wrap:anywhere] @md:text-6xl @lg:text-7xl">
+                  <RichText text={portfolio.title} />
+                </h1>
+                {portfolio.headline ? (
+                  <p className={cn("mt-5 max-w-[42rem] text-lg leading-8 @md:text-xl", bodyCopy)}>
+                    <span className={cn(mono, shellFaint)}># </span>
+                    <RichText text={portfolio.headline} />
+                  </p>
+                ) : null}
               </div>
-              <div className="mt-4 inline-block h-5 w-2.5 animate-pulse bg-[var(--lf-g-400)]" />
+              <aside className="min-w-0">
+                <div className={cn("rounded-sm border p-4", "border-[#d7e0c8]/10 bg-[#080a08]/45")}>
+                  <p className={cn("text-xs", mono, shellFaint)}>identity</p>
+                  <div className="mt-3 flex flex-col gap-2 text-sm">
+                    {portfolio.location ? (
+                      <p className={bodyCopy}>
+                        <span className={cn(mono, shellFaint)}>loc:</span> {portfolio.location}
+                      </p>
+                    ) : null}
+                    {portfolio.contactEmail ? (
+                      <a
+                        href={`mailto:${portfolio.contactEmail}`}
+                        className={cn(bodyCopy, "underline-offset-4 hover:text-[#d7e0c8] hover:underline")}
+                      >
+                        <span className={cn(mono, shellFaint)}>mail:</span> {portfolio.contactEmail}
+                      </a>
+                    ) : null}
+                    {portfolio.websiteUrl ? (
+                      <a
+                        href={portfolio.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(bodyCopy, "underline-offset-4 hover:text-[#d7e0c8] hover:underline")}
+                      >
+                        <span className={cn(mono, shellFaint)}>web:</span>{" "}
+                        {portfolio.websiteUrl.replace(/^https?:\/\//, "")}
+                      </a>
+                    ) : null}
+                  </div>
+                  <div className="mt-5 flex flex-col gap-3">
+                    <HeroProfileButtons
+                      profiles={socialProfiles}
+                      className={cn(chipClass, "transition-colors hover:border-[var(--lf-accent)]/35 hover:text-[#d7e0c8]")}
+                    />
+                    {hasNonHeroSocialProfiles(socialProfiles) ? (
+                      <SocialPills
+                        profiles={socialProfiles}
+                        showUsername
+                        excludeHeroPlatforms
+                        className={cn(chipClass, "transition-colors hover:border-[var(--lf-accent)]/35 hover:text-[#d7e0c8]")}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              </aside>
             </div>
-          </div>
-        </div>
-      </header>
+            <div className="mt-8 flex items-center gap-2">
+              <span className="text-[var(--lf-accent)]">guest@portfolio:~$</span>
+              <span className="h-5 w-2 animate-pulse bg-[var(--lf-accent)]" />
+            </div>
+          </header>
 
-      {navbarEnabled && (
-        <div className="border-b border-[var(--lf-g-900-40)] bg-gray-950/90">
-          <div className="mx-auto max-w-5xl px-5 py-2.5 sm:px-6 md:py-3">
-            <TemplateNavbar
-              items={sections}
-              className="rounded-full border-[var(--lf-g-900-40)] bg-gray-900/70"
-              linkClassName="rounded-full px-4 py-2 text-sm text-gray-500 transition-colors hover:bg-[var(--lf-g-950-50)] hover:text-[var(--lf-g-300)]"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* About / cat summary.md */}
-      {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
-
-      {customSections.map((cs) => (
-        <section key={cs.id} className="border-b border-[var(--lf-g-900-30)]">
-          <div className="mx-auto max-w-5xl px-6 py-16">
-            <p className="mb-6 text-sm text-gray-600">
-              guest@portfolio:~$ cat ~/{cs.sectionType}.txt
-            </p>
-            <div className="rounded-lg border border-[var(--lf-g-900-40)] bg-gray-900/50 p-5">
-              <p className="text-sm text-[var(--lf-g-300)] mb-4">{cs.label}</p>
-              <CustomSectionItems
-                items={cs.items}
-                titleClassName="font-semibold text-[var(--lf-g-300)]"
-                textClassName="text-sm text-gray-400"
-                chipClassName="rounded bg-[var(--lf-g-900-20)] px-2 py-0.5 text-[11px] text-[var(--lf-g-500-80)] border border-[var(--lf-g-900-30)]"
+          {navbarEnabled ? (
+            <div className={cn("border-t px-3 py-3 @md:px-5", shellLine)}>
+              <TemplateNavbar
+                items={sections}
+                className={cn("rounded-none border-0 bg-transparent backdrop-blur-none", mono)}
+                linkClassName={cn(
+                  "rounded-none px-2.5 py-1.5 text-sm text-[#7f8a78] transition-colors hover:bg-[#d7e0c8]/5 hover:text-[#d7e0c8]",
+                )}
               />
             </div>
-          </div>
-        </section>
-      ))}
+          ) : null}
+        </div>
 
-      {/* Contact / Social Footer */}
-      <footer className="bg-gray-950">
-        <div className="mx-auto max-w-5xl px-6 py-16">
-          <p className="mb-6 text-sm text-gray-600">
-            guest@portfolio:~$ cat .social-links
-          </p>
-          <div className="space-y-2">
+        <main className="mt-8 flex min-w-0 flex-col gap-8 @md:mt-10 @md:gap-10">
+          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
+
+          {customSections.map((cs) => (
+            <SectionFrame
+              key={cs.id}
+              command={`cat ~/${cs.sectionType}.txt`}
+              title={<span className={cn("ml-2", shellFaint)}># {cs.label}</span>}
+            >
+              <div className={cn("rounded-sm border p-5", shellPanel)}>
+                <CustomSectionItems
+                  items={cs.items}
+                  titleClassName={cn("font-semibold", shellText)}
+                  textClassName={cn("text-sm leading-6", bodyCopy)}
+                  chipClassName={chipClass}
+                  buttonClassName={moreButtonClass}
+                />
+              </div>
+            </SectionFrame>
+          ))}
+        </main>
+
+        <footer className={cn("mt-10 border-t py-8", shellLine)}>
+          <ShellPrompt command="cat .social-links" />
+          <div className="mt-5 flex flex-col gap-2">
             {extraSocials.map((profile) => (
-              <div key={profile.platform} className="text-sm">
-                <span className="text-[var(--lf-g-700)]">$</span>{" "}
-                <span className="text-gray-500">open</span>{" "}
+              <FooterCommand key={`${profile.platform}-${profile.url}`} command="open">
                 <a
                   href={profile.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--lf-g-400-80)] underline decoration-[var(--lf-g-900)] hover:text-[var(--lf-g-300)] transition-colors"
+                  className="underline-offset-4 hover:text-[#d7e0c8] hover:underline"
                 >
                   {getPlatformIcon(profile.platform)}
-                  {profile.username && (
-                    <span className="text-gray-500"> ({profile.username})</span>
-                  )}
+                  {profile.username ? <span className={shellFaint}> / {profile.username}</span> : null}
                 </a>
-              </div>
+              </FooterCommand>
             ))}
-            {portfolio.websiteUrl && (
-              <div className="text-sm">
-                <span className="text-[var(--lf-g-700)]">$</span>{" "}
-                <span className="text-gray-500">open</span>{" "}
+            {portfolio.websiteUrl ? (
+              <FooterCommand command="open">
                 <a
                   href={portfolio.websiteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--lf-g-400-80)] underline decoration-[var(--lf-g-900)] hover:text-[var(--lf-g-300)] transition-colors"
+                  className="underline-offset-4 hover:text-[#d7e0c8] hover:underline"
                 >
                   {portfolio.websiteUrl}
                 </a>
-              </div>
-            )}
-            {portfolio.phone && (
-              <div className="text-sm">
-                <span className="text-[var(--lf-g-700)]">$</span>{" "}
-                <span className="text-gray-500">call</span>{" "}
-                <a
-                  href={`tel:${portfolio.phone}`}
-                  className="text-[var(--lf-g-400-80)] underline decoration-[var(--lf-g-900)] hover:text-[var(--lf-g-300)] transition-colors"
-                >
+              </FooterCommand>
+            ) : null}
+            {portfolio.phone ? (
+              <FooterCommand command="call">
+                <a href={`tel:${portfolio.phone}`} className="underline-offset-4 hover:text-[#d7e0c8] hover:underline">
                   {portfolio.phone}
                 </a>
-              </div>
-            )}
+              </FooterCommand>
+            ) : null}
           </div>
-          <div className="mt-12 border-t border-[var(--lf-g-900-30)] pt-6">
-            <p className="text-xs text-gray-700">
-              <span className="text-[var(--lf-g-900)]">guest@portfolio:~$</span>{" "}
-              <span className="inline-block h-3.5 w-1.5 animate-pulse bg-[var(--lf-g-800)]" />
-            </p>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }
 
-/* ---- Sub-components ---- */
+function SectionFrame({
+  id,
+  command,
+  title,
+  children,
+}: {
+  id?: string;
+  command: string;
+  title?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section id={id} className="scroll-mt-28">
+      <div className="mb-5 flex flex-col gap-3">
+        <ShellPrompt command={command}>{title}</ShellPrompt>
+        <Separator className="bg-[#d7e0c8]/10" />
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ShellPrompt({
+  command,
+  children,
+}: {
+  command: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <p className={cn("text-sm", mono, shellMuted)}>
+      <span className="text-[var(--lf-accent)]">guest@portfolio:~$</span>{" "}
+      <span>{command}</span>
+      {children}
+    </p>
+  );
+}
+
+function TerminalChrome({ title }: { title: string }) {
+  return (
+    <div className={cn("flex items-center gap-2 border-b px-3 py-2", shellLine, "bg-[#080a08]/75")}>
+      <span className="size-2.5 rounded-full border border-[#d7e0c8]/18" />
+      <span className="size-2.5 rounded-full border border-[#d7e0c8]/18" />
+      <span className="size-2.5 rounded-full border border-[var(--lf-accent)]/45 bg-[var(--lf-accent)]/15" />
+      <span className={cn("ml-2 truncate text-xs", shellFaint)}>{title}</span>
+    </div>
+  );
+}
 
 function StatBlock({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded border border-[var(--lf-g-900-40)] bg-gray-900/40 px-4 py-3 text-center">
-      <p className="text-xl font-bold text-[var(--lf-g-300)]">{value}</p>
-      <p className="mt-0.5 text-[11px] uppercase tracking-wider text-gray-600">
-        {label}
-      </p>
+    <div className="min-w-0 bg-[#0d110e] p-4">
+      <p className={cn("text-2xl font-semibold tabular-nums", shellText)}>{value}</p>
+      <p className={cn("mt-1 text-xs", mono, shellFaint)}>{label}</p>
     </div>
   );
+}
+
+function FooterCommand({
+  command,
+  children,
+}: {
+  command: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <p className={cn("text-sm", bodyCopy)}>
+      <span className="text-[var(--lf-accent)]">$</span>{" "}
+      <span className={shellFaint}>{command}</span> {children}
+    </p>
+  );
+}
+
+function lineNumbers(text: string) {
+  const count = Math.max(text.split("\n").length, 3);
+  return Array.from({ length: count }, (_, index) => index + 1);
 }

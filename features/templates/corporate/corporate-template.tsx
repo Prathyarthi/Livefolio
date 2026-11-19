@@ -1,4 +1,8 @@
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
+import {
+  corporatePlexSans as plexSans,
+  corporatePlexSerif as plexSerif,
+} from "@/features/templates/fonts/ibm-plex";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { cn } from "@/lib/utils";
@@ -7,25 +11,17 @@ import {
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
 import { Trophy } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  RichText,
   buildTemplateSections,
-  ContactChips,
   CustomSectionItems,
   DescriptionBlock,
-  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
-  PROJECT_CARD,
-  PROJECT_CARD_BODY,
-  PROJECT_CARD_HEADER,
-  PROJECT_CARD_META,
-  PROJECT_CARD_TITLE,
-  HERO_HEADER_COLUMN,
-  HERO_HEADLINE_SCALE,
   HERO_TITLE_BASE,
-  HERO_TITLE_SCALE_6XL,
-  PROJECTS_GRID_2,
   SocialPills,
   hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
@@ -43,6 +39,21 @@ import {
 } from "../section-order";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
+/**
+ * Corporate - executive brief portfolio
+ * Color: cool slate paper, deep ink hero, restrained accent signals.
+ * Type: IBM Plex Serif for names and section titles, IBM Plex Sans for body copy.
+ * Layout: one lead work sample with a quiet index of supporting evidence.
+ */
+
+const paper = "bg-[#f4f5f7]";
+const ink = "text-[#0b1220]";
+const mute = "text-[#5c6578]";
+const hairline = "border-[#0b1220]/12";
+const heroPaper = "text-[#f4f5f7]";
+const heroMute = "text-[#c8ced8]";
+const moreButton =
+  "mt-6 self-start rounded-none border-0 bg-transparent px-0 py-1.5 text-sm font-medium text-[#5c6578] underline-offset-4 hover:text-[#0b1220] hover:underline";
 
 export function CorporateTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -62,14 +73,14 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
   const labels = getSectionLabels(portfolio.customization);
   const skillsByCategory = groupSkillsByCategory(skills);
   const githubProfile = socialProfiles.find(
-    (profile) => profile.platform.toLowerCase() === "github"
+    (profile) => profile.platform.toLowerCase() === "github",
   );
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(
-    githubStats?.contributionCalendar
+    githubStats?.contributionCalendar,
   );
   const featuredProjects = projects.filter((project) => project.featured);
-  const visibleProjects =
+  const orderedProjects =
     featuredProjects.length > 0
       ? [...featuredProjects, ...projects.filter((p) => !p.featured)]
       : projects;
@@ -84,133 +95,101 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
-            aboutList: "space-y-3 pl-5 text-base leading-8 text-slate-600 marker:text-slate-300",
-            aboutParagraph: "text-base leading-8 text-slate-600",
-            postList: "list-disc space-y-2 pl-5 text-sm text-slate-900 leading-relaxed",
-            postParagraph: "text-sm text-slate-900 leading-relaxed",
-            descriptionParagraph: "text-sm leading-7 text-slate-600",
-            descriptionList: "space-y-2 pl-5 text-sm leading-7 text-slate-600 marker:text-slate-300",
-          card: "rounded-2xl border border-slate-200 bg-slate-50/60 p-5",
-          title: "text-xl font-semibold text-slate-900",
-          text: "text-sm leading-7 text-slate-600",
-          muted: "text-xs uppercase tracking-[0.22em] text-slate-400",
-          chip: "rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700",
-          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
-          section: "scroll-mt-24 rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8",
+        aboutList: cn("flex flex-col gap-3 pl-5 text-base leading-8", mute, "marker:text-[#0b1220]/30"),
+        aboutParagraph: cn("text-base leading-8", mute),
+        postList: cn("list-disc flex flex-col gap-2 pl-5 text-sm leading-relaxed", ink),
+        postParagraph: cn("text-sm leading-relaxed", ink),
+        descriptionParagraph: cn("text-sm leading-7", mute),
+        descriptionList: cn("flex flex-col gap-2 pl-5 text-sm leading-7", mute, "marker:text-[#0b1220]/30"),
+        card: cn("rounded-none border bg-transparent p-5", hairline),
+        title: cn("font-[family-name:var(--font-corporate-serif)] text-xl font-medium", ink),
+        text: cn("text-sm leading-7", mute),
+        muted: cn("text-sm", mute),
+        chip: cn("rounded-none border px-2.5 py-1 text-sm", hairline, mute),
+        link: "text-sm font-medium text-[var(--lf-accent)] underline-offset-4 hover:underline",
+        section: cn("scroll-mt-28 border-t pt-12", hairline),
       }}
     />
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
-      <section
-        key="about"
-        id="about"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="about" id="about" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName="whitespace-pre-line text-base leading-8 text-slate-600"
-          listClassName="space-y-3 pl-5 text-base leading-8 text-slate-600 marker:text-slate-300"
+          paragraphClassName={cn("max-w-[44rem] whitespace-pre-line text-lg leading-8", mute)}
+          listClassName={cn("max-w-[44rem] flex flex-col gap-3 pl-5 text-lg leading-8", mute, "marker:text-[#0b1220]/30")}
         />
       </section>
     ) : null,
 
-    projects: visibleProjects.length > 0 ? (
-      <section
-        key="projects"
-        id="work"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+    projects: orderedProjects.length > 0 ? (
+      <section key="projects" id="work" className={cn("scroll-mt-28 min-w-0 border-t pt-12", hairline)}>
         <SectionHeading>{labels.projects}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName={cn(PROJECTS_GRID_2, "gap-5")}
-          buttonClassName="col-span-full mt-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
-        >
-          {visibleProjects.map((project) => (
+        <CollapsibleList initial={5} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
+          {orderedProjects.map((project) => (
             <article
               key={project.id}
-              className={cn(
-                PROJECT_CARD,
-                "rounded-[1.5rem] border border-slate-200 bg-slate-50 shadow-[0_10px_30px_rgba(15,23,42,0.04)]"
-              )}
+              className={cn("grid min-w-0 grid-cols-1 gap-4 border-t py-6 @md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_auto] @md:items-start @md:gap-8", hairline)}
             >
-              <TemplateProjectPreview templateId="corporate"
-                liveUrl={project.liveUrl ?? null}
-                imageUrl={project.imageUrl ?? null}
-                projectId={project.id}
-                livePreviewProjectIds={livePreviewProjectIds}
-                alt={stripRichTextToPlain(project.title)}
-                loading="lazy"
-               accentColor={primaryColor} />
-              <div className={PROJECT_CARD_BODY}>
-                <div className={PROJECT_CARD_HEADER}>
-                  <div className="min-w-0 flex-1">
-                    <div className={PROJECT_CARD_META}>
-                      <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-semibold text-slate-900")}>
-                        <RichText text={project.title} />
-                      </h3>
-                      {project.featured && (
-                        <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-white">
-                          Featured
-                        </span>
-                      )}
-                    </div>
-                    {project.language && (
-                      <p className="mt-2 text-xs uppercase tracking-[0.22em] text-slate-400">
-                        {project.language}
-                      </p>
-                    )}
-                  </div>
+              <div className="min-w-0 overflow-hidden rounded-none border border-[#0b1220]/10 bg-white">
+                <TemplateProjectPreview
+                  templateId="corporate"
+                  liveUrl={project.liveUrl ?? null}
+                  imageUrl={project.imageUrl ?? null}
+                  projectId={project.id}
+                  livePreviewProjectIds={livePreviewProjectIds}
+                  alt={stripRichTextToPlain(project.title)}
+                  loading="lazy"
+                  accentColor={primaryColor}
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <h3 className={cn("font-[family-name:var(--font-corporate-serif)] text-xl font-medium tracking-tight", ink)}>
+                    <RichText text={project.title} />
+                  </h3>
+                  {project.featured && (
+                    <Badge
+                      variant="outline"
+                      className="h-auto rounded-none border-[var(--lf-accent)] bg-transparent px-2 py-0.5 text-xs font-medium tracking-normal text-[var(--lf-accent)]"
+                    >
+                      Featured
+                    </Badge>
+                  )}
                 </div>
-
+                {project.language && <p className={cn("mt-1 text-sm", mute)}>{project.language}</p>}
                 {project.description && (
                   <DescriptionBlock
                     text={project.description}
-                    paragraphClassName="mt-4 text-sm leading-7 text-slate-600"
-                    listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-slate-600 marker:text-slate-300"
+                    paragraphClassName={cn("mt-2 text-sm leading-6", mute)}
+                    listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-6", mute, "marker:text-[#0b1220]/30")}
                   />
                 )}
-
-                {project.techStack.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {project.techStack.map((tech) => (
-                      <TechChip
-                        key={tech}
-                        name={tech}
-                        className="rounded-full bg-white px-3 py-1 text-xs text-slate-500 ring-1 ring-slate-200"
-                      />
-                    ))}
-                  </div>
+                {(project.techStack.length > 0 ||
+                  project.githubStars !== null ||
+                  project.githubForks !== null) && (
+                  <p className={cn("mt-3 text-xs leading-5", mute)}>
+                    {[
+                      ...project.techStack.slice(0, 6),
+                      project.githubStars !== null ? `${project.githubStars} stars` : null,
+                      project.githubForks !== null ? `${project.githubForks} forks` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </p>
                 )}
-
-                {(project.githubStars !== null || project.githubForks !== null) && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {project.githubStars !== null && (
-                      <span className="rounded-full bg-white px-3 py-1 text-xs text-slate-500 ring-1 ring-slate-200">
-                        {project.githubStars} stars
-                      </span>
-                    )}
-                    {project.githubForks !== null && (
-                      <span className="rounded-full bg-white px-3 py-1 text-xs text-slate-500 ring-1 ring-slate-200">
-                        {project.githubForks} forks
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                <div className="mt-5">
-                  <ProjectActions
-                    liveUrl={project.liveUrl}
-                    sourceUrl={project.sourceUrl}
-                    label={stripRichTextToPlain(project.title)}
-                    projectId={project.id}
-                    liveClassName="rounded-full bg-[var(--lf-accent)] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[color-mix(in_srgb,var(--lf-accent)_85%,black)]"
-                    sourceClassName="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
-                  />
-                </div>
+              </div>
+              <div className="shrink-0 @md:pt-1">
+                <ProjectActions
+                  liveUrl={project.liveUrl}
+                  sourceUrl={project.sourceUrl}
+                  label={stripRichTextToPlain(project.title)}
+                  projectId={project.id}
+                  liveClassName="rounded-none border border-[#0b1220]/20 bg-transparent px-3 py-1.5 text-xs font-medium text-[#0b1220] hover:border-[#0b1220]/45 hover:bg-transparent"
+                  sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-[#5c6578] hover:bg-transparent hover:text-[#0b1220] hover:underline"
+                />
               </div>
             </article>
           ))}
@@ -219,47 +198,38 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     experience: experiences.length > 0 ? (
-      <section
-        key="experience"
-        id="experience"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="experience" id="experience" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.experience}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-5"
-          buttonClassName="mt-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
           {experiences.map((exp) => (
             <article
               key={exp.id}
-              className="rounded-[1.5rem] border border-slate-200 bg-slate-50/60 p-5"
+              className={cn("grid grid-cols-1 gap-3 border-t py-7 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-900">
-                    <RichText text={exp.role} />
-                  </h3>
-                  <p className="mt-1 text-sm font-medium text-[color-mix(in_srgb,var(--lf-accent)_85%,black)]">
-                    <RichText text={exp.company} />
-                  </p>
-                  {exp.location && (
-                    <p className="mt-1 text-sm text-slate-500"><RichText text={exp.location} /></p>
-                  )}
-                </div>
-                {(exp.startDate || exp.endDate) && (
-                  <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
-                    {formatDateRange(exp.startDate, exp.endDate)}
-                  </p>
+              <p className={cn("pt-1 text-sm tabular-nums", mute)}>
+                {formatDateRange(exp.startDate, exp.endDate) || "Present"}
+              </p>
+              <div className="min-w-0">
+                <h3 className={cn("font-[family-name:var(--font-corporate-serif)] text-xl font-medium tracking-tight", ink)}>
+                  <RichText text={exp.role} />
+                </h3>
+                <p className="mt-1 text-sm font-medium text-[var(--lf-accent)]">
+                  <RichText text={exp.company} />
+                  {exp.location ? (
+                    <span className={mute}>
+                      {" in "}
+                      <RichText text={exp.location} />
+                    </span>
+                  ) : null}
+                </p>
+                {exp.description && (
+                  <DescriptionBlock
+                    text={exp.description}
+                    paragraphClassName={cn("mt-4 max-w-[42rem] text-sm leading-7", mute)}
+                    listClassName={cn("mt-4 max-w-[42rem] flex flex-col gap-2 pl-5 text-sm leading-7", mute, "marker:text-[#0b1220]/30")}
+                  />
                 )}
               </div>
-              {exp.description && (
-                <DescriptionBlock
-                  text={exp.description}
-                  paragraphClassName="mt-4 text-sm leading-7 text-slate-600"
-                  listClassName="mt-4 space-y-2 pl-5 text-sm leading-7 text-slate-600 marker:text-slate-300"
-                />
-              )}
             </article>
           ))}
         </CollapsibleList>
@@ -267,59 +237,37 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     articles: articles.length > 0 ? (
-      <section
-        key="articles"
-        id="writing"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="articles" id="writing" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.articles}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-4"
-          buttonClassName="mt-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
-        >
+        <CollapsibleList initial={5} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
           {articles.map((article) => (
-            <article
-              key={article.id}
-              className="rounded-[1.5rem] border border-slate-200 bg-slate-50/60 p-5"
-            >
-              <ArticleSourceLabel source={article.source} className="mb-2" />
-              <h3 className="text-base font-semibold text-slate-900">
-                <a
-                  href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-[var(--lf-accent)]"
-                >
-                  <RichText text={article.title} />
-                </a>
-              </h3>
-              {article.description && (
-                <p className="mt-2 text-sm leading-7 text-slate-600">{article.description}</p>
-              )}
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                {article.publishedAt && (
-                  <span>
-                    {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
-                )}
-                {article.readTime != null && <span>{article.readTime} min read</span>}
+            <article key={article.id} className={cn("border-t py-5", hairline)}>
+              <div className="flex min-w-0 flex-col gap-2 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8">
+                <h3 className={cn("min-w-0 font-[family-name:var(--font-corporate-serif)] text-lg font-medium tracking-tight", ink)}>
+                  <a
+                    href={article.url}
+                    data-lf-track="article"
+                    data-lf-label={stripRichTextToPlain(article.title)}
+                    data-lf-id={article.id}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline-offset-4 hover:text-[var(--lf-accent)] hover:underline"
+                  >
+                    <RichText text={article.title} />
+                  </a>
+                </h3>
+                <p className={cn("shrink-0 text-sm tabular-nums", mute)}>
+                  {formatArticleDate(article.publishedAt)}
+                  {article.readTime != null ? `${article.publishedAt ? ", " : ""}${article.readTime} min` : null}
+                </p>
               </div>
-              {article.tags.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {article.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-white px-3 py-1 text-xs text-slate-500 ring-1 ring-slate-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+              {article.description && (
+                <p className={cn("mt-2 max-w-[42rem] text-sm leading-6", mute)}>{article.description}</p>
+              )}
+              {(article.source || article.tags.length > 0) && (
+                <p className={cn("mt-2 text-xs leading-5", mute)}>
+                  {[article.source, ...article.tags].filter(Boolean).join(", ")}
+                </p>
               )}
             </article>
           ))}
@@ -328,26 +276,13 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     skills: skills.length > 0 ? (
-      <section
-        key="skills"
-        className="rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="skills" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.skills}</SectionHeading>
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-7 @md:grid-cols-2">
           {Object.entries(skillsByCategory).map(([category, names]) => (
-            <div key={category}>
-              <h3 className="mb-3 text-xs uppercase tracking-[0.22em] text-slate-500">
-                {category}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {names.map((name) => (
-                  <TechChip
-                    key={name}
-                    name={name}
-                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700"
-                  />
-                ))}
-              </div>
+            <div key={category} className="min-w-0">
+              <h3 className={cn("mb-2 font-[family-name:var(--font-corporate-serif)] text-lg font-medium", ink)}>{category}</h3>
+              <p className={cn("text-base leading-7", mute)}>{names.join(", ")}</p>
             </div>
           ))}
         </div>
@@ -355,32 +290,32 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     education: educations.length > 0 ? (
-      <section
-        key="education"
-        className="rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="education" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.education}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-4"
-          buttonClassName="mt-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
           {educations.map((edu) => (
             <article
               key={edu.id}
-              className="rounded-[1.5rem] border border-slate-200 bg-slate-50/60 p-5"
+              className={cn("grid grid-cols-1 gap-3 border-t py-6 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
             >
-              <h3 className="text-lg font-semibold text-slate-900">
-                <RichText text={edu.degree} />
-                {edu.field && <span className="text-slate-500"> in <RichText text={edu.field} /></span>}
-              </h3>
-              <p className="mt-2 text-sm text-slate-600"><RichText text={edu.institution} /></p>
-              {(edu.startDate || edu.endDate) && (
-                <p className="mt-2 text-xs uppercase tracking-[0.22em] text-slate-400">
-                  {formatDateRange(edu.startDate, edu.endDate)}
+              <p className={cn("pt-1 text-sm tabular-nums", mute)}>
+                {formatDateRange(edu.startDate, edu.endDate) || "Completed"}
+              </p>
+              <div className="min-w-0">
+                <h3 className={cn("font-[family-name:var(--font-corporate-serif)] text-lg font-medium", ink)}>
+                  <RichText text={edu.degree} />
+                  {edu.field && (
+                    <span className={mute}>
+                      {" "}
+                      in <RichText text={edu.field} />
+                    </span>
+                  )}
+                </h3>
+                <p className={cn("mt-1 text-sm", mute)}>
+                  <RichText text={edu.institution} />
                 </p>
-              )}
-              {edu.gpa && <p className="mt-3 text-xs text-slate-500">{edu.gpa}</p>}
+                {edu.gpa && <p className={cn("mt-2 text-xs", mute)}>{edu.gpa}</p>}
+              </div>
             </article>
           ))}
         </CollapsibleList>
@@ -388,43 +323,33 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     certifications: certifications.length > 0 ? (
-      <section
-        key="certifications"
-        className="rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="certifications" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.certifications}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-4"
-          buttonClassName="mt-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
           {certifications.map((cert) => (
             <article
               key={cert.id}
-              className="rounded-[1.5rem] border border-slate-200 bg-slate-50/60 p-5"
+              className={cn("flex min-w-0 flex-col gap-2 border-t py-5 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8", hairline)}
             >
-              <h3 className="text-base font-semibold text-slate-900">
-                {cert.url ? (
-                  <a
-                    href={cert.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-[var(--lf-accent)]"
-                  >
-                    {cert.name}
-                  </a>
-                ) : (
-                  cert.name
-                )}
-              </h3>
-              <p className="mt-1 text-sm text-slate-500">{cert.issuer}</p>
+              <div className="min-w-0">
+                <h3 className={cn("text-base font-medium", ink)}>
+                  {cert.url ? (
+                    <a
+                      href={cert.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline-offset-4 hover:text-[var(--lf-accent)] hover:underline"
+                    >
+                      {cert.name}
+                    </a>
+                  ) : (
+                    cert.name
+                  )}
+                </h3>
+                <p className={cn("mt-1 text-sm", mute)}>{cert.issuer}</p>
+              </div>
               {cert.issueDate && (
-                <p className="mt-2 text-xs uppercase tracking-[0.22em] text-slate-400">
-                  {new Date(cert.issueDate).toLocaleDateString("en-US", {
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
+                <p className={cn("shrink-0 text-sm tabular-nums", mute)}>{formatArticleDate(cert.issueDate)}</p>
               )}
             </article>
           ))}
@@ -433,32 +358,17 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     achievements: achievements.length > 0 ? (
-      <section
-        key="achievements"
-        className="rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="achievements" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.achievements}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="space-y-3"
-          buttonClassName="mt-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
           {achievements.map((ach) => (
-            <article
-              key={ach.id}
-              className="flex items-start gap-3 rounded-[1.5rem] border border-slate-200 bg-slate-50/60 p-5"
-            >
-              <Trophy className="h-4 w-4 text-[var(--lf-accent)] mt-0.5 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-900 leading-relaxed"><RichText text={ach.title} /></p>
-                {ach.date && (
-                  <p className="mt-1 text-xs text-slate-500">
-                    {new Date(ach.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
-                )}
+            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5", hairline)}>
+              <Trophy className="mt-0.5 size-4 shrink-0 text-[var(--lf-accent)]" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className={cn("text-sm leading-relaxed", ink)}>
+                  <RichText text={ach.title} />
+                </p>
+                {ach.date && <p className={cn("mt-1 text-xs", mute)}>{formatArticleDate(ach.date)}</p>}
               </div>
             </article>
           ))}
@@ -467,28 +377,21 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     profiles: hasProfiles ? (
-      <section
-        key="profiles"
-        id="profiles"
-        className="scroll-mt-24 rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="profiles" id="profiles" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.profiles}</SectionHeading>
         <ProfileLinksSection
           portfolio={portfolio}
           profiles={socialProfiles}
-          chipClassName="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600"
-          pillClassName="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-900"
-          titleClassName="text-slate-900"
-          textClassName="text-slate-500"
+          chipClassName={cn("rounded-none border px-2.5 py-1 text-sm", hairline, mute)}
+          pillClassName={cn("rounded-none border px-2.5 py-1 text-sm transition-colors hover:border-[#0b1220]/35", hairline, ink)}
+          titleClassName={ink}
+          textClassName={mute}
         />
       </section>
     ) : null,
 
     github: contributionCalendar ? (
-      <section
-        key="github"
-        className="rounded-[1.9rem] border border-white bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)] md:p-8"
-      >
+      <section key="github" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.github}</SectionHeading>
         <GitHubContributionHeatmap
           calendar={contributionCalendar}
@@ -502,90 +405,147 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
   };
 
   return (
-    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[#f3f6fb] text-slate-900 antialiased")} style={accentRootStyle(primaryColor)}>
-      <div className="mx-auto max-w-6xl px-5 py-8 sm:px-6 md:px-10 md:py-12">
-        <header className="overflow-hidden rounded-[2.2rem] border border-slate-200/40 bg-[#0f172a] text-white shadow-[0_30px_90px_rgba(15,23,42,0.18)]">
-          <div className="min-w-0">
-            <div className={cn(HERO_HEADER_COLUMN, "p-6 @md:p-10")}>
+    <div
+      className={cn(
+        TEMPLATE_CONTAINER,
+        plexSans.variable,
+        plexSerif.variable,
+        paper,
+        "min-h-screen font-[family-name:var(--font-corporate-sans)] antialiased",
+        ink,
+      )}
+      style={accentRootStyle(primaryColor)}
+    >
+      <header className="bg-[#0b1220] text-[#f4f5f7]">
+        <div className="mx-auto min-w-0 max-w-6xl px-5 py-12 sm:px-6 md:px-8 md:py-18">
+          <div className="grid min-w-0 grid-cols-1 gap-10 @lg:grid-cols-[minmax(0,1fr)_18rem] @lg:items-end">
+            <div className="min-w-0">
               <h1
                 className={cn(
                   HERO_TITLE_BASE,
-                  HERO_TITLE_SCALE_6XL,
-                  "max-w-3xl font-semibold tracking-tight text-white"
+                  "font-[family-name:var(--font-corporate-serif)] text-4xl font-medium leading-[1.04] tracking-[-0.035em] @sm:text-5xl @md:text-6xl @lg:text-7xl",
+                  heroPaper,
                 )}
               >
                 <RichText text={portfolio.title} />
               </h1>
               {portfolio.headline && (
-                <p className={cn(HERO_HEADLINE_SCALE, "mt-5 max-w-2xl text-slate-300")}>
+                <p className={cn("mt-6 max-w-[42rem] text-lg leading-8 @md:text-xl", heroMute)}>
                   <RichText text={portfolio.headline} />
                 </p>
               )}
+            </div>
 
-              <div className="mt-6">
-                <ContactChips
-                  portfolio={portfolio}
-                  chipClassName="rounded-full border border-white/10 bg-white/6 px-3.5 py-1.5 text-sm text-slate-300"
-                />
-              </div>
-
-              <div className="mt-4">
-                <HeroProfileButtons
-                  profiles={socialProfiles}
-                  className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm text-slate-100 transition-colors hover:bg-white/14"
-                />
-              </div>
-
+            <div className="flex min-w-0 flex-col gap-4 @lg:items-start">
+              <HeroContactLine portfolio={portfolio} />
+              <HeroProfileButtons
+                profiles={socialProfiles}
+                className="rounded-none border-0 bg-transparent px-0 py-0 text-sm text-[#f4f5f7] underline-offset-4 hover:bg-transparent hover:text-white hover:underline"
+              />
               {hasNonHeroSocialProfiles(socialProfiles) && (
-                <div className="mt-6">
-                  <SocialPills
-                    profiles={socialProfiles}
-                    showUsername
-                    excludeHeroPlatforms
-                    className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-white/12"
-                  />
-                </div>
+                <SocialPills
+                  profiles={socialProfiles}
+                  excludeHeroPlatforms
+                  className="rounded-none border-0 bg-transparent px-0 py-0 text-sm text-[#c8ced8] underline-offset-4 hover:bg-transparent hover:text-white hover:underline"
+                />
               )}
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
+      <main className="mx-auto min-w-0 max-w-6xl px-5 pb-16 pt-8 sm:px-6 md:px-8 md:pb-24 md:pt-10">
         {navbarEnabled && (
-          <div className="mt-6">
+          <div className="mb-10">
             <TemplateNavbar
               items={sections}
-              className="rounded-full border-white bg-white/90 shadow-[0_12px_30px_rgba(15,23,42,0.06)]"
-              linkClassName="rounded-full px-4 py-2 text-sm text-slate-500 transition-colors hover:bg-slate-900 hover:text-white"
+              className={cn("rounded-none border-x-0 border-b border-t-0 bg-transparent", hairline)}
+              linkClassName={cn("rounded-none px-0 py-3 text-sm transition-colors hover:text-[#0b1220]", mute)}
             />
           </div>
         )}
 
-        <div className="mt-6 space-y-6 md:mt-8 md:space-y-8">
+        <div className="flex min-w-0 flex-col gap-4">
           {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
 
         {customSections.length > 0 && (
-          <div className="mt-6 grid gap-6 md:mt-8 md:gap-8 md:grid-cols-2">
+          <div className={cn("mt-4 grid gap-12 border-t pt-12 md:grid-cols-2", hairline)}>
             {customSections.map((cs) => (
-              <section key={cs.id} className="rounded-[1.75rem] bg-white p-8 shadow-sm">
+              <section key={cs.id}>
                 <SectionHeading>{cs.label}</SectionHeading>
                 <CustomSectionItems
                   items={cs.items}
-                  titleClassName="font-medium text-slate-900"
-                  textClassName="text-sm text-slate-500"
-                  chipClassName="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-500"
+                  titleClassName={cn("font-medium", ink)}
+                  textClassName={cn("text-sm", mute)}
+                  chipClassName={cn("rounded-none border px-2 py-0.5 text-xs", hairline, mute)}
+                  buttonClassName={moreButton}
                 />
               </section>
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-6 text-2xl font-semibold tracking-tight text-slate-900">{children}</h2>
+    <div className="mb-8">
+      <h2 className={cn("font-[family-name:var(--font-corporate-serif)] text-2xl font-medium tracking-[-0.015em] md:text-[1.75rem]", ink)}>
+        {children}
+      </h2>
+      <Separator className="mt-4 bg-[#0b1220]/12" />
+    </div>
   );
+}
+
+function HeroContactLine({ portfolio }: { portfolio: PortfolioData["portfolio"] }) {
+  const items = [
+    portfolio.location ? { key: "location", label: portfolio.location } : null,
+    portfolio.contactEmail
+      ? { key: "email", label: portfolio.contactEmail, href: `mailto:${portfolio.contactEmail}` }
+      : null,
+    portfolio.phone ? { key: "phone", label: portfolio.phone, href: `tel:${portfolio.phone}` } : null,
+    portfolio.websiteUrl
+      ? {
+          key: "website",
+          label: portfolio.websiteUrl.replace(/^https?:\/\//, ""),
+          href: portfolio.websiteUrl,
+        }
+      : null,
+  ].filter(Boolean) as Array<{ key: string; label: string; href?: string }>;
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="flex min-w-0 flex-col gap-1.5 text-sm leading-6 text-[#c8ced8]">
+      {items.map((item) =>
+        item.href ? (
+          <a
+            key={item.key}
+            href={item.href}
+            target={item.href.startsWith("http") ? "_blank" : undefined}
+            rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+            className="max-w-full [overflow-wrap:anywhere] underline-offset-4 hover:text-white hover:underline"
+          >
+            {item.label}
+          </a>
+        ) : (
+          <span key={item.key} className="max-w-full [overflow-wrap:anywhere]">
+            {item.label}
+          </span>
+        ),
+      )}
+    </div>
+  );
+}
+
+function formatArticleDate(date: string | null) {
+  if (!date) return null;
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
 }

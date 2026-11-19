@@ -45,7 +45,7 @@ export const templateCatalog: Record<string, TemplateMeta> = {
     id: "creative",
     name: "Creative",
     description:
-      "Expressive gallery-style layout built for visual work and standout projects",
+      "Print-studio collage — soft color mats, Fraunces display, expressive project grid.",
     previewImage: getTemplatePreviewImagePath("creative"),
     category: "designer",
   },
@@ -149,9 +149,25 @@ export const templateCatalog: Record<string, TemplateMeta> = {
     id: "artdeco",
     name: "Art Deco",
     description:
-      "Luxury 1920s style with deep navy, gold accents, and geometric borders.",
+      "Restrained black and ivory with muted gold geometry and architectural type.",
     previewImage: getTemplatePreviewImagePath("artdeco"),
     category: "designer",
+  },
+  gatsby: {
+    id: "gatsby",
+    name: "Gatsby",
+    description:
+      "Luxury 1920s style with deep navy, gold accents, and geometric borders.",
+    previewImage: getTemplatePreviewImagePath("gatsby"),
+    category: "designer",
+  },
+  lantern: {
+    id: "lantern",
+    name: "Lantern",
+    description:
+      "Soft dark homepage with a scenic cover, work chips, contribution panel, and rounded project shelves.",
+    previewImage: getTemplatePreviewImagePath("lantern"),
+    category: "general",
   },
   blueprint: {
     id: "blueprint",
@@ -164,7 +180,8 @@ export const templateCatalog: Record<string, TemplateMeta> = {
   airy: {
     id: "airy",
     name: "Airy",
-    description: "Cloud-like, clean, soft shadows and sky blue accents.",
+    description:
+      "Open sky portfolio - name floats on the horizon, soft cloud shelves for work.",
     previewImage: getTemplatePreviewImagePath("airy"),
     category: "general",
   },

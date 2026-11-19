@@ -1,3 +1,4 @@
+import { Outfit, Space_Grotesk } from "next/font/google";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
@@ -8,8 +9,11 @@ import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
 } from "../github-contribution-heatmap";
-import { Trophy, ArrowUpRight } from "lucide-react";
-import { ArticleSourceLabel, RichText,
+import { Trophy } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArticleSourceLabel,
+  RichText,
   buildTemplateSections,
   ContactChips,
   CustomSectionItems,
@@ -20,13 +24,9 @@ import { ArticleSourceLabel, RichText,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
-  PROJECT_CARD_HEADER,
-  PROJECT_CARD_TITLE,
-  PROJECTS_GRID_3,
   SocialPills,
   hasNonHeroSocialProfiles,
   BENTO_GRID,
-  SPLIT_CARD_ROW,
   TEMPLATE_CONTAINER,
   TemplateNavbar,
   getSectionLabels,
@@ -36,6 +36,47 @@ import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
+/**
+ * Bento — modular desk
+ * Color: paper #eef0f2, ink #12141a, mute #667083, dark tile #12141a
+ * Type: Space Grotesk (titles) + Outfit (body)
+ * Layout: real bento proportions; one dark tile; no glow orbs / colored heading dots
+ */
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-bento-display",
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-bento-sans",
+});
+
+const tile =
+  "rounded-2xl border border-[#12141a]/10 bg-white p-6 @md:p-7";
+const tileDark =
+  "rounded-2xl border border-transparent bg-[#12141a] p-6 text-[#eef0f2] @md:p-7";
+const moreBtn =
+  "mt-4 self-start rounded-lg border border-[#12141a]/12 bg-transparent px-3 py-1.5 text-sm text-[#667083] transition-colors hover:border-[#12141a]/25 hover:text-[#12141a]";
+
+function TileTitle({
+  children,
+  dark = false,
+}: {
+  children: React.ReactNode;
+  dark?: boolean;
+}) {
+  return (
+    <h2
+      className={cn(
+        "mb-5 font-[family-name:var(--font-bento-display)] text-lg font-semibold tracking-tight @md:text-xl",
+        dark ? "text-[#eef0f2]" : "text-[#12141a]",
+      )}
+    >
+      {children}
+    </h2>
+  );
+}
 
 export function BentoTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -55,17 +96,18 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
   const labels = getSectionLabels(portfolio.customization);
   const groupedSkills = groupSkillsByCategory(skills);
   const githubProfile = socialProfiles.find(
-    (profile) => profile.platform.toLowerCase() === "github"
+    (profile) => profile.platform.toLowerCase() === "github",
   );
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(
-    githubStats?.contributionCalendar
+    githubStats?.contributionCalendar,
   );
   const featuredProjects = projects.filter((project) => project.featured);
   const visibleProjects =
     featuredProjects.length > 0
       ? [...featuredProjects, ...projects.filter((p) => !p.featured)]
       : projects;
+  const orderedProjects = visibleProjects;
   const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const resolved = resolveSectionLayout(
     getTemplateSectionLayout("bento"),
@@ -73,170 +115,136 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
   );
 
   return (
-    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-zinc-50 text-zinc-900 font-sans")} style={accentRootStyle(primaryColor)}>
+    <div
+      className={cn(
+        TEMPLATE_CONTAINER,
+        spaceGrotesk.variable,
+        outfit.variable,
+        "min-h-screen bg-[#eef0f2] font-[family-name:var(--font-bento-sans)] text-[#12141a] antialiased",
+      )}
+      style={accentRootStyle(primaryColor)}
+    >
       <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 md:px-8 md:pb-24 md:pt-12">
         {navbarEnabled && (
           <div className="mb-8 flex justify-center">
             <TemplateNavbar
               items={sections}
-              className="rounded-2xl bg-white/80 backdrop-blur-md shadow-sm border border-zinc-200/50"
-              linkClassName="px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 hover:bg-zinc-100/50 rounded-xl"
+              className="rounded-2xl border border-[#12141a]/10 bg-white"
+              linkClassName="rounded-xl px-4 py-2 text-sm text-[#667083] transition-colors hover:bg-[#12141a]/[0.04] hover:text-[#12141a]"
             />
           </div>
         )}
 
         <div className={BENTO_GRID}>
-          {/* Hero Bento Box */}
-          <header className="col-span-1 @md:col-span-2 @lg:col-span-3 row-span-2 rounded-3xl bg-white p-5 @md:p-8 shadow-sm border border-zinc-200/50 flex min-w-0 flex-col justify-between relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-linear-to-br from-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] to-[color-mix(in_srgb,var(--lf-accent)_18%,transparent)] rounded-full blur-3xl -mr-20 -mt-20 transition-transform duration-700 group-hover:scale-110" />
-            <div className="relative z-10">
-              <h1 className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-3xl @md:text-4xl @lg:text-6xl font-bold tracking-tight text-zinc-900 mb-4">
+          <header
+            className={cn(
+              tile,
+              "relative col-span-1 flex min-w-0 flex-col gap-6 overflow-hidden @md:col-span-2 @lg:col-span-3",
+            )}
+          >
+            <div>
+              <h1 className="min-w-0 text-balance font-[family-name:var(--font-bento-display)] text-3xl font-semibold tracking-[-0.03em] [overflow-wrap:anywhere] @sm:text-4xl @md:text-5xl @lg:text-6xl">
                 <RichText text={portfolio.title} />
               </h1>
               {portfolio.headline && (
-                <p className="text-base @md:text-lg @lg:text-2xl text-zinc-500 font-medium max-w-2xl mb-8">
+                <p className="mt-3 max-w-2xl text-base text-[#667083] @md:text-lg @lg:text-xl">
                   <RichText text={portfolio.headline} />
                 </p>
               )}
             </div>
-            <div className="relative z-10 flex flex-wrap items-center gap-4 mt-auto">
+            <div className="flex flex-wrap items-center gap-2">
               <ContactChips
                 portfolio={portfolio}
-                chipClassName="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:shadow"
+                chipClassName="rounded-xl border border-[#12141a]/10 bg-[#eef0f2] px-3 py-1.5 text-sm text-[#667083]"
               />
               <HeroProfileButtons
                 profiles={socialProfiles}
-                className="rounded-xl bg-zinc-900 px-5 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-zinc-800 hover:shadow-md"
+                className="rounded-xl bg-[#12141a] px-4 py-1.5 text-sm text-white transition-colors hover:bg-black"
               />
             </div>
           </header>
 
-          {/* About Bento Box */}
           {portfolio.summary && !resolved.isHidden("about") && (
-            <section id="about" className="col-span-1 @md:col-span-3 @lg:col-span-2 row-span-1 rounded-3xl bg-zinc-900 text-zinc-50 p-8 shadow-sm overflow-hidden relative">
-              <div className="absolute -right-10 -bottom-10 opacity-10">
-                <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-              </div>
-              <h2 className="text-lg font-semibold text-zinc-300 mb-4 flex items-center">
-                <span className="w-2 h-2 rounded-full bg-zinc-500 mr-2" />
-                {labels.about}
-              </h2>
+            <section id="about" className={cn(tileDark, "col-span-1 scroll-mt-24 @md:col-span-3 @lg:col-span-2")}>
+              <TileTitle dark>{labels.about}</TileTitle>
               <DescriptionBlock
                 text={portfolio.summary}
-                paragraphClassName="text-base leading-relaxed text-zinc-300"
-                listClassName="space-y-2 pl-5 text-base leading-relaxed text-zinc-300 marker:text-zinc-500"
+                paragraphClassName="text-base leading-7 text-[#eef0f2]/80"
+                listClassName="flex flex-col gap-2 pl-5 text-base leading-7 text-[#eef0f2]/80 marker:text-[#eef0f2]/35"
               />
             </section>
           )}
 
-          {/* Social Links Bento Box */}
           {hasNonHeroSocialProfiles(socialProfiles) && !resolved.isHidden("profiles") && (
-            <div className="col-span-1 @lg:col-span-2 row-span-1 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50 flex flex-col justify-center">
-              <h2 className="text-lg font-semibold text-zinc-400 mb-4 flex items-center">
-                <span className="w-2 h-2 rounded-full bg-zinc-300 mr-2" />
-                {labels.profiles}
-              </h2>
+            <div className={cn(tile, "col-span-1 flex flex-col justify-center @lg:col-span-2")}>
+              <TileTitle>{labels.profiles}</TileTitle>
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
                 excludeHeroPlatforms
-                className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-all hover:border-zinc-300 hover:bg-white hover:shadow-sm"
+                className="rounded-xl border border-[#12141a]/10 bg-[#eef0f2] px-3 py-2 text-sm text-[#12141a] transition-colors hover:bg-white"
               />
             </div>
           )}
 
-          {/* Work Bento Box (Spans full width) */}
-          {visibleProjects.length > 0 && !resolved.isHidden("projects") && (
-            <section id="work" className="col-span-1 @md:col-span-3 @lg:col-span-4 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-zinc-900 flex items-center">
-                  <span className="w-3 h-3 rounded-full bg-[var(--lf-accent)] mr-3" />
-                  {labels.projects}
-                </h2>
-              </div>
-
+          {orderedProjects.length > 0 && !resolved.isHidden("projects") && (
+            <section
+              id="work"
+              className={cn(tile, "col-span-1 scroll-mt-24 @md:col-span-3 @lg:col-span-4")}
+            >
+              <TileTitle>{labels.projects}</TileTitle>
               <CollapsibleList
-                initial={4}
-                wrapperClassName={PROJECTS_GRID_3}
-                buttonClassName="col-span-full mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-600 transition-colors hover:bg-white hover:border-zinc-300"
+                initial={3}
+                wrapperClassName="grid min-w-0 grid-cols-1 gap-4 @md:grid-cols-2 @lg:grid-cols-3 [&>*]:min-w-0"
+                buttonClassName={cn(moreBtn, "col-span-full")}
               >
-                {visibleProjects.map((project) => (
+                {orderedProjects.map((project) => (
                   <article
                     key={project.id}
                     className={cn(
                       PROJECT_CARD,
-                      "group flex flex-col rounded-2xl border border-zinc-200/60 bg-zinc-50/50 transition-all hover:border-zinc-300/80 hover:bg-white hover:shadow-md"
+                      "flex flex-col overflow-hidden rounded-xl border border-[#12141a]/10 bg-[#eef0f2]/70",
                     )}
                   >
-                    <TemplateProjectPreview templateId="bento"
+                    <TemplateProjectPreview
+                      templateId="bento"
                       liveUrl={project.liveUrl ?? null}
                       imageUrl={project.imageUrl ?? null}
                       projectId={project.id}
                       livePreviewProjectIds={livePreviewProjectIds}
                       alt={stripRichTextToPlain(project.title)}
                       loading="lazy"
-                      containerClassName="overflow-hidden bg-zinc-200"
-                      className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                     accentColor={primaryColor} />
-                    <div className={cn(PROJECT_CARD_BODY, "flex flex-col grow p-5")}>
-                      <div className={cn(PROJECT_CARD_HEADER, "mb-3")}>
-                        <div className="min-w-0 flex-1">
-                          <h3 className={cn(PROJECT_CARD_TITLE, "text-lg font-bold text-zinc-900 transition-colors group-hover:text-[var(--lf-accent)]")}>
-                            <RichText text={project.title} />
-                          </h3>
-                          {project.language && (
-                            <p className="mt-1 text-xs font-medium uppercase tracking-wider text-zinc-400">
-                              {project.language}
-                            </p>
-                          )}
-                        </div>
+                      accentColor={primaryColor}
+                    />
+                    <div className={cn(PROJECT_CARD_BODY, "flex grow flex-col p-4")}>
+                      <div className="flex flex-wrap items-baseline gap-2">
+                        <h3 className="font-[family-name:var(--font-bento-display)] text-base font-semibold">
+                          <RichText text={project.title} />
+                        </h3>
                         {project.featured && (
-                          <span className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--lf-accent)_10%,white)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--lf-accent)]">
+                          <Badge
+                            variant="outline"
+                            className="h-auto rounded-md border-[var(--lf-accent)]/40 bg-transparent px-1.5 py-0 font-sans text-[11px] font-medium tracking-normal text-[var(--lf-accent)]"
+                          >
                             Featured
-                          </span>
+                          </Badge>
                         )}
                       </div>
-
                       {project.description && (
                         <DescriptionBlock
                           text={project.description}
-                          paragraphClassName="mb-4 text-sm leading-relaxed text-zinc-500"
-                          listClassName="mb-4 space-y-1 pl-4 text-sm leading-relaxed text-zinc-500 marker:text-zinc-400"
+                          paragraphClassName="mt-2 text-sm leading-6 text-[#667083]"
+                          listClassName="mt-2 flex flex-col gap-1 pl-4 text-sm leading-6 text-[#667083]"
                         />
                       )}
-
-                      {(project.techStack.length > 0 ||
-                        project.githubStars !== null ||
-                        project.githubForks !== null) && (
-                          <div className="mb-4 flex flex-wrap gap-2">
-                            {project.techStack.map((tech) => (
-                              <TechChip
-                                key={tech}
-                                name={tech}
-                                className="rounded-md bg-zinc-100 px-2 py-1 text-[10px] font-medium text-zinc-600"
-                              />
-                            ))}
-                            {project.githubStars !== null && (
-                              <span className="rounded-md bg-zinc-100 px-2 py-1 text-[10px] font-medium text-zinc-600">
-                                {project.githubStars} stars
-                              </span>
-                            )}
-                            {project.githubForks !== null && (
-                              <span className="rounded-md bg-zinc-100 px-2 py-1 text-[10px] font-medium text-zinc-600">
-                                {project.githubForks} forks
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                      <div className="mt-auto border-t border-zinc-100 pt-4">
+                      <div className="mt-auto border-t border-[#12141a]/8 pt-3">
                         <ProjectActions
                           liveUrl={project.liveUrl}
                           sourceUrl={project.sourceUrl}
                           label={stripRichTextToPlain(project.title)}
                           projectId={project.id}
-                          liveClassName="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-zinc-800"
-                          sourceClassName="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+                          liveClassName="rounded-lg bg-[#12141a] px-3 py-1.5 text-xs font-medium text-white hover:bg-black"
+                          sourceClassName="rounded-lg border border-[#12141a]/12 bg-white px-3 py-1.5 text-xs font-medium text-[#667083] hover:text-[#12141a]"
                         />
                       </div>
                     </div>
@@ -246,40 +254,43 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             </section>
           )}
 
-          {/* Experience Bento Box */}
           {experiences.length > 0 && !resolved.isHidden("experience") && (
-            <section id="experience" className="col-span-1 @md:col-span-2 @lg:col-span-2 row-span-2 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
-              <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
-                <span className="w-3 h-3 rounded-full bg-[var(--lf-accent)] mr-3" />
-                {labels.experience}
-              </h2>
+            <section
+              id="experience"
+              className={cn(tile, "col-span-1 row-span-2 scroll-mt-24 @md:col-span-2 @lg:col-span-2")}
+            >
+              <TileTitle>{labels.experience}</TileTitle>
               <CollapsibleList
                 initial={4}
-                wrapperClassName="space-y-4"
-                buttonClassName="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-600 transition-colors hover:bg-white hover:border-zinc-300"
+                wrapperClassName="flex flex-col gap-4"
+                buttonClassName={moreBtn}
               >
                 {experiences.map((exp) => (
-                  <article
-                    key={exp.id}
-                    className="rounded-2xl border border-zinc-200/60 bg-zinc-50/50 p-5 transition-all hover:bg-white hover:shadow-sm"
-                  >
-                    <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-                      <h3 className="font-bold text-zinc-900"><RichText text={exp.role} /></h3>
+                  <article key={exp.id} className="border-t border-[#12141a]/10 pt-4 first:border-t-0 first:pt-0">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <h3 className="font-[family-name:var(--font-bento-display)] font-semibold">
+                        <RichText text={exp.role} />
+                      </h3>
                       {(exp.startDate || exp.endDate) && (
-                        <span className="whitespace-nowrap rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-500">
+                        <span className="text-xs tabular-nums text-[#667083]">
                           {formatDateRange(exp.startDate, exp.endDate)}
                         </span>
                       )}
                     </div>
-                    <p className="mb-2 text-sm font-medium text-[var(--lf-accent)]">
+                    <p className="mt-1 text-sm text-[var(--lf-accent)]">
                       <RichText text={exp.company} />
-                      {exp.location ? ` · ${stripRichTextToPlain(exp.location)}` : ""}
+                      {exp.location ? (
+                        <span className="text-[#667083]">
+                          {" · "}
+                          {stripRichTextToPlain(exp.location)}
+                        </span>
+                      ) : null}
                     </p>
                     {exp.description && (
                       <DescriptionBlock
                         text={exp.description}
-                        paragraphClassName="text-sm leading-relaxed text-zinc-600"
-                        listClassName="space-y-1 pl-4 text-sm leading-relaxed text-zinc-600 marker:text-zinc-400"
+                        paragraphClassName="mt-2 text-sm leading-6 text-[#667083]"
+                        listClassName="mt-2 flex flex-col gap-1 pl-4 text-sm leading-6 text-[#667083]"
                       />
                     )}
                   </article>
@@ -288,24 +299,26 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             </section>
           )}
 
-          {/* Skills Bento Box */}
           {skills.length > 0 && !resolved.isHidden("skills") && (
-            <section className="col-span-1 @md:col-span-1 @lg:col-span-2 row-span-1 rounded-3xl bg-[var(--lf-accent)] p-8 shadow-sm text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-black/10 rounded-full blur-2xl -ml-20 -mb-20" />
-              <h2 className="text-xl font-bold text-white mb-6 relative z-10">{labels.skills}</h2>
-              <div className="space-y-5 relative z-10">
+            <section
+              className={cn(
+                "col-span-1 overflow-hidden rounded-2xl p-6 text-white @md:col-span-1 @lg:col-span-2 @md:p-7",
+              )}
+              style={{ background: "var(--lf-accent)" }}
+            >
+              <h2 className="mb-5 font-[family-name:var(--font-bento-display)] text-lg font-semibold tracking-tight @md:text-xl">
+                {labels.skills}
+              </h2>
+              <div className="flex flex-col gap-5">
                 {Object.entries(groupedSkills).map(([category, names]) => (
                   <div key={category}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/70">
-                      {category}
-                    </h3>
+                    <h3 className="mb-2 text-sm text-white/75">{category}</h3>
                     <div className="flex flex-wrap gap-2">
                       {names.map((name) => (
                         <TechChip
                           key={name}
                           name={name}
-                          className="rounded-xl border border-white/10 bg-white/20 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+                          className="rounded-lg border border-white/15 bg-white/15 px-2.5 py-1 text-sm text-white"
                         />
                       ))}
                     </div>
@@ -315,32 +328,35 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             </section>
           )}
 
-          {/* Education Bento Box */}
           {educations.length > 0 && !resolved.isHidden("education") && (
-            <section className="col-span-1 @md:col-span-2 @lg:col-span-2 row-span-1 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
-              <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
-                <span className="w-3 h-3 rounded-full bg-orange-500 mr-3" />
-                {labels.education}
-              </h2>
+            <section className={cn(tile, "col-span-1 @md:col-span-2 @lg:col-span-2")}>
+              <TileTitle>{labels.education}</TileTitle>
               <CollapsibleList
                 initial={4}
-                wrapperClassName="space-y-4"
-                buttonClassName="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-600 transition-colors hover:bg-white hover:border-zinc-300"
+                wrapperClassName="flex flex-col gap-4"
+                buttonClassName={moreBtn}
               >
                 {educations.map((edu) => (
-                  <article key={edu.id} className="p-4 rounded-2xl bg-zinc-50 border border-zinc-100">
-                    <h3 className="font-bold text-zinc-900">
+                  <article key={edu.id} className="border-t border-[#12141a]/10 pt-4 first:border-t-0 first:pt-0">
+                    <h3 className="font-[family-name:var(--font-bento-display)] font-semibold">
                       <RichText text={edu.degree} />
-                      {edu.field && <span className="text-zinc-500 font-medium"> in <RichText text={edu.field} /></span>}
-                    </h3>
-                    <p className="text-sm font-medium text-orange-600 mt-1"><RichText text={edu.institution} /></p>
-                    <div className="flex items-center justify-between mt-2">
-                      {(edu.startDate || edu.endDate) && (
-                        <p className="text-xs font-medium text-zinc-500">
-                          {formatDateRange(edu.startDate, edu.endDate)}
-                        </p>
+                      {edu.field && (
+                        <span className="font-normal text-[#667083]">
+                          {" "}
+                          in <RichText text={edu.field} />
+                        </span>
                       )}
-                      {edu.gpa && <p className="text-xs font-bold text-zinc-700 bg-zinc-200 px-2 py-0.5 rounded">{edu.gpa}</p>}
+                    </h3>
+                    <p className="mt-1 text-sm text-[#667083]">
+                      <RichText text={edu.institution} />
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[#667083]">
+                      {(edu.startDate || edu.endDate) && (
+                        <span className="tabular-nums">
+                          {formatDateRange(edu.startDate, edu.endDate)}
+                        </span>
+                      )}
+                      {edu.gpa && <span>{edu.gpa}</span>}
                     </div>
                   </article>
                 ))}
@@ -348,54 +364,57 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             </section>
           )}
 
-          {/* Articles Bento Box */}
           {articles.length > 0 && !resolved.isHidden("articles") && (
-            <section id="writing" className="col-span-1 @md:col-span-1 @lg:col-span-2 row-span-1 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
-              <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
-                <span className="w-3 h-3 rounded-full bg-green-500 mr-3" />
-                {labels.articles}
-              </h2>
+            <section
+              id="writing"
+              className={cn(tile, "col-span-1 scroll-mt-24 @md:col-span-1 @lg:col-span-2")}
+            >
+              <TileTitle>{labels.articles}</TileTitle>
               <CollapsibleList
                 initial={4}
-                wrapperClassName="space-y-4"
-                buttonClassName="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-600 transition-colors hover:bg-white hover:border-zinc-300"
+                wrapperClassName="flex flex-col gap-3"
+                buttonClassName={moreBtn}
               >
                 {articles.map((article) => (
-                  <article key={article.id} className="group">
-                    <a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="block p-4 rounded-2xl hover:bg-zinc-50 transition-colors border border-transparent hover:border-zinc-200/60">
-                      <ArticleSourceLabel source={article.source} className="mb-2" />
-                      <h3 className="font-bold text-zinc-900 group-hover:text-green-600 transition-colors flex items-center justify-between">
-                        <span className="truncate pr-4"><RichText text={article.title} /></span>
-                        <ArrowUpRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-green-600" />
-                      </h3>
-                      <div className="flex items-center gap-3 mt-2 text-xs font-medium text-zinc-500">
-                        {article.publishedAt && (
-                          <span>
-                            {new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                          </span>
-                        )}
-                        {article.readTime != null && (
-                          <span className="flex items-center gap-1">
-                            <span className="w-1 h-1 rounded-full bg-zinc-300" />
-                            {article.readTime} min read
-                          </span>
-                        )}
-                      </div>
-                    </a>
+                  <article key={article.id} className="border-t border-[#12141a]/10 pt-3 first:border-t-0 first:pt-0">
+                    <ArticleSourceLabel source={article.source} className="mb-1 text-[#667083]" />
+                    <h3 className="font-[family-name:var(--font-bento-display)] font-semibold">
+                      <a
+                        href={article.url}
+                        data-lf-track="article"
+                        data-lf-label={stripRichTextToPlain(article.title)}
+                        data-lf-id={article.id}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline-offset-4 hover:underline"
+                      >
+                        <RichText text={article.title} />
+                      </a>
+                    </h3>
+                    <p className="mt-1 text-xs tabular-nums text-[#667083]">
+                      {article.publishedAt
+                        ? new Date(article.publishedAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : null}
+                      {article.readTime != null ? (
+                        <span>
+                          {article.publishedAt ? " · " : null}
+                          {article.readTime} min
+                        </span>
+                      ) : null}
+                    </p>
                   </article>
                 ))}
               </CollapsibleList>
             </section>
           )}
 
-          {/* GitHub Activity Bento Box */}
           {contributionCalendar && !resolved.isHidden("github") && (
-            <section className="col-span-1 @md:col-span-3 @lg:col-span-4 rounded-3xl bg-zinc-900 p-8 shadow-sm text-white">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center">
-                <span className="w-3 h-3 rounded-full bg-zinc-500 mr-3" />
-                {labels.github}
-              </h2>
-              <div className="overflow-x-auto pb-2 custom-scrollbar">
+            <section className={cn(tileDark, "col-span-1 @md:col-span-3 @lg:col-span-4")}>
+              <TileTitle dark>{labels.github}</TileTitle>
+              <div className="overflow-x-auto pb-2">
                 <GitHubContributionHeatmap
                   calendar={contributionCalendar}
                   profileUrl={githubProfile?.url}
@@ -407,110 +426,106 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             </section>
           )}
 
-          {/* Certifications and Achievements */}
-          {(certifications.length > 0 || achievements.length > 0) && (
-            <>
-              {certifications.length > 0 && !resolved.isHidden("certifications") && (
-                <section className="col-span-full rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
-                  <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
-                    <span className="w-3 h-3 rounded-full bg-yellow-500 mr-3" />
-                    {labels.certifications}
-                  </h2>
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="space-y-3"
-                    buttonClassName="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-600 transition-colors hover:bg-white hover:border-zinc-300"
+          {certifications.length > 0 && !resolved.isHidden("certifications") && (
+            <section className={cn(tile, "col-span-full")}>
+              <TileTitle>{labels.certifications}</TileTitle>
+              <CollapsibleList
+                initial={4}
+                wrapperClassName="flex flex-col gap-3"
+                buttonClassName={moreBtn}
+              >
+                {certifications.map((cert) => (
+                  <article
+                    key={cert.id}
+                    className="flex flex-wrap items-baseline justify-between gap-2 border-t border-[#12141a]/10 pt-3 first:border-t-0 first:pt-0"
                   >
-                    {certifications.map((cert) => (
-                      <article key={cert.id} className={cn(SPLIT_CARD_ROW, "p-3 rounded-xl hover:bg-zinc-50 transition-colors")}>
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-zinc-900 text-sm">
-                            {cert.url ? <a href={cert.url} target="_blank" rel="noopener noreferrer" className="hover:underline">{cert.name}</a> : cert.name}
-                          </h3>
-                          <p className="text-xs text-zinc-500 mt-0.5">{cert.issuer}</p>
-                        </div>
-                        {cert.issueDate && (
-                          <span className="text-xs font-medium text-zinc-400 bg-zinc-100 px-2 py-1 rounded">
-                            {new Date(cert.issueDate).getFullYear()}
-                          </span>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold">
+                        {cert.url ? (
+                          <a href={cert.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            {cert.name}
+                          </a>
+                        ) : (
+                          cert.name
                         )}
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              )}
-
-              {achievements.length > 0 && !resolved.isHidden("achievements") && (
-                <section className="col-span-full rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
-                  <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
-                    <span className="w-3 h-3 rounded-full bg-red-500 mr-3" />
-                    {labels.achievements}
-                  </h2>
-                  <CollapsibleList
-                    initial={4}
-                    wrapperClassName="space-y-3"
-                    buttonClassName="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-600 transition-colors hover:bg-white hover:border-zinc-300"
-                  >
-                    {achievements.map((ach) => (
-                      <article key={ach.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-zinc-50 transition-colors">
-                        <div className="mt-0.5 bg-red-100 p-1.5 rounded-lg text-red-600">
-                          <Trophy className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-zinc-900 text-sm"><RichText text={ach.title} /></p>
-                          {ach.date && (
-                            <p className="text-xs text-zinc-500 mt-0.5">
-                              {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                            </p>
-                          )}
-                        </div>
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              )}
-            </>
+                      </h3>
+                      <p className="mt-0.5 text-xs text-[#667083]">{cert.issuer}</p>
+                    </div>
+                    {cert.issueDate && (
+                      <span className="text-xs tabular-nums text-[#667083]">
+                        {new Date(cert.issueDate).getFullYear()}
+                      </span>
+                    )}
+                  </article>
+                ))}
+              </CollapsibleList>
+            </section>
           )}
 
-          {/* Custom Sections */}
-          {customSections.length > 0 && customSections.map((cs) => (
-            <section key={cs.id} className="col-span-1 @md:col-span-2 @lg:col-span-2 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
-              <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
-                <span className="w-3 h-3 rounded-full bg-teal-500 mr-3" />
-                {cs.label}
-              </h2>
+          {achievements.length > 0 && !resolved.isHidden("achievements") && (
+            <section className={cn(tile, "col-span-full")}>
+              <TileTitle>{labels.achievements}</TileTitle>
+              <CollapsibleList
+                initial={4}
+                wrapperClassName="flex flex-col gap-3"
+                buttonClassName={moreBtn}
+              >
+                {achievements.map((ach) => (
+                  <article
+                    key={ach.id}
+                    className="flex items-start gap-3 border-t border-[#12141a]/10 pt-3 first:border-t-0 first:pt-0"
+                  >
+                    <Trophy className="mt-0.5 size-4 shrink-0 text-[var(--lf-accent)]" aria-hidden />
+                    <div>
+                      <p className="text-sm font-medium">
+                        <RichText text={ach.title} />
+                      </p>
+                      {ach.date && (
+                        <p className="mt-0.5 text-xs text-[#667083]">
+                          {new Date(ach.date).toLocaleDateString("en-US", {
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </CollapsibleList>
+            </section>
+          )}
+
+          {customSections.map((cs) => (
+            <section key={cs.id} className={cn(tile, "col-span-1 @md:col-span-2 @lg:col-span-2")}>
+              <TileTitle>{cs.label}</TileTitle>
               <CustomSectionItems
                 items={cs.items}
-                titleClassName="font-semibold text-zinc-900"
-                textClassName="text-sm text-zinc-500"
-                chipClassName="rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600"
+                titleClassName="font-semibold text-[#12141a]"
+                textClassName="text-sm text-[#667083]"
+                chipClassName="rounded-lg bg-[#eef0f2] px-2.5 py-1 text-xs text-[#667083]"
+                buttonClassName={moreBtn}
               />
             </section>
           ))}
 
           {data.linkedin && !resolved.isHidden("linkedin") && (
-            <div id="linkedin-tile" className="col-span-1 @md:col-span-3 @lg:col-span-4 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50">
+            <div className={cn(tile, "col-span-1 @md:col-span-3 @lg:col-span-4")}>
               <LinkedInSection
                 data={data.linkedin}
-                heading={
-                  <h2 className="text-xl font-bold text-zinc-900 flex items-center">
-                    <span className="w-3 h-3 rounded-full bg-[#0a66c2] mr-3" />
-                    {labels.linkedin}
-                  </h2>
-                }
+                heading={<TileTitle>{labels.linkedin}</TileTitle>}
                 classes={{
-            aboutList: "list-disc space-y-2 pl-5 text-sm leading-relaxed text-zinc-600",
-            aboutParagraph: "text-sm leading-relaxed text-zinc-600",
-            postList: "list-disc space-y-2 pl-5 font-semibold text-zinc-900 text-sm",
-            postParagraph: "font-semibold text-zinc-900 text-sm",
-            descriptionParagraph: "text-sm leading-relaxed text-zinc-500",
-            descriptionList: "space-y-1 pl-4 text-sm leading-relaxed text-zinc-500 marker:text-zinc-400",
+                  aboutList: "list-disc flex flex-col gap-2 pl-5 text-sm leading-relaxed text-[#667083]",
+                  aboutParagraph: "text-sm leading-relaxed text-[#667083]",
+                  postList: "list-disc flex flex-col gap-2 pl-5 text-sm font-semibold text-[#12141a]",
+                  postParagraph: "text-sm font-semibold text-[#12141a]",
+                  descriptionParagraph: "text-sm leading-relaxed text-[#667083]",
+                  descriptionList: "flex flex-col gap-1 pl-4 text-sm leading-relaxed text-[#667083]",
                   section: "scroll-mt-24",
-                  card: "rounded-2xl border border-zinc-200 bg-zinc-50 p-5",
-                  title: "font-bold text-zinc-900",
-                  text: "text-sm leading-relaxed text-zinc-600",
-                  muted: "text-xs font-medium text-zinc-500",
-                  chip: "rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600",
+                  card: "rounded-xl border border-[#12141a]/10 bg-[#eef0f2] p-5",
+                  title: "font-[family-name:var(--font-bento-display)] font-semibold text-[#12141a]",
+                  text: "text-sm leading-relaxed text-[#667083]",
+                  muted: "text-xs text-[#667083]",
+                  chip: "rounded-lg bg-white px-2.5 py-1 text-xs text-[#667083]",
                   link: "text-sm font-medium text-[var(--lf-accent)] hover:underline",
                 }}
               />
@@ -520,23 +535,19 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           {hasProfiles && !resolved.isHidden("profiles") && (
             <section
               id="profiles"
-              className="col-span-1 @md:col-span-3 @lg:col-span-4 scroll-mt-24 rounded-3xl bg-white p-8 shadow-sm border border-zinc-200/50"
+              className={cn(tile, "col-span-1 scroll-mt-24 @md:col-span-3 @lg:col-span-4")}
             >
-              <h2 className="text-xl font-bold text-zinc-900 mb-6 flex items-center">
-                <span className="w-3 h-3 rounded-full bg-indigo-500 mr-3" />
-                {labels.profiles}
-              </h2>
+              <TileTitle>{labels.profiles}</TileTitle>
               <ProfileLinksSection
                 portfolio={portfolio}
                 profiles={socialProfiles}
-                chipClassName="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-all hover:border-zinc-300 hover:bg-white hover:shadow-sm"
-                pillClassName="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-all hover:border-zinc-300 hover:bg-white hover:shadow-sm"
-                titleClassName="font-semibold text-zinc-900"
-                textClassName="text-sm text-zinc-500"
+                chipClassName="rounded-xl border border-[#12141a]/10 bg-[#eef0f2] px-3 py-2 text-sm text-[#667083]"
+                pillClassName="rounded-xl border border-[#12141a]/10 bg-[#eef0f2] px-3 py-2 text-sm text-[#12141a] transition-colors hover:bg-white"
+                titleClassName="font-semibold text-[#12141a]"
+                textClassName="text-sm text-[#667083]"
               />
             </section>
           )}
-
         </div>
       </div>
     </div>

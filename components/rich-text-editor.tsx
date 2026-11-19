@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -211,12 +212,14 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
 
   if (!shouldShow) return null;
 
-  return (
+  // Portal to body: viewport coords from coordsAtPos() break when this sits
+  // under glass-panel / backdrop-filter (those create a fixed containing block).
+  return createPortal(
     <div
       ref={menuRef}
       data-rich-text-toolbar=""
       className={cn(
-        "fixed z-50 flex items-center gap-0.5",
+        "fixed z-[100] flex items-center gap-0.5",
         "rounded-xl border border-zinc-200/90 bg-white px-1.5 py-1",
         "shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
       )}
@@ -316,7 +319,8 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
           </div>
         </PopoverContent>
       </Popover>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

@@ -1,40 +1,47 @@
-"use client";
+import { Schibsted_Grotesk } from "next/font/google";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
 import { stripRichTextToPlain } from "@/lib/rich-text";
-
 import type { PortfolioData } from "../types";
-import { getTemplateSectionLayout } from "../section-layouts";
-import {
-  renderSections,
-  resolveSectionLayout,
-  type ReorderableSectionKey,
-} from "../section-order";
-import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Trophy } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { TemplateProjectPreview } from "@/components/template-project-preview";
+import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
 import { CollapsibleList } from "../collapsible-list";
-import { ArticleSourceLabel, RichText,
-  DescriptionBlock,
-  TechChip,
-  TechIcon,
-  TemplateNavbar,
+import { getTemplateSectionLayout } from "../section-layouts";
+import { renderSections, resolveSectionLayout, type ReorderableSectionKey } from "../section-order";
+import { formatDateRange, groupSkillsByCategory } from "../utils";
+import {
+  ArticleSourceLabel,
+  RichText,
   buildTemplateSections,
-  SocialPills,
-  HeroProfileButtons,
-  hasNonHeroSocialProfiles,
   ContactChips,
   CustomSectionItems,
+  DescriptionBlock,
+  HeroProfileButtons,
   ProfileLinksSection,
+  ProjectActions,
   PROJECT_CARD,
-  PROJECT_CARD_TITLE,
+  HERO_TITLE_BASE,
+  SocialPills,
+  TechChip,
+  TemplateNavbar,
   TEMPLATE_CONTAINER,
   getSectionLabels,
+  hasNonHeroSocialProfiles,
 } from "../shared";
-import { TemplateProjectPreview } from "@/components/template-project-preview";
-import { formatDateRange, groupSkillsByCategory } from "../utils";
-import { GitHubContributionHeatmap, parseContributionCalendar } from "../github-contribution-heatmap";
-import { motion } from "motion/react";
-import { LinkedInSection } from "@/features/templates/components/linkedin-section";
 
+/**
+ * Terracotta - cooler adobe portfolio. Paper #f6f1ea, deep umber ink, Schibsted Grotesk, and cooler clay #8f5a45 as signal only, avoiding the cream/serif/Claude terracotta cliché.
+ */
+const schibsted = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-terracotta" });
+
+const ink = "text-[#27231f]";
+const mute = "text-[#6f665d]";
+const hairline = "border-[#27231f]/12";
+const moreBtn = "mt-8 self-start rounded-none border-b border-[#27231f]/30 bg-transparent px-0 py-1.5 text-sm font-medium text-[#6f665d] hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]";
 
 export function TerracottaTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -52,347 +59,226 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
   } = data;
   const primaryColor = resolveAccentColor("terracotta", portfolio.customization);
   const labels = getSectionLabels(portfolio.customization);
-  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
   const groupedSkills = groupSkillsByCategory(skills);
-
-  const githubProfile = socialProfiles.find((p) => p.platform.toLowerCase() === "github");
+  const githubProfile = socialProfiles.find((profile) => profile.platform.toLowerCase() === "github");
   const githubStats = githubProfile?.cachedStats as Record<string, unknown> | null;
   const contributionCalendar = parseContributionCalendar(githubStats?.contributionCalendar);
+  const featuredProjects = projects.filter((project) => project.featured);
+  const visibleProjects = featuredProjects.length > 0 ? [...featuredProjects, ...projects.filter((p) => !p.featured)] : projects;
+  const { hasProfiles, navbarEnabled, sections } = buildTemplateSections(data);
+  const resolved = resolveSectionLayout(getTemplateSectionLayout("terracotta"), portfolio.customization);
 
-  const resolved = resolveSectionLayout(
-    getTemplateSectionLayout("terracotta"),
-    portfolio.customization,
-  );
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<h2 className="mb-4 flex items-center gap-4 text-3xl font-medium text-[var(--lf-accent)]">{labels.linkedin} <span className="h-px flex-1 bg-[#3D405B]/10" /></h2>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
-            aboutList: "space-y-2 pl-5 text-xl font-light text-[#3D405B]/90 marker:text-[var(--lf-accent)]",
-            aboutParagraph: "text-xl leading-loose text-[#3D405B]/90 font-light",
-            postList: "list-disc space-y-2 pl-5 text-xl font-medium text-[#3D405B]",
-            postParagraph: "text-xl font-medium text-[#3D405B]",
-            descriptionParagraph: "text-lg leading-relaxed font-light text-[#3D405B]/80",
-            descriptionList: "space-y-2 pl-5 text-lg leading-relaxed font-light text-[#3D405B]/80 marker:text-[var(--lf-accent)]",
-          card: "bg-white p-6 rounded-3xl shadow-xs border border-[#3D405B]/5",
-          title: "text-2xl font-medium text-[#3D405B]",
-          text: "text-[#3D405B]/80 font-light leading-relaxed text-lg",
-          muted: "text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)]",
-          chip: "rounded-full border border-[#3D405B]/10 bg-[#F4F1DE] px-3 py-1.5 text-xs font-medium text-[#3D405B]",
-          link: "text-sm font-medium text-[var(--lf-accent)] hover:underline underline-offset-4",
-          section: "scroll-mt-32 max-w-4xl",
+        aboutList: `flex flex-col gap-3 pl-5 text-base leading-8 ${mute} marker:text-[var(--lf-accent)]`,
+        aboutParagraph: `text-base leading-8 ${mute}`,
+        postList: `list-disc flex flex-col gap-2 pl-5 text-sm leading-relaxed ${ink}`,
+        postParagraph: `text-sm leading-relaxed ${ink}`,
+        descriptionParagraph: `text-sm leading-7 ${mute}`,
+        descriptionList: `flex flex-col gap-2 pl-5 text-sm leading-7 ${mute} marker:text-[var(--lf-accent)]`,
+        card: `border border-[#27231f]/12 bg-[#fffaf3] p-5`,
+        title: ` text-xl font-semibold ${ink}`,
+        text: `text-sm leading-7 ${mute}`,
+        muted: `text-sm ${mute}`,
+        chip: `rounded-none border ${hairline} bg-[#f6f1ea] px-2.5 py-1 text-sm ${mute}`,
+        link: "text-sm font-medium text-[var(--lf-accent)] underline-offset-4 hover:underline",
+        section: `scroll-mt-28 border-t ${hairline} pt-12`,
       }}
     />
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
-    about: portfolio.summary && (
-                <section key="about" id="about" className="scroll-mt-32 max-w-4xl">
-                  <h2 className="mb-8 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                    {labels.about} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                  </h2>
-                  <DescriptionBlock
-                    text={portfolio.summary}
-                    paragraphClassName="text-xl leading-loose text-[#3D405B]/90 font-light"
-                    listClassName="space-y-2 pl-5 text-xl font-light text-[#3D405B]/90 marker:text-[var(--lf-accent)]"
-                  />
-                </section>
-              ),
-    projects: projects.length > 0 && (
-                <section key="projects" id="work" className="scroll-mt-32">
-                  <h2 className="mb-12 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                    {labels.projects} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                  </h2>
-                  <CollapsibleList initial={4} wrapperClassName={cn("grid min-w-0 grid-cols-1 gap-12", "@lg:grid-cols-2")} buttonClassName="mt-12 mx-auto block uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors">
-                    {projects.map((project) => (
-                      <article key={project.id} className={cn(PROJECT_CARD, "group flex flex-col gap-6")}>
-                        <div className="overflow-hidden rounded-t-[50px]">
-                          <TemplateProjectPreview templateId="terracotta"
-                            liveUrl={project.liveUrl ?? null}
-                            imageUrl={project.imageUrl ?? null}
-                            projectId={project.id}
-                            livePreviewProjectIds={livePreviewProjectIds}
-                            alt={stripRichTextToPlain(project.title)}
-                            containerClassName="overflow-hidden bg-[#F4F1DE]"
-                            className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                           accentColor={primaryColor} />
-                        </div>
-                        <div>
-                          <h3 className={cn(PROJECT_CARD_TITLE, "text-2xl font-medium text-[#3D405B] mb-3")}><RichText text={project.title} /></h3>
-                          {project.description && (
-                            <DescriptionBlock
-                              text={project.description}
-                              paragraphClassName="mb-6 text-lg leading-relaxed font-light text-[#3D405B]/80"
-                              listClassName="mb-6 space-y-2 pl-5 text-lg leading-relaxed font-light text-[#3D405B]/80 marker:text-[var(--lf-accent)]"
-                            />
-                          )}
-                          <div className="flex flex-wrap gap-2 mb-6">
-                            {project.techStack.map((tech) => (
-                              <TechChip
-                                key={tech}
-                                name={tech}
-                                className="text-xs uppercase tracking-widest font-semibold text-[var(--lf-accent)]"
-                              />
-                            ))}
-                          </div>
-                          <div className="flex gap-6">
-                            {project.liveUrl && (
-                              <a href={project.liveUrl} data-lf-track="project_live" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="text-sm uppercase tracking-widest font-semibold border-b border-[#3D405B] pb-1 hover:text-[var(--lf-accent)] hover:border-[var(--lf-accent)] transition-all">
-                                Visit Site
-                              </a>
-                            )}
-                            {project.sourceUrl && (
-                              <a href={project.sourceUrl} data-lf-track="project_source" data-lf-label={stripRichTextToPlain(project.title)} data-lf-id={project.id} target="_blank" rel="noreferrer" className="text-sm uppercase tracking-widest font-semibold border-b border-transparent pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-all text-[#3D405B]/60">
-                                Source
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              ),
-    experience: experiences.length > 0 && (
-                <section key="experience" id="experience" className="scroll-mt-32 max-w-4xl">
-                  <h2 className="mb-12 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                    {labels.experience} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                  </h2>
-                  <CollapsibleList initial={3} wrapperClassName="space-y-12" buttonClassName="mt-12 mx-auto block uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors">
-                    {experiences.map((exp) => (
-                      <div key={exp.id} className="relative pl-8 md:pl-0">
-                        <div className="absolute left-0 top-2 h-full w-px bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] md:hidden" />
-                        <div className="absolute left-[-4px] top-2 h-2 w-2 rounded-full bg-[var(--lf-accent)] md:hidden" />
-                        <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-8 mb-4">
-                          {formatDateRange(exp.startDate, exp.endDate) ? (
-                            <span className="text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)] md:w-1/4 shrink-0">
-                              {formatDateRange(exp.startDate, exp.endDate)}
-                            </span>
-                          ) : null}
-                          <div className={formatDateRange(exp.startDate, exp.endDate) ? "md:w-3/4" : undefined}>
-                            <h3 className="text-2xl font-medium text-[#3D405B]"><RichText text={exp.role} /></h3>
-                            <p className="text-xl font-light italic text-[#3D405B]/60 mt-1"><RichText text={exp.company} /></p>
-                          </div>
-                        </div>
-                        {exp.description && (
-                          <div className={formatDateRange(exp.startDate, exp.endDate) ? "md:pl-[calc(25%+2rem)]" : undefined}>
-                            <DescriptionBlock text={exp.description} paragraphClassName="text-[#3D405B]/80 font-light leading-relaxed text-lg" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              ),
-    education: educations.length > 0 && (
-                  <section key="education" className="scroll-mt-32">
-                    <h2 className="mb-8 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                      {labels.education} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                    </h2>
-                    <CollapsibleList initial={3} wrapperClassName="space-y-8" buttonClassName="mt-8 uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors">
-                      {educations.map((edu) => (
-                        <div key={edu.id}>
-                          <h3 className="text-xl font-medium text-[#3D405B]">
-                            <RichText text={edu.degree} /> {edu.field ? `in ${stripRichTextToPlain(edu.field)}` : ""}
-                          </h3>
-                          <p className="text-lg font-light italic text-[#3D405B]/60 mt-1"><RichText text={edu.institution} /></p>
-                          <p className="mt-2 text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)]">{formatDateRange(edu.startDate, edu.endDate)}</p>
-                          {edu.gpa ? <p className="mt-1 text-sm font-light text-[#3D405B]/60">{edu.gpa}</p> : null}
-                        </div>
-                      ))}
-                    </CollapsibleList>
-                  </section>
-                ),
-    skills: skills.length > 0 && (
-                  <section key="skills" className="scroll-mt-32">
-                    <h2 className="mb-8 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                      {labels.skills} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                    </h2>
-                    <div className="space-y-8">
-                      {Object.entries(groupedSkills).map(([category, items]) => (
-                        <div key={category}>
-                          <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-[#3D405B]/50">{category}</h3>
-                          <div className="flex flex-wrap gap-x-6 gap-y-3">
-                            {items.map((skill) => (
-                              <span key={skill} className="inline-flex items-center gap-2 text-lg font-light text-[#3D405B]">
-                                <TechIcon name={skill} className="h-4 w-4" />
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                ),
-    certifications: certifications.length > 0 && (
-                    <section key="certifications">
-                      <h2 className="mb-8 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                        {labels.certifications} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                      </h2>
-                      <CollapsibleList initial={3} wrapperClassName="space-y-6" buttonClassName="mt-8 uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors">
-                        {certifications.map((cert) => (
-                          <div key={cert.id}>
-                            <h3 className="text-xl font-medium text-[#3D405B]">
-                              {cert.url ? (
-                                <a href={cert.url} target="_blank" rel="noreferrer" className="hover:text-[var(--lf-accent)] transition-colors">{cert.name}</a>
-                              ) : cert.name}
-                            </h3>
-                            <p className="text-lg font-light italic text-[#3D405B]/60 mt-1">{cert.issuer}</p>
-                          </div>
-                        ))}
-                      </CollapsibleList>
-                    </section>
-                  ),
-    achievements: achievements.length > 0 && (
-                    <section key="achievements">
-                      <h2 className="mb-8 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                        {labels.achievements} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                      </h2>
-                      <CollapsibleList initial={3} wrapperClassName="space-y-6" buttonClassName="mt-8 uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors">
-                        {achievements.map((ach) => (
-                          <div key={ach.id} className="flex gap-4">
-                            <Trophy className="h-6 w-6 text-[var(--lf-accent)] shrink-0 mt-1" />
-                            <div>
-                              <h3 className="text-xl font-medium text-[#3D405B]"><RichText text={ach.title} /></h3>
-                              {ach.date && (
-                                <p className="text-sm uppercase tracking-widest font-semibold text-[#3D405B]/50 mt-2">
-                                  {new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </CollapsibleList>
-                    </section>
-                  ),
-    articles: articles.length > 0 && (
-                <section key="articles" id="articles" className="scroll-mt-32 max-w-4xl">
-                  <h2 className="mb-12 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                    {labels.articles} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                  </h2>
-                  <CollapsibleList initial={3} wrapperClassName="space-y-12" buttonClassName="mt-12 mx-auto block uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors">
-                    {articles.map((article) => (
-                      <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block group">
-                        <ArticleSourceLabel source={article.source} className="mb-2" />
-                        <h3 className="text-2xl font-medium text-[#3D405B] group-hover:text-[var(--lf-accent)] transition-colors mb-3"><RichText text={article.title} /></h3>
-                        {article.description && <p className="text-lg font-light text-[#3D405B]/80 mb-4">{article.description}</p>}
-                        <div className="flex items-center gap-4 text-sm uppercase tracking-widest font-semibold text-[var(--lf-accent)]">
-                          {article.publishedAt && <span>{new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>}
-                          {article.readTime && <span>{article.readTime} min read</span>}
-                        </div>
-                      </a>
-                    ))}
-                  </CollapsibleList>
-                </section>
-              ),
-    profiles: hasProfiles && (
-                <section key="profiles" id="profiles" className="scroll-mt-32 max-w-4xl">
-                  <h2 className="mb-12 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                    {labels.profiles} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                  </h2>
-                  <div className="bg-white p-8 rounded-3xl shadow-xs border border-[#3D405B]/5">
-                    <ProfileLinksSection
-                      portfolio={portfolio}
-                      profiles={socialProfiles}
-                      chipClassName="rounded-full border border-[#3D405B]/10 bg-[#F4F1DE] px-3 py-1.5 text-sm font-medium text-[#3D405B]"
-                      pillClassName="rounded-full border border-[var(--lf-accent)]/20 bg-[color-mix(in_srgb,var(--lf-accent)_12%,white)] px-3 py-1.5 text-sm font-medium text-[var(--lf-accent)] hover:bg-[color-mix(in_srgb,var(--lf-accent)_20%,white)] transition-colors"
-                      titleClassName="text-sm font-semibold uppercase tracking-widest text-[var(--lf-accent)]"
-                      textClassName="text-base font-light text-[#3D405B]/80"
-                    />
-                  </div>
-                </section>
-              ),
-    github: contributionCalendar && (
-                <section key="github" className="scroll-mt-32 max-w-5xl overflow-x-auto pb-4">
-                  <h2 className="mb-12 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                    {labels.github} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                  </h2>
-                  <div className="min-w-[700px] bg-white p-8 rounded-3xl shadow-xs border border-[#3D405B]/5">
-                    <GitHubContributionHeatmap
-                      calendar={contributionCalendar}
-                      profileUrl={githubProfile?.url}
-                      username={githubProfile?.username}
-                      variant="minimal"
-                      label={labels.github}
-                    />
-                  </div>
-                </section>
-              ),
+    about: portfolio.summary ? (
+      <section key="about" id="about" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
+        <SectionHeading>{labels.about}</SectionHeading>
+        <DescriptionBlock
+          text={portfolio.summary}
+          paragraphClassName={cn("max-w-[42rem] text-lg leading-8", mute)}
+          listClassName={cn("flex max-w-[42rem] flex-col gap-3 pl-5 text-lg leading-8 marker:text-[var(--lf-accent)]", mute)}
+        />
+      </section>
+    ) : null,
+
+    projects: visibleProjects.length > 0 ? (
+      <section key="projects" id="work" className={cn("scroll-mt-28 min-w-0 border-t pt-12", hairline)}>
+        <SectionHeading>{labels.projects}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="grid grid-cols-1 gap-6 @lg:grid-cols-2" buttonClassName={moreBtn}>
+          {visibleProjects.map((project) => (
+            <article key={project.id} className={cn(PROJECT_CARD, "border-l-2 border-[var(--lf-accent)]/60 bg-[#fffaf3] p-4")}> 
+              <TemplateProjectPreview
+                templateId="terracotta"
+                liveUrl={project.liveUrl ?? null}
+                imageUrl={project.imageUrl ?? null}
+                projectId={project.id}
+                livePreviewProjectIds={livePreviewProjectIds}
+                alt={stripRichTextToPlain(project.title)}
+                loading="lazy"
+                containerClassName="overflow-hidden bg-[#e6ddd2]"
+                className="h-full w-full object-cover object-top saturate-[0.92]"
+                accentColor={primaryColor}
+              />
+              <div className="pt-5">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <h3 className="text-xl font-semibold tracking-[-0.03em]"><RichText text={project.title} /></h3>
+                  {project.featured && <Badge variant="outline" className="h-auto rounded-none border-[var(--lf-accent)]/50 bg-transparent px-2 py-0.5 text-xs font-normal text-[var(--lf-accent)]">Featured</Badge>}
+                </div>
+                {project.description && <DescriptionBlock text={project.description} paragraphClassName={cn("mt-2 text-sm leading-6", mute)} listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)} />}
+                {project.techStack.length > 0 && <TechList items={project.techStack.slice(0, 6)} compact />}
+                <ProjectActions liveUrl={project.liveUrl} sourceUrl={project.sourceUrl} label={stripRichTextToPlain(project.title)} projectId={project.id} liveClassName="rounded-none bg-[#27231f] px-3 py-1.5 text-xs font-medium text-[#f6f1ea] hover:bg-[var(--lf-accent)]" sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-[#6f665d] hover:underline" />
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    experience: experiences.length > 0 ? (
+      <section key="experience" id="experience" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
+        <SectionHeading>{labels.experience}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {experiences.map((exp) => (
+            <article key={exp.id} className={cn("grid grid-cols-1 gap-3 border-t py-7 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}>
+              <p className={cn("pt-1 text-sm tabular-nums", mute)}>{formatDateRange(exp.startDate, exp.endDate) || ""}</p>
+              <div className="min-w-0">
+                <h3 className="text-xl font-semibold tracking-[-0.03em]"><RichText text={exp.role} /></h3>
+                <p className="mt-1 text-sm text-[var(--lf-accent)]"><RichText text={exp.company} />{exp.location ? <span className={mute}> / <RichText text={exp.location} /></span> : null}</p>
+                {exp.description && <DescriptionBlock text={exp.description} paragraphClassName={cn("mt-4 max-w-[42rem] text-sm leading-7", mute)} listClassName={cn("mt-4 flex max-w-[42rem] flex-col gap-2 pl-5 text-sm leading-7", mute)} />}
+              </div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    articles: articles.length > 0 ? (
+      <section key="articles" id="articles" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
+        <SectionHeading>{labels.articles}</SectionHeading>
+        <CollapsibleList initial={4} wrapperClassName="grid grid-cols-1 gap-5 @md:grid-cols-2" buttonClassName={moreBtn}>
+          {articles.map((article) => (
+            <article key={article.id} className="border-l-2 border-[var(--lf-accent)]/60 bg-[#fffaf3] p-5">
+              <ArticleSourceLabel source={article.source} className={cn("mb-2", mute)} />
+              <h3 className="text-lg font-semibold tracking-[-0.025em]"><a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline"><RichText text={article.title} /></a></h3>
+              {article.description && <p className={cn("mt-3 text-sm leading-6", mute)}>{article.description}</p>}
+              <p className={cn("mt-4 text-xs", mute)}>{article.publishedAt ? new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : null}{article.publishedAt && article.readTime != null ? " / " : null}{article.readTime != null ? `${article.readTime} min` : null}</p>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    skills: skills.length > 0 ? (
+      <section key="skills" className={cn("border-t pt-12", hairline)}>
+        <SectionHeading>{labels.skills}</SectionHeading>
+        <div className="grid gap-5 @md:grid-cols-2">
+          {Object.entries(groupedSkills).map(([category, names]) => (
+            <div key={category} className="border border-[#27231f]/12 bg-[#fffaf3] p-4">
+              <h3 className="mb-2 text-sm font-semibold text-[var(--lf-accent)]">{category}</h3>
+              <p className={cn("text-sm leading-7", mute)}>{names.join(" / ")}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    ) : null,
+
+    education: educations.length > 0 ? (
+      <section key="education" className={cn("border-t pt-12", hairline)}>
+        <SectionHeading>{labels.education}</SectionHeading>
+        <CollapsibleList initial={3} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {educations.map((edu) => (
+            <article key={edu.id} className={cn("border-t py-5", hairline)}>
+              <h3 className="text-xl font-semibold tracking-[-0.03em]"><RichText text={edu.degree} />{edu.field ? <span className={mute}> in <RichText text={edu.field} /></span> : null}</h3>
+              <p className={cn("mt-1 text-sm", mute)}><RichText text={edu.institution} />{formatDateRange(edu.startDate, edu.endDate) ? ` / ${formatDateRange(edu.startDate, edu.endDate)}` : ""}</p>
+              {edu.gpa ? <p className={cn("mt-1 text-xs", mute)}>{edu.gpa}</p> : null}
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    certifications: certifications.length > 0 ? (
+      <section key="certifications" className={cn("border-t pt-12", hairline)}>
+        <SectionHeading>{labels.certifications}</SectionHeading>
+        <CollapsibleList initial={3} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {certifications.map((cert) => (
+            <article key={cert.id} className={cn("border-t py-5", hairline)}>
+              <h3 className="text-base font-medium">{cert.url ? <a href={cert.url} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">{cert.name}</a> : cert.name}</h3>
+              <p className={cn("mt-1 text-sm", mute)}>{cert.issuer}{cert.issueDate ? ` / ${new Date(cert.issueDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}` : ""}</p>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    achievements: achievements.length > 0 ? (
+      <section key="achievements" className={cn("border-t pt-12", hairline)}>
+        <SectionHeading>{labels.achievements}</SectionHeading>
+        <CollapsibleList initial={3} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
+          {achievements.map((ach) => (
+            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5", hairline)}>
+              <Trophy className="mt-0.5 size-4 shrink-0 text-[var(--lf-accent)]" aria-hidden />
+              <div><h3 className="text-base font-medium"><RichText text={ach.title} /></h3>{ach.date ? <p className={cn("mt-1 text-xs", mute)}>{new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</p> : null}</div>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    profiles: hasProfiles ? (
+      <section key="profiles" id="profiles" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
+        <SectionHeading>{labels.profiles}</SectionHeading>
+        <ProfileLinksSection portfolio={portfolio} profiles={socialProfiles} chipClassName="rounded-none border border-[#27231f]/12 bg-[#fffaf3] px-3 py-1.5 text-sm text-[#6f665d]" pillClassName="rounded-none border border-[#27231f]/12 bg-[#fffaf3] px-3 py-1.5 text-sm text-[#27231f] hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]" titleClassName={ink} textClassName={mute} />
+      </section>
+    ) : null,
+
+    github: contributionCalendar ? (
+      <section key="github" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
+        <SectionHeading>{labels.github}</SectionHeading>
+        <div className="overflow-x-auto border border-[#27231f]/12 bg-[#fffaf3] p-5"><GitHubContributionHeatmap calendar={contributionCalendar} profileUrl={githubProfile?.url} username={githubProfile?.username} variant="minimal" label={labels.github} /></div>
+      </section>
+    ) : null,
   };
 
   return (
-    <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[#FDFBF7] text-[#3D405B] font-serif overflow-x-hidden")} style={accentRootStyle(primaryColor)}>
-      <div className="mx-auto max-w-6xl px-6 py-16 sm:px-12 md:py-24">
-
-        <header className="mb-24 flex min-w-0 w-full flex-col @md:flex-row @md:items-center gap-12">
-          <div className="min-w-0">
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="min-w-0 text-balance [overflow-wrap:anywhere] text-2xl @sm:text-4xl @md:text-5xl @lg:text-7xl font-medium tracking-tight text-[var(--lf-accent)]"
-            >
-              <RichText text={portfolio.title} />
-            </motion.h1>
-            {portfolio.headline && (
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="mt-4 text-base @md:text-lg @lg:text-2xl text-[#3D405B]/80 font-light italic"
-              >
-                <RichText text={portfolio.headline} />
-              </motion.p>
-            )}
-
-            <div className="mt-8 flex flex-col items-start gap-4">
-              <ContactChips portfolio={portfolio} chipClassName="text-sm uppercase tracking-widest text-[var(--lf-accent)]" />
-              <HeroProfileButtons
-                profiles={socialProfiles}
-                className="text-[#3D405B] hover:text-[var(--lf-accent)] transition-colors p-2"
-              />
-              {hasNonHeroSocialProfiles(socialProfiles) && (
-                <SocialPills
-                  profiles={socialProfiles}
-                  showUsername
-                  excludeHeroPlatforms
-                  className="text-[#3D405B] hover:text-[var(--lf-accent)] transition-colors p-2"
-                />
-              )}
+    <div className={cn(TEMPLATE_CONTAINER, schibsted.variable, "min-h-screen bg-[#f6f1ea] font-[family-name:var(--font-terracotta)] antialiased", ink)} style={accentRootStyle(primaryColor)}>
+      
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-16 pt-8 sm:px-7 md:pb-28 md:pt-12">
+        {navbarEnabled && <TemplateNavbar items={sections} className="mb-14 rounded-none border-y border-[#27231f]/12 bg-transparent" linkClassName="rounded-none px-0 py-3 text-sm text-[#6f665d] hover:text-[var(--lf-accent)]" />}
+        <header className="grid min-w-0 gap-10 border-b border-[#27231f]/12 pb-12 @lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <div>
+            <h1 className={cn(HERO_TITLE_BASE, "text-5xl font-semibold leading-[1.01] tracking-[-0.065em] @sm:text-6xl @lg:text-8xl", ink)}><RichText text={portfolio.title} /></h1>
+            {portfolio.headline && <p className={cn("mt-6 max-w-[38rem] text-xl leading-8 @md:text-2xl", mute)}><RichText text={portfolio.headline} /></p>}
+          </div>
+          <div className="self-end bg-[#fffaf3] p-5">
+            <ContactChips portfolio={portfolio} chipClassName="rounded-none bg-transparent px-0 py-0 text-sm text-[#6f665d]" />
+            <div className="mt-4 flex flex-wrap gap-2">
+              <HeroProfileButtons profiles={socialProfiles} className="rounded-none border border-[#27231f]/12 bg-transparent px-3 py-1.5 text-sm text-[#27231f] hover:border-[var(--lf-accent)]" />
+              {hasNonHeroSocialProfiles(socialProfiles) && <SocialPills profiles={socialProfiles} showUsername excludeHeroPlatforms className="rounded-none border border-[#27231f]/12 bg-transparent px-3 py-1.5 text-sm text-[#27231f] hover:border-[var(--lf-accent)]" />}
             </div>
           </div>
         </header>
-
-        {navbarEnabled && (
-          <nav className="mb-16 border-y border-[#3D405B]/10 py-4">
-            <TemplateNavbar
-              items={sections}
-              className="justify-center md:justify-start gap-8 border-none"
-              linkClassName="text-sm uppercase tracking-[0.2em] font-semibold text-[#3D405B] hover:text-[var(--lf-accent)] transition-colors"
-            />
-          </nav>
+        <main className="mt-14 flex min-w-0 flex-col gap-14">{renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}</main>
+        {customSections.length > 0 && (
+          <div className={cn("mt-14 grid gap-10 border-t pt-12 @md:grid-cols-2", hairline)}>
+            {customSections.map((cs) => (
+              <section key={cs.id}>
+                <SectionHeading>{cs.label}</SectionHeading>
+                <CustomSectionItems items={cs.items} titleClassName="font-semibold text-[#27231f]" textClassName={cn("text-sm", mute)} chipClassName="mr-2 mt-2 inline-block rounded-none border border-[#27231f]/12 bg-[#fffaf3] px-2 py-0.5 text-xs text-[#6f665d]" buttonClassName={moreBtn} />
+              </section>
+            ))}
+          </div>
         )}
-
-        <main className="space-y-32">
-          {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
-
-          {customSections.map((cs) => (
-                <section key={cs.id}>
-                  <h2 className="mb-12 text-3xl font-medium text-[var(--lf-accent)] flex items-center gap-4">
-                    {cs.label} <span className="h-px flex-1 bg-[#3D405B]/10" />
-                  </h2>
-                  <CustomSectionItems
-                    items={cs.items}
-                    titleClassName="text-xl font-medium text-[#3D405B]"
-                    textClassName="text-lg font-light text-[#3D405B]/80 mt-2"
-                    chipClassName="inline-block mt-4 mr-4 text-xs uppercase tracking-widest font-semibold text-[var(--lf-accent)]"
-                    buttonClassName="mt-8 uppercase tracking-widest text-sm font-semibold border-b border-[var(--lf-accent)] text-[var(--lf-accent)] pb-1 hover:text-[#3D405B] hover:border-[#3D405B] transition-colors"
-                  />
-                </section>
-              ))}
-
-        </main>
       </div>
     </div>
   );
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return <div className="mb-8"><h2 className="text-2xl font-semibold tracking-[-0.04em] text-[#27231f] @md:text-3xl">{children}</h2><Separator className="mt-4 bg-[#27231f]/12" /></div>;
+}
+
+function TechList({ items, compact = false }: { items: string[]; compact?: boolean }) {
+  return <div className={cn("flex flex-wrap gap-2", compact ? "mt-4" : "mt-5")}>{items.map((tech) => <TechChip key={tech} name={tech} className="rounded-none border border-[#27231f]/12 bg-[#f6f1ea] px-2 py-0.5 text-xs text-[#6f665d]" />)}</div>;
 }
