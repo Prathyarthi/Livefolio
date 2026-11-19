@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { ExternalLink, Search, SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RichText } from "@/components/rich-text";
@@ -205,7 +205,24 @@ export default function JobApplicantsPage() {
       <PageHeader
         eyebrow="Applicants"
         title={
-          data?.job.title ? <RichText as="span" text={data.job.title} /> : "Applicant pool"
+          data?.job.title ? (
+            <span className="inline-flex items-center gap-2">
+              <RichText as="span" text={data.job.title} />
+              {data.job.slug ? (
+                <Link
+                  href={`/jobs/${data.job.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Open public job page"
+                  className="inline-flex text-text-muted transition-colors hover:text-brand-primary"
+                >
+                  <ExternalLink className="size-4 md:size-5" />
+                </Link>
+              ) : null}
+            </span>
+          ) : (
+            "Applicant pool"
+          )
         }
         description={
           hasActiveFilters
