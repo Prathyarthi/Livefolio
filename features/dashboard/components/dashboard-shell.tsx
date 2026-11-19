@@ -229,9 +229,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/dashboard/edit") ||
     pathname.startsWith("/dashboard/preview") ||
     pathname.startsWith("/dashboard/import");
+  const isPreview = pathname.startsWith("/dashboard/preview");
   const fullHeightPanel =
-    pathname.startsWith("/dashboard/edit") ||
-    pathname.startsWith("/dashboard/preview");
+    pathname.startsWith("/dashboard/edit") || isPreview;
 
   return (
     <SidebarProvider
@@ -247,14 +247,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <SidebarInset
         className={
           fullHeightPanel
-            ? "relative flex h-dvh max-h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface-base"
+            ? isPreview
+              ? "relative flex min-w-0 flex-1 flex-col bg-surface-base max-md:min-h-svh max-md:overflow-x-hidden md:h-dvh md:max-h-dvh md:min-h-0 md:overflow-hidden"
+              : "relative flex h-dvh max-h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface-base"
             : "relative flex min-w-0 flex-1 flex-col overflow-x-hidden bg-surface-base"
         }
       >
         <div
           className={
             fullHeightPanel
-              ? "flex min-h-0 flex-1 flex-col"
+              ? isPreview
+                ? "flex flex-1 flex-col max-md:min-h-svh md:min-h-0"
+                : "flex min-h-0 flex-1 flex-col"
               : "flex min-h-svh flex-col"
           }
         >
@@ -262,7 +266,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <main
             className={
               fullHeightPanel
-                ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-[var(--space-5)]"
+                ? isPreview
+                  ? "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col max-md:overflow-x-hidden max-md:p-0 md:overflow-hidden md:p-[var(--space-5)]"
+                  : "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-[var(--space-5)]"
                 : "relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-[var(--space-5)]"
             }
           >
