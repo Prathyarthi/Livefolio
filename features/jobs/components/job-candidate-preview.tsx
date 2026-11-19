@@ -1,22 +1,12 @@
 "use client";
 
-import { BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RichText } from "@/components/rich-text";
-import {
-  JobHighlights,
-  JobPerkPills,
-} from "@/features/jobs/components/job-highlights";
-import {
-  JobRequirementCard,
-  JobTextSection,
-} from "@/features/jobs/components/job-text-section";
+import { CandidateJobBody } from "@/features/jobs/components/public-job-view";
 import type { Job, JobOrganization } from "@/features/jobs/api/use-jobs";
 import {
   formStateToJobInput,
   type JobRoleFormState,
 } from "@/features/jobs/lib/role-fields";
-import { OrgBanner, OrgLogo } from "@/features/organization/components/org-logo";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 
 type PreviewOrg = Pick<
@@ -88,108 +78,30 @@ export function JobCandidatePreview({
   compact?: boolean;
 }) {
   const job = formToPreviewJob(form, organization);
-  const org = job.organization;
-  const required = job.requirements
-    .filter((r) => r.type === "required")
-    .map((r) => r.label);
-  const preferred = job.requirements
-    .filter((r) => r.type === "preferred")
-    .map((r) => r.label);
   const hasTitle = Boolean(stripRichTextToPlain(form.title));
 
   return (
-    <aside className="rounded-[var(--radius-lg)] border border-border-default bg-surface-base">
-      <div className="flex items-center justify-between gap-3 rounded-t-[var(--radius-lg)] border-b border-border-default bg-surface-raised px-4 py-3">
-        <div>
-          <p className="text-label uppercase text-text-secondary">
-            Candidate view
-          </p>
-          <p className="text-xs text-text-muted">
-            Live preview of the public job page
-          </p>
-        </div>
+    <aside className="overflow-hidden rounded-[20px] border border-border-default bg-surface-raised">
+      <div className="px-5 pb-4 pt-5">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-brand-secondary">
+          Candidate view
+        </p>
+        <p className="mt-1.5 text-sm text-text-secondary">
+          Live preview of the public job page. Changes appear as you type.
+        </p>
       </div>
-
-      <div>
-        {org.bannerUrl ? (
-          <div className="relative aspect-[4/1] w-full overflow-hidden">
-            <OrgBanner bannerUrl={org.bannerUrl} brandColor={org.brandColor} />
-          </div>
-        ) : null}
-
-        <div className="space-y-5 px-4 pb-5 pt-4">
-          <div className="flex flex-wrap items-start gap-4">
-            {org.logoUrl ? (
-              <div
-                className={`relative z-10 shrink-0 ${
-                  org.bannerUrl ? "-mt-8" : ""
-                }`}
-              >
-                <OrgLogo
-                  name={org.name}
-                  logoUrl={org.logoUrl}
-                  brandColor={org.brandColor}
-                  size="lg"
-                />
-              </div>
-            ) : null}
-            <div className="min-w-0 pt-1">
-              <p className="flex items-center gap-1.5 font-medium text-text-primary">
-                <RichText as="span" text={org.name} />
-                {org.verified ? (
-                  <BadgeCheck className="size-4 shrink-0 text-sky-500" aria-label="Verified company" />
-                ) : null}
-              </p>
-              
-              {org.location ? (
-                <p className="text-body-sm text-text-secondary">
-                  <RichText as="span" text={org.location} />
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="min-w-0 space-y-2">
-            <h2
-              className={`text-xl font-semibold tracking-tight ${
-                hasTitle ? "text-text-primary" : "text-text-muted"
-              }`}
-            >
-              <RichText as="span" text={job.title} />
-            </h2>
-            <JobPerkPills job={job} />
-          </div>
-
-          <JobHighlights job={job} compact={compact} />
-
-          <JobTextSection
-            compact
-            title="About the role"
-            body={job.description || null}
-            emptyHint="Add a description to show candidates what this role is about."
-          />
-          <JobTextSection
-            compact
-            title="Responsibilities"
-            body={job.responsibilities}
-          />
-          {(required.length > 0 || preferred.length > 0) && (
-            <div className="grid gap-3">
-              <JobRequirementCard compact title="Required" items={required} />
-              <JobRequirementCard compact title="Preferred" items={preferred} />
-            </div>
-          )}
-          <JobTextSection
-            compact
-            title="Qualifications"
-            body={job.qualifications}
-          />
-          <JobTextSection compact title="Benefits" body={job.benefits} />
-          <Button size="sm" disabled>
+      <CandidateJobBody
+        job={job}
+        compact={compact}
+        framed={false}
+        titlePlaceholder={!hasTitle}
+        showEmptyAbout
+        footer={
+          <Button size={compact ? "sm" : "lg"} disabled>
             Apply with Livefolio
           </Button>
-        </div>
-      </div>
+        }
+      />
     </aside>
   );
 }

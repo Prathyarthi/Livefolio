@@ -130,7 +130,7 @@ export default function CompanyOverviewPage() {
             </Button>
           </div>
         ) : (
-          <ul className="divide-y divide-border-default rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
+          <ul className="divide-y divide-border-default overflow-hidden rounded-[var(--radius-lg)] border border-border-default bg-surface-raised">
             {recentJobs.map((job) => (
               <li key={job.id}>
                 <Link

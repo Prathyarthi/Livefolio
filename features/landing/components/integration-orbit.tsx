@@ -88,6 +88,7 @@ function beamOnSpoke(node: { x: number; y: number }, progress: number) {
 export function IntegrationOrbit() {
   const [step, setStep] = useState({ index: 0, progress: 0 });
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const nodeCount = NODES.length;
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -98,22 +99,29 @@ export function IntegrationOrbit() {
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || nodeCount === 0) return;
     const start = performance.now();
     let raf = 0;
     const tick = (now: number) => {
       const elapsed = now - start;
-      const index = Math.floor(elapsed / CYCLE_MS) % NODES.length;
+      // `% 0` is NaN — keep the index in range whenever the catalog is empty or HMR resets it.
+      const index = Math.floor(elapsed / CYCLE_MS) % nodeCount;
       const progress = Math.min(1, (elapsed % CYCLE_MS) / TRAVEL_MS);
       setStep({ index, progress });
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, nodeCount]);
 
-  const activeIndex = prefersReducedMotion ? 0 : step.index;
-  const activeNode = NODES[activeIndex];
+  if (nodeCount === 0) return null;
+
+  const activeIndex = prefersReducedMotion
+    ? 0
+    : Math.min(Math.max(0, step.index), nodeCount - 1);
+  const activeNode = NODES[activeIndex] ?? NODES[0];
+  if (!activeNode) return null;
+
   const beam = beamOnSpoke(
     activeNode,
     prefersReducedMotion ? 0.45 : step.progress,

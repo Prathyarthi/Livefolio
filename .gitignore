@@ -46,9 +46,8 @@ leads/
 docs/
 svs
 
-# local agent skills
-/.agents/
-
+# local agent skills / scripts (not tracked)
 /scripts
-.cursor
+/.agents/
+.cursor/
 skills-lock.json

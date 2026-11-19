@@ -51,6 +51,7 @@ const RECRUITER_PILL_MENU_LINKS = [
   { label: "References", href: "#references" },
   { label: "How it works", href: "#how-it-works" },
   { label: "Pricing", href: "#pricing" },
+  { label: "Integrations", href: "#integrations" },
   { label: "FAQ", href: "#faq" },
   { label: "For candidates", href: "/" },
 ];
@@ -60,6 +61,7 @@ const RECRUITER_LINKS = [
   { label: "References", href: "#references" },
   { label: "How it works", href: "#how-it-works" },
   { label: "Pricing", href: "#pricing" },
+  { label: "Integrations", href: "#integrations" },
   { label: "FAQ", href: "#faq" },
   { label: "For candidates", href: "/" },
 ];

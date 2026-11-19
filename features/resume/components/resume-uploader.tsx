@@ -1,7 +1,15 @@
 "use client";
 
 import { normalizeSectionTitles } from "@/features/templates/section-labels";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -97,11 +105,31 @@ async function postImport(path: string, body: unknown, context: string) {
   await assertApiOk(res, context);
 }
 
-export function ResumeUploader({
-  onToolbarActionsChange,
-}: {
-  onToolbarActionsChange?: (actions: React.ReactNode) => void;
-} = {}) {
+export type ResumeUploaderHandle = {
+  openFilePicker: () => void;
+};
+
+export const ResumeUploader = forwardRef<
+  ResumeUploaderHandle,
+  {
+    onToolbarActionsChange?: (actions: React.ReactNode) => void;
+    /** Hide the import-page cards and drive upload from an external button. */
+    embedded?: boolean;
+    /** Import page continues to the preview route. Embedded flows stay put. */
+    redirectToPreview?: boolean;
+    onUploadStart?: () => void;
+    onImportFinished?: () => void;
+  }
+>(function ResumeUploader(
+  {
+    onToolbarActionsChange,
+    embedded = false,
+    redirectToPreview = true,
+    onUploadStart,
+    onImportFinished,
+  },
+  ref,
+) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -172,8 +200,16 @@ export function ResumeUploader({
   );
 
   const goToPreview = useCallback(() => {
-    router.push("/dashboard/preview");
-  }, [router]);
+    if (redirectToPreview) {
+      router.push("/dashboard/preview");
+      return;
+    }
+    onImportFinished?.();
+  }, [onImportFinished, redirectToPreview, router]);
+
+  useImperativeHandle(ref, () => ({
+    openFilePicker: () => fileInputRef.current?.click(),
+  }));
 
   const handleImport = useCallback(async (data: ParsedResume) => {
     setImporting(true);
@@ -485,6 +521,7 @@ export function ResumeUploader({
         return;
       }
 
+      onUploadStart?.();
       parseResume.mutate(file, {
         onSuccess: (data) => {
           setParsedData(data);
@@ -500,7 +537,7 @@ export function ResumeUploader({
       // Allow re-selecting the same file later.
       e.target.value = "";
     },
-    [parseResume, handleImport]
+    [parseResume, handleImport, onUploadStart]
   );
 
   const handleClearNow = async () => {
@@ -539,7 +576,9 @@ export function ResumeUploader({
   }, [onToolbarActionsChange, parsedData, importing, handleImport]);
 
   return (
-    <div className="space-y-6">
+    <div className={embedded ? "contents" : "space-y-6"}>
+      {embedded ? null : (
+      <>
       {/* Upload area */}
       <Card>
         <CardHeader>
@@ -582,16 +621,6 @@ export function ResumeUploader({
               </>
             )}
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/pdf"
-            aria-label="Upload resume PDF"
-            title="Upload resume PDF"
-            className="hidden"
-            onChange={handleFileChange}
-            disabled={parseResume.isPending}
-          />
         </CardContent>
       </Card>
 
@@ -673,6 +702,39 @@ export function ResumeUploader({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/pdf"
+        aria-label="Upload resume PDF"
+        title="Upload resume PDF"
+        className="hidden"
+        onChange={handleFileChange}
+        disabled={parseResume.isPending}
+      />
+
+      <Dialog open={embedded && parseResume.isPending} onOpenChange={() => undefined}>
+        <DialogContent
+          showCloseButton={false}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="sm:max-w-md"
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Reading your resume</DialogTitle>
+            <DialogDescription>
+              Please wait while your resume is read.
+            </DialogDescription>
+          </DialogHeader>
+          <RotatingLoader
+            messages={RESUME_PARSE_MESSAGES}
+            className="py-4"
+          />
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={importing} onOpenChange={() => undefined}>
         <DialogContent
@@ -711,7 +773,13 @@ export function ResumeUploader({
 
       {/* Shown only when auto-import fails so the user can retry */}
       {parsedData && !importing && (
-        <div className="space-y-4">
+        <div
+          className={
+            embedded
+              ? "fixed inset-0 z-50 overflow-y-auto bg-surface-base p-6"
+              : "space-y-4"
+          }
+        >
           <div>
             <h3 className="text-lg font-semibold">Parsed Data</h3>
             <p className="text-sm text-muted-foreground">
@@ -950,4 +1018,4 @@ export function ResumeUploader({
       )}
     </div>
   );
-}
+});
