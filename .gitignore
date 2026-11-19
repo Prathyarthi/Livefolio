@@ -47,4 +47,6 @@ docs/
 svs
 
 # local agent skills
+/scripts
 /.agents/
+.cursor

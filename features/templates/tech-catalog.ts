@@ -18,22 +18,6 @@ function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/[\s._/-]+/g, "");
 }
 
-/** Brands Simple Icons does not ship. Served from /tech-icons. */
-const LOCAL_ICON_SLUGS: Record<string, string> = {
-  elysia: "local/elysia",
-  elysiajs: "local/elysia",
-  websocket: "local/websocket",
-  websockets: "local/websocket",
-};
-
-/**
- * Names that are a prefix of a different brand. "java" must not inherit
- * the JavaScript icon. Simple Icons does not ship the Java cup, so it is local.
- */
-const EXACT_ALIASES: Record<string, TechEntry> = {
-  java: { label: "Java", slug: "local/java" },
-};
-
 function iconKeys(entry: TechEntry): string[] {
   const label = normalize(entry.label);
   const slug = (entry.slug ?? "").toLowerCase().replace(/dot/g, "");
@@ -57,33 +41,9 @@ function matchRank(query: string, entry: TechEntry): number {
   return rank;
 }
 
-function exactMatches(query: string): TechEntry[] {
-  const q = normalize(query);
-  if (!q) return [];
-  const found: TechEntry[] = [];
-  const seen = new Set<string>();
-  const add = (entry: TechEntry) => {
-    const key = entry.label.toLowerCase();
-    if (!key || seen.has(key)) return;
-    seen.add(key);
-    found.push(entry);
-  };
-  const alias = EXACT_ALIASES[q];
-  if (alias) add(alias);
-  for (const entry of TECH_CATALOG) {
-    if (!entry.slug) continue;
-    if (iconKeys(entry).some((key) => key === q)) add(entry);
-  }
-  return found;
-}
-
 export function resolveTechIcon(name: string): { slug: string | null } {
   const q = normalize(name);
   if (!q) return { slug: null };
-  const local = LOCAL_ICON_SLUGS[q];
-  if (local) return { slug: local };
-  const alias = EXACT_ALIASES[q];
-  if (alias?.slug) return { slug: alias.slug };
 
   let best: { slug: string; rank: number; gap: number } | null = null;
   for (const entry of TECH_CATALOG) {
@@ -122,22 +82,10 @@ export function suggestTechs(
     results.push(entry);
   };
 
-  const exact = exactMatches(trimmed);
-  if (exact.length > 0) {
-    for (const entry of exact) push(entry);
-    for (const name of extra) {
-      if (results.length >= limit) break;
-      if (normalize(name) !== q) continue;
-      push({ label: name.trim(), slug: resolveTechIcon(name).slug });
-    }
-    return results.slice(0, limit);
-  }
-
-  push({ label: trimmed, slug: null });
-
-  for (const [key, entry] of Object.entries(EXACT_ALIASES)) {
-    if (key.startsWith(q)) push(entry);
-  }
+  const official = TECH_CATALOG.find(
+    (entry) => entry.slug && iconKeys(entry).some((key) => key === q),
+  );
+  push(official ?? { label: trimmed, slug: null });
 
   const matched = TECH_CATALOG
     .map((entry) => ({ entry, rank: matchRank(q, entry) }))
@@ -162,8 +110,5 @@ export function suggestTechs(
 }
 
 export function techIconUrl(slug: string): string {
-  if (slug === "local/elysia") return "/tech-icons/elysia.svg";
-  if (slug === "local/java") return "/tech-icons/java.svg";
-  if (slug === "local/websocket") return "/tech-icons/websocket.png";
   return `https://cdn.simpleicons.org/${slug}`;
 }
