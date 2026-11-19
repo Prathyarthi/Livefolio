@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -43,9 +44,6 @@ import {
   type ResumeUploaderHandle,
 } from "@/features/resume/components/resume-uploader";
 
-const EMPTY_PORTFOLIO_PROMPT =
-  "Your portfolio is waiting to be explored. Add your details and discover how your profile looks to the world.";
-
 const EMPTY_PORTFOLIO_PROMPT_KEY = "livefolio.empty-portfolio-prompt-dismissed";
 
 function emptyPromptStorageKey(portfolioId: string | undefined) {
@@ -73,9 +71,6 @@ function rememberEmptyPromptDismissed(portfolioId: string | undefined) {
 function portfolioHasDetails(portfolio: {
   headline?: string | null;
   summary?: string | null;
-  phone?: string | null;
-  websiteUrl?: string | null;
-  location?: string | null;
   experiences?: unknown[] | null;
   educations?: unknown[] | null;
   skills?: unknown[] | null;
@@ -85,13 +80,7 @@ function portfolioHasDetails(portfolio: {
   customSections?: unknown[] | null;
   socialProfiles?: unknown[] | null;
 }) {
-  if (
-    portfolio.headline?.trim() ||
-    portfolio.summary?.trim() ||
-    portfolio.phone?.trim() ||
-    portfolio.websiteUrl?.trim() ||
-    portfolio.location?.trim()
-  ) {
+  if (portfolio.headline?.trim() || portfolio.summary?.trim()) {
     return true;
   }
   return [
@@ -203,12 +192,14 @@ export default function PreviewPage() {
     applyTemplatePreview(next);
   };
 
-  const dismissEmptyPrompt = () => {
+  const dismissEmptyPrompt = (opts?: { openEditor?: boolean }) => {
+    setDetailsPromptOpen(false);
     setEmptyPromptDismissed(true);
     rememberEmptyPromptDismissed(portfolioId);
     const next = pendingTemplateRef.current;
     pendingTemplateRef.current = null;
     if (next) applyTemplatePreview(next);
+    if (opts?.openEditor) setEditOpen(true);
   };
 
   const finishImportOnPreview = useCallback(() => {
@@ -510,19 +501,42 @@ export default function PreviewPage() {
           dismissEmptyPrompt();
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="font-sans sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-balance text-lg font-medium leading-snug">
-              {EMPTY_PORTFOLIO_PROMPT}
+            <DialogTitle className="!font-sans text-balance text-lg font-semibold leading-snug tracking-normal">
+              Fill your portfolio to preview this look
             </DialogTitle>
+            <DialogDescription className="!font-sans text-pretty text-sm leading-relaxed">
+              Upload a resume to import your details in one step, or edit
+              sections yourself. You can change anything later.
+            </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:justify-between">
             <Button
               type="button"
-              onClick={() => resumeImportRef.current?.openFilePicker()}
+              variant="ghost"
+              className="!font-sans"
+              onClick={() => dismissEmptyPrompt()}
             >
-              Upload resume
+              I&apos;ll do it later
             </Button>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                className="!font-sans"
+                onClick={() => dismissEmptyPrompt({ openEditor: true })}
+              >
+                Edit manually
+              </Button>
+              <Button
+                type="button"
+                className="!font-sans"
+                onClick={() => resumeImportRef.current?.openFilePicker()}
+              >
+                Upload resume
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

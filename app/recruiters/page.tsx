@@ -7,6 +7,7 @@ import { RecruiterReferences } from "@/features/landing/components/recruiter-ref
 import { RecruiterHowItWorks } from "@/features/landing/components/recruiter-how-it-works";
 import { RecruiterDifferentiation } from "@/features/landing/components/recruiter-differentiation";
 import { RecruiterPricing } from "@/features/landing/components/recruiter-pricing";
+import { Integrations } from "@/features/landing/components/integrations";
 import { RECRUITER_FAQS, RecruiterFAQ } from "@/features/landing/components/recruiter-faq";
 import { RecruiterCTA } from "@/features/landing/components/recruiter-cta";
 import { StudioShell } from "@/features/landing/components/studio-shell";
@@ -55,6 +56,11 @@ export default function RecruitersLandingPage() {
           <RecruiterHowItWorks />
           <RecruiterDifferentiation />
           <RecruiterPricing />
+          <Integrations
+            title="Proof from the platforms candidates already use"
+            description="LinkedIn, GitHub, writing, and coding stats show up on Livefolios — so you can rank on shipped work, not keyword stuffing."
+            footnote="More integrations on the roadmap. We ship what helps you hire with confidence."
+          />
           <RecruiterFAQ />
           <RecruiterCTA />
         </main>
