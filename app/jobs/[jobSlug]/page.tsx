@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { useApplicationPreview } from "@/features/applications/api/use-applications";
 import { usePublicJob } from "@/features/jobs/api/use-jobs";
 import { CandidateJobBody } from "@/features/jobs/components/public-job-view";
 import { LogoMark } from "@/components/logo";
@@ -14,6 +15,9 @@ export default function PublicJobPage() {
   const jobSlug = params.jobSlug;
   const { data: job, isLoading } = usePublicJob(jobSlug);
   const { status } = useSession();
+  const { data: preview } = useApplicationPreview(jobSlug, {
+    enabled: status === "authenticated",
+  });
 
   if (isLoading) {
     return (
@@ -37,11 +41,20 @@ export default function PublicJobPage() {
     );
   }
 
+  const existingApplication = preview?.alreadyApplied
+    ? preview.existingApplication
+    : null;
+  const appliedHref = existingApplication
+    ? `/dashboard/applications/${existingApplication.id}`
+    : null;
   const applyHref =
     status === "authenticated"
       ? `/jobs/${job.slug}/apply`
       : `/sign-in?callbackUrl=${encodeURIComponent(`/jobs/${job.slug}/apply`)}`;
   const isPaused = job.status === "paused";
+  const ctaHref = appliedHref ?? applyHref;
+  const headerCtaLabel = appliedHref ? "Applied" : "Apply";
+  const footerCtaLabel = appliedHref ? "Applied" : "Apply with Livefolio";
 
   return (
     <div className="min-h-screen bg-surface-base">
@@ -53,8 +66,13 @@ export default function PublicJobPage() {
               {siteConfig.name}
             </span>
           </Link>
-          <Button asChild size="sm" disabled={isPaused}>
-            <Link href={applyHref}>Apply</Link>
+          <Button
+            asChild
+            size="sm"
+            variant={appliedHref ? "outline" : "default"}
+            disabled={!appliedHref && isPaused}
+          >
+            <Link href={ctaHref}>{headerCtaLabel}</Link>
           </Button>
         </div>
       </header>
@@ -65,8 +83,13 @@ export default function PublicJobPage() {
           paused={isPaused}
           showCompany
           footer={
-            <Button asChild size="lg" disabled={isPaused}>
-              <Link href={applyHref}>Apply with Livefolio</Link>
+            <Button
+              asChild
+              size="lg"
+              variant={appliedHref ? "outline" : "default"}
+              disabled={!appliedHref && isPaused}
+            >
+              <Link href={ctaHref}>{footerCtaLabel}</Link>
             </Button>
           }
         />

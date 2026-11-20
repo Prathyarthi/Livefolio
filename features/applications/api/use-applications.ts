@@ -90,8 +90,9 @@ export type ApplicationPreview = {
     submittedAt: string;
     status: string;
   } | null;
-  snapshot: ApplicationSnapshotData;
-  portfolioId: string;
+  /** Null when the candidate already applied (snapshot not needed). */
+  snapshot: ApplicationSnapshotData | null;
+  portfolioId: string | null;
 };
 
 export function useMyApplications(options?: { page?: number; pageSize?: number }) {
@@ -133,10 +134,13 @@ export function useMyApplication(id: string | undefined) {
   });
 }
 
-export function useApplicationPreview(jobSlug: string | undefined) {
+export function useApplicationPreview(
+  jobSlug: string | undefined,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: ["applications", "preview", jobSlug],
-    enabled: Boolean(jobSlug),
+    enabled: Boolean(jobSlug) && (options?.enabled ?? true),
     queryFn: async () => {
       const res = await fetch(`/api/applications/preview/${jobSlug}`, {
         cache: "no-store",

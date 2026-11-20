@@ -255,7 +255,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       },
     });
 
-    if (!job || job.status !== "published") {
+    if (!job) {
       ctx.set.status = 404;
       return { error: "Job not found or not open for applications" };
     }
@@ -267,6 +267,27 @@ export const applications = new Elysia({ prefix: "/applications" })
       select: { id: true, submittedAt: true, status: true },
     });
 
+    // Allow status lookup after apply even if the role was paused/closed.
+    if (job.status !== "published" && !existing) {
+      ctx.set.status = 404;
+      return { error: "Job not found or not open for applications" };
+    }
+
+    const jobPayload = {
+      ...job,
+      screeningQuestions: parseScreeningQuestions(job.screeningQuestions),
+    };
+
+    if (existing) {
+      return {
+        job: jobPayload,
+        alreadyApplied: true,
+        existingApplication: existing,
+        snapshot: null,
+        portfolioId: null,
+      };
+    }
+
     const snapshot = await buildApplicationSnapshot(session.userId);
     if (!snapshot) {
       ctx.set.status = 400;
@@ -277,12 +298,9 @@ export const applications = new Elysia({ prefix: "/applications" })
     }
 
     return {
-      job: {
-        ...job,
-        screeningQuestions: parseScreeningQuestions(job.screeningQuestions),
-      },
-      alreadyApplied: Boolean(existing),
-      existingApplication: existing,
+      job: jobPayload,
+      alreadyApplied: false,
+      existingApplication: null,
       snapshot: snapshot.data,
       portfolioId: snapshot.portfolioId,
     };

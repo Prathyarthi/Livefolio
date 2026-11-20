@@ -121,6 +121,20 @@ export default function ApplyJobPage() {
     );
   }
 
+  if (!data.snapshot) {
+    return (
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-4 px-6 py-16">
+        <h1 className="text-h2 text-text-primary">Unable to apply</h1>
+        <p className="text-body-sm text-text-secondary">
+          Create your Livefolio before applying.
+        </p>
+        <Button asChild>
+          <Link href="/dashboard">Open dashboard</Link>
+        </Button>
+      </div>
+    );
+  }
+
   const snapshot = data.snapshot;
   const screeningQuestions = data.job.screeningQuestions ?? [];
   const companyName = data.job.organization.name;
