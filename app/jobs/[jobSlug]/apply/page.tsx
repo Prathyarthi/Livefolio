@@ -87,6 +87,25 @@ export default function ApplyJobPage() {
     );
   }
 
+  const deadlinePassed =
+    error instanceof Error &&
+    (error as Error & { code?: string }).code === "DEADLINE_PASSED";
+
+  if (deadlinePassed) {
+    return (
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-4 px-6 py-16">
+        <h1 className="text-h2 text-text-primary">Applications closed</h1>
+        <p className="text-body-sm text-text-secondary">
+          The deadline for this role has passed, so it is no longer accepting
+          applications.
+        </p>
+        <Button asChild variant="outline">
+          <Link href={`/jobs/${jobSlug}`}>Back to job</Link>
+        </Button>
+      </div>
+    );
+  }
+
   if (error || !data) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-4 px-6 py-16">

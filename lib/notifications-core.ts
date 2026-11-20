@@ -28,7 +28,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   "linkedin.sync_failed": "LinkedIn sync failed",
   badge_earned: "Badges earned",
   "application.submitted": "Application submitted",
-  "application.stage_changed": "Application status updates",
+  "application.stage_changed": "Hiring decisions",
   system: "Product & account updates",
 };
 

@@ -45,6 +45,7 @@ import {
   notifyApplicationStageChanged,
   notifyApplicationSubmitted,
 } from "@/features/applications/lib/notify-candidate";
+import { isApplicationDeadlinePassed } from "@/features/jobs/constants/labels";
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -246,6 +247,7 @@ export const applications = new Elysia({ prefix: "/applications" })
         title: true,
         slug: true,
         status: true,
+        applicationDeadline: true,
         screeningQuestions: true,
         organization: {
           select: {
@@ -289,6 +291,14 @@ export const applications = new Elysia({ prefix: "/applications" })
         existingApplication: existing,
         snapshot: null,
         portfolioId: null,
+      };
+    }
+
+    if (isApplicationDeadlinePassed(job.applicationDeadline)) {
+      ctx.set.status = 400;
+      return {
+        error: "The application deadline has passed",
+        code: "DEADLINE_PASSED",
       };
     }
 
@@ -348,12 +358,12 @@ export const applications = new Elysia({ prefix: "/applications" })
         return { error: "Job not found or not open for applications" };
       }
 
-      if (
-        job.applicationDeadline &&
-        job.applicationDeadline.getTime() < Date.now()
-      ) {
+      if (isApplicationDeadlinePassed(job.applicationDeadline)) {
         ctx.set.status = 400;
-        return { error: "The application deadline has passed" };
+        return {
+          error: "The application deadline has passed",
+          code: "DEADLINE_PASSED",
+        };
       }
 
       const existing = await prisma.application.findUnique({

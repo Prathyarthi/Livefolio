@@ -121,6 +121,15 @@ export function formatDeadline(value: string | null | undefined): string | null 
   });
 }
 
+export function isApplicationDeadlinePassed(
+  value: string | Date | null | undefined,
+  now = Date.now(),
+): boolean {
+  if (!value) return false;
+  const time = new Date(value).getTime();
+  return !Number.isNaN(time) && time < now;
+}
+
 export function splitRichLines(text: string | null | undefined): string[] {
   if (!text?.trim()) return [];
   const lines = text

@@ -1,8 +1,4 @@
-import { APPLICATION_STATUS_LABELS } from "@/features/jobs/constants/labels";
-import {
-  statusForStage,
-  type PipelineStage,
-} from "@/features/applications/lib/pipeline";
+import type { PipelineStage } from "@/features/applications/lib/pipeline";
 import { notify } from "@/lib/notifications";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 
@@ -10,6 +6,8 @@ type JobContext = {
   title: string;
   organizationName: string;
 };
+
+const DECISION_STAGES = new Set<PipelineStage>(["hired", "rejected"]);
 
 function plainJobTitle(title: string) {
   return stripRichTextToPlain(title).trim() || "a role";
@@ -21,6 +19,19 @@ function plainOrgName(name: string) {
 
 function applicationHref(applicationId: string) {
   return `/dashboard/applications/${applicationId}`;
+}
+
+function decisionCopy(stage: PipelineStage, jobTitle: string, org: string) {
+  if (stage === "hired") {
+    return {
+      title: `You're hired: ${jobTitle}`,
+      body: `Congratulations! ${org} marked your application for ${jobTitle} as hired.`,
+    };
+  }
+  return {
+    title: `Update on ${jobTitle}`,
+    body: `${org} has decided not to move forward with your application. Thank you for applying.`,
+  };
 }
 
 /**
@@ -47,8 +58,7 @@ export function notifyApplicationSubmitted(input: {
 }
 
 /**
- * Candidate-only status update. Skips when the pipeline stage did not change.
- * Fire-and-forget — never await from request handlers.
+ * Candidate-only, hired or rejected only. Fire-and-forget — never await from request handlers.
  */
 export function notifyApplicationStageChanged(input: {
   userId: string;
@@ -58,22 +68,21 @@ export function notifyApplicationStageChanged(input: {
   stage: PipelineStage;
 }) {
   if (input.previousStage === input.stage) return;
+  if (!DECISION_STAGES.has(input.stage)) return;
 
   const jobTitle = plainJobTitle(input.job.title);
   const org = plainOrgName(input.job.organizationName);
-  const status = statusForStage(input.stage);
-  const statusLabel = APPLICATION_STATUS_LABELS[status] ?? status;
+  const copy = decisionCopy(input.stage, jobTitle, org);
 
   void notify({
     userId: input.userId,
     type: "application.stage_changed",
-    title: `${statusLabel}: ${jobTitle}`,
-    body: `${org} updated your application to ${statusLabel.toLowerCase()}.`,
+    title: copy.title,
+    body: copy.body,
     href: applicationHref(input.applicationId),
     metadata: {
       applicationId: input.applicationId,
       stage: input.stage,
-      status,
       previousStage: input.previousStage,
     },
   });
