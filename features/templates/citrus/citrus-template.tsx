@@ -151,7 +151,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                 </section>
               ),
     experience: experiences.length > 0 && (
-                <section key="experience" id="experience" className="scroll-mt-32 max-w-5xl">
+                <section key="experience" id="experience" className="scroll-mt-32 max-w-6xl">
                   <h2 className="mb-12 text-4xl font-black text-[#264653] uppercase tracking-tight">{labels.experience}</h2>
                   <CollapsibleList initial={4} wrapperClassName="space-y-8" buttonClassName="mt-12 bg-[#264653] text-white px-8 py-3 font-bold uppercase tracking-widest hover:bg-[var(--lf-accent)] transition-colors">
                     {experiences.map((exp) => (
@@ -251,7 +251,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                     </section>
                   ),
     articles: articles.length > 0 && (
-                <section key="articles" id="articles" className="scroll-mt-32 max-w-5xl">
+                <section key="articles" id="articles" className="scroll-mt-32 max-w-6xl">
                   <h2 className="mb-12 text-4xl font-black text-[#264653] uppercase tracking-tight">{labels.articles}</h2>
                   <CollapsibleList initial={3} wrapperClassName="grid gap-8 md:grid-cols-2" buttonClassName="mt-12 mx-auto bg-[#264653] text-white px-8 py-3 font-bold uppercase tracking-widest hover:bg-[var(--lf-accent)] transition-colors">
                     {articles.map((article) => (
@@ -301,7 +301,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
 
   return (
     <div className={cn(TEMPLATE_CONTAINER, "min-h-screen bg-[#FFFCF2] text-[#264653] font-sans font-medium overflow-x-hidden")} style={accentRootStyle(primaryColor)}>
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-8 md:py-20">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8 md:py-20">
 
         {navbarEnabled && (
           <nav className="mb-16">

@@ -504,7 +504,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
         />
       )}
 
-      <div className="relative mx-auto min-w-0 max-w-5xl overflow-x-clip px-5 pb-20 pt-16 sm:px-6 md:px-8 md:pb-32 md:pt-28">
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-20 pt-16 sm:px-6 md:px-8 md:pb-32 md:pt-28">
         <header className={cn(HERO_HEADER_COLUMN, "max-w-3xl space-y-4")}>
           <h1
             className={cn(

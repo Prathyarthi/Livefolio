@@ -462,7 +462,7 @@ export function LanternTemplate({ data }: { data: PortfolioData }) {
       )}
       style={accentRootStyle(primaryColor)}
     >
-      <div className="relative mx-auto min-w-0 max-w-[1039px] overflow-x-clip px-4 pb-24 pt-5 sm:px-6 md:pb-32 md:pt-8">
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-4 pb-24 pt-5 sm:px-6 md:pb-32 md:pt-8">
         {navbarEnabled && (
           <TemplateNavbar
             items={sections}

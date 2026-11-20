@@ -428,7 +428,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
         />
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 py-12 relative z-10 space-y-20">
+      <div className="mx-auto max-w-6xl px-4 py-12 relative z-10 space-y-20">
 
         {navbarEnabled && (
           <div className="sticky top-6 z-50 mb-16 flex min-w-0 w-full justify-center px-2">

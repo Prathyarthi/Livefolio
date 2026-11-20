@@ -107,7 +107,7 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 const LINE = "border-[var(--veil-line)]";
 const MUTED = "text-[var(--veil-muted)]";
 const FAINT = "text-[var(--veil-faint)]";
-const SHELL = "mx-auto w-full max-w-7xl px-5 @sm:px-8 @lg:px-12";
+const SHELL = "mx-auto w-full max-w-6xl px-5 @sm:px-8 @lg:px-12";
 const MORE_BUTTON =
   "mt-6 rounded-full border border-[var(--veil-line-strong)] px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--veil-muted)] transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--veil-paper)]";
 

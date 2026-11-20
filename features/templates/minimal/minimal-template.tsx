@@ -473,7 +473,7 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
       )}
       style={accentRootStyle(primaryColor)}
     >
-      <div className="relative mx-auto min-w-0 max-w-[44rem] overflow-x-clip px-5 pb-16 pt-12 sm:px-6 md:pb-28 md:pt-20">
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-16 pt-12 sm:px-6 md:pb-28 md:pt-20">
         <header className="min-w-0">
           <h1
             className={cn(
