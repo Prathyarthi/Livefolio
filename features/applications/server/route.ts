@@ -41,6 +41,10 @@ import {
   parseScreeningQuestions,
   validateScreeningAnswers,
 } from "@/features/jobs/lib/screening-questions";
+import {
+  notifyApplicationStageChanged,
+  notifyApplicationSubmitted,
+} from "@/features/applications/lib/notify-candidate";
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -424,6 +428,16 @@ export const applications = new Elysia({ prefix: "/applications" })
         include: candidateApplicationInclude,
       });
 
+      // Separate from the apply response path — never await.
+      notifyApplicationSubmitted({
+        userId: session.userId,
+        applicationId: application.id,
+        job: {
+          title: job.title,
+          organizationName: job.organization.name,
+        },
+      });
+
       return application;
     },
     {
@@ -672,7 +686,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       const stage = ctx.body.stage as PipelineStage;
       const existing = await prisma.application.findFirst({
         where: { id: ctx.params.applicationId, jobId: job.id },
-        select: { id: true },
+        select: { id: true, userId: true, stage: true },
       });
       if (!existing) {
         ctx.set.status = 404;
@@ -694,6 +708,18 @@ export const applications = new Elysia({ prefix: "/applications" })
           shortlisted: true,
           shortlistedAt: true,
           updatedAt: true,
+        },
+      });
+
+      // Separate from the stage update response — never await.
+      notifyApplicationStageChanged({
+        userId: existing.userId,
+        applicationId: existing.id,
+        previousStage: existing.stage,
+        stage,
+        job: {
+          title: job.title,
+          organizationName: job.organization.name,
         },
       });
 
@@ -734,7 +760,7 @@ export const applications = new Elysia({ prefix: "/applications" })
 
       const existing = await prisma.application.findFirst({
         where: { id: ctx.params.applicationId, jobId: job.id },
-        select: { id: true, stage: true },
+        select: { id: true, userId: true, stage: true },
       });
       if (!existing) {
         ctx.set.status = 404;
@@ -763,6 +789,18 @@ export const applications = new Elysia({ prefix: "/applications" })
           shortlisted: true,
           shortlistedAt: true,
           updatedAt: true,
+        },
+      });
+
+      // Separate from the shortlist response — never await.
+      notifyApplicationStageChanged({
+        userId: existing.userId,
+        applicationId: existing.id,
+        previousStage: existing.stage,
+        stage: nextStage,
+        job: {
+          title: job.title,
+          organizationName: job.organization.name,
         },
       });
 
