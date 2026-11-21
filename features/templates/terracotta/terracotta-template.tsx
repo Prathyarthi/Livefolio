@@ -161,7 +161,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
             <article key={article.id} className="border-l-2 border-[var(--lf-accent)]/60 bg-[#fffaf3] p-5">
               <ArticleSourceLabel source={article.source} className={cn("mb-2", mute)} />
               <h3 className="text-lg font-semibold tracking-[-0.025em]"><a href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline"><RichText text={article.title} /></a></h3>
-              {article.description && <p className={cn("mt-3 text-sm leading-6", mute)}>{article.description}</p>}
+              {article.description && <p className={cn("mt-3 text-sm leading-6", mute)}><RichText text={article.description} /></p>}
               <p className={cn("mt-4 text-xs", mute)}>{article.publishedAt ? new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : null}{article.publishedAt && article.readTime != null ? " / " : null}{article.readTime != null ? `${article.readTime} min` : null}</p>
             </article>
           ))}

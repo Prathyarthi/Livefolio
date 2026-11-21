@@ -304,7 +304,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                   {article.readTime != null ? <span>{article.publishedAt ? " / " : null}{article.readTime} min</span> : null}
                 </p>
               </div>
-              {article.description && <p className={cn("mt-2 max-w-[42rem] text-sm leading-6", mute)}>{article.description}</p>}
+              {article.description && <p className={cn("mt-2 max-w-[42rem] text-sm leading-6", mute)}><RichText text={article.description} /></p>}
             </article>
           ))}
         </CollapsibleList>
@@ -355,7 +355,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
       style={accentRootStyle(primaryColor)}
     >
       <div className="pointer-events-none fixed inset-0 opacity-[0.08]" style={decoPattern} aria-hidden />
-      <div className="relative mx-auto min-w-0 max-w-5xl overflow-x-clip px-5 pb-16 pt-10 sm:px-6 md:px-8 md:pb-28 md:pt-14">
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-16 pt-10 sm:px-6 md:px-8 md:pb-28 md:pt-14">
         <header className="relative mx-auto max-w-4xl border border-[#c5a45c]/28 bg-[#10100d]/90 px-5 py-10 text-center sm:px-8 md:px-12 md:py-14">
           <div className="mx-auto mb-8 h-16 w-40" style={fanPattern} aria-hidden />
           <h1 className={cn(HERO_TITLE_BASE, "font-[family-name:var(--font-artdeco-display)] text-4xl leading-[1.02] tracking-[-0.025em] @sm:text-5xl @md:text-6xl @lg:text-7xl", ink)}>

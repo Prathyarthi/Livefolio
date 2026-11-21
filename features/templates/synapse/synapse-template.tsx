@@ -232,7 +232,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           muted: "text-xs font-bold text-[var(--lf-accent)]",
           chip: "px-3 py-1.5 rounded-full bg-white border border-black/10 text-xs font-medium text-gray-600",
           link: "text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] hover:opacity-80",
-          section: "max-w-5xl mx-auto scroll-mt-24 py-16 px-6",
+          section: "max-w-6xl mx-auto scroll-mt-24 py-16 px-6",
       }}
     />
   ) : null;
@@ -240,7 +240,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: null,
     skills: data.skills.length > 0 ? (
-      <section key="skills" id="skills" className={cn(SECTION_PAD, "max-w-7xl mx-auto scroll-mt-24")}>
+      <section key="skills" id="skills" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
         <SectionHeading>
           {labels.skills}
         </SectionHeading>
@@ -272,7 +272,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     experience: experiences.length > 0 ? (
-      <section key="experience" id="experience" className={cn(SECTION_PAD, "max-w-5xl mx-auto scroll-mt-24")}>
+      <section key="experience" id="experience" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
         <SectionHeading>{labels.experience}</SectionHeading>
         <CollapsibleList
           initial={4}
@@ -338,7 +338,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         id="work"
         className={cn(SECTION_PAD, "bg-gray-50/50 scroll-mt-24")}
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <SectionHeading>
             {labels.projects}
           </SectionHeading>
@@ -425,7 +425,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     education: data.educations.length > 0 ? (
-      <section key="education" id="education" className={cn(SECTION_PAD, "max-w-5xl mx-auto scroll-mt-24")}>
+      <section key="education" id="education" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
         <SectionHeading>{labels.education}</SectionHeading>
         <CollapsibleList
           initial={4}
@@ -468,7 +468,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         id="articles"
         className={cn(SECTION_PAD, "bg-gray-50/50 scroll-mt-24")}
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <SectionHeading>
             {labels.articles}
           </SectionHeading>
@@ -544,7 +544,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     certifications: data.certifications.length > 0 ? (
-      <section key="certifications" id="certifications" className={cn(SECTION_PAD, "max-w-5xl mx-auto scroll-mt-24")}>
+      <section key="certifications" id="certifications" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
         <SectionHeading>{labels.certifications}</SectionHeading>
         <div className="@md:hidden">
           <CollapsibleList
@@ -586,7 +586,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       <section
         key="achievements"
         id="achievements"
-        className={cn(SECTION_PAD, "max-w-5xl mx-auto scroll-mt-24")}
+        className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}
       >
         <SectionHeading>{labels.achievements}</SectionHeading>
         <div className="@md:hidden">
@@ -656,7 +656,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     profiles: hasProfiles ? (
-      <section key="profiles" id="profiles" className={cn(SECTION_PAD, "max-w-5xl mx-auto scroll-mt-24")}>
+      <section key="profiles" id="profiles" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
         <SectionHeading>{labels.profiles}</SectionHeading>
         <ProfileLinksSection
           portfolio={data.portfolio}
@@ -669,7 +669,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     github: contributionCalendar ? (
-      <section key="github" className={cn(SECTION_PAD, "max-w-7xl mx-auto scroll-mt-24")}>
+      <section key="github" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
         <SectionHeading>{labels.github}</SectionHeading>
         <div className="overflow-x-auto">
           <div className="mx-auto w-max max-w-full">
@@ -707,7 +707,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
             : "py-4 @sm:py-6 bg-transparent",
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 @sm:px-6 @md:px-12 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 @sm:px-6 @md:px-12 flex items-center justify-between">
           <a href="#about" className="flex items-center gap-2.5 group">
             <span className="w-8 h-8 rounded-lg bg-[var(--lf-accent)] text-white text-xs font-bold flex items-center justify-center">
               {getInitials(data.portfolio.title)}
@@ -802,7 +802,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       <main className="relative z-10">
         <section
           id="about"
-          className="min-h-0 flex items-center pt-8 pb-12 @sm:pt-10 @sm:pb-14 px-4 @sm:px-6 @md:px-12 max-w-7xl mx-auto scroll-mt-24"
+          className="min-h-0 flex items-center pt-8 pb-12 @sm:pt-10 @sm:pb-14 px-4 @sm:px-6 @md:px-12 max-w-6xl mx-auto scroll-mt-24"
         >
           <div className={cn(HERO_HEADER_COLUMN, "w-full max-w-3xl space-y-4")}>
             <h1
@@ -858,7 +858,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {data.customSections.length > 0 && (
-          <section className={cn(SECTION_PAD, "max-w-5xl mx-auto")}>
+          <section className={cn(SECTION_PAD, "max-w-6xl mx-auto")}>
             {data.customSections.map((sec) => (
               <div key={sec.id} className={cn(CARD, "rounded-2xl p-6 @sm:p-8 mb-8")}>
                 <SectionHeading>{sec.label}</SectionHeading>
@@ -914,7 +914,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </main>
 
       <footer className="py-8 @sm:py-12 border-t border-black/5 px-4 @sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col @sm:flex-row justify-between items-center gap-4 @sm:gap-6 text-center @sm:text-left">
+        <div className="max-w-6xl mx-auto flex flex-col @sm:flex-row justify-between items-center gap-4 @sm:gap-6 text-center @sm:text-left">
           <div className={cn(MUTED, "text-xs @sm:text-sm")}>
             © {new Date().getFullYear()} <RichText text={data.portfolio.title} />. Crafted with precision.
           </div>

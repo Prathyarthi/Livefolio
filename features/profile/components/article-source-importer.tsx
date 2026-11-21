@@ -2,6 +2,7 @@
 
 import { useState, type ComponentType } from "react";
 import { toast } from "sonner";
+import { RichText } from "@/components/rich-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -235,7 +236,7 @@ export function ArticleSourceImporter({
                           </p>
                           {article.description ? (
                             <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                              {article.description}
+                              <RichText text={article.description} />
                             </p>
                           ) : null}
                           <div className="mt-2 flex flex-wrap items-center gap-3">

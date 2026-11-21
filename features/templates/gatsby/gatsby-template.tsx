@@ -357,7 +357,7 @@ export function GatsbyTemplate({ data }: { data: PortfolioData }) {
                   </h3>
                   {article.description && (
                     <p className="text-[#a0a0a0] text-sm leading-relaxed mb-8 grow font-light">
-                      {article.description}
+                      <RichText text={article.description} />
                     </p>
                   )}
                   <div className="mt-auto flex items-center justify-center gap-4 text-[10px] font-bold text-[#888] pt-6 border-t border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] uppercase tracking-[0.2em] w-full">
@@ -432,7 +432,7 @@ export function GatsbyTemplate({ data }: { data: PortfolioData }) {
       />
       <div className="absolute inset-0 z-0 pointer-events-none border-8 border-double border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] m-3 md:m-8 md:border-16" />
 
-      <div className="relative z-10 mx-auto max-w-5xl space-y-24 px-10 py-16 sm:px-12 md:px-16">
+      <div className="relative z-10 mx-auto max-w-6xl space-y-24 px-10 py-16 sm:px-12 md:px-16">
 
         {navbarEnabled && (
           <div className="sticky top-8 z-50 mb-16 flex min-w-0 w-full justify-center px-2">

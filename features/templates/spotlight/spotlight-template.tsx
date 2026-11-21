@@ -303,7 +303,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             >
               <ArticleSourceLabel source={article.source} className={cn("mb-3", muted)} />
               <h3 className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold leading-tight tracking-[-0.03em] text-[#17231f]"><RichText text={article.title} /></h3>
-              {article.description ? <p className={cn("mt-3 text-sm leading-6", muted)}>{article.description}</p> : null}
+              {article.description ? <p className={cn("mt-3 text-sm leading-6", muted)}><RichText text={article.description} /></p> : null}
               <p className={cn("mt-4 text-sm", muted)}>
                 {article.publishedAt
                   ? new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })

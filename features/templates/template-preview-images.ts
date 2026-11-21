@@ -29,6 +29,7 @@ const TEMPLATE_PREVIEW_FILES: Record<string, string> = {
   maximalist: "maximalist.webp",
   synapse: "synapse.webp",
   veil: "veil.webp",
+  vignette: "vignette/keyart.jpg",
 };
 
 export function hasTemplatePreviewImage(templateId: string): boolean {

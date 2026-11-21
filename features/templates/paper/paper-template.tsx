@@ -273,7 +273,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                 </p>
               </div>
               {article.description && (
-                <p className={cn("mt-2 max-w-[36rem] text-sm leading-6", mute)}>{article.description}</p>
+                <p className={cn("mt-2 max-w-[36rem] text-sm leading-6", mute)}><RichText text={article.description} /></p>
               )}
             </article>
           ))}
@@ -423,7 +423,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
       style={accentRootStyle(primaryColor)}
     >
       <div className="px-3 py-3 @md:px-6 @md:py-6">
-        <main className="mx-auto min-w-0 max-w-[48rem] overflow-x-clip border border-[#25231f]/12 bg-[#fbfaf4] px-5 pb-16 pt-10 shadow-[0_1px_0_rgba(37,35,31,0.05),0_22px_70px_rgba(37,35,31,0.08)] @sm:px-7 @md:px-10 @md:pb-24 @md:pt-14">
+        <main className="mx-auto min-w-0 max-w-6xl overflow-x-clip border border-[#25231f]/12 bg-[#fbfaf4] px-5 pb-16 pt-10 shadow-[0_1px_0_rgba(37,35,31,0.05),0_22px_70px_rgba(37,35,31,0.08)] @sm:px-7 @md:px-10 @md:pb-24 @md:pt-14">
           <header className="min-w-0">
             <div className={cn("mb-8 border-b pb-5", hairline)}>
               <p className={cn("max-w-[16rem] text-sm leading-6", mute)}>

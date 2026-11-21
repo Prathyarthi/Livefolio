@@ -293,7 +293,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                 </p>
               </div>
               {article.description && (
-                <p className={cn("mt-2 max-w-[36rem] text-sm leading-6", mute)}>{article.description}</p>
+                <p className={cn("mt-2 max-w-[36rem] text-sm leading-6", mute)}><RichText text={article.description} /></p>
               )}
             </article>
           ))}
@@ -478,7 +478,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
         }
       `}</style>
 
-      <div className="relative mx-auto min-w-0 max-w-5xl overflow-x-clip px-5 pb-24 pt-8 sm:px-8 md:pb-32 md:pt-10">
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-24 pt-8 sm:px-8 md:pb-32 md:pt-10">
         {navbarEnabled && (
           <div className="mb-14 flex justify-center">
             <TemplateNavbar

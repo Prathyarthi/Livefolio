@@ -39,6 +39,7 @@ const TEMPLATE_PREVIEW_GRADIENTS: Record<string, string> = {
   ledger: "from-slate-900 to-blue-500/40",
   maximalist: "from-black to-blue-500/50",
   veil: "from-[#0c0b0f] to-[#ff5a36]/30",
+  vignette: "from-[#0c0d1b] to-[#cc46a0]/40",
 };
 
 type TemplatePreviewThumbnailProps = {

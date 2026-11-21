@@ -65,6 +65,22 @@ describe("parseDescription", () => {
       { type: "list", items: ["Did X", "Did Y"] },
     ]);
   });
+
+  test("strips stranded markdown hard-break backslashes", () => {
+    expect(
+      parseDescription(
+        "testing I am a good engineer\\\ntesting I am a good engineer\\",
+      ),
+    ).toEqual([
+      {
+        type: "list",
+        items: [
+          "testing I am a good engineer",
+          "testing I am a good engineer",
+        ],
+      },
+    ]);
+  });
 });
 
 describe("normalizeDescription", () => {

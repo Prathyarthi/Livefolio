@@ -230,6 +230,14 @@ export const templateCatalog: Record<string, TemplateMeta> = {
     previewImage: getTemplatePreviewImagePath("veil"),
     category: "designer",
   },
+  vignette: {
+    id: "vignette",
+    name: "Vignette",
+    description:
+      "Open-world key art: painted cover collage, sunset monogram lockup, mission log, stats menu, and an in-game phone.",
+    previewImage: getTemplatePreviewImagePath("vignette"),
+    category: "designer",
+  },
 };
 
 export const templateCatalogList: TemplateMeta[] = Object.values(templateCatalog);

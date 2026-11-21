@@ -1,0 +1,572 @@
+/*
+ * Vignette — a portfolio laid out like open-world game key art.
+ * Night ink, cream type, painted vignettes in black gutters.
+ * Sunset accents live in the wordmark stroke, neon script, and mini marks.
+ */
+
+.root {
+  --vg-abyss: #0c0d1b;
+  --vg-ink: #111222;
+  --vg-gutter: #05050c;
+  --vg-board: #1d002e;
+  --vg-cream: #fff1dc;
+  --vg-cream-2: color-mix(in srgb, var(--vg-cream) 72%, transparent);
+  --vg-cream-3: color-mix(in srgb, var(--vg-cream) 46%, transparent);
+  --vg-rule: color-mix(in srgb, var(--vg-cream) 12%, transparent);
+  --vg-amber: #ffa948;
+  --vg-paper-ink: #1d1b2e;
+  --vg-sunset: linear-gradient(
+    180deg,
+    #4c5fca 0%,
+    #813dbb 22%,
+    #cc46a0 44%,
+    #f76685 62%,
+    #ff885f 80%,
+    #ffa948 100%
+  );
+
+  background: var(--vg-abyss);
+  color: var(--vg-cream);
+  font-family: var(--font-vg-body), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Pricedown on section headings, hero name stack, project titles, and contact email. */
+.heading,
+.wordmark,
+.titleStack,
+.viMark,
+.vignetteTitle,
+.emailMark {
+  font-family: var(--font-pricedown), Impact, Haettenschweiler, sans-serif;
+  font-weight: 900;
+  font-synthesis: none;
+}
+
+/* ---------- Cover ---------- */
+
+.cover {
+  display: block;
+  padding: 6px;
+  background: var(--vg-gutter);
+}
+
+.tile {
+  position: relative;
+  overflow: hidden;
+  background: var(--vg-ink);
+  isolation: isolate;
+}
+
+.tileImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  animation: vg-settle 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--vg-delay, 0ms);
+}
+
+.keyTile {
+  width: 100%;
+  min-height: min(100svh, 900px);
+}
+
+.keyTile .tileImg {
+  object-position: center 40%;
+}
+
+.keyScrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(12, 13, 27, 0.4) 0%, transparent 24%),
+    linear-gradient(90deg, rgba(12, 13, 27, 0.45) 0%, transparent 40%),
+    linear-gradient(0deg, rgba(12, 13, 27, 0.9) 0%, rgba(12, 13, 27, 0.35) 30%, transparent 52%);
+}
+
+/* ---------- Lockup ---------- */
+
+.lockup {
+  animation: vg-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) 250ms both;
+}
+
+/* VI mark behind the stacked name — original title-logo structure, not Rockstar assets. */
+.titleLockup {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 0;
+}
+
+.titleCluster {
+  display: grid;
+  place-items: center;
+}
+
+.viMark {
+  grid-area: 1 / 1;
+  display: inline-grid;
+  font-size: clamp(10rem, 34cqw, 21rem);
+  line-height: 0.78;
+  letter-spacing: 0.02em;
+  user-select: none;
+  pointer-events: none;
+}
+
+.viMark > span {
+  grid-area: 1 / 1;
+  position: relative;
+}
+
+.viOutline {
+  color: var(--vg-board);
+  -webkit-text-stroke: 0.12em var(--vg-board);
+  filter: drop-shadow(0 0.06em 0 rgba(5, 5, 12, 0.85));
+}
+
+.viKeyline {
+  color: #fff;
+  -webkit-text-stroke: 0.045em #fff;
+}
+
+.viFill {
+  background-image: url("/templates/vignette/palms.jpg"), var(--vg-sunset);
+  background-size: cover;
+  background-position: center 40%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.titleStack {
+  grid-area: 1 / 1;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-transform: uppercase;
+  line-height: 0.82;
+  letter-spacing: 0.04em;
+  color: #fff;
+  -webkit-text-stroke: 0.09em var(--vg-board);
+  paint-order: stroke fill;
+  font-size: clamp(2.6rem, 7.4cqw, 5.5rem);
+  text-shadow: 0 0.06em 0 rgba(5, 5, 12, 0.8);
+  max-width: 14ch;
+}
+
+.titleStack > span {
+  display: block;
+}
+
+.wordmark {
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: 0.03em;
+  color: #fff;
+  -webkit-text-stroke: 0.1em var(--vg-board);
+  paint-order: stroke fill;
+  font-size: clamp(2.4rem, 7cqw, 5.4rem);
+  text-wrap: balance;
+}
+
+.neon {
+  font-family: var(--font-vg-script), cursive;
+  color: #ffd2ee;
+  font-size: clamp(2.1rem, 5cqw, 3.6rem);
+  line-height: 1;
+  transform: rotate(-6deg);
+  transform-origin: left center;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 8px #ff5fb6,
+    0 0 22px #cc46a0,
+    0 0 44px rgba(204, 70, 160, 0.7);
+}
+
+.titleNeon {
+  margin-top: -0.35em;
+  transform: rotate(-6deg);
+  transform-origin: center;
+}
+
+.miniMono {
+  background-image: var(--vg-sunset);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* ---------- Chapters ---------- */
+
+.navScrim {
+  background: linear-gradient(
+    180deg,
+    rgba(5, 5, 12, 0.92) 0%,
+    rgba(5, 5, 12, 0.7) 55%,
+    rgba(5, 5, 12, 0) 100%
+  );
+}
+
+.backdrop {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  margin-bottom: -100svh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(12, 13, 27, 0.72) 0%, rgba(12, 13, 27, 0.42) 28%, rgba(12, 13, 27, 0.62) 100%),
+    radial-gradient(ellipse 75% 65% at 50% 45%, transparent 20%, rgba(5, 5, 12, 0.45) 100%);
+}
+
+.heading {
+  text-transform: uppercase;
+  line-height: 0.84;
+  letter-spacing: 0.02em;
+  text-shadow: 0 6px 40px rgba(5, 5, 12, 0.85);
+}
+
+.menu {
+  background: rgba(12, 13, 27, 0.8);
+  border: 1px solid var(--vg-rule);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: blur(16px) saturate(1.15);
+}
+
+/* ---------- Postcard ---------- */
+
+.postcard {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+    #fff1dc;
+  color: var(--vg-paper-ink);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 40px 80px -30px rgba(0, 0, 0, 0.75),
+    0 12px 24px -12px rgba(0, 0, 0, 0.5);
+}
+
+@container (min-width: 48rem) {
+  .postcard {
+    transform: rotate(-1.2deg);
+  }
+}
+
+.postScript {
+  font-family: var(--font-vg-script), cursive;
+  color: #cc46a0;
+  line-height: 1;
+}
+
+/* Perforations are postcard-colored dots centered on the stamp's edge; the art covers the rest. */
+.stamp {
+  position: relative;
+  width: 140px;
+  height: 170px;
+  padding: 9px;
+  background:
+    radial-gradient(circle, #fff1dc 3.2px, transparent 3.7px) -5px -5px / 10px 10px,
+    #fffaf3;
+  transform: rotate(3deg);
+  box-shadow: 0 8px 18px -10px rgba(29, 27, 46, 0.45);
+}
+
+.stamp img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% center;
+}
+
+.addressLine {
+  height: 1px;
+  background: color-mix(in srgb, var(--vg-paper-ink) 22%, transparent);
+}
+
+/* ---------- Vignette grid (projects) ---------- */
+
+.vignettes {
+  display: grid;
+  gap: 6px;
+  padding: 6px;
+  background: var(--vg-gutter);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container (min-width: 42rem) {
+  .vignettes.pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.vignette {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #121327;
+}
+
+.vignetteMedia {
+  position: relative;
+  overflow: hidden;
+}
+
+.vignetteMedia img {
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vignette:hover .vignetteMedia img {
+  transform: scale(1.04);
+}
+
+.vignetteCaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 3rem 1.25rem 1rem;
+  background: linear-gradient(0deg, rgba(5, 5, 12, 0.88), transparent);
+  pointer-events: none;
+}
+
+.vignetteTitle {
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.9;
+  color: #fff;
+  -webkit-text-stroke: 0.1em rgba(5, 5, 12, 0.85);
+  paint-order: stroke fill;
+}
+
+/* ---------- Mission log ---------- */
+
+.mission {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--vg-rule);
+}
+
+.mission:last-child {
+  border-bottom: 0;
+}
+
+@container (min-width: 42rem) {
+  .mission {
+    grid-template-columns: 7rem minmax(0, 1fr) auto;
+    gap: 1.75rem;
+    align-items: start;
+  }
+}
+
+.status {
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+/* ---------- Stats menu (skills) ---------- */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--vg-rule);
+}
+
+.tab {
+  flex: none;
+  padding: 0.7rem 1.1rem 0.6rem;
+  font-weight: 800;
+  font-size: 1.1rem;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--vg-cream-2);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.tab:hover {
+  color: var(--vg-cream);
+  background: rgba(255, 241, 220, 0.06);
+}
+
+.tab[data-on] {
+  background: var(--vg-cream);
+  color: var(--vg-abyss);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--lf-accent);
+  outline-offset: -2px;
+}
+
+.statGrid {
+  display: grid;
+  gap: 0 2rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container (min-width: 36rem) {
+  .statGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 56rem) {
+  .statGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.statRow {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--vg-rule);
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.bar > span {
+  height: 6px;
+  background: rgba(255, 241, 220, 0.14);
+}
+
+.bar > span[data-on] {
+  background: var(--vg-cream);
+}
+
+/* ---------- Phone (profiles) ---------- */
+
+.phone {
+  width: min(100%, 300px);
+  padding: 10px;
+  border-radius: 46px;
+  background: linear-gradient(160deg, #2a2b3d, #0a0a12 40%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 40px 80px -30px rgba(0, 0, 0, 0.85);
+}
+
+.screen {
+  position: relative;
+  min-height: 480px;
+  overflow: hidden;
+  border-radius: 37px;
+  isolation: isolate;
+}
+
+.screen > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+.screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(12, 13, 27, 0.35), rgba(12, 13, 27, 0.82) 55%);
+}
+
+/* ---------- Footer ---------- */
+
+.finale {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.finale > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  z-index: -2;
+}
+
+.finale::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, var(--vg-abyss) 0%, rgba(12, 13, 27, 0.2) 40%, rgba(12, 13, 27, 0.75) 100%);
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes vg-settle {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes vg-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tileImg,
+  .lockup {
+    animation: none;
+  }
+
+  .vignetteMedia img,
+  .tab {
+    transition: none;
+  }
+
+  .vignette:hover .vignetteMedia img {
+    transform: none;
+  }
+}
