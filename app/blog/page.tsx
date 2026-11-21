@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MarketingPageShell } from "@/features/landing/components/marketing-page-shell";
 import { BlogCard } from "@/features/blog/components/blog-card";
 import { JsonLd } from "@/components/json-ld";
-import { getAllPosts } from "@/features/blog/lib/posts";
+import { getBlogPosts } from "@/features/blog/lib/blog-posts";
 import {
   BLOG_DESCRIPTION,
   BLOG_PATH,
@@ -16,9 +16,10 @@ export const metadata: Metadata = getBlogIndexMetadata();
 
 // See app/blog/[slug]/page.tsx: prerender despite the root layout reading headers().
 export const dynamic = "force-static";
+export const revalidate = 3600;
 
-export default function BlogIndexPage() {
-  const posts = getAllPosts();
+export default async function BlogIndexPage() {
+  const posts = await getBlogPosts();
 
   const schema = {
     "@context": "https://schema.org",

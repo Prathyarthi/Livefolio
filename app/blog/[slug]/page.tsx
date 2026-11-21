@@ -5,36 +5,41 @@ import { notFound } from "next/navigation";
 import { MarketingPageShell } from "@/features/landing/components/marketing-page-shell";
 import { BlogCta } from "@/features/blog/components/blog-cta";
 import { JsonLd } from "@/components/json-ld";
-import { formatPostDate, getAllPosts, getPostBySlug } from "@/features/blog/lib/posts";
+import { formatPostDate } from "@/features/blog/lib/posts";
+import { getBlogPost, getBlogPosts } from "@/features/blog/lib/blog-posts";
 import { extractFaq, renderMarkdown } from "@/features/blog/lib/markdown";
 import {
   getArticleSchema,
   getBreadcrumbSchema,
   getFaqSchema,
   getPostMetadata,
+  isExternalCover,
 } from "@/features/blog/lib/seo";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
+// Posts published through /api/blog after the build render on first request.
+// Unknown slugs and drafts 404. The API calls revalidatePath on every write.
+export const dynamicParams = true;
 
 // The root layout reads headers() (footer), which makes routes dynamic by default.
-// Blog pages are plain content, so force them to be prerendered at build time.
+// Blog pages are plain content, so force them to be prerendered (ISR).
 export const dynamic = "force-static";
+export const revalidate = 3600;
 
-export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+export async function generateStaticParams() {
+  return (await getBlogPosts()).map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getBlogPost(slug);
   return post ? getPostMetadata(post) : {};
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getBlogPost(slug);
   if (!post) notFound();
 
   const html = renderMarkdown(post.content);
@@ -77,6 +82,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             alt=""
             fill
             priority
+            unoptimized={isExternalCover(post.cover)}
             sizes="(min-width: 768px) 768px, 100vw"
             className="object-cover"
           />

@@ -7,8 +7,21 @@ import type { BlogPost } from "@/features/blog/types";
 export const BLOG_CONTENT_DIR = path.join(process.cwd(), "content", "blog");
 export const DEFAULT_AUTHOR = "Prathyarthi Kashyap, Founder";
 
-const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** "Name, Role" -> { authorName, authorRole }. */
+export function splitAuthor(author: string): { authorName: string; authorRole?: string } {
+  const [authorName, ...roleParts] = author.split(",");
+  return {
+    authorName: authorName.trim(),
+    authorRole: roleParts.join(",").trim() || undefined,
+  };
+}
+
+export function readingMinutesFor(markdown: string): number {
+  return Math.max(1, Math.ceil(countWords(markdown) / 220));
+}
 
 function str(
   data: Record<string, FrontMatterValue>,
@@ -60,8 +73,7 @@ export function parsePost(
     }
   }
   const author = str(data, "author", file, false) || DEFAULT_AUTHOR;
-  const [authorName, ...roleParts] = author.split(",");
-  const authorRole = roleParts.join(",").trim() || undefined;
+  const { authorName, authorRole } = splitAuthor(author);
   const tags = Array.isArray(data.tags) ? data.tags : [];
 
   return {
@@ -73,21 +85,37 @@ export function parsePost(
     keyword,
     cover,
     author,
-    authorName: authorName.trim(),
+    authorName,
     authorRole,
     tags,
     content,
-    readingMinutes: Math.max(1, Math.ceil(countWords(content) / 220)),
+    readingMinutes: readingMinutesFor(content),
   };
 }
 
-/** All published posts, newest first. Throws on invalid or duplicate posts. */
-export function getAllPosts(): BlogPost[] {
+function listPostFiles(): string[] {
   if (!fs.existsSync(BLOG_CONTENT_DIR)) return [];
-
-  const files = fs
+  return fs
     .readdirSync(BLOG_CONTENT_DIR)
     .filter((f) => f.endsWith(".md") && f.toLowerCase() !== "readme.md" && !f.startsWith("_"));
+}
+
+/**
+ * Slugs claimed by markdown files, drafts included. The blog API refuses to
+ * create a database post with one of these so the two sources never collide.
+ */
+export function getFileSlugs(): Set<string> {
+  const slugs = new Set<string>();
+  for (const file of listPostFiles()) {
+    const { data } = parseFrontMatter(fs.readFileSync(path.join(BLOG_CONTENT_DIR, file), "utf8"));
+    if (typeof data.slug === "string" && data.slug.trim()) slugs.add(data.slug.trim());
+  }
+  return slugs;
+}
+
+/** All published file posts, newest first. Throws on invalid or duplicate posts. */
+export function getAllPosts(): BlogPost[] {
+  const files = listPostFiles();
 
   const posts: BlogPost[] = [];
   const seen = new Map<string, string>();
@@ -103,6 +131,11 @@ export function getAllPosts(): BlogPost[] {
     posts.push(post);
   }
 
+  return sortPosts(posts);
+}
+
+/** Newest first, then by title for a stable order. */
+export function sortPosts(posts: BlogPost[]): BlogPost[] {
   return posts.sort(
     (a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title),
   );

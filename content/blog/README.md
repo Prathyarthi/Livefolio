@@ -56,6 +56,34 @@ Another answer.
 
 The section renders as normal article content and is also emitted as `FAQPage` JSON-LD. Only the `## FAQ` (or `## Frequently asked questions`) section is read; headings elsewhere are not treated as questions.
 
+## Publishing through the API (no PR)
+
+Posts can also be created and published without a repo change through a protected API. They are stored in the `blog_posts` table and render exactly like file posts (same page, index, sitemap, RSS, Open Graph and JSON-LD, including the FAQ convention above). Drafts are never public: their URL returns 404 until the post is published.
+
+Every request needs `Authorization: Bearer <BLOG_API_KEY>`. If `BLOG_API_KEY` is not set on the server, every call is rejected with 503.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/blog` | Create a post (draft by default). 201 `{ slug, status, url }` |
+| `GET` | `/api/blog/<slug>` | Read a post, drafts included |
+| `PATCH` | `/api/blog/<slug>` | Partial update. `{"status":"published"}` publishes a draft |
+
+Fields: `title`, `slug`, `date` (YYYY-MM-DD), `description`, `keyword`, `body` (markdown) are required on create; `cover` (absolute https URL, 1200x630 recommended; the default OG image is used when omitted), `author` ("Name, Role", defaults to the founder), `tags` (string array) and `status` (`draft` or `published`) are optional. The slug cannot be changed with PATCH. Unknown fields and em dashes are rejected with 400. A slug already used by a file post or an API post returns 409.
+
+```bash
+curl -X POST https://livefolio.me/api/blog \
+  -H "Authorization: Bearer $BLOG_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Post title","slug":"post-title","date":"2026-11-20","description":"Meta description.","keyword":"primary keyword","tags":["portfolio"],"body":"Intro paragraph.\n\n## FAQ\n\n### A question?\n\nThe answer."}'
+
+curl -X PATCH https://livefolio.me/api/blog/post-title \
+  -H "Authorization: Bearer $BLOG_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"published"}'
+```
+
+Writes refresh `/blog`, the post page, the RSS feed and the sitemap right away. If the database is unreachable, the public blog keeps serving file posts.
+
 ## Cross-posting (Medium, Dev.to, Hashnode)
 
 These posts are the canonical source. When cross-posting, set the canonical URL on the other platform to `https://livefolio.me/blog/<slug>`. The RSS feed at `https://livefolio.me/blog/rss.xml` includes the full article HTML.
