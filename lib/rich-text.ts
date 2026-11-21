@@ -82,8 +82,10 @@ export function sanitizeRichHtml(html: string): string {
  * that may contain Markdown + limited HTML into sanitized HTML.
  */
 export function inlineRichTextToSafeHtml(text: string): string {
-  if (!text.trim()) return "";
-  const rendered = md.renderInline(text);
+  // Stranded markdown hard-break markers (`\` at EOL) render as visible slashes.
+  const cleaned = text.replace(/\\+\s*$/gm, "").trimEnd();
+  if (!cleaned.trim()) return "";
+  const rendered = md.renderInline(cleaned);
   return sanitizeRichHtml(rendered);
 }
 

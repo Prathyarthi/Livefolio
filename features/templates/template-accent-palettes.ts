@@ -55,6 +55,7 @@ const TEMPLATE_DEFAULT_ACCENTS: Record<string, string> = {
   maximalist: "#3b82f6",
   synapse: "#2563eb",
   veil: "#ff5a36",
+  vignette: "#cc46a0",
 };
 
 const FALLBACK_ACCENT = "#3b82f6";

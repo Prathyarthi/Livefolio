@@ -397,6 +397,19 @@ export const TEMPLATE_PROJECT_PREVIEW: Record<string, TemplateProjectPreviewConf
     },
     variant: "dark",
   },
+  vignette: {
+    palette: {
+      bg: "#0c0d1b",
+      bgAlt: "#111222",
+      primary: "#cc46a0",
+      secondary: "#fff1dc",
+      accent: "#ff885f",
+      surface: "#1f1f38",
+      muted: "#252644",
+      stroke: "rgba(255,241,220,0.14)",
+    },
+    variant: "dark",
+  },
   bluish: {
     palette: {
       bg: "#0a0a0a",

@@ -306,6 +306,18 @@ const TEMPLATE_PREVIEW_THEMES: Record<string, TemplatePreviewTheme> = {
     chrome: "#f8fafc",
     urlBar: "#eff6ff",
   },
+  vignette: {
+    canvas: "#0c0d1b",
+    blobA: "rgba(204, 70, 160, 0.28)",
+    blobB: "rgba(255, 169, 72, 0.18)",
+    surface: "#111222",
+    hero: "rgba(204, 70, 160, 0.22)",
+    cards: ["rgba(76, 95, 202, 0.2)", "rgba(247, 102, 133, 0.18)", "rgba(255, 169, 72, 0.16)"],
+    lines: "rgba(255, 241, 220, 0.22)",
+    chrome: "#18182d",
+    urlBar: "#1f1f38",
+    dark: true,
+  },
 };
 
 export function getTemplatePreviewTheme(templateId: string): TemplatePreviewTheme {
