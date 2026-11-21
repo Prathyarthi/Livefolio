@@ -156,12 +156,13 @@ export const ResumeUploader = forwardRef<
         if (!res.ok) return;
         const data = (await res.json().catch(() => ({}))) as {
           subscription?: { status?: string | null } | null;
+          access?: { tier?: "free" | "trial" | "pro" } | null;
         };
         if (cancelled) return;
-        const status = data.subscription?.status ?? null;
-        setSubscriptionStatus(
-          status?.toLowerCase() === "active" ? "active" : "none"
-        );
+        const hasPro =
+          data.access?.tier === "pro" ||
+          (data.subscription?.status ?? "").toLowerCase() === "active";
+        setSubscriptionStatus(hasPro ? "active" : "none");
       } catch {
         if (cancelled) return;
         setSubscriptionStatus("none");

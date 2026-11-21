@@ -18,8 +18,8 @@ import {
 } from "@/lib/entitlements";
 import { bulkImportPortfolioData } from "./bulk-import";
 import {
-  getMaxLivePreviews,
-  isProSubscriptionStatus,
+  getMaxLivePreviewsForAccess,
+  hasLivePreviewProAccess,
   sanitizeLivePreviewProjectIds,
 } from "@/lib/live-preview";
 import {
@@ -174,9 +174,14 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
 
       const owner = await prisma.user.findUnique({
         where: { id: session.userId },
-        select: { subscriptionStatus: true },
+        select: {
+          subscriptionStatus: true,
+          subscriptionCancelAtPeriodEnd: true,
+          subscriptionCurrentPeriodEnd: true,
+          complimentaryProUntil: true,
+        },
       });
-      if (!isProSubscriptionStatus(owner?.subscriptionStatus)) {
+      if (!owner || !hasLivePreviewProAccess(owner)) {
         return { ...existing, livePreviewProjectIds: [] };
       }
 
@@ -2263,14 +2268,21 @@ export const portfolio = new Elysia({ prefix: "/portfolio" })
 
       const user = await prisma.user.findUnique({
         where: { id: session.userId },
-        select: { subscriptionStatus: true },
+        select: {
+          subscriptionStatus: true,
+          subscriptionCancelAtPeriodEnd: true,
+          subscriptionCurrentPeriodEnd: true,
+          complimentaryProUntil: true,
+        },
       });
       if (!user) {
         ctx.set.status = 404;
         return { error: "User not found" };
       }
 
-      const maxAllowed = getMaxLivePreviews(user.subscriptionStatus);
+      const maxAllowed = getMaxLivePreviewsForAccess(
+        hasLivePreviewProAccess(user)
+      );
       const requestedIds = Array.isArray(ctx.body.projectIds)
         ? ctx.body.projectIds.filter((id): id is string => typeof id === "string")
         : [];

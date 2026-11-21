@@ -32,6 +32,9 @@ export function SubscriptionFlow() {
     null
   );
   const [trialDaysRemaining, setTrialDaysRemaining] = useState(0);
+  const [complimentaryUntil, setComplimentaryUntil] = useState<string | null>(
+    null
+  );
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
   useEffect(() => {
@@ -53,6 +56,7 @@ export function SubscriptionFlow() {
       setPaidPending(false);
       setAccessTier(null);
       setTrialDaysRemaining(0);
+      setComplimentaryUntil(null);
       return;
     }
 
@@ -65,7 +69,11 @@ export function SubscriptionFlow() {
           razorpayReady?: boolean;
           availableIntervals?: BillingInterval[];
           subscription?: { status?: string } | null;
-          access?: { tier?: "free" | "trial" | "pro"; trialDaysRemaining?: number };
+          access?: {
+            tier?: "free" | "trial" | "pro";
+            trialDaysRemaining?: number;
+            complimentaryProUntil?: string | null;
+          };
         };
         if (cancelled) return;
 
@@ -80,6 +88,7 @@ export function SubscriptionFlow() {
         setPaidPending(data.subscription?.status === "PENDING");
         setAccessTier(data.access?.tier ?? null);
         setTrialDaysRemaining(data.access?.trialDaysRemaining ?? 0);
+        setComplimentaryUntil(data.access?.complimentaryProUntil ?? null);
       } catch {
         if (cancelled) return;
         setPaymentsReady(false);
@@ -88,6 +97,7 @@ export function SubscriptionFlow() {
         setPaidPending(false);
         setAccessTier(null);
         setTrialDaysRemaining(0);
+        setComplimentaryUntil(null);
       } finally {
         if (!cancelled) setBillingLoading(false);
       }
@@ -140,6 +150,18 @@ export function SubscriptionFlow() {
           {trialDaysRemaining === 1 ? "" : "s"} remaining with full features.
         </p>
       )}
+      {!stateLoading &&
+        accessTier === "pro" &&
+        !paidActive &&
+        complimentaryUntil && (
+          <p className="rounded-[var(--radius-md)] bg-success-bg px-4 py-3 text-center text-body-sm text-success">
+            Pro is included free until{" "}
+            {new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(
+              new Date(complimentaryUntil)
+            )}
+            . Subscribe any time to keep Pro after that.
+          </p>
+        )}
       {!stateLoading && accessTier === "free" && (
         <p className="rounded-[var(--radius-md)] bg-warning-bg px-4 py-3 text-center text-body-sm text-text-secondary">
           Your free month ended. Free essentials remain active; upgrade to Pro

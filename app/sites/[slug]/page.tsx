@@ -83,6 +83,8 @@ export default async function PortfolioPage({ params }: Props) {
     ...portfolio,
     // LinkedIn showcase is Pro-only; drop it if the owner's plan lapsed.
     linkedinImport: access.canUseLinkedInImport ? portfolio.linkedinImport : null,
+    livePreviewProjectIds:
+      access.tier === "pro" ? portfolio.livePreviewProjectIds ?? [] : [],
   });
 
   return (
