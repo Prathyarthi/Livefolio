@@ -16,7 +16,6 @@ export default async function AdminBlogEditPage({ params }: PageProps) {
         slug: post.slug,
         title: post.title,
         date: post.date,
-        updated: post.updated ?? "",
         description: post.description,
         keyword: post.keyword,
         cover: post.cover,

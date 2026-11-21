@@ -2,12 +2,12 @@
 
 You can manage posts in two ways:
 
-1. **Admin CMS** (preferred): `/admin/blog` for emails listed in `ADMIN_EMAILS`. Create, edit, publish and delete posts there. APIs under `/api/admin/blog` are `requireAdmin()` only.
-2. **Markdown files** (fallback): drop a `.md` file here. DB posts override the same slug.
+1. **Admin CMS** (preferred): `/admin/blog` for emails listed in `ADMIN_EMAILS`. Create, edit, publish and delete posts there. APIs under `/api/admin/blog` are gated with `requireAdmin()` only. There is no `BLOG_API_KEY`.
+2. **Markdown files** (fallback): drop a `.md` file here. File posts win if the same slug also exists in the database.
 
 At runtime every published post gets:
 
-- an article page at `/blog/<slug>` (statically generated)
+- an article page at `/blog/<slug>` (statically generated, revalidated when the admin CMS writes)
 - an entry on the `/blog` index (newest first)
 - an entry in `/sitemap.xml` and in the RSS feed at `/blog/rss.xml`
 - a canonical URL `https://livefolio.me/blog/<slug>` (built from the site base URL, `NEXT_PUBLIC_APP_URL` in production), Open Graph and Twitter tags, and Article JSON-LD
@@ -61,13 +61,6 @@ Another answer.
 
 The section renders as normal article content and is also emitted as `FAQPage` JSON-LD. Only the `## FAQ` (or `## Frequently asked questions`) section is read; headings elsewhere are not treated as questions.
 
-## Cross-posting (Medium, Dev.to, Hashnode)
+## Admin CMS
 
-These posts are the canonical source. When cross-posting, set the canonical URL on the other platform to `https://livefolio.me/blog/<slug>`. The RSS feed at `https://livefolio.me/blog/rss.xml` includes the full article HTML.
-
-## Preview
-
-```bash
-bun dev
-# http://localhost:3000/blog
-```
+Use `/admin/blog` while signed in as an `ADMIN_EMAILS` account. Drafts stay private (404 on the public URL). Publishing sets `status=PUBLISHED` and revalidates `/blog`, the post page, RSS and the sitemap.

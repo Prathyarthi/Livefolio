@@ -4,7 +4,7 @@ import {
   getDocCategories,
   getDocHref,
 } from "@/features/docs/lib/docs";
-import { getAllPosts } from "@/features/blog/lib/posts";
+import { getBlogPosts } from "@/features/blog/lib/blog-posts";
 import { postUrl } from "@/features/blog/lib/seo";
 import { PUBLIC_SITEMAP_ROUTES, absoluteUrl } from "@/lib/seo";
 
@@ -29,6 +29,9 @@ const DEFAULT_LAST_MODIFIED = "2026-11-15";
 /** Docs have no per-article timestamps; last commit to features/docs/content. */
 const DOCS_LAST_MODIFIED = "2026-11-15";
 
+// Blog posts can be published through /admin/blog without a deploy.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages: MetadataRoute.Sitemap = PUBLIC_SITEMAP_ROUTES.map(
     ({ path, changeFrequency, priority }) => ({
@@ -52,8 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  const blogPosts = await getAllPosts();
-  const posts: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+  const posts: MetadataRoute.Sitemap = (await getBlogPosts()).map((post) => ({
     url: postUrl(post.slug),
     lastModified: new Date(`${post.updated ?? post.date}T00:00:00Z`),
     changeFrequency: "monthly" as const,

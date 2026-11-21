@@ -918,28 +918,35 @@ model UserBadge {
 }
 
 // ============================================================
-// MARKETING BLOG (admin CMS; markdown files remain a read fallback)
+// BLOG (admin CMS at /admin/blog; markdown files remain a read fallback)
 // ============================================================
 
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model BlogPost {
-  id          String    @id @default(uuid())
-  slug        String    @unique
+  id          String         @id @default(uuid())
+  slug        String         @unique
   title       String
-  /// YYYY-MM-DD
-  date        String
-  /// Optional YYYY-MM-DD
-  updated     String?
   description String
   keyword     String
-  /// Path under /public, e.g. /blog/cover.png
-  cover       String
-  author      String    @default("Prathyarthi Kashyap, Founder")
-  tags        String[]  @default([])
-  content     String    @db.Text
-  draft       Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  /// Path under /public (e.g. /blog/cover.png) or absolute https URL. Null uses default OG image.
+  cover       String?
+  /// Display string, "Name, Role".
+  author      String
+  tags        String[]       @default([])
+  /// Markdown body. FAQ goes under "## FAQ" with "### Question?" subheadings.
+  body        String
+  status      BlogPostStatus @default(DRAFT)
+  /// Post date shown on the article and used for ordering (stored as midnight UTC).
+  date        DateTime       @db.Date
+  /// Set the first time the post is published; never cleared.
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
-  @@index([draft, date(sort: Desc)])
+  @@index([status, date(sort: Desc)])
   @@map("blog_posts")
 }

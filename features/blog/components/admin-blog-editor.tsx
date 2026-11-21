@@ -22,7 +22,6 @@ export type AdminBlogEditorPost = {
   slug: string;
   title: string;
   date: string;
-  updated?: string;
   description: string;
   keyword: string;
   cover: string;
@@ -59,7 +58,6 @@ const EMPTY: AdminBlogEditorPost = {
   slug: "",
   title: "",
   date: todayIso(),
-  updated: "",
   description: "",
   keyword: "",
   cover: "/blog/placeholder-cover.jpg",
@@ -94,7 +92,7 @@ export function AdminBlogEditor({
       const payload = {
         ...form,
         draft: asDraft,
-        updated: form.updated || null,
+        cover: form.cover.trim() || null,
         tags: form.tags,
       };
       const res = await fetch(
@@ -202,25 +200,14 @@ export function AdminBlogEditor({
               />
               <p className="text-xs text-text-muted">/blog/{form.slug || "…"}</p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => setField("date", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="updated">Updated</Label>
-                <Input
-                  id="updated"
-                  type="date"
-                  value={form.updated ?? ""}
-                  onChange={(e) => setField("updated", e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={form.date}
+                onChange={(e) => setField("date", e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>

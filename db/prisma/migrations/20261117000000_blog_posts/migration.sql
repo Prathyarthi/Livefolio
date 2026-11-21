@@ -1,17 +1,20 @@
+-- CreateEnum
+CREATE TYPE "BlogPostStatus" AS ENUM ('DRAFT', 'PUBLISHED');
+
 -- CreateTable
 CREATE TABLE "blog_posts" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "date" TEXT NOT NULL,
-    "updated" TEXT,
     "description" TEXT NOT NULL,
     "keyword" TEXT NOT NULL,
-    "cover" TEXT NOT NULL,
-    "author" TEXT NOT NULL DEFAULT 'Prathyarthi Kashyap, Founder',
+    "cover" TEXT,
+    "author" TEXT NOT NULL,
     "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "content" TEXT NOT NULL,
-    "draft" BOOLEAN NOT NULL DEFAULT false,
+    "body" TEXT NOT NULL,
+    "status" "BlogPostStatus" NOT NULL DEFAULT 'DRAFT',
+    "date" DATE NOT NULL,
+    "publishedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -22,4 +25,5 @@ CREATE TABLE "blog_posts" (
 CREATE UNIQUE INDEX "blog_posts_slug_key" ON "blog_posts"("slug");
 
 -- CreateIndex
-CREATE INDEX "blog_posts_draft_date_idx" ON "blog_posts"("draft", "date" DESC);
+CREATE INDEX "blog_posts_status_date_idx" ON "blog_posts"("status", "date" DESC);
+

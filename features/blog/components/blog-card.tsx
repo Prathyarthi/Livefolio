@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatPostDate } from "@/features/blog/lib/posts";
-import { postPath } from "@/features/blog/lib/seo";
+import { isExternalCover, postPath } from "@/features/blog/lib/seo";
 import type { BlogPost } from "@/features/blog/types";
 
 export function BlogCard({ post, priority = false }: { post: BlogPost; priority?: boolean }) {
@@ -15,6 +15,7 @@ export function BlogCard({ post, priority = false }: { post: BlogPost; priority?
             fill
             sizes="(min-width: 768px) 50vw, 100vw"
             priority={priority}
+            unoptimized={isExternalCover(post.cover)}
             className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           />
         </div>
