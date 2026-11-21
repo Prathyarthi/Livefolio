@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { listPublishedDbBlogPosts } from "@/features/blog/lib/admin-store";
 import { parseFrontMatter, type FrontMatterValue } from "@/features/blog/lib/frontmatter";
 import { countWords } from "@/features/blog/lib/markdown";
 import type { BlogPost } from "@/features/blog/types";
@@ -81,8 +82,7 @@ export function parsePost(
   };
 }
 
-/** All published posts, newest first. Throws on invalid or duplicate posts. */
-export function getAllPosts(): BlogPost[] {
+function getFilePosts(): BlogPost[] {
   if (!fs.existsSync(BLOG_CONTENT_DIR)) return [];
 
   const files = fs
@@ -102,14 +102,39 @@ export function getAllPosts(): BlogPost[] {
     seen.set(post.slug, file);
     posts.push(post);
   }
+  return posts;
+}
 
+function sortPosts(posts: BlogPost[]): BlogPost[] {
   return posts.sort(
     (a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title),
   );
 }
 
-export function getPostBySlug(slug: string): BlogPost | undefined {
-  return getAllPosts().find((post) => post.slug === slug);
+/**
+ * Published posts for the public site.
+ * Markdown files under content/blog are the fallback; DB posts from the admin
+ * CMS override the same slug.
+ */
+export async function getAllPosts(): Promise<BlogPost[]> {
+  const filePosts = getFilePosts();
+  let dbPosts: BlogPost[] = [];
+  try {
+    dbPosts = await listPublishedDbBlogPosts();
+  } catch {
+    // Build/preview without a DB should still serve markdown posts.
+    dbPosts = [];
+  }
+
+  const bySlug = new Map<string, BlogPost>();
+  for (const post of filePosts) bySlug.set(post.slug, post);
+  for (const post of dbPosts) bySlug.set(post.slug, post);
+  return sortPosts([...bySlug.values()]);
+}
+
+export async function getPostBySlug(slug: string): Promise<BlogPost | undefined> {
+  const posts = await getAllPosts();
+  return posts.find((post) => post.slug === slug);
 }
 
 export function formatPostDate(iso: string): string {

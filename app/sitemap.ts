@@ -29,7 +29,7 @@ const DEFAULT_LAST_MODIFIED = "2026-11-15";
 /** Docs have no per-article timestamps; last commit to features/docs/content. */
 const DOCS_LAST_MODIFIED = "2026-11-15";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages: MetadataRoute.Sitemap = PUBLIC_SITEMAP_ROUTES.map(
     ({ path, changeFrequency, priority }) => ({
       url: absoluteUrl(path),
@@ -52,7 +52,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
-  const posts: MetadataRoute.Sitemap = getAllPosts().map((post) => ({
+  const blogPosts = await getAllPosts();
+  const posts: MetadataRoute.Sitemap = blogPosts.map((post) => ({
     url: postUrl(post.slug),
     lastModified: new Date(`${post.updated ?? post.date}T00:00:00Z`),
     changeFrequency: "monthly" as const,

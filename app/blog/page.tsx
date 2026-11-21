@@ -14,11 +14,11 @@ import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = getBlogIndexMetadata();
 
-// See app/blog/[slug]/page.tsx: prerender despite the root layout reading headers().
-export const dynamic = "force-static";
+// Admin CMS can publish at any time; keep the index fresh.
+export const dynamic = "force-dynamic";
 
-export default function BlogIndexPage() {
-  const posts = getAllPosts();
+export default async function BlogIndexPage() {
+  const posts = await getAllPosts();
 
   const schema = {
     "@context": "https://schema.org",

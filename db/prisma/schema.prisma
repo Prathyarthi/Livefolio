@@ -916,3 +916,30 @@ model UserBadge {
   @@index([userId, showOnPortfolio])
   @@map("user_badges")
 }
+
+// ============================================================
+// MARKETING BLOG (admin CMS; markdown files remain a read fallback)
+// ============================================================
+
+model BlogPost {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  title       String
+  /// YYYY-MM-DD
+  date        String
+  /// Optional YYYY-MM-DD
+  updated     String?
+  description String
+  keyword     String
+  /// Path under /public, e.g. /blog/cover.png
+  cover       String
+  author      String    @default("Prathyarthi Kashyap, Founder")
+  tags        String[]  @default([])
+  content     String    @db.Text
+  draft       Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([draft, date(sort: Desc)])
+  @@map("blog_posts")
+}

@@ -16,25 +16,24 @@ import {
 
 type PageProps = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
+// Admin CMS can publish new slugs after deploy.
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
 
-// The root layout reads headers() (footer), which makes routes dynamic by default.
-// Blog pages are plain content, so force them to be prerendered at build time.
-export const dynamic = "force-static";
-
-export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+export async function generateStaticParams() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   return post ? getPostMetadata(post) : {};
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
   const html = renderMarkdown(post.content);

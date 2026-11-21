@@ -53,7 +53,7 @@ describe("renderMarkdown", () => {
 });
 
 describe("parsePost", () => {
-  const base = `---\ntitle: T\nslug: t\ndate: 2026-01-02\ndescription: D\nkeyword: k\ncover: /blog/placeholder-cover.png\n---\nbody`;
+  const base = `---\ntitle: T\nslug: t\ndate: 2026-01-02\ndescription: D\nkeyword: k\ncover: /blog/placeholder-cover.jpg\n---\nbody`;
 
   test("applies the default author", () => {
     const post = parsePost(base, "t.md");
@@ -74,27 +74,28 @@ describe("parsePost", () => {
 });
 
 describe("content/blog", () => {
-  test("all posts are valid, newest first, with unique slugs", () => {
-    const posts = getAllPosts();
+  test("all posts are valid, newest first, with unique slugs", async () => {
+    const posts = await getAllPosts();
     const dates = posts.map((p) => p.date);
     expect(dates).toEqual([...dates].sort().reverse());
     expect(new Set(posts.map((p) => p.slug)).size).toBe(posts.length);
   });
 
-  test("no em dashes in post files or the generated feed", () => {
+  test("no em dashes in post files or the generated feed", async () => {
     const files = fs.readdirSync(BLOG_CONTENT_DIR).filter((f) => f.endsWith(".md"));
     for (const file of files) {
       expect(fs.readFileSync(path.join(BLOG_CONTENT_DIR, file), "utf8")).not.toContain("\u2014");
     }
-    expect(buildRssFeed(getAllPosts())).not.toContain("\u2014");
+    expect(buildRssFeed(await getAllPosts())).not.toContain("\u2014");
   });
 });
 
 describe("buildRssFeed", () => {
-  test("emits item links on the canonical /blog/<slug> path", () => {
-    const xml = buildRssFeed(getAllPosts());
+  test("emits item links on the canonical /blog/<slug> path", async () => {
+    const posts = await getAllPosts();
+    const xml = buildRssFeed(posts);
     expect(xml).toContain("<rss version=\"2.0\"");
-    for (const post of getAllPosts()) {
+    for (const post of posts) {
       expect(xml).toContain(`/blog/${post.slug}</link>`);
     }
   });

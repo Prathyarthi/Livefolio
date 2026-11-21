@@ -1,6 +1,11 @@
 # Blog posts
 
-Posts live here as markdown files. **Adding a post = dropping in one `.md` file.** No code changes, routes or imports are needed. At build time every post gets:
+You can manage posts in two ways:
+
+1. **Admin CMS** (preferred): `/admin/blog` for emails listed in `ADMIN_EMAILS`. Create, edit, publish and delete posts there. APIs under `/api/admin/blog` are `requireAdmin()` only.
+2. **Markdown files** (fallback): drop a `.md` file here. DB posts override the same slug.
+
+At runtime every published post gets:
 
 - an article page at `/blog/<slug>` (statically generated)
 - an entry on the `/blog` index (newest first)
