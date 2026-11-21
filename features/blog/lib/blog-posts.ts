@@ -5,7 +5,7 @@ import type { BlogPost } from "@/features/blog/types";
 
 /**
  * Public blog reads: markdown files in content/blog plus PUBLISHED posts from
- * the database (written through /api/blog). The database is optional here: if
+ * the database (written through /admin/blog). The database is optional here: if
  * it is unreachable (local builds, outages) the blog falls back to file posts.
  */
 

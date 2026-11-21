@@ -433,7 +433,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                 </h3>
                 {article.description && (
                   <p className="mt-1.5 max-w-3xl text-sm leading-7 text-zinc-400">
-                    {article.description}
+                    <RichText text={article.description} />
                   </p>
                 )}
               </div>
@@ -512,7 +512,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
         />
       )}
 
-      <div className="relative mx-auto min-w-0 max-w-5xl px-5 pb-20 pt-14 sm:px-6 md:px-8 md:pb-32 md:pt-24">
+      <div className="relative mx-auto min-w-0 max-w-6xl px-5 pb-20 pt-14 sm:px-6 md:px-8 md:pb-32 md:pt-24">
         <header className="min-w-0">
           <h1
             className={cn(

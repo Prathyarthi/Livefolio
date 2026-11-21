@@ -293,7 +293,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                   </a>
                 </h3>
                 {article.description && (
-                  <p className={cn("mt-1 text-sm leading-6", mute)}>{article.description}</p>
+                  <p className={cn("mt-1 text-sm leading-6", mute)}><RichText text={article.description} /></p>
                 )}
                 <p className="mt-2 text-xs tabular-nums text-[#8a8076]">
                   {article.publishedAt

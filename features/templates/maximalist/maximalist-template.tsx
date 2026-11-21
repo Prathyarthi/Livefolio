@@ -192,7 +192,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
           muted: "font-mono text-xs",
           chip: "border-2 border-white px-3 py-1 text-xs font-black uppercase text-white",
           link: "text-sm font-black uppercase text-[var(--lf-accent)] hover:underline",
-          section: "mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8",
+          section: "mx-auto max-w-6xl scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8",
       }}
     />
   ) : null;
@@ -205,7 +205,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
         {/* Ambient Radial Background Glow */}
         <div className="absolute -top-20 -right-20 w-80 h-80 bg-[color-mix(in_srgb,var(--lf-accent)_15%,transparent)] rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4 border-b-4 border-white pb-6">
             <div>
@@ -299,7 +299,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
         {/* Ambient Radial Background Glow */}
         <div className="absolute bottom-0 -left-20 w-96 h-96 bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4 border-b-4 border-white pb-6">
             <div>
@@ -426,7 +426,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
     education: data.educations.length > 0
       ? (
         <section key="education" id="education" className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="mb-12 border-b-4 border-white pb-6">
               <SectionHeading>{labels.education}</SectionHeading>
             </div>
@@ -474,7 +474,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
         {/* Ambient Radial Glow */}
         <div className="absolute top-[-50px] left-[-50px] w-80 h-80 bg-amber-500/15 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4 border-b-4 border-white pb-6">
             <div>
@@ -507,7 +507,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
     profiles: hasProfiles
       ? (
         <section key="profiles" id="profiles" className="py-16 bg-black border-b-4 border-white scroll-mt-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-8 border-b-4 border-white pb-6">
               <SectionHeading>{labels.profiles}</SectionHeading>
             </div>
@@ -526,7 +526,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
     github: contributionCalendar
       ? (
         <section key="github" className="py-16 bg-black border-b-4 border-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-6">
               <SectionHeading>{labels.github.toUpperCase()}</SectionHeading>
             </div>
@@ -585,7 +585,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
 
       {/* 2. NAVIGATION BAR */}
       <nav className="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b-4 border-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
 
           {/* Logo */}
           <a href="#about" className="flex items-center gap-3 group">
@@ -679,7 +679,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-1/2 -right-32 w-96 h-96 bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
 
             {/* Main Info Box */}
@@ -744,7 +744,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
 
       {data.customSections.length > 0 && (
         <section className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             {data.customSections.map((sec) => (
               <div key={sec.id} className="bg-black border-4 border-[var(--lf-accent)] p-8 neo-shadow mb-8">
                 <SectionHeading>{sec.label}</SectionHeading>
@@ -790,7 +790,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-6">
             {/* 1. Full name — one line, never truncated */}
             <div className="flex shrink-0 items-center gap-2">
@@ -875,7 +875,7 @@ function SkillsSectionComponent({
     <section key="skills" id="skills" className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] rounded-full blur-[160px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 border-b-4 border-white pb-6">
           <div>
             <SectionHeading>{labels.skills}</SectionHeading>
@@ -930,7 +930,7 @@ function ArticlesSectionComponent({
     <section key="articles" id="articles" className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white relative overflow-hidden">
       <div className="absolute bottom-[-50px] right-[-50px] w-80 h-80 bg-purple-600/15 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="space-y-6">
           <SectionHeading>{labels.articles}</SectionHeading>
 
@@ -1019,7 +1019,7 @@ function CertificationsSectionComponent({
     <section key="certifications" id="certifications" className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white relative overflow-hidden scroll-mt-24">
       <div className="absolute bottom-[-50px] right-[-50px] w-80 h-80 bg-purple-600/15 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="space-y-6">
           <SectionHeading>{labels.certifications}</SectionHeading>
 

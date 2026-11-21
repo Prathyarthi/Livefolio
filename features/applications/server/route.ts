@@ -41,6 +41,11 @@ import {
   parseScreeningQuestions,
   validateScreeningAnswers,
 } from "@/features/jobs/lib/screening-questions";
+import {
+  notifyApplicationStageChanged,
+  notifyApplicationSubmitted,
+} from "@/features/applications/lib/notify-candidate";
+import { isApplicationDeadlinePassed } from "@/features/jobs/constants/labels";
 
 function optionalTrim(value?: string | null) {
   if (value == null) return null;
@@ -242,6 +247,7 @@ export const applications = new Elysia({ prefix: "/applications" })
         title: true,
         slug: true,
         status: true,
+        applicationDeadline: true,
         screeningQuestions: true,
         organization: {
           select: {
@@ -255,7 +261,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       },
     });
 
-    if (!job || job.status !== "published") {
+    if (!job) {
       ctx.set.status = 404;
       return { error: "Job not found or not open for applications" };
     }
@@ -267,6 +273,35 @@ export const applications = new Elysia({ prefix: "/applications" })
       select: { id: true, submittedAt: true, status: true },
     });
 
+    // Allow status lookup after apply even if the role was paused/closed.
+    if (job.status !== "published" && !existing) {
+      ctx.set.status = 404;
+      return { error: "Job not found or not open for applications" };
+    }
+
+    const jobPayload = {
+      ...job,
+      screeningQuestions: parseScreeningQuestions(job.screeningQuestions),
+    };
+
+    if (existing) {
+      return {
+        job: jobPayload,
+        alreadyApplied: true,
+        existingApplication: existing,
+        snapshot: null,
+        portfolioId: null,
+      };
+    }
+
+    if (isApplicationDeadlinePassed(job.applicationDeadline)) {
+      ctx.set.status = 400;
+      return {
+        error: "The application deadline has passed",
+        code: "DEADLINE_PASSED",
+      };
+    }
+
     const snapshot = await buildApplicationSnapshot(session.userId);
     if (!snapshot) {
       ctx.set.status = 400;
@@ -277,12 +312,9 @@ export const applications = new Elysia({ prefix: "/applications" })
     }
 
     return {
-      job: {
-        ...job,
-        screeningQuestions: parseScreeningQuestions(job.screeningQuestions),
-      },
-      alreadyApplied: Boolean(existing),
-      existingApplication: existing,
+      job: jobPayload,
+      alreadyApplied: false,
+      existingApplication: null,
       snapshot: snapshot.data,
       portfolioId: snapshot.portfolioId,
     };
@@ -326,12 +358,12 @@ export const applications = new Elysia({ prefix: "/applications" })
         return { error: "Job not found or not open for applications" };
       }
 
-      if (
-        job.applicationDeadline &&
-        job.applicationDeadline.getTime() < Date.now()
-      ) {
+      if (isApplicationDeadlinePassed(job.applicationDeadline)) {
         ctx.set.status = 400;
-        return { error: "The application deadline has passed" };
+        return {
+          error: "The application deadline has passed",
+          code: "DEADLINE_PASSED",
+        };
       }
 
       const existing = await prisma.application.findUnique({
@@ -404,6 +436,16 @@ export const applications = new Elysia({ prefix: "/applications" })
           },
         },
         include: candidateApplicationInclude,
+      });
+
+      // Separate from the apply response path — never await.
+      notifyApplicationSubmitted({
+        userId: session.userId,
+        applicationId: application.id,
+        job: {
+          title: job.title,
+          organizationName: job.organization.name,
+        },
       });
 
       return application;
@@ -654,7 +696,7 @@ export const applications = new Elysia({ prefix: "/applications" })
       const stage = ctx.body.stage as PipelineStage;
       const existing = await prisma.application.findFirst({
         where: { id: ctx.params.applicationId, jobId: job.id },
-        select: { id: true },
+        select: { id: true, userId: true, stage: true },
       });
       if (!existing) {
         ctx.set.status = 404;
@@ -676,6 +718,18 @@ export const applications = new Elysia({ prefix: "/applications" })
           shortlisted: true,
           shortlistedAt: true,
           updatedAt: true,
+        },
+      });
+
+      // Separate from the stage update response — never await.
+      notifyApplicationStageChanged({
+        userId: existing.userId,
+        applicationId: existing.id,
+        previousStage: existing.stage,
+        stage,
+        job: {
+          title: job.title,
+          organizationName: job.organization.name,
         },
       });
 
@@ -716,7 +770,7 @@ export const applications = new Elysia({ prefix: "/applications" })
 
       const existing = await prisma.application.findFirst({
         where: { id: ctx.params.applicationId, jobId: job.id },
-        select: { id: true, stage: true },
+        select: { id: true, userId: true, stage: true },
       });
       if (!existing) {
         ctx.set.status = 404;
@@ -745,6 +799,18 @@ export const applications = new Elysia({ prefix: "/applications" })
           shortlisted: true,
           shortlistedAt: true,
           updatedAt: true,
+        },
+      });
+
+      // Separate from the shortlist response — never await.
+      notifyApplicationStageChanged({
+        userId: existing.userId,
+        applicationId: existing.id,
+        previousStage: existing.stage,
+        stage: nextStage,
+        job: {
+          title: job.title,
+          organizationName: job.organization.name,
         },
       });
 

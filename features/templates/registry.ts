@@ -27,6 +27,7 @@ import { PulseTemplate } from "./pulse/pulse-template";
 import { MaximalistTemplate } from "./maximalist/maximalist-template";
 import { SynapseTemplate } from "./synapse/synapse-template";
 import { VeilTemplate } from "./veil/veil-template";
+import { VignetteTemplate } from "./vignette/vignette-template";
 import type { TemplateComponent } from "./types";
 import { templateCatalog } from "./template-catalog";
 
@@ -37,6 +38,7 @@ const TEMPLATE_COMPONENTS: Record<
   pulse: PulseTemplate,
   synapse: SynapseTemplate,
   veil: VeilTemplate,
+  vignette: VignetteTemplate,
   modern: ModernTemplate,
   minimal: MinimalTemplate,
   developer: DeveloperTemplate,

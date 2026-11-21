@@ -18,8 +18,8 @@ import {
 
 type PageProps = { params: Promise<{ slug: string }> };
 
-// Posts published through /api/blog after the build render on first request.
-// Unknown slugs and drafts 404. The API calls revalidatePath on every write.
+// Posts published through /admin/blog after the build render on first request.
+// Unknown slugs and drafts 404. The admin API calls revalidatePath on every write.
 export const dynamicParams = true;
 
 // The root layout reads headers() (footer), which makes routes dynamic by default.

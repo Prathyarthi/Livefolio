@@ -29,7 +29,7 @@ const DEFAULT_LAST_MODIFIED = "2026-11-15";
 /** Docs have no per-article timestamps; last commit to features/docs/content. */
 const DOCS_LAST_MODIFIED = "2026-11-15";
 
-// Blog posts can be published through /api/blog without a deploy.
+// Blog posts can be published through /admin/blog without a deploy.
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

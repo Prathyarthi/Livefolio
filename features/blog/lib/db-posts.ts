@@ -58,7 +58,7 @@ export function recordToPost(record: BlogPostRecord): BlogPost {
 /**
  * Public post list: every file post plus PUBLISHED database posts. Drafts are
  * dropped here even if the caller already filtered them. A file post wins if a
- * slug exists in both places (the API refuses to create such a post).
+ * slug exists in both places (the admin CMS refuses to create such a post).
  */
 export function mergePosts(filePosts: BlogPost[], records: BlogPostRecord[]): BlogPost[] {
   const fileSlugs = new Set(filePosts.map((post) => post.slug));

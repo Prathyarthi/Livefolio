@@ -101,7 +101,7 @@ function listPostFiles(): string[] {
 }
 
 /**
- * Slugs claimed by markdown files, drafts included. The blog API refuses to
+ * Slugs claimed by markdown files, drafts included. The admin CMS refuses to
  * create a database post with one of these so the two sources never collide.
  */
 export function getFileSlugs(): Set<string> {

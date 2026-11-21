@@ -184,7 +184,7 @@ function Header({
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl min-h-16 items-center justify-between gap-3 px-4 py-2 @sm:px-6 @lg:px-8">
+      <div className="mx-auto flex max-w-6xl min-h-16 items-center justify-between gap-3 px-4 py-2 @sm:px-6 @lg:px-8">
         {/* Logo/Brand */}
         <div
           onClick={() => handleScroll(navItems[0]?.id ?? 'about')}
@@ -240,7 +240,7 @@ function Header({
 
       {mobileMenuOpen && navItems.length > 0 && (
         <nav className="border-t border-white/10 bg-[#0a0a0a]/95 px-4 py-3 @md:hidden">
-          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-2">
+          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-2">
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -284,7 +284,7 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: H
         style={{ backgroundColor: primaryColor }}
       />
 
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8">
         <div className="grid grid-cols-1 @lg:grid-cols-12 gap-12 @lg:gap-16 items-center">
 
           {/* Left Column: Core Bio */}
@@ -363,7 +363,7 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
 
   return (
     <section key="experience" className="py-12 scroll-mt-20 bg-transparent" id="experience">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8">
 
         {/* Section Heading */}
         <div className="mb-8">
@@ -469,7 +469,7 @@ function EducationSection({ educations, primaryColor, labels }: EducationSection
 
   return (
     <section key="education" className="py-12 scroll-mt-20 bg-transparent" id="education">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8">
         <div className="space-y-6" id="timeline-education-list">
           <SectionHeading>{labels.education}</SectionHeading>
 
@@ -543,7 +543,7 @@ function SkillsMatrix({ skills, primaryColor, labels }: SkillsMatrixProps) {
 
   return (
     <section className="py-12 bg-transparent border-y border-white/10" id="skills">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8">
 
         {/* Header */}
         <div className="mb-12">
@@ -611,7 +611,7 @@ function ProjectsShowcase({
 }: ProjectsShowcaseProps) {
   return (
     <section className="py-12 scroll-mt-20" id="work">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8">
 
         {/* Header Title */}
         <div className="mb-8 @sm:mb-16">
@@ -745,7 +745,7 @@ function CertificationsSection({
 
   return (
     <section key="certifications" className="py-12 bg-transparent" id="certifications">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8 space-y-6">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8 space-y-6">
         <SectionHeading>{labels.certifications}</SectionHeading>
         <CollapsibleList
           initial={4}
@@ -797,7 +797,7 @@ function ArticlesSection({
 
   return (
     <section key="articles" className="py-12 bg-transparent" id="articles">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8 space-y-6">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8 space-y-6">
         <SectionHeading>{labels.articles}</SectionHeading>
         <CollapsibleList
           initial={4}
@@ -824,7 +824,7 @@ function ArticlesSection({
                   {art.title}
                 </h4>
                 {art.description && (
-                  <p className="font-sans text-xs text-slate-400 leading-relaxed line-clamp-2">{art.description}</p>
+                  <p className="font-sans text-xs text-slate-400 leading-relaxed line-clamp-2"><RichText text={art.description} /></p>
                 )}
               </div>
               <div className="flex items-center gap-1 text-xs font-mono text-slate-500 group-hover:text-slate-300 transition-colors">
@@ -852,7 +852,7 @@ function AchievementsSection({
 
   return (
     <section key="achievements" className="py-12 bg-transparent" id="achievements">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8 space-y-6">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8 space-y-6">
         <SectionHeading>{labels.achievements}</SectionHeading>
         <CollapsibleList
           initial={4}
@@ -904,7 +904,7 @@ function ProfilesSection({
 
   return (
     <section key="profiles" className="py-12 bg-transparent scroll-mt-20" id="profiles">
-      <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8 space-y-6">
+      <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8 space-y-6">
         <SectionHeading>{labels.profiles}</SectionHeading>
         <ProfileLinksSection
           portfolio={portfolio}
@@ -983,7 +983,7 @@ export function PulseTemplate({ data }: AppProps) {
             postParagraph: "font-display text-sm font-bold text-white leading-snug",
             descriptionParagraph: "font-sans text-sm text-slate-400 leading-relaxed",
             descriptionList: "space-y-2 pl-5 font-sans text-sm text-slate-400 leading-relaxed marker:text-slate-600",
-          section: "mx-auto max-w-7xl px-4 py-12 @sm:px-6 @lg:px-8",
+          section: "mx-auto max-w-6xl px-4 py-12 @sm:px-6 @lg:px-8",
           card: "rounded-2xl border border-white/10 bg-white/5 p-5",
           title: "font-display text-base @sm:text-lg font-bold text-white",
           text: "font-sans text-sm text-slate-400 leading-relaxed",
@@ -1029,7 +1029,7 @@ export function PulseTemplate({ data }: AppProps) {
     ) : null,
     github: contributionCalendar ? (
       <section key="github" className="py-12" id="github-activity">
-        <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8 space-y-6">
+        <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8 space-y-6">
           <SectionHeading>{labels.github}</SectionHeading>
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5 overflow-x-auto">
             <div className="mx-auto w-max max-w-full">
@@ -1140,7 +1140,7 @@ export function PulseTemplate({ data }: AppProps) {
 
         {customSections.length > 0 && (
           <section className="py-12 bg-transparent">
-            <div className="mx-auto max-w-7xl px-4 @sm:px-6 @lg:px-8 space-y-12">
+            <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8 space-y-12">
               {customSections.map((section) => (
                 <div key={section.id} className="space-y-6" id={`custom-section-${section.id}`}>
                   <SectionHeading>{section.label}</SectionHeading>
@@ -1160,7 +1160,7 @@ export function PulseTemplate({ data }: AppProps) {
       </main>
 
       {/* Primary Footer */}
-      <footer className="mt-10 pt-6 border-t border-white/10 flex justify-between items-center text-[10px] font-mono tracking-widest text-slate-500 py-8 mx-auto w-full max-w-7xl px-4 @sm:px-6 @lg:px-8">
+      <footer className="mt-10 pt-6 border-t border-white/10 flex justify-between items-center text-[10px] font-mono tracking-widest text-slate-500 py-8 mx-auto w-full max-w-6xl px-4 @sm:px-6 @lg:px-8">
         <div className="flex flex-col @md:flex-row items-center justify-between w-full gap-6">
           <div className="flex items-center gap-2">
             <Cpu className="h-4 w-4" style={{ color: primaryColor }} />

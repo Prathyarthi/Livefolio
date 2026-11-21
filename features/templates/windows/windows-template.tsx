@@ -448,7 +448,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 </h3>
                 {article.description && (
                   <p className="mt-1 max-w-2xl text-xs leading-6 text-black/80">
-                    {article.description}
+                    <RichText text={article.description} />
                   </p>
                 )}
                 <p className="mt-1.5 text-[11px] text-black/60">
@@ -509,7 +509,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
       )}
       style={{ ...accentRootStyle(primaryColor), fontFamily: SYSTEM_FONT }}
     >
-      <main className="mx-auto w-full min-w-0 max-w-5xl grow space-y-6 p-4 pb-10 md:space-y-8 md:p-8 md:pb-14">
+      <main className="mx-auto w-full min-w-0 max-w-6xl grow space-y-6 p-4 pb-10 md:space-y-8 md:p-8 md:pb-14">
         <Window title="System Properties">
           <div className={cn(well, "min-w-0 p-5 @md:p-8")}>
             <h1

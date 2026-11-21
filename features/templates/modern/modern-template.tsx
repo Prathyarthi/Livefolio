@@ -307,7 +307,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                 </p>
               </div>
               {article.description && (
-                <p className={cn("mt-2 max-w-[40rem] text-sm leading-6", mute)}>{article.description}</p>
+                <p className={cn("mt-2 max-w-[40rem] text-sm leading-6", mute)}><RichText text={article.description} /></p>
               )}
             </article>
           ))}
@@ -474,7 +474,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
       )}
       style={accentRootStyle(primaryColor)}
     >
-      <div className="relative mx-auto min-w-0 max-w-5xl overflow-x-clip px-5 pb-16 pt-10 sm:px-6 md:px-8 md:pb-28 md:pt-16">
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-16 pt-10 sm:px-6 md:px-8 md:pb-28 md:pt-16">
         <header className="min-w-0 pb-4">
           <h1
             className={cn(

@@ -301,7 +301,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
                   {article.readTime != null ? <span>{article.publishedAt ? "; " : null}{article.readTime} min</span> : null}
                 </p>
               </div>
-              {article.description && <p className={cn("mt-2 max-w-[42rem] text-sm leading-6", mute)}>{article.description}</p>}
+              {article.description && <p className={cn("mt-2 max-w-[42rem] text-sm leading-6", mute)}><RichText text={article.description} /></p>}
             </article>
           ))}
         </CollapsibleList>
@@ -352,7 +352,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
       )}
       style={accentRootStyle(primaryColor)}
     >
-      <div className="relative mx-auto min-w-0 max-w-5xl overflow-x-clip px-5 pb-16 pt-8 sm:px-6 md:px-8 md:pb-28 md:pt-14">
+      <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-16 pt-8 sm:px-6 md:px-8 md:pb-28 md:pt-14">
         <div
           className="pointer-events-none absolute inset-x-5 top-6 h-24 border-x border-t border-[#b5aa8e]/70 md:inset-x-8"
           aria-hidden

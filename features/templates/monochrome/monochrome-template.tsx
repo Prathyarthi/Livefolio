@@ -251,7 +251,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 </a>
               </h3>
               {article.description && (
-                <p className={cn("mt-3 grow text-sm leading-6", mute)}>{article.description}</p>
+                <p className={cn("mt-3 grow text-sm leading-6", mute)}><RichText text={article.description} /></p>
               )}
               <p className={cn("mt-5 border-t border-neutral-200 pt-3 text-sm tabular-nums", pale)}>
                 {article.publishedAt
@@ -412,7 +412,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
       )}
       style={accentRootStyle(primaryColor)}
     >
-      <div className="mx-auto min-w-0 max-w-7xl overflow-x-clip px-4 pb-16 pt-6 @md:px-8 @md:pb-28 @md:pt-10">
+      <div className="mx-auto min-w-0 max-w-6xl overflow-x-clip px-4 pb-16 pt-6 @md:px-8 @md:pb-28 @md:pt-10">
         {navbarEnabled && (
           <div className="mb-14 border-b border-black pb-4">
             <div className="flex min-w-0 flex-col gap-3 @md:flex-row @md:items-baseline @md:justify-between @md:gap-6">

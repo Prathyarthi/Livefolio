@@ -204,6 +204,20 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "profiles",
   ]),
 
+  vignette: singleColumn([
+    "about",
+    "projects",
+    "experience",
+    "skills",
+    "education",
+    "articles",
+    "certifications",
+    "achievements",
+    "linkedin",
+    "profiles",
+    "github",
+  ]),
+
   ledger: singleColumn([
     "about",
     "experience",

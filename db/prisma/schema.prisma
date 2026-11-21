@@ -918,7 +918,7 @@ model UserBadge {
 }
 
 // ============================================================
-// BLOG (posts written through POST /api/blog; file posts live in content/blog)
+// BLOG (admin CMS at /admin/blog; markdown files remain a read fallback)
 // ============================================================
 
 enum BlogPostStatus {
@@ -932,7 +932,7 @@ model BlogPost {
   title       String
   description String
   keyword     String
-  /// Absolute https URL, 1200x630 recommended. Null falls back to the default OG image.
+  /// Path under /public (e.g. /blog/cover.png) or absolute https URL. Null uses default OG image.
   cover       String?
   /// Display string, "Name, Role".
   author      String

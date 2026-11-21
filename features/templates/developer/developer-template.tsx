@@ -481,7 +481,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(215,224,200,0.045),transparent_34rem)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(215,224,200,0.2)_1px,transparent_1px)] [background-size:100%_3px]" />
 
-      <div className="relative mx-auto max-w-5xl px-4 py-5 sm:px-6 md:px-8 md:py-8">
+      <div className="relative mx-auto max-w-6xl px-4 py-5 sm:px-6 md:px-8 md:py-8">
         <div className={cn("overflow-hidden rounded-sm border shadow-[0_24px_80px_rgba(0,0,0,0.35)]", shellPanel)}>
           <TerminalChrome title="~/portfolio" />
           <header className="min-w-0 px-5 py-10 @md:px-8 @md:py-14">
