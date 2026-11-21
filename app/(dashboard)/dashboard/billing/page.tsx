@@ -29,6 +29,7 @@ interface BillingState {
   access: {
     tier: "free" | "trial" | "pro";
     trialDaysRemaining: number;
+    complimentaryProUntil: string | null;
     canUsePremiumTemplates: boolean;
     canUseImports: boolean;
     canUseAnalytics: boolean;
@@ -158,13 +159,18 @@ export default function BillingPage() {
   const isFree = tier === "free";
   const trialDays = billing?.access?.trialDaysRemaining ?? 0;
   const paymentsReady = billing?.razorpayReady ?? false;
+  const hasPaidSubscription = billing?.subscription?.status === "ACTIVE";
   const isPending = billing?.subscription?.status === "PENDING";
   const cancelAtPeriodEnd =
-    billing?.subscription?.status === "ACTIVE" &&
-    billing.subscription.cancelAtPeriodEnd;
+    hasPaidSubscription &&
+    Boolean(billing?.subscription?.cancelAtPeriodEnd);
   const currentPeriodEnd = formatBillingDate(
     billing?.subscription?.currentPeriodEnd
   );
+  const complimentaryUntil = formatBillingDate(
+    billing?.access?.complimentaryProUntil
+  );
+  const isComplimentaryPro = isPro && !hasPaidSubscription && Boolean(complimentaryUntil);
   const intervalCheckoutReady = checkoutIntervals.includes(billingInterval);
 
   return (
@@ -213,7 +219,23 @@ export default function BillingPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {isPro && (
+          {isComplimentaryPro && (
+            <div className="flex items-start gap-3 rounded-xl border border-teal-500/20 bg-teal-500/8 px-4 py-3">
+              <Crown className="mt-0.5 h-4 w-4 shrink-0 text-teal-400" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-teal-200">
+                  Pro included free
+                  {complimentaryUntil ? ` until ${complimentaryUntil}` : ""}
+                </p>
+                <p className="mt-0.5 text-body-sm text-text-secondary">
+                  All Pro features are unlocked during this complimentary period.
+                  You can still subscribe any time to keep Pro after it ends.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {hasPaidSubscription && (
             <div className="flex items-start gap-3 rounded-xl border border-teal-500/20 bg-teal-500/8 px-4 py-3">
               <Crown className="mt-0.5 h-4 w-4 shrink-0 text-teal-400" />
               <div className="flex-1">
@@ -233,7 +255,7 @@ export default function BillingPage() {
             </div>
           )}
 
-          {isPro && !cancelAtPeriodEnd && (
+          {hasPaidSubscription && !cancelAtPeriodEnd && (
             <Button
               variant="outline"
               className="w-full rounded-full border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
@@ -322,7 +344,7 @@ export default function BillingPage() {
             </div>
           </div>
 
-          {!isPro && paymentsReady && (
+          {!hasPaidSubscription && paymentsReady && (
             <div className="space-y-4">
               <BillingIntervalToggle
                 value={billingInterval}
@@ -343,12 +365,14 @@ export default function BillingPage() {
                   ? "Opening checkout…"
                   : isPending
                     ? "Payment recovery required"
-                    : `Upgrade to Pro — ${formatProPriceLabel(billingInterval)}`}
+                    : isComplimentaryPro
+                      ? `Subscribe to keep Pro — ${formatProPriceLabel(billingInterval)}`
+                      : `Upgrade to Pro — ${formatProPriceLabel(billingInterval)}`}
               </Button>
             </div>
           )}
 
-          {!isPro && !paymentsReady && (
+          {!hasPaidSubscription && !paymentsReady && (
             <p className="text-center text-body-sm text-text-muted">
               Payments are not configured on this instance.
             </p>

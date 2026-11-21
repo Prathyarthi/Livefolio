@@ -32,6 +32,7 @@ export interface UserBillingProfile {
   subscriptionStatus?: string | null;
   subscriptionCancelAtPeriodEnd?: boolean;
   subscriptionCurrentPeriodEnd?: Date | null;
+  complimentaryProUntil?: Date | null;
 }
 
 export const FREE_PROJECT_THUMBNAILS = 3;
@@ -41,10 +42,11 @@ export interface AccessSnapshot {
   tier: AccessTier;
   trialEndsAt: string;
   trialDaysRemaining: number;
+  complimentaryProUntil: string | null;
   canUsePremiumTemplates: boolean;
   canUseImports: boolean;
   canUseAnalytics: boolean;
-  /** Paid Pro only (not the free trial): LinkedIn import spends scrape credits. */
+  /** Paid Pro or complimentary Pro (not the free trial): LinkedIn import spends scrape credits. */
   canUseLinkedInImport: boolean;
   allowedTemplateIds: string[];
   maxProjectThumbnails: number;
@@ -57,6 +59,50 @@ export function isProSubscription(
   return (subscriptionStatus ?? "").toLowerCase() === "active";
 }
 
+export function isComplimentaryProActive(
+  complimentaryProUntil: Date | string | null | undefined,
+  now: Date = new Date()
+): boolean {
+  if (!complimentaryProUntil) return false;
+  const until =
+    complimentaryProUntil instanceof Date
+      ? complimentaryProUntil
+      : new Date(complimentaryProUntil);
+  return !Number.isNaN(until.getTime()) && until.getTime() > now.getTime();
+}
+
+export function hasPaidProAccess(
+  user: Pick<
+    UserBillingProfile,
+    | "subscriptionStatus"
+    | "subscriptionCancelAtPeriodEnd"
+    | "subscriptionCurrentPeriodEnd"
+  >,
+  now: Date = new Date()
+): boolean {
+  const paidThroughCancellation =
+    !user.subscriptionCancelAtPeriodEnd ||
+    !user.subscriptionCurrentPeriodEnd ||
+    now.getTime() < user.subscriptionCurrentPeriodEnd.getTime();
+  return isProSubscription(user.subscriptionStatus) && paidThroughCancellation;
+}
+
+export function hasProAccess(
+  user: Pick<
+    UserBillingProfile,
+    | "subscriptionStatus"
+    | "subscriptionCancelAtPeriodEnd"
+    | "subscriptionCurrentPeriodEnd"
+    | "complimentaryProUntil"
+  >,
+  now: Date = new Date()
+): boolean {
+  return (
+    hasPaidProAccess(user, now) ||
+    isComplimentaryProActive(user.complimentaryProUntil, now)
+  );
+}
+
 export function resolveAccessForUser(
   user: UserBillingProfile,
   now: Date = new Date()
@@ -66,17 +112,17 @@ export function resolveAccessForUser(
     user.createdAt.getTime() + FREE_TRIAL_DAYS * 24 * 60 * 60 * 1000
   );
   const inTrial = now.getTime() < trialEndsAtDate.getTime();
-  const paidThroughCancellation =
-    !user.subscriptionCancelAtPeriodEnd ||
-    !user.subscriptionCurrentPeriodEnd ||
-    now.getTime() < user.subscriptionCurrentPeriodEnd.getTime();
-  const paidPro =
-    isProSubscription(user.subscriptionStatus) && paidThroughCancellation;
+  const paidPro = hasPaidProAccess(user, now);
+  const complimentaryPro = isComplimentaryProActive(
+    user.complimentaryProUntil,
+    now
+  );
+  const unlockedPro = paidPro || complimentaryPro;
   const allowUnconfiguredBillingAccess =
     process.env.NODE_ENV !== "production" &&
     process.env.ALLOW_UNCONFIGURED_BILLING_ACCESS === "true";
 
-  const tier: AccessTier = paidPro ? "pro" : inTrial ? "trial" : "free";
+  const tier: AccessTier = unlockedPro ? "pro" : inTrial ? "trial" : "free";
   const trialDaysRemaining = inTrial
     ? Math.max(
         0,
@@ -87,18 +133,26 @@ export function resolveAccessForUser(
     : 0;
 
   const canUsePremiumTemplates =
-    paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
+    unlockedPro ||
+    inTrial ||
+    (!billingConfigured && allowUnconfiguredBillingAccess);
   const canUseImports =
-    paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
+    unlockedPro ||
+    inTrial ||
+    (!billingConfigured && allowUnconfiguredBillingAccess);
   const canUseAnalytics =
-    paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
+    unlockedPro ||
+    inTrial ||
+    (!billingConfigured && allowUnconfiguredBillingAccess);
   const canUseLinkedInImport =
-    paidPro || (!billingConfigured && allowUnconfiguredBillingAccess);
+    unlockedPro || (!billingConfigured && allowUnconfiguredBillingAccess);
   const allowedTemplateIds = canUsePremiumTemplates
     ? allTemplateIds()
     : [...FREE_TEMPLATE_IDS];
   const unlocked =
-    paidPro || inTrial || (!billingConfigured && allowUnconfiguredBillingAccess);
+    unlockedPro ||
+    inTrial ||
+    (!billingConfigured && allowUnconfiguredBillingAccess);
   const maxProjectThumbnails = unlocked
     ? PRO_PROJECT_THUMBNAILS
     : FREE_PROJECT_THUMBNAILS;
@@ -108,6 +162,10 @@ export function resolveAccessForUser(
     tier,
     trialEndsAt: trialEndsAtDate.toISOString(),
     trialDaysRemaining,
+    complimentaryProUntil:
+      complimentaryPro && user.complimentaryProUntil
+        ? new Date(user.complimentaryProUntil).toISOString()
+        : null,
     canUsePremiumTemplates,
     canUseImports,
     canUseAnalytics,

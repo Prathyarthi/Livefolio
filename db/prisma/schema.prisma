@@ -30,6 +30,9 @@ model User {
   subscriptionCancelAtPeriodEnd Boolean   @default(false)
   subscriptionCurrentPeriodEnd  DateTime?
 
+  /// Complimentary Pro grant end date (independent of Razorpay billing state).
+  complimentaryProUntil DateTime?
+
   welcomeEmailSentAt           DateTime?
   noPortfolioReminderSentAt    DateTime?
   unpublishedReminderSentAt    DateTime?

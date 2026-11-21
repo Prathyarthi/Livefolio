@@ -1,3 +1,5 @@
+import { hasProAccess } from "@/lib/entitlements";
+
 export const FREE_MAX_LIVE_PREVIEWS = 0;
 export const ACTIVE_MAX_LIVE_PREVIEWS = 50;
 
@@ -9,12 +11,25 @@ export function isProSubscriptionStatus(
   return (subscriptionStatus ?? "").toLowerCase() === "active";
 }
 
+export function hasLivePreviewProAccess(user: {
+  subscriptionStatus?: string | null;
+  subscriptionCancelAtPeriodEnd?: boolean;
+  subscriptionCurrentPeriodEnd?: Date | null;
+  complimentaryProUntil?: Date | null;
+}): boolean {
+  return hasProAccess(user);
+}
+
 export function getMaxLivePreviews(
   subscriptionStatus: string | null | undefined
 ): number {
   return isProSubscriptionStatus(subscriptionStatus)
     ? ACTIVE_MAX_LIVE_PREVIEWS
     : FREE_MAX_LIVE_PREVIEWS;
+}
+
+export function getMaxLivePreviewsForAccess(hasPro: boolean): number {
+  return hasPro ? ACTIVE_MAX_LIVE_PREVIEWS : FREE_MAX_LIVE_PREVIEWS;
 }
 
 export function isLivePreviewEnabledForProject(

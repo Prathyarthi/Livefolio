@@ -80,6 +80,7 @@ async function loadBillingUser(userId: string) {
       subscriptionStatus: true,
       subscriptionCancelAtPeriodEnd: true,
       subscriptionCurrentPeriodEnd: true,
+      complimentaryProUntil: true,
       portfolio: { select: { id: true, headline: true } },
     },
   });

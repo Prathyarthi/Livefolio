@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 import { prisma } from "@/lib/prisma";
 import { buildLinkedInShowcase } from "@/lib/linkedin";
-import { canUseTemplate, isProSubscription, resolveAccessForUser } from "@/lib/entitlements";
+import { canUseTemplate, resolveAccessForUser } from "@/lib/entitlements";
 
 export const publicPortfolio = new Elysia({ prefix: "/public" })
 
@@ -56,9 +56,8 @@ export const publicPortfolio = new Elysia({ prefix: "/public" })
       linkedin: access.canUseLinkedInImport
         ? buildLinkedInShowcase(linkedinImport)
         : null,
-      livePreviewProjectIds: isProSubscription(user.subscriptionStatus)
-        ? livePreviewProjectIds ?? []
-        : [],
+      livePreviewProjectIds:
+        access.tier === "pro" ? livePreviewProjectIds ?? [] : [],
     };
   })
 
