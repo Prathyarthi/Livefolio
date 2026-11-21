@@ -293,7 +293,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
               </h3>
               {article.description && (
                 <p className="mt-2 text-sm font-medium leading-7 text-gray-700">
-                  {article.description}
+                  <RichText text={article.description} />
                 </p>
               )}
               <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-bold text-gray-600">

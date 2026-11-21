@@ -507,7 +507,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
               </h3>
               {article.description && (
                 <p className="mt-3 line-clamp-3 text-[15px] leading-relaxed text-[var(--vg-cream-2)]">
-                  {article.description}
+                  <RichText text={article.description} />
                 </p>
               )}
               {(article.publishedAt || article.readTime != null) && (

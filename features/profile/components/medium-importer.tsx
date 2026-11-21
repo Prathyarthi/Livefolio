@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { RichText } from "@/components/rich-text";
 import { useFetchMedium, useImportMedium } from "@/features/profile/api/use-medium";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -239,7 +240,7 @@ export function MediumImporter() {
                             </p>
                             {article.description && (
                               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                {article.description}
+                                <RichText text={article.description} />
                               </p>
                             )}
                             <div className="flex items-center gap-3 mt-2 flex-wrap">

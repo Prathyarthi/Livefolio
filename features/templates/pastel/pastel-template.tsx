@@ -319,7 +319,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                   {article.readTime != null ? <span>{article.publishedAt ? " / " : null}{article.readTime} min</span> : null}
                 </p>
               </div>
-              {article.description && <p className={cn("mt-2 max-w-[40rem] text-sm leading-6", mute)}>{article.description}</p>}
+              {article.description && <p className={cn("mt-2 max-w-[40rem] text-sm leading-6", mute)}><RichText text={article.description} /></p>}
             </article>
           ))}
         </CollapsibleList>

@@ -57,6 +57,7 @@ export function stripRichTextToPlain(value: string): string {
     .replace(/^>\s+/gm, "")
     .replace(/^[-*+]\s+/gm, "")
     .replace(/^\d+\.\s+/gm, "")
+    .replace(/\\+\s*$/gm, "")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .replace(/[ \t]{2,}/g, " ")
@@ -92,5 +93,6 @@ export function inlineRichTextToSafeHtml(text: string): string {
 /** Full markdown document → sanitized HTML (editor round-trips / tests). */
 export function markdownToSafeHtml(markdown: string): string {
   if (!markdown.trim()) return "";
-  return sanitizeRichHtml(md.render(markdown));
+  const cleaned = markdown.replace(/\\+\s*$/gm, "");
+  return sanitizeRichHtml(md.render(cleaned));
 }

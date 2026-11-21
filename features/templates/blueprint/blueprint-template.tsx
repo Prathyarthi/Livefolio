@@ -364,7 +364,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
                   </h3>
                   {article.description && (
                     <p className="text-xs text-white/70 leading-relaxed mb-6 grow">
-                      {article.description}
+                      <RichText text={article.description} />
                     </p>
                   )}
                   <div className="mt-auto flex justify-between items-center text-[10px] uppercase tracking-widest text-white/50 pt-4 border-t border-dashed border-white/30">

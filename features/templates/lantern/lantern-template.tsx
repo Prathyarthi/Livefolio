@@ -417,7 +417,7 @@ export function LanternTemplate({ data }: { data: PortfolioData }) {
                 </a>
               </h3>
               {article.description && (
-                <p className={cn("mt-3 text-sm leading-6", mute)}>{article.description}</p>
+                <p className={cn("mt-3 text-sm leading-6", mute)}><RichText text={article.description} /></p>
               )}
               <p className={cn("mt-4 text-xs", mute)}>
                 {article.publishedAt

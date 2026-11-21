@@ -293,7 +293,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                 </p>
               </div>
               {article.description && (
-                <p className={cn("mt-2 max-w-[36rem] text-sm leading-6", mute)}>{article.description}</p>
+                <p className={cn("mt-2 max-w-[36rem] text-sm leading-6", mute)}><RichText text={article.description} /></p>
               )}
             </article>
           ))}

@@ -251,7 +251,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 </a>
               </h3>
               {article.description && (
-                <p className={cn("mt-3 grow text-sm leading-6", mute)}>{article.description}</p>
+                <p className={cn("mt-3 grow text-sm leading-6", mute)}><RichText text={article.description} /></p>
               )}
               <p className={cn("mt-5 border-t border-neutral-200 pt-3 text-sm tabular-nums", pale)}>
                 {article.publishedAt

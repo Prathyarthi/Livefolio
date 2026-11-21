@@ -433,7 +433,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
                 </h3>
                 {article.description && (
                   <p className="mt-1.5 max-w-3xl text-sm leading-7 text-zinc-400">
-                    {article.description}
+                    <RichText text={article.description} />
                   </p>
                 )}
               </div>

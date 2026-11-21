@@ -1042,7 +1042,7 @@ function ArticlesSection({
                     {art.title}
                   </h3>
                   {art.description && (
-                    <p className={cn("line-clamp-2 text-sm leading-relaxed", MUTED)}>{art.description}</p>
+                    <p className={cn("line-clamp-2 text-sm leading-relaxed", MUTED)}><RichText text={art.description} /></p>
                   )}
                 </div>
                 <div className="hidden items-start justify-end @md:col-span-1 @md:flex">

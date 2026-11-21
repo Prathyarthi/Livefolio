@@ -448,7 +448,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 </h3>
                 {article.description && (
                   <p className="mt-1 max-w-2xl text-xs leading-6 text-black/80">
-                    {article.description}
+                    <RichText text={article.description} />
                   </p>
                 )}
                 <p className="mt-1.5 text-[11px] text-black/60">

@@ -258,7 +258,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                       <a key={article.id} href={article.url} data-lf-track="article" data-lf-label={stripRichTextToPlain(article.title)} data-lf-id={article.id} target="_blank" rel="noreferrer" className="block bg-white border-4 border-[#264653] p-8 rounded-xl shadow-[8px_8px_0_0_#264653] hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--lf-accent)] transition-all">
                         <ArticleSourceLabel source={article.source} className="mb-2" />
                         <h3 className="text-2xl font-black text-[#264653] uppercase mb-4"><RichText text={article.title} /></h3>
-                        {article.description && <p className="text-lg font-medium text-[#264653]/80 mb-6">{article.description}</p>}
+                        {article.description && <p className="text-lg font-medium text-[#264653]/80 mb-6"><RichText text={article.description} /></p>}
                         <div className="flex items-center gap-4 text-sm font-bold tracking-widest uppercase text-[var(--lf-accent)]">
                           {article.publishedAt && <span>{new Date(article.publishedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>}
                           {article.readTime && <span>{article.readTime} min read</span>}

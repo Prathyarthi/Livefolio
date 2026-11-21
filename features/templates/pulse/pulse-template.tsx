@@ -824,7 +824,7 @@ function ArticlesSection({
                   {art.title}
                 </h4>
                 {art.description && (
-                  <p className="font-sans text-xs text-slate-400 leading-relaxed line-clamp-2">{art.description}</p>
+                  <p className="font-sans text-xs text-slate-400 leading-relaxed line-clamp-2"><RichText text={art.description} /></p>
                 )}
               </div>
               <div className="flex items-center gap-1 text-xs font-mono text-slate-500 group-hover:text-slate-300 transition-colors">

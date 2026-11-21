@@ -357,7 +357,7 @@ export function GatsbyTemplate({ data }: { data: PortfolioData }) {
                   </h3>
                   {article.description && (
                     <p className="text-[#a0a0a0] text-sm leading-relaxed mb-8 grow font-light">
-                      {article.description}
+                      <RichText text={article.description} />
                     </p>
                   )}
                   <div className="mt-auto flex items-center justify-center gap-4 text-[10px] font-bold text-[#888] pt-6 border-t border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] uppercase tracking-[0.2em] w-full">

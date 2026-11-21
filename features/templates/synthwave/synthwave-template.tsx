@@ -356,7 +356,7 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
                   </h3>
                   {article.description && (
                     <p className="text-[#b0b0b0] text-sm leading-relaxed mb-6 grow font-medium">
-                      {article.description}
+                      <RichText text={article.description} />
                     </p>
                   )}
                   <div className="mt-auto flex flex-wrap items-center gap-3 text-[10px] font-bold text-[#ffbc00] pt-4 border-t border-[#ffbc00]/20 uppercase tracking-widest">
