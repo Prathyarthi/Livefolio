@@ -1,27 +1,5 @@
-import {
-  CodeforcesIcon,
-  DevtoIcon,
-  HashnodeIcon,
-  LeetCodeMark,
-  LinkedinIcon,
-  StackOverflowIcon,
-} from "@/components/icons";
-import {
-  GitHubIcon,
-  MediumIcon,
-} from "@/features/landing/components/integration-icons";
+import { BRAND_LOGOS } from "@/features/landing/components/brand-logos";
 import { integrations } from "@/lib/site";
-
-const ICONS = {
-  github: GitHubIcon,
-  medium: MediumIcon,
-  devto: DevtoIcon,
-  hashnode: HashnodeIcon,
-  leetcode: LeetCodeMark,
-  stackoverflow: StackOverflowIcon,
-  codeforces: CodeforcesIcon,
-  linkedin: LinkedinIcon,
-} as const;
 
 /** Platforms shown in the compact end-of-hero strip (truthful, not customers). */
 const HERO_PLATFORM_IDS = [
@@ -45,20 +23,20 @@ export function HeroPlatformStrip() {
   );
 
   return (
-    <div className="mx-auto mt-8 w-full max-w-[48rem] pt-2">
-      <p className="text-center text-[13px] text-text-muted">
+    <div className="relative z-[1] mx-auto mt-12 w-full max-w-[68rem] sm:mt-24">
+      <p className="text-center text-[15px] text-text-muted sm:text-[16px]">
         Connect the tools you already use
       </p>
-      <ul className="mt-3.5 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2 sm:gap-x-3 md:flex-nowrap md:gap-x-3.5 lg:gap-x-4">
+      <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 sm:gap-x-6 lg:flex-nowrap lg:gap-x-7">
         {platforms.map((platform) => {
-          const Icon = ICONS[platform.id];
+          const Logo = BRAND_LOGOS[platform.id];
           return (
             <li
               key={platform.id}
-              className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-text-secondary"
+              className="inline-flex shrink-0 items-center gap-2.5 whitespace-nowrap text-text-secondary"
             >
-              <Icon className="h-3.5 w-3.5 shrink-0 text-text-primary" />
-              <span className="text-[12px] font-medium tracking-[-0.01em] sm:text-[13px]">
+              <Logo className="h-6 w-6 shrink-0 text-text-primary sm:h-7 sm:w-7" />
+              <span className="text-[15px] font-medium tracking-[-0.01em] sm:text-[17px]">
                 {platform.name}
               </span>
             </li>

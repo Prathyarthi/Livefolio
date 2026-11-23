@@ -88,14 +88,14 @@ export function StudioHeading({
   return (
     <div
       className={cn(
-        align === "center" && "mx-auto max-w-[36rem] text-center",
-        align === "left" && "max-w-[34rem] text-left",
+        align === "center" && "mx-auto max-w-[44rem] text-center",
+        align === "left" && "max-w-[40rem] text-left",
       )}
     >
       {eyebrow ? <p className="eyebrow uppercase">{eyebrow}</p> : null}
       <h2
         className={cn(
-          "text-h1 font-semibold tracking-[-0.03em] text-text-primary",
+          "studio-title font-semibold tracking-[-0.03em] text-text-primary",
           eyebrow ? "mt-2.5" : null,
         )}
       >
@@ -104,7 +104,7 @@ export function StudioHeading({
       {description ? (
         <p
           className={cn(
-            "mt-3 max-w-[40rem] text-body text-text-secondary",
+            "studio-lead mt-4 max-w-[40rem] text-text-secondary",
             align === "center" && "mx-auto",
           )}
         >

@@ -173,12 +173,12 @@ export function PeopleBrands() {
         </div>
 
         {/* Generous vertical padding keeps copy clear of top/bottom logo bands */}
-        <div className="relative z-[1] mx-auto max-w-[17.5rem] px-1 pt-36 pb-44 text-center sm:max-w-[22rem] sm:pt-40 sm:pb-48 md:max-w-[26rem] md:px-0 md:py-24">
+        <div className="relative z-[1] mx-auto max-w-[20rem] px-1 pt-36 pb-44 text-center sm:max-w-[28rem] sm:pt-40 sm:pb-48 md:max-w-[40rem] md:px-0 md:py-28">
           <h2 className="text-h1 font-semibold tracking-[-0.03em] text-text-primary">
             <span className="block">People from top companies,</span>
             <span className="block">on Livefolio.</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-[16rem] text-body text-text-secondary sm:max-w-[28rem]">
+          <p className="studio-lead mx-auto mt-4 max-w-[18rem] text-text-secondary sm:max-w-[32rem]">
             Portfolios that show real work, not just a resume.
           </p>
           <p className="mt-2 text-body-sm text-text-muted">

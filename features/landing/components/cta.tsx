@@ -8,7 +8,7 @@ export function CTA() {
           <h2 className="text-h1 text-text-primary">
             Build your portfolio today
           </h2>
-          <p className="prose-measure mx-auto mt-4 text-body-lg text-text-secondary">
+          <p className="studio-lead prose-measure mx-auto mt-4 text-text-secondary">
             Upload your resume, go live in seconds, then connect integrations to
             keep it current.
           </p>

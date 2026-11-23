@@ -371,6 +371,12 @@ body {
   .text-body-lg { font-size: 18px; font-weight: 400; line-height: 1.7; }
   .text-body { font-size: 16px; font-weight: 400; line-height: 1.7; }
   .text-body-sm { font-size: 14px; font-weight: 400; line-height: 1.6; }
+  /* Section subheading under a landing title */
+  .studio-lead {
+    font-size: clamp(1.125rem, 1.02rem + 0.45vw, 1.375rem);
+    font-weight: 400;
+    line-height: 1.55;
+  }
   .text-label {
     font-size: 12px;
     font-weight: 500;
@@ -591,14 +597,16 @@ html:not(.dark):not([data-theme="dark"]) .studio-landing {
   letter-spacing: -0.03em;
 }
 
-.studio-landing .text-display {
-  font-size: clamp(2rem, 1.4rem + 1.6vw, 2.5rem);
-  line-height: 1.18;
-}
-
-.studio-landing .text-h1 {
-  font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.125rem);
-  line-height: 1.22;
+/* One section-title size for every landing heading (about 34–50px).
+   studio-title is not a text-* utility, so tailwind-merge will not drop it. */
+.studio-landing .text-display,
+.studio-landing .text-h1,
+.studio-landing .studio-title {
+  font-family: var(--studio-sans) !important;
+  font-size: clamp(2.125rem, 1.25rem + 2.4vw, 3.15rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
 }
 
 .studio-landing .text-h2 {
@@ -608,10 +616,10 @@ html:not(.dark):not([data-theme="dark"]) .studio-landing {
 
 .studio-landing .studio-hero-title {
   font-family: var(--studio-sans) !important;
-  font-size: clamp(2rem, 1.55rem + 1.8vw, 2.875rem); /* ~32–46px */
+  font-size: clamp(2.75rem, 2rem + 2.4vw, 4.25rem); /* ~44–68px */
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.035em;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
 }
 
 /* Selection highlight — painted band hugs glyphs (not full line-box) */
@@ -619,12 +627,11 @@ html:not(.dark):not([data-theme="dark"]) .studio-landing {
   display: inline;
   background-color: var(--color-brand-secondary);
   color: #ffffff;
-  font-size: 0.68em;
-  padding: 0 0.06em;
+  font-size: 0.8em;
+  padding: 0.1em 0.2em;
   margin: 0;
-  border-radius: 2px;
   /* smaller than parent title line-height so bg is not a tall slab */
-  line-height: 1.02;
+  line-height: normal;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   box-shadow: none;
@@ -817,6 +824,94 @@ html[data-theme="dark"] .studio-landing .studio-hero-float__tile {
   50% { transform: translateY(-3px); }
 }
 
+/* ─── Integration orbit: live data pulses ──────────────────────── */
+/* Shared cycle; must match CYCLE_S in integration-orbit.tsx. Each spoke sets its
+   own animation-delay from FIRE_AT, a fraction of this cycle. */
+.integration-orbit {
+  --orbit-cycle: 7.4s;
+  --orbit-sync: #e86a5a;
+}
+
+.integration-orbit .orbit-ring {
+  transform-box: view-box;
+  transform-origin: 50px 50px;
+}
+.integration-orbit .orbit-ring--cw { animation: orbit-spin 48s linear infinite; }
+.integration-orbit .orbit-ring--ccw { animation: orbit-spin 32s linear infinite reverse; }
+.integration-orbit .orbit-ring--ccw-slow { animation: orbit-spin 90s linear infinite reverse; }
+
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Comet lives in a frame rotated toward the hub; px here are SVG user units.
+   38 = spoke length (SPOKE in integration-orbit.tsx). */
+.integration-orbit .orbit-comet {
+  opacity: 0;
+  animation: orbit-comet var(--orbit-cycle) infinite;
+}
+
+@keyframes orbit-comet {
+  0% { transform: translateX(0); opacity: 0; animation-timing-function: cubic-bezier(0.5, 0, 0.75, 1); }
+  2.5% { opacity: 1; }
+  15% { opacity: 1; }
+  19% { transform: translateX(38px); opacity: 0; }
+  100% { transform: translateX(38px); opacity: 0; }
+}
+
+/* Node lights up as it sends its pulse toward the hub. */
+.integration-orbit .orbit-node-face {
+  animation: orbit-node-flash var(--orbit-cycle) ease-out infinite;
+}
+@keyframes orbit-node-flash {
+  0% {
+    border-color: var(--orbit-sync);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--orbit-sync) 20%, transparent), 0 8px 22px rgba(26, 24, 40, 0.12);
+  }
+  9%, 100% {
+    border-color: var(--color-border-default);
+    box-shadow: 0 6px 18px rgba(26, 24, 40, 0.08);
+  }
+}
+
+.integration-orbit .orbit-node-ring {
+  border: 1.5px solid var(--orbit-sync);
+  opacity: 0;
+  animation: orbit-node-ping var(--orbit-cycle) ease-out infinite;
+}
+@keyframes orbit-node-ping {
+  0% { transform: scale(1); opacity: 0.7; }
+  9%, 100% { transform: scale(1.7); opacity: 0; }
+}
+
+.integration-orbit .orbit-hub-ripple {
+  animation: orbit-hub-ripple 3s ease-out infinite;
+}
+@keyframes orbit-hub-ripple {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* One beat per comet arrival: FIRE_AT + ~17% of the cycle for travel. */
+.integration-orbit .orbit-hub {
+  animation: orbit-hub-beat var(--orbit-cycle) linear infinite;
+}
+@keyframes orbit-hub-beat {
+  0%, 5%, 9.5%, 16.4%, 20.9%, 26.4%, 30.9%, 42.6%, 47.1%, 52.6%, 57.1%,
+  66.4%, 70.9%, 81.4%, 85.9%, 91.4%, 95.9%, 100% { transform: scale(1); }
+  5.6%, 16.9%, 26.9%, 43.1%, 53.1%, 66.9%, 81.9%, 91.9% { transform: scale(1.045); }
+}
+
+.integration-orbit .orbit-core-glow {
+  transform-box: view-box;
+  transform-origin: 50px 50px;
+  animation: orbit-core-breathe 3s ease-in-out infinite;
+}
+@keyframes orbit-core-breathe {
+  0%, 100% { opacity: 0.6; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .studio-landing * {
     scroll-behavior: auto !important;
@@ -826,6 +921,19 @@ html[data-theme="dark"] .studio-landing .studio-hero-float__tile {
   }
   .studio-landing .integration-orbit__node {
     animation: none !important;
+  }
+  .integration-orbit .orbit-ring,
+  .integration-orbit .orbit-comet,
+  .integration-orbit .orbit-node-face,
+  .integration-orbit .orbit-node-ring,
+  .integration-orbit .orbit-hub,
+  .integration-orbit .orbit-hub-ripple,
+  .integration-orbit .orbit-core-glow {
+    animation: none !important;
+  }
+  .integration-orbit .orbit-comet {
+    transform: translateX(20px);
+    opacity: 0.8;
   }
 }
 

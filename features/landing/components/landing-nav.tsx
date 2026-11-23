@@ -117,12 +117,12 @@ export function LandingNav({
     const menuLinks =
       variant === "recruiter" ? RECRUITER_PILL_MENU_LINKS : CANDIDATE_PILL_MENU_LINKS;
     return (
-      <header className="sticky top-0 z-[100] px-4 pt-3 md:px-0 md:pt-5">
+      <header className="sticky top-0 z-[100] px-4 pt-10 md:px-0 md:pt-10">
         {/*
           max-w-3xl (~768px) matches reference nav width.
           Slimmer padding / ~16px radius to match studio floating bar.
         */}
-        <div className="relative mx-auto grid w-full max-w-3xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-2.5 py-1.5 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:gap-3 sm:px-3.5">
+        <div className="relative mx-auto grid w-full max-w-3xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 overflow-hidden rounded-2xl border border-border-default bg-surface-raised/95 px-3 py-2.5 shadow-[var(--shadow-card)] backdrop-blur-md supports-backdrop-filter:bg-surface-raised/85 dark:bg-surface-raised/90 sm:gap-3 sm:px-4">
           <div className="relative z-[1] flex min-w-0 items-center">
             <Logo
               className="shrink-0 gap-1.5 [&_img]:h-7 [&_img]:w-7"
@@ -159,7 +159,7 @@ export function LandingNav({
                 variant="ghost"
                 size="sm"
                 asChild
-                className="hidden h-7 shrink-0 rounded-full px-2.5 text-[13px] md:inline-flex"
+                className="hidden h-8 shrink-0 rounded-full px-3 text-[13px] md:inline-flex"
               >
                 <Link href="/sign-in">Sign in</Link>
               </Button>
@@ -167,7 +167,7 @@ export function LandingNav({
             <Button
               size="sm"
               asChild
-              className="hidden h-7 shrink-0 rounded-full px-3 text-[13px] sm:inline-flex"
+              className="hidden h-8 shrink-0 rounded-full px-3.5 text-[13px] sm:inline-flex"
               variant="accent"
             >
               <Link href={primaryHref}>{primaryLabelShort}</Link>
@@ -175,7 +175,7 @@ export function LandingNav({
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 shrink-0 rounded-full lg:hidden"
+              className="h-8 w-8 shrink-0 rounded-full lg:hidden"
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
@@ -233,7 +233,7 @@ export function LandingNav({
 
   return (
     <header className="glass-nav sticky top-0 z-[100]">
-      <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-4 sm:gap-4 sm:px-6">
+      <div className="mx-auto flex h-40 max-w-[1200px] items-center gap-3 px-4 sm:gap-4 sm:px-6">
         <Logo className="shrink-0" />
 
         <nav
