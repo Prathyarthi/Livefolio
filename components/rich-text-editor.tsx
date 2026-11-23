@@ -4,6 +4,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import BoldExtension from "@tiptap/extension-bold";
+import ItalicExtension from "@tiptap/extension-italic";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -24,6 +26,43 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+
+/**
+ * Bold+italic as `***…***` trips tiptap-markdown's delimiter trimmer, which
+ * drops the opening markers (`Co-founder***`). Serialize italic with `_` and
+ * skip whitespace expulsion so nested marks stay `**_…_**` / `_**…**_`.
+ */
+const MarkdownBold = BoldExtension.extend({
+  addStorage() {
+    return {
+      markdown: {
+        serialize: {
+          open: "**",
+          close: "**",
+          mixable: true,
+          expelEnclosingWhitespace: false,
+        },
+        parse: {},
+      },
+    };
+  },
+});
+
+const MarkdownItalic = ItalicExtension.extend({
+  addStorage() {
+    return {
+      markdown: {
+        serialize: {
+          open: "_",
+          close: "_",
+          mixable: true,
+          expelEnclosingWhitespace: false,
+        },
+        parse: {},
+      },
+    };
+  },
+});
 
 function getMarkdown(editor: Editor): string {
   const storage = editor.storage as {
@@ -361,11 +400,15 @@ export function RichTextEditor({
         codeBlock: false,
         blockquote: false,
         horizontalRule: false,
+        bold: false,
+        italic: false,
         bulletList: singleLine ? false : undefined,
         orderedList: singleLine ? false : undefined,
         listItem: singleLine ? false : undefined,
         hardBreak: singleLine ? false : undefined,
       }),
+      MarkdownBold,
+      MarkdownItalic,
       Underline,
       Link.configure({
         openOnClick: false,

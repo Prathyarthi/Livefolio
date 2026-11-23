@@ -311,7 +311,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
               <div className="self-end">
                 <div className={styles.stamp}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- static template art */}
-                  <img src={ART.beach} alt="" />
+                  <img src={portfolio.profileImageUrl || ART.beach} alt="" />
                 </div>
               </div>
               <div className="mt-auto space-y-7 pb-2">
