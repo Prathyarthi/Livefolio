@@ -41,6 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 .cache_restore
+app/dummy-portfolio/preview-cache.json
 
 leads/
 docs/
