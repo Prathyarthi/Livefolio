@@ -122,7 +122,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
     about: portfolio.summary ? (
       <section key="about" id="about" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.about}</SectionHeading>
-        <div className="mx-auto max-w-[44rem] text-center">
+        <div className="text-center">
           <DescriptionBlock
             text={portfolio.summary}
             paragraphClassName={cn("text-lg leading-8", mute)}
@@ -199,7 +199,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>{formatDateRange(exp.startDate, exp.endDate) || "—"}</p>
               <div className="min-w-0">
                 <h3 className={cn("font-[family-name:var(--font-artdeco-display)] text-xl", ink)}><RichText text={exp.role} /></h3>
-                <p className="mt-1 text-sm text-[#c5a45c]">
+                <p className="mt-1 text-sm text-[var(--lf-accent)]">
                   <RichText text={exp.company} />
                   {exp.location ? <span className={mute}> / <RichText text={exp.location} /></span> : null}
                 </p>
@@ -244,10 +244,17 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>{formatDateRange(edu.startDate, edu.endDate) || "—"}</p>
               <div>
                 <h3 className={cn("font-[family-name:var(--font-artdeco-display)] text-lg", ink)}>
-                  <RichText text={edu.degree} />{edu.field ? <span className={mute}> in <RichText text={edu.field} /></span> : null}
+                  <RichText text={edu.degree} />{edu.field ? <> in <RichText text={edu.field} /></> : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}><RichText text={edu.institution} /></p>
-                {edu.gpa && <Badge variant="outline" className="mt-3 rounded-none border-[#c5a45c]/45 bg-[#c5a45c]/10 px-2 py-0 text-xs font-medium text-[#c5a45c]">{edu.gpa}</Badge>}
+                {edu.gpa && (
+                  <Badge
+                    variant="outline"
+                    className="mt-3 rounded-none border-[color-mix(in_srgb,var(--lf-accent)_45%,transparent)] bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] px-2 py-0 text-xs font-medium text-[var(--lf-accent)]"
+                  >
+                    {edu.gpa}
+                  </Badge>
+                )}
               </div>
             </article>
           ))}
@@ -275,7 +282,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {achievements.map((ach) => (
             <article key={ach.id} className={cn("flex items-start gap-4 border-t py-5", hairline)}>
-              <span className="mt-1.5 size-3 shrink-0 rotate-45 border border-[#c5a45c]" />
+              <span className="mt-1.5 size-3 shrink-0 rotate-45 border border-[var(--lf-accent)]" />
               <div className="min-w-0">
                 <h3 className={cn("text-sm leading-6", ink)}><RichText text={ach.title} /></h3>
                 {ach.date && <p className={cn("mt-1 text-xs", mute)}>{new Date(ach.date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</p>}
@@ -330,13 +337,15 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section key="github" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className="overflow-x-auto border border-[#c5a45c]/28 bg-[#10100d] p-5">
+        <div className="min-w-0 overflow-x-auto border border-[#c5a45c]/28 bg-[#10100d] p-5">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
-            variant="minimal"
-            label={labels.github}
+            variant="modern"
+            stretch
+            className="mt-0 border-0 pt-0"
+            label={null}
           />
         </div>
       </section>
@@ -349,12 +358,12 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
         TEMPLATE_CONTAINER,
         cinzel.variable,
         inter.variable,
-        "min-h-screen bg-[#070705] font-[family-name:var(--font-artdeco-sans)] antialiased selection:bg-[var(--lf-accent)] selection:text-[#070705]",
+        "relative min-h-screen bg-[#070705] font-[family-name:var(--font-artdeco-sans)] antialiased selection:bg-[var(--lf-accent)] selection:text-[#070705]",
         ink,
       )}
       style={accentRootStyle(primaryColor)}
     >
-      <div className="pointer-events-none fixed inset-0 opacity-[0.08]" style={decoPattern} aria-hidden />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.08]" style={decoPattern} aria-hidden />
       <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-16 pt-10 sm:px-6 md:px-8 md:pb-28 md:pt-14">
         <header className="relative mx-auto max-w-4xl border border-[#c5a45c]/28 bg-[#10100d]/90 px-5 py-10 text-center sm:px-8 md:px-12 md:py-14">
           <div className="mx-auto mb-8 h-16 w-40" style={fanPattern} aria-hidden />
@@ -386,7 +395,7 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
           </div>
         )}
 
-        <main className="mt-12 flex min-w-0 flex-col gap-4 md:mt-16">
+        <main className="mt-2 flex min-w-0 flex-col gap-4">
           {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </main>
 

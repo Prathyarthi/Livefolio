@@ -4,20 +4,12 @@ import { useMemo, useState } from "react";
 import { Fredoka, Nunito } from "next/font/google";
 import { Menu, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
-import { stripRichTextToPlain } from "@/lib/rich-text";
-import { cn } from "@/lib/utils";
-import { accentRootStyle, resolveAccentColor } from "@/features/templates/template-accent-palettes";
+import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
 import { LinkedInSection } from "@/features/templates/components/linkedin-section";
+import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
-import { getTemplateSectionLayout } from "../section-layouts";
-import {
-  renderSections,
-  resolveSectionLayout,
-  type ReorderableSectionKey,
-} from "../section-order";
-import { CollapsibleList } from "../collapsible-list";
+import { cn } from "@/lib/utils";
 import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
@@ -40,7 +32,14 @@ import {
   TEMPLATE_CONTAINER,
   getSectionLabels,
 } from "../shared";
+import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
+import { getTemplateSectionLayout } from "../section-layouts";
+import {
+  renderSections,
+  resolveSectionLayout,
+  type ReorderableSectionKey,
+} from "../section-order";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -57,7 +56,6 @@ const ink = "text-[#17231f]";
 const muted = "text-[#66756f]";
 const line = "border-[#17231f]/12";
 const paper = "border-[#17231f]/12 bg-white";
-const yellow = "#ffcc33";
 const moreButton =
   "mt-6 self-start rounded-full border border-[#17231f]/15 bg-white px-5 py-2 text-sm font-semibold text-[#17231f] transition-colors hover:border-[var(--lf-accent)] hover:bg-[color-mix(in_srgb,var(--lf-accent)_16%,white)]";
 
@@ -100,7 +98,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
     ],
     [sections, customSections],
   );
-  const heroTagline = portfolio.customization.heroTagline?.trim() || portfolio.headline;
+  const heroTagline = portfolio.customization?.heroTagline?.trim() || portfolio.headline;
   const resolved = resolveSectionLayout(
     getTemplateSectionLayout("spotlight"),
     portfolio.customization,
@@ -132,15 +130,17 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
     about: portfolio.summary?.trim() ? (
       <section key="about" id="about" className="scroll-mt-28">
         <SpotlightSectionHeading title={labels.about} />
-        <div className={cn("grid gap-6 rounded-[1.6rem] border p-6 @lg:grid-cols-[14rem_minmax(0,1fr)] @lg:p-8", paper)}>
+        <div className={cn("rounded-[1.6rem] border p-6 @lg:p-8", paper)}>
           <p className="font-[family-name:var(--font-spotlight-display)] text-3xl font-semibold leading-tight text-[#17231f]">
             The short version
           </p>
-          <DescriptionBlock
-            text={portfolio.summary}
-            paragraphClassName={cn("text-lg leading-8", muted)}
-            listClassName={cn("flex flex-col gap-3 pl-5 text-lg leading-8", muted, "marker:text-[var(--lf-accent)]")}
-          />
+          <div className="mt-6">
+            <DescriptionBlock
+              text={portfolio.summary}
+              paragraphClassName={cn("text-lg leading-8", muted)}
+              listClassName={cn("flex flex-col gap-3 pl-5 text-lg leading-8", muted, "marker:text-[var(--lf-accent)]")}
+            />
+          </div>
         </div>
       </section>
     ) : null,
@@ -213,13 +213,18 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
         <SpotlightSectionHeading title={labels.experience} />
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
           {experiences.map((exp) => (
-            <article key={exp.id} className={cn("grid gap-4 border-t py-6 @md:grid-cols-[11rem_minmax(0,1fr)]", line)}>
+            <article key={exp.id} className={cn("grid gap-4 border-t py-5 first:border-t-0 first:pt-0 @md:grid-cols-[11rem_minmax(0,1fr)]", line)}>
               <p className={cn("text-sm font-semibold tabular-nums", muted)}>{formatDateRange(exp.startDate, exp.endDate) || "Undated"}</p>
               <div className="min-w-0">
                 <h3 className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.03em] text-[#17231f]"><RichText text={exp.role} /></h3>
-                <p className={cn("mt-1 text-sm font-semibold", muted)}>
+                <p className="mt-1 text-sm font-semibold text-[var(--lf-accent)]">
                   <RichText text={exp.company} />
-                  {exp.location ? <span> / <RichText text={exp.location} /></span> : null}
+                  {exp.location ? (
+                    <span className={muted}>
+                      {" "}
+                      / <RichText text={exp.location} />
+                    </span>
+                  ) : null}
                 </p>
                 {exp.description ? (
                   <DescriptionBlock
@@ -243,7 +248,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
             <article key={edu.id} className={cn("rounded-[1.4rem] border p-5", paper)}>
               <h3 className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.03em] text-[#17231f]">
                 <RichText text={edu.degree} />
-                {edu.field ? <span className={muted}> in <RichText text={edu.field} /></span> : null}
+                {edu.field ? <> in <RichText text={edu.field} /></> : null}
               </h3>
               <p className={cn("mt-2 text-sm font-semibold", muted)}><RichText text={edu.institution} /></p>
               <p className={cn("mt-3 text-sm", muted)}>{formatDateRange(edu.startDate, edu.endDate) || "Undated"}</p>
@@ -272,14 +277,52 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
       </section>
     ) : null,
 
-    achievements: achievements.length > 0 || certifications.length > 0 ? (
+    achievements: achievements.length > 0 ? (
       <section key="achievements" id="achievements" className="scroll-mt-28">
         <SpotlightSectionHeading title={labels.achievements} />
         <CollapsibleList initial={5} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
-          {[...achievements.map((achievement) => ({ id: `achievement-${achievement.id}`, title: achievement.title, detail: achievement.date ? new Date(achievement.date).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "Achievement" })), ...certifications.map((certification) => ({ id: `certification-${certification.id}`, title: certification.name, detail: certification.issuer }))].map((item) => (
-            <article key={item.id} className={cn("grid gap-3 border-t py-5 @md:grid-cols-[minmax(0,1fr)_12rem]", line)}>
-              <p className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.03em] text-[#17231f]">{item.title}</p>
-              <p className={cn("text-sm font-semibold @md:text-right", muted)}>{item.detail}</p>
+          {achievements.map((achievement) => (
+            <article key={achievement.id} className={cn("grid gap-3 border-t py-4 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,1fr)_12rem]", line)}>
+              <p className="font-[family-name:var(--font-spotlight-display)] text-2xl font-normal tracking-[-0.03em] text-[#17231f]">
+                <RichText text={achievement.title} />
+              </p>
+              <p className={cn("text-sm font-normal @md:text-right", muted)}>
+                {achievement.date
+                  ? new Date(achievement.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "Achievement"}
+              </p>
+            </article>
+          ))}
+        </CollapsibleList>
+      </section>
+    ) : null,
+
+    certifications: certifications.length > 0 ? (
+      <section key="certifications" id="certifications" className="scroll-mt-28">
+        <SpotlightSectionHeading title={labels.certifications} />
+        <CollapsibleList initial={5} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
+          {certifications.map((certification) => (
+            <article key={certification.id} className={cn("grid gap-3 border-t py-4 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,1fr)_12rem]", line)}>
+              <p className="font-[family-name:var(--font-spotlight-display)] text-2xl font-normal tracking-[-0.03em] text-[#17231f]">
+                {certification.url ? (
+                  <a
+                    href={certification.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {certification.name}
+                  </a>
+                ) : (
+                  certification.name
+                )}
+              </p>
+              <p className={cn("text-sm font-normal @md:text-right", muted)}>
+                {certification.issuer}
+              </p>
             </article>
           ))}
         </CollapsibleList>
@@ -328,35 +371,30 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
     profiles: hasProfiles ? (
       <section key="profiles" id="profiles" className="scroll-mt-28">
         <SpotlightSectionHeading title={labels.profiles} />
-        <div className={cn("rounded-[1.6rem] border p-6 @md:p-8", paper)}>
-          <ContactChips
-            portfolio={portfolio}
-            chipClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#66756f]"
-          />
-          <div className="mt-6">
-            <ProfileLinksSection
-              portfolio={portfolio}
-              profiles={socialProfiles}
-              chipClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#66756f]"
-              pillClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#17231f] transition-colors hover:border-[var(--lf-accent)]"
-              titleClassName="font-semibold text-[#17231f]"
-              textClassName="text-sm text-[#66756f]"
-            />
-          </div>
-        </div>
+        <ProfileLinksSection
+          portfolio={portfolio}
+          profiles={socialProfiles}
+          chipClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#66756f]"
+          pillClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#17231f] transition-colors hover:border-[var(--lf-accent)]"
+          titleClassName="font-semibold text-[#17231f]"
+          textClassName="text-sm text-[#66756f]"
+        />
       </section>
     ) : null,
 
     github: contributionCalendar ? (
       <section key="github" id="activity" className="scroll-mt-28">
         <SpotlightSectionHeading title={labels.github} />
-        <div className={cn("overflow-x-auto rounded-[1.4rem] border p-5", paper)}>
+        <div className="min-w-0">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="minimal"
-            label={labels.github}
+            stretch
+            className="mt-0 border-0 pt-0"
+            frameClassName="border-0 bg-transparent p-0 shadow-none"
+            label={null}
           />
         </div>
       </section>
@@ -374,38 +412,29 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
         "min-h-screen font-[family-name:var(--font-spotlight-sans)] antialiased selection:bg-[var(--lf-accent)] selection:text-[#17231f]",
         ink,
       )}
-      style={{
-        ...accentRootStyle(primaryColor),
-        ["--lf-accent" as string]: primaryColor || yellow,
-      }}
+      style={accentRootStyle(primaryColor)}
     >
+      {navbarEnabled ? (
       <header className="sticky top-0 z-20 border-b border-[#17231f]/10 bg-[#fbfffe]/92 backdrop-blur">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-6 md:px-8">
-          <a href="#top" className="font-[family-name:var(--font-spotlight-display)] text-2xl font-semibold tracking-[-0.04em] text-[#17231f]" aria-label="Home">
-            <RichText text={portfolio.title} />
-          </a>
-          {navbarEnabled ? (
-            <div className="hidden items-center gap-6 lg:flex">
-              {navItems.map((item) => (
-                <a key={`${item.href}-${item.label}`} href={item.href} className="text-sm font-semibold text-[#66756f] underline-offset-4 hover:text-[#17231f] hover:decoration-[var(--lf-accent)] hover:decoration-2 hover:underline">
-                  {item.label}
-                </a>
-              ))}
-            </div>
-          ) : null}
-          {navbarEnabled ? (
-            <button
-              type="button"
-              onClick={() => setMenuOpen((open) => !open)}
-              className="rounded-full border border-[#17231f]/12 bg-white p-2 text-[#17231f] lg:hidden"
-              aria-expanded={menuOpen}
-              aria-label="Toggle menu"
-            >
-              {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-            </button>
-          ) : null}
+        <nav className="mx-auto flex max-w-6xl items-center justify-end gap-4 px-5 py-4 sm:px-6 md:px-8">
+          <div className="hidden items-center gap-6 lg:flex">
+            {navItems.map((item) => (
+              <a key={`${item.href}-${item.label}`} href={item.href} className="text-sm font-semibold text-[#66756f] underline-offset-4 hover:text-[#17231f] hover:decoration-[var(--lf-accent)] hover:decoration-2 hover:underline">
+                {item.label}
+              </a>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="rounded-full border border-[#17231f]/12 bg-white p-2 text-[#17231f] lg:hidden"
+            aria-expanded={menuOpen}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
         </nav>
-        {navbarEnabled && menuOpen ? (
+        {menuOpen ? (
           <div className="border-t border-[#17231f]/10 bg-[#fbfffe] px-5 py-4 lg:hidden">
             <div className="mx-auto flex max-w-6xl flex-col gap-3">
               {navItems.map((item) => (
@@ -417,13 +446,11 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
           </div>
         ) : null}
       </header>
+      ) : null}
 
-      <main className="mx-auto min-w-0 max-w-6xl px-5 pb-16 pt-10 sm:px-6 md:px-8 md:pb-28 md:pt-16">
-        <section className="grid min-h-[70vh] gap-8 pb-12 @lg:grid-cols-[minmax(0,1fr)_20rem] @lg:items-center">
+      <main className="mx-auto min-w-0 max-w-6xl px-5 pb-16 pt-5 sm:px-6 md:px-8 md:pb-24 md:pt-6">
+        <section className="grid gap-8 pb-6 @lg:grid-cols-[minmax(0,1fr)_20rem] @lg:items-start">
           <div className="min-w-0">
-            <div className="mb-6 inline-flex rounded-full border border-[#17231f]/12 bg-white px-4 py-2 text-sm font-semibold text-[#17231f]">
-              Product stage / portfolio
-            </div>
             <h1 className={cn(HERO_TITLE_BASE, "max-w-[58rem] font-[family-name:var(--font-spotlight-display)] text-5xl font-semibold leading-[0.92] tracking-[-0.06em] text-[#17231f] @md:text-7xl @lg:text-8xl")}>
               <RichText text={portfolio.title} />
             </h1>
@@ -458,8 +485,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                 Built to feel usable before it is explained.
               </p>
             </div>
-            <Separator className="my-5 bg-[#17231f]/12" />
-            <div className="flex flex-col gap-3">
+            <div className="mt-5 flex flex-col gap-3">
               <ContactChips
                 portfolio={portfolio}
                 chipClassName="rounded-full border border-[#17231f]/12 bg-[#fbfffe] px-3 py-1.5 text-sm font-semibold text-[#66756f]"
@@ -497,12 +523,11 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
 
 function SpotlightSectionHeading({ title }: { title: string }) {
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       <h2 className="font-[family-name:var(--font-spotlight-display)] text-4xl font-semibold tracking-[-0.05em] text-[#17231f] @md:text-5xl">
         {title}
         <span className="text-[var(--lf-accent)]">.</span>
       </h2>
-      <Separator className="mt-4 bg-[#17231f]/12" />
     </div>
   );
 }

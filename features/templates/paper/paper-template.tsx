@@ -24,6 +24,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HERO_TITLE_BASE,
   HeroProfileButtons,
   ProfileLinksSection,
@@ -122,8 +123,8 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName={cn("max-w-[37rem] whitespace-pre-line text-lg leading-9", mute)}
-          listClassName={cn("flex max-w-[37rem] flex-col gap-3 pl-5 text-lg leading-8", mute, "marker:text-[#25231f]/30")}
+          paragraphClassName={cn("whitespace-pre-line text-lg leading-9", mute)}
+          listClassName={cn("flex flex-col gap-3 pl-5 text-lg leading-8", mute, "marker:text-[#25231f]/30")}
         />
       </section>
     ) : null,
@@ -136,11 +137,11 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
             <article
               key={project.id}
               className={cn(
-                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 @md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)_auto] @md:gap-8",
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,28rem)_1fr] @md:gap-8",
                 hairline,
               )}
             >
-              <div className={cn("overflow-hidden border bg-[#fffef9] p-1 shadow-[0_1px_0_rgba(37,35,31,0.05)]", hairline)}>
+              <div className={cn("min-w-0 w-full overflow-hidden border bg-[#fffef9] p-1 shadow-[0_1px_0_rgba(37,35,31,0.05)]", hairline)}>
                 <TemplateProjectPreview
                   templateId="paper"
                   liveUrl={project.liveUrl ?? null}
@@ -149,7 +150,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                   livePreviewProjectIds={livePreviewProjectIds}
                   alt={stripRichTextToPlain(project.title)}
                   loading="lazy"
-                  containerClassName="bg-[#f7f4ea]"
+                  containerClassName="aspect-[8/5] w-full bg-[#f7f4ea]"
                   accentColor={primaryColor}
                 />
               </div>
@@ -175,16 +176,16 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                     {project.techStack.slice(0, 7).join(" / ")}
                   </p>
                 )}
-              </div>
-              <div className="shrink-0 @md:pt-1">
-                <ProjectActions
-                  liveUrl={project.liveUrl}
-                  sourceUrl={project.sourceUrl}
-                  label={stripRichTextToPlain(project.title)}
-                  projectId={project.id}
-                  liveClassName={cn("rounded-none border bg-transparent px-3 py-1.5 text-xs font-medium hover:bg-[#25231f]/[0.035]", hairline, ink)}
-                  sourceClassName={cn("rounded-none px-3 py-1.5 text-xs font-medium underline-offset-4 hover:underline", mute)}
-                />
+                <div className="mt-4">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName={cn("rounded-none border bg-transparent px-3 py-1.5 text-xs font-medium hover:bg-[#25231f]/[0.035]", hairline, ink)}
+                    sourceClassName={cn("rounded-none px-3 py-1.5 text-xs font-medium underline-offset-4 hover:underline", mute)}
+                  />
+                </div>
               </div>
             </article>
           ))}
@@ -200,7 +201,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
             <article
               key={exp.id}
               className={cn(
-                "grid grid-cols-1 gap-2 border-t py-7 @md:grid-cols-[8.5rem_minmax(0,1fr)] @md:gap-10",
+                "grid grid-cols-1 gap-2 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[8.5rem_minmax(0,1fr)] @md:gap-10",
                 hairline,
               )}
             >
@@ -241,7 +242,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.articles}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {articles.map((article) => (
-            <article key={article.id} className={cn("border-t py-5", hairline)}>
+            <article key={article.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <ArticleSourceLabel source={article.source} className={cn("mb-1 opacity-75", mute)} />
               <div className="flex min-w-0 flex-col gap-1 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8">
                 <h3 className={cn("font-[family-name:var(--font-paper-display)] text-lg font-semibold", ink)}>
@@ -288,7 +289,11 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
           {Object.entries(groupedSkills).map(([category, names]) => (
             <div key={category}>
               <h3 className={cn("mb-2 text-sm", mute)}>{category}</h3>
-              <p className={cn("max-w-[40rem] text-base leading-7", ink)}>{names.join(" / ")}</p>
+              <div className={cn("flex max-w-[40rem] flex-wrap gap-x-4 gap-y-2 text-base leading-7", ink)}>
+                {names.map((name) => (
+                  <TechChip key={name} name={name} />
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -302,7 +307,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
           {educations.map((edu) => (
             <article
               key={edu.id}
-              className={cn("grid grid-cols-1 gap-2 border-t py-6 @md:grid-cols-[8.5rem_minmax(0,1fr)] @md:gap-10", hairline)}
+              className={cn("grid grid-cols-1 gap-2 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[8.5rem_minmax(0,1fr)] @md:gap-10", hairline)}
             >
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>
                 {formatDateRange(edu.startDate, edu.endDate) || "—"}
@@ -310,12 +315,12 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
               <div>
                 <h3 className={cn("font-[family-name:var(--font-paper-display)] text-lg font-semibold", ink)}>
                   <RichText text={edu.degree} />
-                  {edu.field && (
-                    <span className={mute}>
+                  {edu.field ? (
+                    <>
                       {" "}
                       in <RichText text={edu.field} />
-                    </span>
-                  )}
+                    </>
+                  ) : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}>
                   <RichText text={edu.institution} />
@@ -333,7 +338,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.certifications}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {certifications.map((cert) => (
-            <article key={cert.id} className={cn("border-t py-5", hairline)}>
+            <article key={cert.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <h3 className={cn("text-base font-medium", ink)}>
                 {cert.url ? (
                   <a href={cert.url} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
@@ -363,7 +368,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.achievements}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {achievements.map((ach) => (
-            <article key={ach.id} className={cn("border-t py-5", hairline)}>
+            <article key={ach.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <p className={cn("text-sm leading-7", ink)}>
                 <RichText text={ach.title} />
               </p>
@@ -398,12 +403,14 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section key="github" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.openSource}</SectionHeading>
-        <div className="overflow-x-auto pb-4 custom-scrollbar">
+        <div className="min-w-0 overflow-x-auto pb-4 custom-scrollbar">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="minimal"
+            stretch
+            className="mt-0 border-0 pt-0"
             label={labels.github}
           />
         </div>
@@ -466,16 +473,16 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
           </header>
 
           {navbarEnabled && (
-            <div className="mt-10">
+            <div className="mt-8">
               <TemplateNavbar
                 items={sections}
-                className={cn("rounded-none border-x-0 border-b border-t-0 bg-transparent", hairline)}
-                linkClassName={cn("rounded-none px-0 py-3 text-sm transition-colors hover:text-[#25231f]", mute)}
+                className={cn("rounded-none border-0 bg-transparent", hairline)}
+                linkClassName={cn("rounded-none px-0 py-1.5 text-sm transition-colors hover:text-[#25231f]", mute)}
               />
             </div>
           )}
 
-          <div className="mt-12 flex min-w-0 flex-col gap-2 @md:mt-16">
+          <div className="mt-2 flex min-w-0 flex-col gap-2">
             {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
           </div>
 

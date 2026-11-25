@@ -393,16 +393,18 @@ export function SynthwaveTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     github: contributionCalendar ? (
-      <section key="github" className="scroll-mt-32">
-
+      <section key="github" className="scroll-mt-32 min-w-0">
             <SectionHeading>{labels.github}</SectionHeading>
-            <div className="bg-[#1a0b2e]/80 border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] p-8 shadow-[0_0_15px_rgba(0,240,255,0.1)] overflow-x-auto custom-scrollbar">
+            <div className="min-w-0 overflow-x-auto bg-[#1a0b2e]/80 border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] p-5 md:p-8 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
               <GitHubContributionHeatmap
                 calendar={contributionCalendar}
                 profileUrl={githubProfile?.url}
                 username={githubProfile?.username}
-                variant="minimal"
-                label="Commits"
+                variant="modern"
+                stretch
+                className="mt-0 border-0 pt-0"
+                frameClassName="rounded-none border-0 bg-transparent p-0 shadow-none"
+                label={null}
               />
             </div>
       </section>

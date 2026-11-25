@@ -212,7 +212,18 @@ export function LedgerTemplate({ data }: AppProps) {
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, ReactNode>> = {
-    about: null,
+    about: portfolio.summary ? (
+      <section key="about" id="about" className="space-y-8 scroll-mt-20">
+        <div className="border-l-2 border-[var(--lf-accent)] pl-4">
+          <SectionHeading>{labels.about}</SectionHeading>
+        </div>
+        <DescriptionBlock
+          text={portfolio.summary}
+          paragraphClassName="text-base @sm:text-lg text-slate-400 leading-relaxed"
+          listClassName="space-y-2 pl-5 text-base @sm:text-lg text-slate-400 leading-relaxed marker:text-[var(--lf-accent)]"
+        />
+      </section>
+    ) : null,
     experience: experiences.length > 0
       ? (
         <section key="experience" id="experience" className="space-y-8 scroll-mt-20">
@@ -420,9 +431,7 @@ export function LedgerTemplate({ data }: AppProps) {
                         loading="lazy"
                         accentColor={primaryColor}
                         containerClassName="bg-slate-950"
-                        className="opacity-60 transition-all duration-500 group-hover:opacity-80"
                       />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#111418] to-transparent opacity-80" />
 
                       <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-2">
                         {project.featured ? (
@@ -923,10 +932,10 @@ export function LedgerTemplate({ data }: AppProps) {
       <main className="max-w-6xl mx-auto px-4 @sm:px-6 @lg:px-8 py-6 @sm:py-8 @md:py-16 space-y-16 @sm:space-y-24 @md:space-y-32">
 
         {/* HERO SECTION */}
-        <section id="about" className="relative pt-4 @md:pt-12 scroll-mt-20">
+        <section id="top" className="relative pt-4 @md:pt-12 scroll-mt-20">
           <div className="grid grid-cols-1 @md:grid-cols-12 gap-8 @md:gap-12 items-center">
             {/* Left info column */}
-            <div className={cn(HERO_HEADER_COLUMN, "@md:col-span-7 space-y-6 order-2 @md:order-1 text-center @md:text-left")}>
+            <div className={cn(HERO_HEADER_COLUMN, "@md:col-span-full space-y-6 order-2 @md:order-1 text-center @md:text-left")}>
 
               <h1
                 id="hero-title"
@@ -955,14 +964,6 @@ export function LedgerTemplate({ data }: AppProps) {
                 <p id="hero-tagline" className="text-lg @sm:text-xl text-white font-semibold">
                   {portfolio.customization.heroTagline}
                 </p>
-              )}
-
-              {!resolved.isHidden("about") && portfolio.summary && (
-                <DescriptionBlock
-                  text={portfolio.summary}
-                  paragraphClassName="text-base @sm:text-lg text-slate-400 leading-relaxed max-w-xl mx-auto @md:mx-0"
-                  listClassName="space-y-2 pl-5 text-base @sm:text-lg text-slate-400 leading-relaxed max-w-xl mx-auto @md:mx-0 marker:text-[var(--lf-accent)]"
-                />
               )}
 
               <ContactChips

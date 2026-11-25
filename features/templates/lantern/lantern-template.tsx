@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Schibsted_Grotesk } from "next/font/google";
 import { MapPin, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -57,9 +60,9 @@ const ink = "text-[#e8e8e8]";
 const mute = "text-[#a1a1aa]";
 const border = "border-[#303033]";
 const softCard =
-  "rounded-[1.5rem] border border-[#303033] bg-[rgba(16,15,13,0.72)]";
+  "rounded-xl border border-[#303033] bg-[rgba(16,15,13,0.72)]";
 const moreBtn =
-  "mx-auto mt-10 block rounded-full border border-[#303033] bg-[#100f0d] px-6 py-2.5 text-sm font-medium text-[#a1a1aa] transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]";
+  "mx-auto mt-8 block w-fit rounded-full border border-[#303033] bg-[#100f0d] px-6 py-2.5 text-sm font-medium text-[#a1a1aa] transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]";
 
 export function LanternTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -127,9 +130,9 @@ export function LanternTemplate({ data }: { data: PortfolioData }) {
         <div className={cn(softCard, "p-6 @md:p-8")}>
           <DescriptionBlock
             text={portfolio.summary}
-            paragraphClassName={cn("max-w-[42rem] text-base leading-8", mute)}
+            paragraphClassName={cn("text-base leading-8", mute)}
             listClassName={cn(
-              "flex max-w-[42rem] flex-col gap-3 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]",
+              "flex flex-col gap-3 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]",
               mute,
             )}
           />
@@ -140,74 +143,22 @@ export function LanternTemplate({ data }: { data: PortfolioData }) {
     experience: experiences.length > 0 ? (
       <section key="experience" id="experience" className="scroll-mt-28">
         <SectionHeading>{labels.experience}</SectionHeading>
-        <CollapsibleList
-          initial={6}
-          wrapperClassName="grid grid-cols-1 gap-3 @sm:grid-cols-2 @lg:grid-cols-3"
-          buttonClassName={moreBtn}
-        >
-          {experiences.map((exp) => {
-            const current = !exp.endDate;
-            const company = stripRichTextToPlain(exp.company);
-            const initial = company.slice(0, 1).toUpperCase() || "•";
-            return (
-              <article
-                key={exp.id}
-                className={cn(
-                  softCard,
-                  "flex min-w-0 items-start gap-3 p-4 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,#303033)]",
-                )}
-              >
-                <div
-                  className="grid size-11 shrink-0 place-items-center rounded-xl border border-[#303033] bg-[#0a0a0a] text-sm font-semibold text-[var(--lf-accent)]"
-                  aria-hidden
-                >
-                  {initial}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className={cn("truncate text-[15px] font-semibold tracking-[-0.02em]", ink)}>
-                      <RichText text={exp.company} />
-                    </h3>
-                    {current && (
-                      <Badge
-                        variant="outline"
-                        className="h-auto rounded-full border-emerald-500/35 bg-emerald-500/15 px-2 py-0 text-[10px] font-semibold tracking-normal text-emerald-300"
-                      >
-                        Now
-                      </Badge>
-                    )}
-                  </div>
-                  <p className={cn("mt-0.5 truncate text-sm", mute)}>
-                    <RichText text={exp.role} />
-                  </p>
-                  {exp.description && (
-                    <DescriptionBlock
-                      text={exp.description}
-                      paragraphClassName={cn("mt-3 text-sm leading-6", mute)}
-                      listClassName={cn("mt-3 flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
-                    />
-                  )}
-                </div>
-              </article>
-            );
-          })}
-        </CollapsibleList>
+        <ExperienceList experiences={experiences} moreBtn={moreBtn} />
       </section>
     ) : null,
 
     github: contributionCalendar ? (
       <section key="github" className="scroll-mt-28">
-        <div className={cn(softCard, "overflow-x-auto p-5 @md:p-6")}>
+        <SectionHeading>{labels.github}</SectionHeading>
+        <div className={cn(softCard, "min-w-0 overflow-x-auto p-5 @md:p-6")}>
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
-            variant="minimal"
-            label={
-              contributionCalendar.totalContributions
-                ? `${contributionCalendar.totalContributions} contributions`
-                : labels.github
-            }
+            variant="modern"
+            stretch
+            className="mt-0 border-0 pt-0"
+            label={null}
           />
         </div>
       </section>
@@ -317,10 +268,10 @@ export function LanternTemplate({ data }: { data: PortfolioData }) {
               <h3 className={cn("text-lg font-semibold tracking-[-0.03em]", ink)}>
                 <RichText text={edu.degree} />
                 {edu.field ? (
-                  <span className={mute}>
+                  <>
                     {" in "}
                     <RichText text={edu.field} />
-                  </span>
+                  </>
                 ) : null}
               </h3>
               <p className={cn("mt-1 text-sm", mute)}>
@@ -463,19 +414,19 @@ export function LanternTemplate({ data }: { data: PortfolioData }) {
       style={accentRootStyle(primaryColor)}
     >
       <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-4 pb-24 pt-5 sm:px-6 md:pb-32 md:pt-8">
-        {navbarEnabled && (
+        {/* {navbarEnabled && (
           <TemplateNavbar
             items={sections}
-            className="mb-6 rounded-full border border-[#303033] bg-[#100f0d]/90 px-2 py-1.5 backdrop-blur-md"
-            linkClassName="rounded-full px-3 py-2 text-sm text-[#a1a1aa] transition-colors hover:text-white"
+            className="static mb-6 rounded-xl border border-[#303033] bg-[#100f0d]/90 px-2 py-1.5 backdrop-blur-md"
+            linkClassName="rounded-lg px-3 py-2 text-sm text-[#a1a1aa] transition-colors hover:text-white"
           />
-        )}
+        )} */}
 
         {/* Cover + identity — matches the reference homepage composition */}
         <header className="relative mb-12">
           <div
             className={cn(
-              "relative h-[220px] overflow-hidden rounded-[1.75rem] border sm:h-[260px] @md:h-[300px]",
+              "relative h-[220px] overflow-hidden rounded-xl border sm:h-[260px] @md:h-[300px]",
               border,
             )}
           >
@@ -485,71 +436,69 @@ export function LanternTemplate({ data }: { data: PortfolioData }) {
               alt=""
               className="absolute inset-0 h-full w-full object-cover object-center"
             />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(10,10,10,0.35)_100%)]"
-            />
-            <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent" />
           </div>
 
-          <div className="relative z-10 -mt-10 flex flex-col gap-5 px-1 sm:-mt-12 sm:flex-row sm:items-end sm:gap-5 sm:px-3">
-            {portraitSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element -- remote portfolio portrait
-              <img
-                src={portraitSrc}
-                alt=""
-                className="size-[88px] shrink-0 rounded-[1.35rem] border-[3px] border-[#0a0a0a] object-cover shadow-[0_16px_40px_-16px_rgba(0,0,0,0.9)] sm:size-[104px]"
-              />
-            ) : (
-              <div
-                aria-hidden
-                className="grid size-[88px] shrink-0 place-items-center rounded-[1.35rem] border-[3px] border-[#0a0a0a] bg-[#100f0d] text-2xl font-semibold text-[var(--lf-accent)] shadow-[0_16px_40px_-16px_rgba(0,0,0,0.9)] sm:size-[104px]"
-              >
-                {stripRichTextToPlain(portfolio.title).slice(0, 1) || "•"}
-              </div>
-            )}
-
-            <div className="min-w-0 flex-1 pb-1">
-              <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h1
-                  className={cn(
-                    HERO_TITLE_BASE,
-                    "text-[1.75rem] font-semibold leading-none tracking-[-0.04em] text-white sm:text-[2rem]",
-                  )}
+          <div className="relative z-10 px-1 sm:px-3">
+            <div className="flex items-start gap-4 sm:gap-5">
+              {portraitSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element -- remote portfolio portrait
+                <img
+                  src={portraitSrc}
+                  alt=""
+                  className="-mt-10 size-[88px] shrink-0 rounded-xl border-[5px] border-[#0a0a0a] object-cover sm:-mt-9 sm:size-[104px]"
+                />
+              ) : (
+                <div
+                  aria-hidden
+                  className="-mt-10 grid size-[88px] shrink-0 place-items-center rounded-xl border-[5px] border-[#0a0a0a] bg-[#100f0d] text-2xl font-semibold text-[var(--lf-accent)] sm:-mt-12 sm:size-[104px]"
                 >
-                  <RichText text={portfolio.title} />
-                </h1>
-                {portfolio.location && (
-                  <p className={cn("inline-flex items-center gap-1 text-sm", mute)}>
-                    <MapPin className="size-3.5 shrink-0 opacity-80" aria-hidden />
-                    <span className="min-w-0 [overflow-wrap:anywhere]">{portfolio.location}</span>
+                  {stripRichTextToPlain(portfolio.title).slice(0, 1) || "•"}
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1 pt-1">
+                <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h1
+                    className={cn(
+                      HERO_TITLE_BASE,
+                      "text-[1.75rem] font-semibold leading-none tracking-[-0.04em] text-white sm:text-[2rem]",
+                    )}
+                  >
+                    <RichText text={portfolio.title} />
+                  </h1>
+                  {portfolio.location && (
+                    <p className={cn("inline-flex items-center gap-1 text-sm", mute)}>
+                      <MapPin className="size-3.5 shrink-0 opacity-80" aria-hidden />
+                      <span className="min-w-0 [overflow-wrap:anywhere]">{portfolio.location}</span>
+                    </p>
+                  )}
+                </div>
+                {portfolio.headline && (
+                  <p className={cn("mt-2 max-w-[36rem] text-[15px] leading-6", mute)}>
+                    <RichText text={portfolio.headline} />
                   </p>
                 )}
               </div>
-              {portfolio.headline && (
-                <p className={cn("mt-2 max-w-[36rem] text-[15px] leading-6", mute)}>
-                  <RichText text={portfolio.headline} />
-                </p>
-              )}
-              {socials.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {socials.map((profile) => (
-                    <a
-                      key={`${profile.platform}-${profile.url}`}
-                      href={profile.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      data-lf-track="social"
-                      data-lf-label={profile.platform}
-                      aria-label={profile.platform}
-                      className="grid size-9 place-items-center rounded-xl border border-[#303033] bg-[#100f0d] text-[#e8e8e8] transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]"
-                    >
-                      <PlatformIcon platform={profile.platform} className="size-4" />
-                    </a>
-                  ))}
-                </div>
-              )}
             </div>
+
+            {socials.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {socials.map((profile) => (
+                  <a
+                    key={`${profile.platform}-${profile.url}`}
+                    href={profile.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-lf-track="social"
+                    data-lf-label={profile.platform}
+                    aria-label={profile.platform}
+                    className="grid size-9 place-items-center rounded-lg border border-[#303033] bg-[#100f0d] text-[#e8e8e8] transition-colors hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]"
+                  >
+                    <PlatformIcon platform={profile.platform} className="size-4" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </header>
 
@@ -580,7 +529,7 @@ export function LanternTemplate({ data }: { data: PortfolioData }) {
         <div className="mt-16 space-y-8">
           <div
             className={cn(
-              "relative overflow-hidden rounded-[1.75rem] border px-6 py-16 text-center sm:py-20",
+              "relative overflow-hidden rounded-xl border px-6 py-16 text-center sm:py-20",
               border,
             )}
           >
@@ -639,5 +588,110 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
     <h2 className="mb-5 text-[1.65rem] font-semibold tracking-[-0.04em] text-white sm:text-3xl">
       {children}
     </h2>
+  );
+}
+
+function ExperienceList({
+  experiences,
+  moreBtn,
+}: {
+  experiences: PortfolioData["experiences"];
+  moreBtn: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <CollapsibleList
+      initial={6}
+      wrapperClassName="grid grid-cols-1 items-start gap-3 @sm:grid-cols-2 @lg:grid-cols-3"
+      buttonClassName={moreBtn}
+    >
+      {experiences.map((exp) => (
+        <ExperienceCard
+          key={exp.id}
+          exp={exp}
+          open={open}
+          onToggle={() => setOpen((value) => !value)}
+        />
+      ))}
+    </CollapsibleList>
+  );
+}
+
+function ExperienceCard({
+  exp,
+  open,
+  onToggle,
+}: {
+  exp: PortfolioData["experiences"][number];
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const current = !exp.endDate;
+  const company = stripRichTextToPlain(exp.company);
+  const initial = company.slice(0, 1).toUpperCase() || "•";
+  const hasDescription = Boolean(exp.description?.trim());
+
+  const toggle = hasDescription ? (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="shrink-0 cursor-pointer text-xs font-medium text-[#a1a1aa] transition-colors hover:text-[var(--lf-accent)]"
+    >
+      {open ? "Show less" : "Show more"}
+    </button>
+  ) : null;
+
+  return (
+    <article
+      className={cn(
+        softCard,
+        "flex min-w-0 flex-col self-start p-4 transition-colors hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,#303033)]",
+      )}
+    >
+      <div className="flex min-w-0 items-start gap-3">
+        <div
+          className="grid size-11 shrink-0 place-items-center rounded-lg border border-[#303033] bg-[#0a0a0a] text-sm font-semibold text-[var(--lf-accent)]"
+          aria-hidden
+        >
+          {initial}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className={cn("truncate text-[15px] font-semibold tracking-[-0.02em]", ink)}>
+              <RichText text={exp.company} />
+            </h3>
+            {current && (
+              <Badge
+                variant="outline"
+                className="h-auto rounded-full border-emerald-500/35 bg-emerald-500/15 px-2 py-0 text-[10px] font-semibold tracking-normal text-emerald-300"
+              >
+                Now
+              </Badge>
+            )}
+          </div>
+
+          {open && hasDescription ? (
+            <>
+              <p className={cn("mt-0.5 truncate text-sm", mute)}>
+                <RichText text={exp.role} />
+              </p>
+              <DescriptionBlock
+                text={exp.description}
+                paragraphClassName={cn("mt-3 text-sm leading-6", mute)}
+                listClassName={cn("mt-3 flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
+              />
+              {toggle ? <div className="mt-3 flex justify-end">{toggle}</div> : null}
+            </>
+          ) : (
+            <div className="mt-0.5 flex items-baseline justify-between gap-3">
+              <p className={cn("min-w-0 truncate text-sm", mute)}>
+                <RichText text={exp.role} />
+              </p>
+              {toggle}
+            </div>
+          )}
+        </div>
+      </div>
+    </article>
   );
 }

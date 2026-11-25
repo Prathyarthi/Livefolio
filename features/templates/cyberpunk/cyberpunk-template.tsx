@@ -142,9 +142,9 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName={cn("max-w-3xl whitespace-pre-line text-base leading-8", body)}
+          paragraphClassName={cn("whitespace-pre-line text-base leading-8", body)}
           listClassName={cn(
-            "max-w-3xl flex flex-col gap-2 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]",
+            "flex flex-col gap-2 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]",
             body,
           )}
         />
@@ -230,7 +230,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             <article
               key={exp.id}
               className={cn(
-                "relative grid grid-cols-1 gap-2 border-t py-6 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                "relative grid grid-cols-1 gap-2 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
                 line,
               )}
             >
@@ -280,7 +280,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             <div
               key={category}
               className={cn(
-                "grid grid-cols-1 gap-3 border-t py-4 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                "grid grid-cols-1 gap-3 border-t py-4 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
                 line,
               )}
             >
@@ -308,7 +308,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             <article
               key={edu.id}
               className={cn(
-                "grid grid-cols-1 gap-2 border-t py-5 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                "grid grid-cols-1 gap-2 border-t py-5 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
                 line,
               )}
             >
@@ -318,12 +318,12 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
               <div className="min-w-0">
                 <h3 className={cn(displayFont, "text-base font-semibold", ink)}>
                   <RichText text={edu.degree} />
-                  {edu.field && (
-                    <span className="font-normal text-zinc-400">
+                  {edu.field ? (
+                    <>
                       {" "}
                       in <RichText text={edu.field} />
-                    </span>
-                  )}
+                    </>
+                  ) : null}
                 </h3>
                 <p className="mt-0.5 text-sm text-zinc-400">
                   <RichText text={edu.institution} />
@@ -344,7 +344,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             <article
               key={cert.id}
               className={cn(
-                "grid grid-cols-1 gap-1 border-t py-4 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                "grid grid-cols-1 gap-1 border-t py-4 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
                 line,
               )}
             >
@@ -382,7 +382,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             <article
               key={ach.id}
               className={cn(
-                "grid grid-cols-1 gap-1 border-t py-4 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                "grid grid-cols-1 gap-1 border-t py-4 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
                 line,
               )}
             >
@@ -406,7 +406,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             <article
               key={article.id}
               className={cn(
-                "grid grid-cols-1 gap-2 border-t py-5 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
+                "grid grid-cols-1 gap-2 border-t py-5 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-6",
                 line,
               )}
             >
@@ -462,15 +462,18 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     github: contributionCalendar ? (
-      <section key="github" className="scroll-mt-24">
+      <section key="github" className="scroll-mt-24 min-w-0">
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className={cn("overflow-x-auto border p-5 custom-scrollbar", line)}>
+        <div className="min-w-0 overflow-x-auto custom-scrollbar">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
-            variant="minimal"
-            label={labels.github}
+            variant="modern"
+            stretch
+            className="mt-0 border-0 pt-0"
+            frameClassName="rounded-none border-0 bg-[#0a0a0c] p-0 shadow-none"
+            label={null}
           />
         </div>
       </section>

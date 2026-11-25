@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import { Trophy } from "lucide-react";
 import {
+  ArticleSourceLabel,
   RichText,
   buildTemplateSections,
   ContactChips,
@@ -71,6 +72,7 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
     educations,
     skills,
     projects,
+    articles,
     socialProfiles,
     certifications,
     achievements,
@@ -185,13 +187,17 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
           )}
         </div>
         {contributionCalendar ? (
-          <GitHubContributionHeatmap
-            calendar={contributionCalendar}
-            profileUrl={githubProfile?.url}
-            username={githubProfile?.username}
-            variant="developer"
-            label="guest@portfolio:~$ gh activity --year"
-          />
+          <div className="min-w-0 overflow-x-auto">
+            <GitHubContributionHeatmap
+              calendar={contributionCalendar}
+              profileUrl={githubProfile?.url}
+              username={githubProfile?.username}
+              variant="developer"
+              stretch
+              className="mt-8 border-0 pt-0"
+              label="guest@portfolio:~$ gh activity --year"
+            />
+          </div>
         ) : null}
       </SectionFrame>
     ) : null,
@@ -392,10 +398,10 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                 <h3 className={cn("text-base font-semibold", shellText)}>
                   <RichText text={edu.degree} />
                   {edu.field ? (
-                    <span className={shellMuted}>
+                    <>
                       {" "}
                       in <RichText text={edu.field} />
-                    </span>
+                    </>
                   ) : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", bodyCopy)}>
@@ -431,6 +437,56 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
               <p className={cn("mt-1 text-xs", mono, shellFaint)}>
                 {cert.issuer}
                 {cert.issueDate ? ` | ${formatDateRange(cert.issueDate, null).split(" - ")[0]}` : null}
+              </p>
+            </article>
+          ))}
+        </CollapsibleList>
+      </SectionFrame>
+    ) : null,
+
+    articles: articles.length > 0 ? (
+      <SectionFrame key="articles" id="writing" command="ls ~/writing" title={customTitle("articles")}>
+        <CollapsibleList
+          initial={4}
+          wrapperClassName="flex flex-col"
+          buttonClassName={moreButtonClass}
+        >
+          {articles.map((article) => (
+            <article
+              key={article.id}
+              className={cn("border-t py-4 first:border-t-0 first:pt-0", shellLine)}
+            >
+              <ArticleSourceLabel
+                source={article.source}
+                className={cn("mb-1 text-xs", mono, shellFaint)}
+              />
+              <h3 className={cn("text-sm font-semibold", shellText)}>
+                <a
+                  href={article.url}
+                  data-lf-track="article"
+                  data-lf-label={stripRichTextToPlain(article.title)}
+                  data-lf-id={article.id}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline-offset-4 hover:underline"
+                >
+                  <RichText text={article.title} />
+                </a>
+              </h3>
+              {article.description ? (
+                <p className={cn("mt-2 text-sm leading-6", bodyCopy)}>
+                  <RichText text={article.description} />
+                </p>
+              ) : null}
+              <p className={cn("mt-2 text-xs", mono, shellFaint)}>
+                {article.publishedAt
+                  ? new Date(article.publishedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : null}
+                {article.publishedAt && article.readTime != null ? " | " : null}
+                {article.readTime != null ? `${article.readTime} min` : null}
               </p>
             </article>
           ))}

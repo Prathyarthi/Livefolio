@@ -257,6 +257,10 @@
   backdrop-filter: blur(16px) saturate(1.15);
 }
 
+.heatmap {
+  --lf-heatmap-empty: color-mix(in srgb, var(--lf-accent) 10%, transparent);
+}
+
 /* ---------- Postcard ---------- */
 
 .postcard {

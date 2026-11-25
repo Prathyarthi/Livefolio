@@ -105,8 +105,8 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
-        aboutList: cn("flex max-w-[40rem] flex-col gap-3 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]", mute),
-        aboutParagraph: cn("max-w-[40rem] text-base leading-8", mute),
+        aboutList: cn("flex flex-col gap-3 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]", mute),
+        aboutParagraph: cn("text-base leading-8", mute),
         postList: cn("flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed", ink),
         postParagraph: cn("text-sm leading-relaxed", ink),
         descriptionParagraph: cn("text-sm leading-7", mute),
@@ -128,8 +128,8 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName={cn("max-w-[38rem] text-lg leading-9", mute)}
-          listClassName={cn("flex max-w-[38rem] flex-col gap-3 pl-5 text-lg leading-9 marker:text-[var(--lf-accent)]", mute)}
+          paragraphClassName={cn("text-lg leading-9", mute)}
+          listClassName={cn("flex flex-col gap-3 pl-5 text-lg leading-9 marker:text-[var(--lf-accent)]", mute)}
         />
       </section>
     ) : null,
@@ -209,14 +209,14 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
         <div className="relative">
           <div
             aria-hidden
-            className="absolute bottom-2 left-[0.35rem] top-2 w-px bg-gradient-to-b from-[#9ec9e8] via-[#c5dff0] to-transparent @md:left-[0.4rem]"
+            className="absolute bottom-2 left-2 top-2 w-px -translate-x-1/2 bg-gradient-to-b from-[#9ec9e8] via-[#c5dff0] to-transparent"
           />
           <CollapsibleList initial={4} wrapperClassName="relative flex flex-col" buttonClassName={moreBtn}>
             {experiences.map((exp) => (
               <article key={exp.id} className="relative grid grid-cols-[1rem_minmax(0,1fr)] gap-4 py-5 @md:gap-6">
                 <span
                   aria-hidden
-                  className="mt-2 size-2.5 rounded-full bg-[var(--lf-accent)] shadow-[0_0_0_4px_rgba(255,255,255,0.85)]"
+                  className="relative z-10 mx-auto mt-2 size-2.5 rounded-full bg-[var(--lf-accent)] shadow-[0_0_0_4px_rgba(255,255,255,0.85)]"
                 />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -331,12 +331,12 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
             <article key={edu.id} className="border-t border-[#9ec9e8]/35 py-5 first:border-t-0 first:pt-0">
               <h3 className={cn("font-[family-name:var(--font-airy-display)] text-lg font-medium", ink)}>
                 <RichText text={edu.degree} />
-                {edu.field && (
-                  <span className={cn("font-normal", mute)}>
+                {edu.field ? (
+                  <>
                     {" "}
                     in <RichText text={edu.field} />
-                  </span>
-                )}
+                  </>
+                ) : null}
               </h3>
               <p className={cn("mt-1 text-sm", mute)}>
                 <RichText text={edu.institution} />
@@ -434,15 +434,18 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     github: contributionCalendar ? (
-      <section key="github">
+      <section key="github" className="min-w-0">
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className="overflow-x-auto rounded-[1.5rem] border border-white/70 bg-white/50 p-4 shadow-[0_20px_60px_-30px_rgba(56,126,184,0.4)]">
+        <div className="min-w-0">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="minimal"
-            label={labels.github}
+            stretch
+            className="mt-0 border-0 pt-0"
+            frameClassName="rounded-none border-0 bg-transparent p-0 shadow-none"
+            label={null}
           />
         </div>
       </section>
@@ -480,17 +483,18 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
 
       <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-24 pt-8 sm:px-8 md:pb-32 md:pt-10">
         {navbarEnabled && (
-          <div className="mb-14 flex justify-center">
+          <div className="mb-10 min-w-0 @md:mb-14">
             <TemplateNavbar
               items={sections}
-              className="rounded-full border border-white/80 bg-white/55 shadow-[0_16px_40px_-20px_rgba(56,126,184,0.45)] backdrop-blur-md"
-              linkClassName="rounded-full px-4 py-2 text-sm font-medium text-[#5b6d80] transition-colors hover:bg-white/80 hover:text-[var(--lf-accent)]"
+              wrap
+              className="static w-full max-w-full rounded-3xl border border-white/80 bg-white/55 shadow-[0_16px_40px_-20px_rgba(56,126,184,0.45)] backdrop-blur-md @md:rounded-full"
+              linkClassName="rounded-full px-3 py-1.5 text-sm font-medium text-[#5b6d80] transition-colors hover:bg-white/80 hover:text-[var(--lf-accent)] @md:px-4 @md:py-2"
             />
           </div>
         )}
 
         {/* Name in open sky — not inside a card */}
-        <header className="relative mb-20 min-h-[18rem] pt-6 @md:mb-28 @md:min-h-[22rem] @md:pt-10">
+        <header className="relative mb-10 pt-6 @md:mb-12 @md:pt-8">
           <h1
             className={cn(
               HERO_TITLE_BASE,

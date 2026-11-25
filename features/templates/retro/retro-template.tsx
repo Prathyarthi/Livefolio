@@ -375,7 +375,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
             >
               <h3 className="font-sans text-lg font-black uppercase text-black">
                 <RichText text={edu.degree} />
-                {edu.field && <span className="text-gray-600"> in <RichText text={edu.field} /></span>}
+                {edu.field ? <> in <RichText text={edu.field} /></> : null}
               </h3>
               <p className="mt-2 text-sm font-bold text-gray-700"><RichText text={edu.institution} /></p>
               {(edu.startDate || edu.endDate) && (

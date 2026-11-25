@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { Instrument_Sans, Mr_Dafoe } from "next/font/google";
 import { ArrowUp, ArrowUpRight, Trophy } from "lucide-react";
+import { PlatformIcon } from "@/components/icons";
 import {
   resolveAccentColor,
   accentRootStyle,
@@ -28,7 +29,8 @@ import {
   HeroProfileButtons,
   hasNonHeroSocialProfiles,
   CustomSectionItems,
-  ProfileLinksSection,
+  ContactChips,
+  visibleSocialProfiles,
   ProjectActions,
   PROJECT_CARD,
   PROJECT_CARD_BODY,
@@ -37,7 +39,7 @@ import {
   getSectionLabels,
 } from "../shared";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
-import { formatDateRange, sortExperiencesNewestFirst } from "../utils";
+import { formatDateRange, getPlatformIcon, sortExperiencesNewestFirst } from "../utils";
 import {
   GitHubContributionHeatmap,
   parseContributionCalendar,
@@ -193,11 +195,6 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
                   firstName
                 )}
               </p>
-              <DescriptionBlock
-                text={portfolio.summary}
-                paragraphClassName="mt-6 text-[17px] leading-[1.75] text-[var(--vg-paper-ink)]/85"
-                listClassName="mt-6 list-disc space-y-2 pl-5 text-[17px] leading-[1.75] text-[var(--vg-paper-ink)]/85 marker:text-[#cc46a0]"
-              />
             </div>
             <span
               aria-hidden
@@ -217,6 +214,11 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
               </div>
             </div>
           </div>
+          <DescriptionBlock
+            text={portfolio.summary}
+            paragraphClassName="mt-6 text-[17px] leading-[1.75] text-[var(--vg-paper-ink)]/85"
+            listClassName="mt-6 list-disc space-y-2 pl-5 text-[17px] leading-[1.75] text-[var(--vg-paper-ink)]/85 marker:text-[#cc46a0]"
+          />
         </div>
       </section>
     ) : null,
@@ -565,15 +567,22 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
                 <p className="text-4xl font-extrabold leading-none text-white">
                   Contacts
                 </p>
-                <ProfileLinksSection
-                  portfolio={portfolio}
-                  profiles={socialProfiles}
-                  excludeHeroPlatforms={false}
-                  titleClassName="text-[13px] font-semibold text-white"
-                  textClassName="text-[13px] leading-snug text-white/70"
-                  chipClassName="block w-full rounded-2xl bg-[rgba(12,13,27,0.62)] px-4 py-3 text-sm text-white backdrop-blur-md"
-                  pillClassName="flex w-full rounded-2xl bg-[rgba(12,13,27,0.62)] px-4 py-3 text-sm text-white backdrop-blur-md transition-colors hover:bg-[rgba(12,13,27,0.85)] [&_span]:min-w-0 [&_span]:truncate"
-                />
+                <div className="space-y-5">
+                  <div>
+                    <p className="text-[13px] font-semibold text-white">Reach out</p>
+                    <p className="mt-2 text-[13px] leading-snug text-white/70">
+                      Use these links to connect, collaborate, or explore more work.
+                    </p>
+                  </div>
+                  <ContactChips
+                    portfolio={portfolio}
+                    chipClassName="block w-full rounded-2xl bg-[rgba(12,13,27,0.62)] px-4 py-3 text-sm text-white backdrop-blur-md"
+                  />
+                  <ContactSocialGrid
+                    profiles={socialProfiles}
+                    className="flex w-full min-w-0 rounded-2xl bg-[rgba(12,13,27,0.62)] px-4 py-3 text-sm text-white backdrop-blur-md transition-colors hover:bg-[rgba(12,13,27,0.85)]"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -582,15 +591,18 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     github: contributionCalendar ? (
-      <section key="github" className="scroll-mt-24">
+      <section key="github" className="scroll-mt-24 min-w-0">
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className={cn(styles.menu, "overflow-x-auto p-6 @md:p-8")}>
+        <div className={cn(styles.menu, styles.heatmap, "min-w-0 p-6 @md:p-8")}>
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="modern"
-            label={labels.github}
+            stretch
+            className="mt-0 border-0 pt-0"
+            frameClassName="rounded-none border-0 bg-transparent p-0 shadow-none"
+            label={null}
           />
         </div>
       </section>
@@ -812,6 +824,38 @@ function StatsMenu({ groups }: { groups: Array<[string, Skill[]]> }) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function ContactSocialGrid({
+  profiles,
+  className,
+}: {
+  profiles: PortfolioData["socialProfiles"];
+  className: string;
+}) {
+  const visible = visibleSocialProfiles(profiles, { excludeHeroPlatforms: false });
+  if (visible.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {visible.map((profile) => (
+        <a
+          key={`${profile.platform}-${profile.url}`}
+          href={profile.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(className, "odd:last:col-span-2")}
+          data-lf-track="social"
+          data-lf-label={profile.platform}
+        >
+          <span className="inline-flex min-w-0 items-center gap-1.5">
+            <PlatformIcon platform={profile.platform} className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{getPlatformIcon(profile.platform)}</span>
+          </span>
+        </a>
+      ))}
     </div>
   );
 }

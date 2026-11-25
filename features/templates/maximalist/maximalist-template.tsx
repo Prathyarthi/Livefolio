@@ -198,7 +198,18 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
-    about: null,
+    about: data.portfolio.summary ? (
+      <section key="about" id="about" className="scroll-mt-24 border-b-4 border-white bg-[#0A0A0B] py-16">
+        <div className="mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8">
+          <SectionHeading>{labels.about}</SectionHeading>
+          <DescriptionBlock
+            text={data.portfolio.summary}
+            paragraphClassName="text-slate-200 text-base sm:text-lg font-bold leading-relaxed"
+            listClassName="space-y-2 pl-5 text-slate-200 text-base sm:text-lg font-bold leading-relaxed marker:text-[var(--lf-accent)]"
+          />
+        </div>
+      </section>
+    ) : null,
     experience: experiences.length > 0
       ? (
         <section key="experience" id="experience" className="py-16 bg-[#0A0A0B] bg-grid-pattern border-b-4 border-white relative overflow-hidden">
@@ -340,9 +351,8 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                         loading="lazy"
                         accentColor={primaryColor}
                         containerClassName="bg-black"
-                        className="grayscale contrast-125 transition-all duration-300 group-hover:scale-105 group-hover:grayscale-0"
+                        className="transition-transform duration-300 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
 
                       {proj.featured && (
                         <div className="absolute top-3 left-3 bg-white text-black font-mono font-black text-[10px] px-2.5 py-1 border border-black italic uppercase">
@@ -674,7 +684,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
       </nav>
 
       {/* 3. HERO SECTION */}
-      <section id="about" className="py-12 sm:py-20 border-b-4 border-white relative overflow-hidden bg-grid-pattern">
+      <section id="top" className="py-12 sm:py-20 border-b-4 border-white relative overflow-hidden bg-grid-pattern">
         {/* Ambient Radial Background Glows */}
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-1/2 -right-32 w-96 h-96 bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
@@ -683,7 +693,7 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
 
             {/* Main Info Box */}
-            <div className="lg:col-span-8 space-y-6 sm:space-y-8">
+            <div className="lg:col-span-full space-y-6 sm:space-y-8">
 
               {/* Display Header */}
               <div className={cn(HERO_HEADER_COLUMN, "border-b-4 border-white pb-6 space-y-3")}>
@@ -707,15 +717,6 @@ export function MaximalistTemplate({ data: initialData }: AppProps) {
                   </p>
                 )}
               </div>
-
-              {/* Summary Text */}
-              {!resolved.isHidden("about") && data.portfolio.summary && (
-                <DescriptionBlock
-                  text={data.portfolio.summary}
-                  paragraphClassName="text-slate-200 text-base sm:text-lg font-bold leading-relaxed max-w-3xl"
-                  listClassName="space-y-2 pl-5 text-slate-200 text-base sm:text-lg font-bold leading-relaxed max-w-3xl marker:text-[var(--lf-accent)]"
-                />
-              )}
 
               <ContactChips
                 portfolio={data.portfolio}

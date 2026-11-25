@@ -1,3 +1,5 @@
+"use client";
+
 import { Manrope, Syne } from "next/font/google";
 import { resolveAccentColor, accentRootStyle } from "@/features/templates/template-accent-palettes";
 import { stripRichTextToPlain } from "@/lib/rich-text";
@@ -60,7 +62,7 @@ const ink = "text-[#eceae4]";
 const mute = "text-[#9c9890]";
 const hairline = "border-[#eceae4]/12";
 const moreBtn =
-  "mt-6 self-start rounded-none border border-[#eceae4]/18 bg-transparent px-0 py-1.5 font-sans text-sm text-[#9c9890] underline-offset-4 hover:border-transparent hover:text-[#eceae4] hover:underline";
+  "mt-6 self-start rounded-none border-0 bg-transparent px-0 py-1.5 font-sans text-sm text-[#9c9890] underline-offset-4 hover:text-[#eceae4] hover:underline";
 
 export function ModernTemplate({ data }: { data: PortfolioData }) {
   const {
@@ -125,8 +127,8 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName={cn("max-w-[42rem] whitespace-pre-line text-lg leading-8", mute)}
-          listClassName={cn("max-w-[42rem] flex flex-col gap-3 pl-5 text-lg leading-8", mute, "marker:text-[#eceae4]/30")}
+          paragraphClassName={cn("whitespace-pre-line text-lg leading-8", mute)}
+          listClassName={cn("flex flex-col gap-3 pl-5 text-lg leading-8", mute, "marker:text-[#eceae4]/30")}
         />
       </section>
     ) : null,
@@ -143,11 +145,11 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
             <article
               key={project.id}
               className={cn(
-                "grid min-w-0 grid-cols-1 gap-4 border-t py-6 @md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_auto] @md:items-start @md:gap-8",
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_auto] @md:items-start @md:gap-8",
                 hairline,
               )}
             >
-              <div className="overflow-hidden rounded-sm border border-[#eceae4]/10">
+              <div className="min-w-0 w-full overflow-hidden rounded-sm border border-[#eceae4]/10">
                 <TemplateProjectPreview
                   templateId="modern"
                   liveUrl={project.liveUrl ?? null}
@@ -157,6 +159,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                   alt={stripRichTextToPlain(project.title)}
                   loading="lazy"
                   accentColor={primaryColor}
+                  containerClassName="aspect-[8/5] w-full bg-[#09090b]"
                 />
               </div>
               <div className="min-w-0">
@@ -187,23 +190,23 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                 )}
                 {project.techStack.length > 0 && (
                   <p className={cn("mt-3 text-xs", mute)}>
-                    {project.techStack.slice(0, 5).join(" · ")}
+                    {project.techStack.slice(0, 6).join(" · ")}
                   </p>
                 )}
-              </div>
-              <div className="shrink-0 @md:pt-1">
-                <ProjectActions
-                  liveUrl={project.liveUrl}
-                  sourceUrl={project.sourceUrl}
-                  label={stripRichTextToPlain(project.title)}
-                  projectId={project.id}
-                  liveClassName={cn(
-                    "rounded-none border bg-transparent px-3 py-1.5 text-xs font-medium hover:bg-[#eceae4]/5",
-                    hairline,
-                    ink,
-                  )}
-                  sourceClassName={cn("rounded-none px-3 py-1.5 text-xs font-medium hover:underline", mute)}
-                />
+                <div className="mt-4">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName={cn(
+                      "rounded-none border bg-transparent px-3 py-1.5 text-xs font-medium hover:bg-[#eceae4]/5",
+                      hairline,
+                      ink,
+                    )}
+                    sourceClassName={cn("rounded-none px-3 py-1.5 text-xs font-medium hover:underline", mute)}
+                  />
+                </div>
               </div>
             </article>
           ))}
@@ -223,7 +226,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
             <article
               key={exp.id}
               className={cn(
-                "grid grid-cols-1 gap-3 border-t py-7 @md:grid-cols-[9rem_minmax(0,1fr)] @md:gap-10",
+                "grid grid-cols-1 gap-3 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[9rem_minmax(0,1fr)] @md:gap-10",
                 hairline,
               )}
             >
@@ -269,7 +272,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
           {articles.map((article) => (
             <article
               key={article.id}
-              className={cn("border-t py-5", hairline)}
+              className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}
             >
               <ArticleSourceLabel source={article.source} className={cn("mb-1.5 opacity-70", mute)} />
               <div className="flex min-w-0 flex-col gap-2 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8">
@@ -322,7 +325,11 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
           {Object.entries(groupedSkills).map(([category, names]) => (
             <div key={category} className="min-w-0">
               <h3 className={cn("mb-3 text-sm", mute)}>{category}</h3>
-              <p className={cn("text-base leading-7", ink)}>{names.join(" · ")}</p>
+              <div className={cn("flex flex-wrap gap-x-4 gap-y-2 text-base leading-7", ink)}>
+                {names.map((name) => (
+                  <TechChip key={name} name={name} />
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -337,7 +344,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
             <article
               key={edu.id}
               className={cn(
-                "grid grid-cols-1 gap-3 border-t py-6 @md:grid-cols-[9rem_minmax(0,1fr)] @md:gap-10",
+                "grid grid-cols-1 gap-3 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[9rem_minmax(0,1fr)] @md:gap-10",
                 hairline,
               )}
             >
@@ -352,12 +359,12 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                   )}
                 >
                   <RichText text={edu.degree} />
-                  {edu.field && (
-                    <span className={mute}>
+                  {edu.field ? (
+                    <>
                       {" "}
                       in <RichText text={edu.field} />
-                    </span>
-                  )}
+                    </>
+                  ) : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}>
                   <RichText text={edu.institution} />
@@ -375,7 +382,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.certifications}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {certifications.map((cert) => (
-            <article key={cert.id} className={cn("border-t py-5", hairline)}>
+            <article key={cert.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <h3 className={cn("text-base font-medium", ink)}>
                 {cert.url ? (
                   <a
@@ -410,7 +417,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.achievements}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {achievements.map((ach) => (
-            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5", hairline)}>
+            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <Trophy className="mt-0.5 size-4 shrink-0 text-[var(--lf-accent)]" aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className={cn("text-sm leading-relaxed", ink)}>
@@ -452,13 +459,17 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section key="github" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.github}</SectionHeading>
-        <GitHubContributionHeatmap
-          calendar={contributionCalendar}
-          profileUrl={githubProfile?.url}
-          username={githubProfile?.username}
-          variant="modern"
-          label={labels.github}
-        />
+        <div className="min-w-0 overflow-x-auto">
+          <GitHubContributionHeatmap
+            calendar={contributionCalendar}
+            profileUrl={githubProfile?.url}
+            username={githubProfile?.username}
+            variant="modern"
+            stretch
+            className="mt-0 border-0 pt-0"
+            label={null}
+          />
+        </div>
       </section>
     ) : null,
   };
@@ -526,16 +537,16 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
           <div className="mt-10">
             <TemplateNavbar
               items={sections}
-              className={cn("rounded-none border-x-0 border-b border-t-0 bg-transparent", hairline)}
+              className={cn("rounded-none border-0 bg-transparent", hairline)}
               linkClassName={cn(
-                "rounded-none px-0 py-3 text-sm transition-colors hover:text-[#eceae4]",
+                "rounded-none px-0 py-1 text-sm transition-colors hover:text-[#eceae4]",
                 mute,
               )}
             />
           </div>
         )}
 
-        <div className="mt-12 flex min-w-0 flex-col gap-4 md:mt-16">
+        <div className="mt-3 flex min-w-0 flex-col gap-4">
           {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
 
