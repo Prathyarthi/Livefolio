@@ -71,7 +71,7 @@ export function LivePreviewImage({
           src={src}
           alt={alt}
           loading={loading}
-          className={cn("block h-full w-full object-cover object-top", className)}
+          className={cn("absolute inset-0 size-full object-cover object-top", className)}
           onError={() => {
             if (liveSrc) setLiveFailed(true);
             else setImageFailed(true);
@@ -84,7 +84,7 @@ export function LivePreviewImage({
           variant={placeholderVariant}
           templateId={templateId}
           accentColor={accentColor}
-          className={placeholderClassName}
+          className={cn("absolute inset-0 size-full", placeholderClassName)}
         />
       )}
     </div>
