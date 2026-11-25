@@ -301,10 +301,7 @@ export default function PreviewPage() {
     setPublishDialogOpen(true);
   };
 
-  const templateOptions = useMemo(
-    () => templateCatalogList.filter((template) => template.id !== "spotlight"),
-    [],
-  );
+  const templateOptions = templateCatalogList;
 
   const isTemplateLocked = (templateId: string) =>
     accessTier === "pro" || accessTier === "trial"
