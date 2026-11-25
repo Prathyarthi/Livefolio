@@ -17,8 +17,8 @@ const TEMPLATE_PREVIEW_FILES: Record<string, string> = {
   monochrome: "monochrome.webp",
   synthwave: "synthwave.webp",
   artdeco: "artdeco.webp",
-  gatsby: "artdeco.webp",
-  lantern: "lantern/cover.jpg",
+  gatsby: "gatsby.webp",
+  lantern: "lantern.webp",
   blueprint: "blueprint.webp",
   airy: "airy.webp",
   terracotta: "terracotta.webp",
@@ -29,7 +29,7 @@ const TEMPLATE_PREVIEW_FILES: Record<string, string> = {
   maximalist: "maximalist.webp",
   synapse: "synapse.webp",
   veil: "veil.webp",
-  vignette: "vignette/keyart.jpg",
+  vignette: "vignette.webp",
 };
 
 export function hasTemplatePreviewImage(templateId: string): boolean {
