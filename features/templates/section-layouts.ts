@@ -1,7 +1,13 @@
-import type {
-  ReorderableSectionKey,
-  TemplateSectionLayout,
+import {
+  REORDERABLE_SECTIONS,
+  type ReorderableSectionKey,
+  type TemplateSectionLayout,
 } from "./section-order";
+
+function completeOrder(order: ReorderableSectionKey[]): ReorderableSectionKey[] {
+  const seen = new Set(order);
+  return [...order, ...REORDERABLE_SECTIONS.filter((key) => !seen.has(key))];
+}
 
 function singleColumn(
   order: ReorderableSectionKey[],
@@ -11,7 +17,7 @@ function singleColumn(
       {
         id: "full",
         label: "Sections",
-        defaultOrder: order,
+        defaultOrder: completeOrder(order),
       },
     ],
   };
@@ -232,28 +238,19 @@ export const TEMPLATE_SECTION_LAYOUTS: Record<string, TemplateSectionLayout> = {
     "profiles",
   ]),
 
-  bento: {
-    fixed: true,
-    groups: [
-      {
-        id: "full",
-        label: "Sections",
-        defaultOrder: [
-          "about",
-          "linkedin",
-          "profiles",
-          "projects",
-          "experience",
-          "skills",
-          "education",
-          "articles",
-          "github",
-          "certifications",
-          "achievements",
-        ],
-      },
-    ],
-  },
+  bento: singleColumn([
+    "about",
+    "linkedin",
+    "profiles",
+    "projects",
+    "experience",
+    "skills",
+    "education",
+    "articles",
+    "github",
+    "certifications",
+    "achievements",
+  ]),
 };
 
 const FALLBACK_LAYOUT = singleColumn(STANDARD_SINGLE);

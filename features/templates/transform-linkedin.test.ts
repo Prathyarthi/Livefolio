@@ -73,4 +73,19 @@ describe("LinkedIn as its own reorderable section", () => {
       expect(getTemplateSectionLayout(id).groups[0]!.defaultOrder).toContain("linkedin");
     }
   });
+
+  it("saved section order is used in full, even for keys a template omitted from its default", () => {
+    const layout = getTemplateSectionLayout("synapse");
+    const moved = resolveSectionLayout(layout, {
+      sectionLayout: {
+        order: ["projects", "about", "experience", "skills"],
+      },
+    });
+    expect(moved.order.full.slice(0, 4)).toEqual([
+      "projects",
+      "about",
+      "experience",
+      "skills",
+    ]);
+  });
 });
