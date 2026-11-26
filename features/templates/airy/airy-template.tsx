@@ -137,17 +137,13 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
     projects: orderedProjects.length > 0 ? (
       <section key="projects" id="work" className="scroll-mt-28 min-w-0">
         <SectionHeading>{labels.projects}</SectionHeading>
-        <CollapsibleList
-          initial={4}
-          wrapperClassName="flex min-w-0 flex-col gap-7"
-          buttonClassName={moreBtn}
-        >
+        <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {orderedProjects.map((project) => (
             <article
               key={project.id}
-              className="group grid min-w-0 grid-cols-1 gap-5 overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/55 p-3 shadow-[0_24px_70px_-32px_rgba(56,126,184,0.45)] backdrop-blur-[2px] @md:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] @md:items-stretch @md:gap-0 @md:p-0"
+              className="grid min-w-0 grid-cols-1 gap-4 border-t border-[#9ec9e8]/40 py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8"
             >
-              <div className="overflow-hidden rounded-[1.35rem] bg-[#dcebf8]/40 @md:rounded-none @md:rounded-l-[1.75rem]">
+              <div className="min-w-0 w-full overflow-hidden border border-[#9ec9e8]/40">
                 <TemplateProjectPreview
                   templateId="airy"
                   liveUrl={project.liveUrl ?? null}
@@ -157,12 +153,11 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                   alt={stripRichTextToPlain(project.title)}
                   loading="lazy"
                   accentColor={primaryColor}
-                  containerClassName="bg-[#dcebf8]/50"
                 />
               </div>
-              <div className="flex min-w-0 flex-col justify-center px-2 pb-2 @md:px-7 @md:py-6">
+              <div className="min-w-0">
                 <div className="flex flex-wrap items-baseline gap-2">
-                  <h3 className={cn("font-[family-name:var(--font-airy-display)] text-2xl font-medium tracking-[-0.02em]", ink)}>
+                  <h3 className={cn("font-[family-name:var(--font-airy-display)] text-xl font-medium", ink)}>
                     <RichText text={project.title} />
                   </h3>
                   {project.featured && (
@@ -177,16 +172,16 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                 {project.description && (
                   <DescriptionBlock
                     text={project.description}
-                    paragraphClassName={cn("mt-3 max-w-[34rem] text-sm leading-7", mute)}
-                    listClassName={cn("mt-3 flex max-w-[34rem] flex-col gap-1.5 pl-5 text-sm leading-7", mute)}
+                    paragraphClassName={cn("mt-2 text-sm leading-6", mute)}
+                    listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
                   />
                 )}
                 {project.techStack.length > 0 && (
-                  <p className="mt-4 text-xs text-[#7a8fa3]">
-                    {project.techStack.slice(0, 6).join("  ·  ")}
+                  <p className="mt-3 text-xs text-[#7a8fa3]">
+                    {project.techStack.slice(0, 6).join(" · ")}
                   </p>
                 )}
-                <div className="mt-5">
+                <div className="mt-4">
                   <ProjectActions
                     liveUrl={project.liveUrl}
                     sourceUrl={project.sourceUrl}
