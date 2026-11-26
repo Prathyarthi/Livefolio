@@ -145,7 +145,7 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
             <article
               key={project.id}
               className={cn(
-                "grid min-w-0 grid-cols-1 gap-4 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_auto] @md:items-start @md:gap-8",
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8",
                 hairline,
               )}
             >

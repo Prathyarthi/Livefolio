@@ -167,11 +167,11 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
             <article
               key={project.id}
               className={cn(
-                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_9.5rem] @md:items-start @md:gap-8",
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8",
                 line,
               )}
             >
-              <div className="aspect-[8/5] w-full overflow-hidden rounded-sm bg-[#070914] ring-1 ring-white/10">
+              <div className="min-w-0 w-full overflow-hidden rounded-sm bg-[#070914] ring-1 ring-white/10">
                 <TemplateProjectPreview
                   templateId="space"
                   liveUrl={project.liveUrl ?? null}
@@ -180,7 +180,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                   livePreviewProjectIds={livePreviewProjectIds}
                   alt={stripRichTextToPlain(project.title)}
                   loading="lazy"
-                  containerClassName="size-full bg-[#070914]"
+                  containerClassName="bg-[#070914]"
                   accentColor={primaryColor}
                 />
               </div>
@@ -202,8 +202,8 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                 {project.description && (
                   <DescriptionBlock
                     text={project.description}
-                    paragraphClassName={cn("mt-2 text-sm leading-7", mute)}
-                    listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-7", mute)}
+                    paragraphClassName={cn("mt-2 text-sm leading-6", mute)}
+                    listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
                   />
                 )}
                 {project.techStack.length > 0 && (
@@ -211,16 +211,16 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                     {project.techStack.slice(0, 5).join(", ")}
                   </p>
                 )}
-              </div>
-              <div className="shrink-0">
-                <ProjectActions
-                  liveUrl={project.liveUrl}
-                  sourceUrl={project.sourceUrl}
-                  label={stripRichTextToPlain(project.title)}
-                  projectId={project.id}
-                  liveClassName="rounded-sm border border-white/20 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-white/5 hover:text-white"
-                  sourceClassName="rounded-sm px-2 py-1.5 text-xs font-medium text-slate-400 hover:text-white"
-                />
+                <div className="mt-4">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName="rounded-sm border border-white/20 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-white/5 hover:text-white"
+                    sourceClassName="rounded-sm px-2 py-1.5 text-xs font-medium text-slate-400 hover:text-white"
+                  />
+                </div>
               </div>
             </article>
           ))}

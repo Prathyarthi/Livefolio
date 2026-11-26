@@ -137,7 +137,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
             <article
               key={project.id}
               className={cn(
-                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,28rem)_1fr] @md:gap-8",
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8",
                 hairline,
               )}
             >
@@ -167,8 +167,8 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
                 {project.description && (
                   <DescriptionBlock
                     text={project.description}
-                    paragraphClassName={cn("mt-2 max-w-[34rem] text-sm leading-7", mute)}
-                    listClassName={cn("mt-2 flex max-w-[34rem] flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
+                    paragraphClassName={cn("mt-2 text-sm leading-6", mute)}
+                    listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
                   />
                 )}
                 {project.techStack.length > 0 && (
