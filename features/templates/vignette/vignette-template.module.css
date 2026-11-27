@@ -165,11 +165,17 @@
   -webkit-text-stroke: 0.04em var(--vg-board);
 }
 
-.viFill {
+.viKeyline {
   z-index: 3;
-  background-image: var(--vg-sunset);
-  background-size: 100% 100%;
-  background-position: center;
+  color: #fff;
+  -webkit-text-stroke: 4px #fff;
+}
+
+.viFill {
+  z-index: 4;
+  background-image: url("/templates/vignette/palms.jpg"), var(--vg-sunset);
+  background-size: cover;
+  background-position: center 40%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

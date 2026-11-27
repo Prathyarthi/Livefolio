@@ -636,7 +636,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
                 href={`mailto:${portfolio.contactEmail}`}
                 className={cn(
                   styles.emailMark,
-                  "block text-4xl leading-[0.9] tracking-wide text-[var(--vg-cream)] transition-colors hover:text-[var(--lf-accent)] @md:text-5xl @4xl:text-6xl [overflow-wrap:anywhere]",
+                  "block text-2xl leading-[0.95] tracking-wide text-[var(--vg-cream)] transition-colors hover:text-[var(--lf-accent)] @md:text-3xl @4xl:text-4xl [overflow-wrap:anywhere]",
                 )}
               >
                 {portfolio.contactEmail}
@@ -755,6 +755,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
                 <div className={styles.viMark} aria-hidden>
                   <span className={styles.viGlow}>{initials}</span>
                   <span className={styles.viOutline}>{initials}</span>
+                  <span className={styles.viKeyline}>{initials}</span>
                   <span className={styles.viFill}>{initials}</span>
                 </div>
               ) : null}
