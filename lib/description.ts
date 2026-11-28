@@ -60,26 +60,13 @@ function flushText(buffer: string[], nodes: DescriptionNode[]) {
   buffer.length = 0;
 }
 
-/** Turn rich-text block tags into lines so `<p>` / `<li>` become list points. */
-function unwrapBlockHtml(text: string): string {
-  if (!/<(?:p|br|li|ul|ol|div|h[1-6])\b/i.test(text)) return text;
-  return text
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(?:p|li|h[1-6]|div)>/gi, "\n")
-    .replace(/<(?:p|li|h[1-6]|div|ul|ol)\b[^>]*>/gi, "")
-    .replace(/<\/(?:ul|ol)>/gi, "")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{2,}/g, "\n")
-    .trim();
-}
-
 export function parseDescription(text: string): DescriptionNode[] {
   if (!text.trim()) return [];
 
   const nodes: DescriptionNode[] = [];
   const buffer: string[] = [];
 
-  for (const raw of unwrapBlockHtml(text.replace(/\r\n?/g, "\n")).split("\n")) {
+  for (const raw of text.replace(/\r\n?/g, "\n").split("\n")) {
     const line = classifyLine(raw);
     if (line.type === "blank") {
       flushText(buffer, nodes);
@@ -93,14 +80,6 @@ export function parseDescription(text: string): DescriptionNode[] {
     buffer.push(line.text);
   }
   flushText(buffer, nodes);
-  if (nodes.length >= 2 && nodes.every((node) => node.type === "paragraph")) {
-    return [
-      {
-        type: "list",
-        items: nodes.map((node) => node.text),
-      },
-    ];
-  }
   return nodes;
 }
 

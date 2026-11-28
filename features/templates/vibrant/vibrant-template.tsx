@@ -203,7 +203,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                     label={stripRichTextToPlain(project.title)}
                     projectId={project.id}
                     liveClassName="rounded-full border border-white/15 bg-transparent px-3 py-1 text-xs font-medium text-zinc-100 hover:bg-white/10 hover:text-white"
-                    sourceClassName="rounded-full px-2 py-1 text-xs font-medium text-zinc-400 hover:text-white"
+                    sourceClassName="rounded-full px-2 py-1 text-xs font-medium text-zinc-400 hover:bg-transparent hover:text-white"
                   />
                 </div>
               </div>
@@ -531,7 +531,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
             />
             <ContactChips
               portfolio={portfolio}
-              chipClassName="text-xs text-zinc-400 @sm:text-sm"
+              chipClassName="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-xs text-zinc-300 @sm:text-sm"
             />
             {hasNonHeroSocialProfiles(socialProfiles) && (
               <SocialPills

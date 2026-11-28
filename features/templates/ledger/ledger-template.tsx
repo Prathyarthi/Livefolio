@@ -513,7 +513,7 @@ export function LedgerTemplate({ data }: AppProps) {
                       liveUrl={project.liveUrl}
                       sourceUrl={project.sourceUrl}
                       liveClassName="px-3 py-1.5 bg-[var(--lf-accent)] border border-[var(--lf-accent)] hover:bg-transparent text-white hover:text-[var(--lf-accent)] font-semibold text-[10px] font-mono uppercase tracking-widest rounded-none transition-all text-center"
-                      sourceClassName="px-3 py-1.5 text-slate-500 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-none transition-colors text-[10px] font-mono uppercase tracking-widest text-center"
+                      sourceClassName="px-3 py-1.5 text-slate-500 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-600 hover:bg-slate-800 rounded-none transition-colors text-[10px] font-mono uppercase tracking-widest text-center"
                     />
                   </div>
                 </div>

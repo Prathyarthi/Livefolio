@@ -512,7 +512,7 @@ export function ProjectActions({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {liveUrl && (
-        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans", liveClassName)}>
+        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans hover:bg-transparent hover:text-inherit", liveClassName)}>
           <a
             href={liveUrl}
             target="_blank"
@@ -526,7 +526,7 @@ export function ProjectActions({
         </Button>
       )}
       {sourceUrl && (
-        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans", sourceClassName)}>
+        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans hover:bg-transparent hover:text-inherit", sourceClassName)}>
           <a
             href={sourceUrl}
             target="_blank"

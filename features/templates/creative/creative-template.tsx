@@ -205,7 +205,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                       sourceUrl={project.sourceUrl}
                       label={stripRichTextToPlain(project.title)}
                       projectId={project.id}
-                      liveClassName="rounded-full bg-[#171412] px-4 py-1.5 text-xs font-semibold text-[#fff8f1] hover:bg-black"
+                      liveClassName="rounded-full bg-[#171412] px-4 py-1.5 text-xs font-semibold text-[#fff8f1] hover:bg-black hover:text-[#fff8f1]"
                       sourceClassName="rounded-full border border-[#171412]/12 bg-[#fff6ee] px-4 py-1.5 text-xs font-semibold text-[#6d645c] hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]"
                     />
                   </div>

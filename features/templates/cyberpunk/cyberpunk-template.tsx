@@ -541,7 +541,7 @@ export function CyberpunkTemplate({ data }: { data: PortfolioData }) {
             />
             <ContactChips
               portfolio={portfolio}
-              chipClassName={cn("text-xs text-zinc-400", monoFont)}
+              chipClassName={cn("rounded-sm border border-white/15 bg-white/[0.03] px-2.5 py-1 text-xs text-zinc-300", monoFont)}
             />
             {hasNonHeroSocialProfiles(socialProfiles) && (
               <SocialPills

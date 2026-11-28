@@ -458,7 +458,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
           <div className="flex min-w-0 flex-col gap-3 border-t border-black pt-4 @lg:border-t-0 @lg:pt-0">
             <ContactChips
               portfolio={portfolio}
-              chipClassName="rounded-none border-0 bg-transparent px-0 py-0 text-left text-sm text-neutral-600 underline-offset-4 hover:text-black hover:underline"
+              chipClassName="rounded-sm border border-neutral-300 bg-white px-2.5 py-1 text-left text-sm text-neutral-700 transition-colors hover:border-black hover:text-black"
             />
             <HeroProfileButtons
               profiles={socialProfiles}

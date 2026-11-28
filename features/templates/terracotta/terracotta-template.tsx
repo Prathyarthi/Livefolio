@@ -271,7 +271,7 @@ export function TerracottaTemplate({ data }: { data: PortfolioData }) {
             {portfolio.headline && <p className={cn("mt-6 max-w-[38rem] text-xl leading-8 @md:text-2xl", mute)}><RichText text={portfolio.headline} /></p>}
           </div>
           <div className="self-end bg-[#fffaf3] p-5">
-            <ContactChips portfolio={portfolio} chipClassName="rounded-none bg-transparent px-0 py-0 text-sm text-[#6f665d]" />
+            <ContactChips portfolio={portfolio} chipClassName="rounded-sm border border-[#27231f]/15 bg-[#f6f1ea]/70 px-2.5 py-1 text-sm text-[#6f665d]" />
             <div className="mt-4 flex flex-wrap gap-2">
               <HeroProfileButtons profiles={socialProfiles} className="rounded-none border border-[#27231f]/12 bg-transparent px-3 py-1.5 text-sm text-[#27231f] hover:border-[var(--lf-accent)]" />
               {hasNonHeroSocialProfiles(socialProfiles) && <SocialPills profiles={socialProfiles} showUsername excludeHeroPlatforms className="rounded-none border border-[#27231f]/12 bg-transparent px-3 py-1.5 text-sm text-[#27231f] hover:border-[var(--lf-accent)]" />}

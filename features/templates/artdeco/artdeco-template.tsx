@@ -178,8 +178,8 @@ export function ArtDecoTemplate({ data }: { data: PortfolioData }) {
                       sourceUrl={project.sourceUrl}
                       label={stripRichTextToPlain(project.title)}
                       projectId={project.id}
-                      liveClassName="rounded-none border border-[#c5a45c]/40 bg-transparent px-3 py-1.5 text-xs font-medium text-[#c5a45c] hover:bg-[#c5a45c]/10"
-                      sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-[#b9ad90] hover:text-[#f1ead7]"
+                      liveClassName="rounded-none border border-[#c5a45c]/40 bg-transparent px-3 py-1.5 text-xs font-medium text-[#c5a45c] hover:bg-[#c5a45c]/10 hover:text-[#e4c98a]"
+                      sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-[#b9ad90] hover:bg-transparent hover:text-[#f1ead7]"
                     />
                   </div>
                 </div>

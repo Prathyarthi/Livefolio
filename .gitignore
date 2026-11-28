@@ -52,3 +52,5 @@ svs
 /.agents/
 .cursor/
 skills-lock.json
+
+dummy-portfolio.md

@@ -247,7 +247,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                           sourceUrl={project.sourceUrl}
                           label={stripRichTextToPlain(project.title)}
                           projectId={project.id}
-                          liveClassName="rounded-lg bg-[#12141a] px-3 py-1.5 text-xs font-medium text-white hover:bg-black"
+                          liveClassName="rounded-lg bg-[#12141a] px-3 py-1.5 text-xs font-medium text-white hover:bg-black hover:text-white"
                           sourceClassName="rounded-lg border border-[#12141a]/12 bg-white px-3 py-1.5 text-xs font-medium text-[#667083] hover:text-[#12141a]"
                         />
                       </div>
@@ -418,15 +418,19 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {contributionCalendar && !resolved.isHidden("github") && (
-            <section className={cn(tileDark, "col-span-1 @md:col-span-3 @lg:col-span-4")} style={{ order: slot("github") }}>
+            <section className={cn(tileDark, "col-span-1 min-w-0 @md:col-span-3 @lg:col-span-4")} style={{ order: slot("github") }}>
               <TileTitle dark>{labels.github}</TileTitle>
-              <div className="overflow-x-auto pb-2">
+              <div className="min-w-0">
                 <GitHubContributionHeatmap
                   calendar={contributionCalendar}
                   profileUrl={githubProfile?.url}
                   username={githubProfile?.username}
                   variant="minimal"
-                  label={labels.github}
+                  stretch
+                  label={null}
+                  className="mt-0 border-0 pt-0"
+                  frameClassName="w-full"
+                  metaClassName="mb-4 justify-start text-sm text-[#9aa3b2] [&_span]:text-[#eef0f2]"
                 />
               </div>
             </section>

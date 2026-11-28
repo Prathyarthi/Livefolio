@@ -47,6 +47,7 @@ export function GitHubContributionHeatmap({
   stretch = false,
   className,
   frameClassName,
+  metaClassName,
 }: {
   calendar: GitHubContributionCalendar;
   profileUrl?: string | null;
@@ -57,6 +58,7 @@ export function GitHubContributionHeatmap({
   stretch?: boolean;
   className?: string;
   frameClassName?: string;
+  metaClassName?: string;
 }) {
   const monthLabels = calendar.weeks.map((week, index) => {
     const firstRealDay = week.contributionDays.find((day) =>
@@ -92,7 +94,7 @@ export function GitHubContributionHeatmap({
   return (
     <div className={cn(theme.rootClassName, className)}>
       {label ? <p className={theme.labelClassName}>{label}</p> : null}
-      <div className={theme.metaClassName}>
+      <div className={cn(theme.metaClassName, metaClassName)}>
         <p>
           <span className={theme.totalClassName}>
             {calendar.totalContributions}
@@ -240,7 +242,7 @@ function groupMonthLabelSpans(labels: string[]): Array<{ label: string; span: nu
 
 /** Intensity steps for contribution cells — tinted from `--lf-accent`. */
 const LIGHT_ACCENT_CELLS = [
-  "bg-transparent ring-1 ring-inset ring-[color-mix(in_srgb,currentColor_16%,transparent)]",
+  "bg-transparent ring-1 ring-inset ring-stone-300",
   "bg-[color-mix(in_srgb,var(--lf-accent)_18%,white)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--lf-accent)_28%,transparent)]",
   "bg-[color-mix(in_srgb,var(--lf-accent)_38%,white)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)]",
   "bg-[color-mix(in_srgb,var(--lf-accent)_62%,white)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--lf-accent)_35%,transparent)]",

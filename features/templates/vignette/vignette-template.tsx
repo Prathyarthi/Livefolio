@@ -576,7 +576,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
                   </div>
                   <ContactChips
                     portfolio={portfolio}
-                    chipClassName="block w-full rounded-2xl bg-[rgba(12,13,27,0.62)] px-4 py-3 text-sm text-white backdrop-blur-md"
+                    chipClassName="block w-full rounded-2xl border border-white/15 bg-[rgba(12,13,27,0.62)] px-4 py-3 text-sm text-white backdrop-blur-md"
                   />
                   <ContactSocialGrid
                     profiles={socialProfiles}

@@ -455,7 +455,7 @@ export function PaperTemplate({ data }: { data: PortfolioData }) {
             <div className="mt-8 flex flex-col gap-3">
               <ContactChips
                 portfolio={portfolio}
-                chipClassName={cn("rounded-none border-0 bg-transparent px-0 py-0 text-sm underline-offset-4 hover:underline", mute)}
+                chipClassName={cn("rounded-sm border bg-[#fffef9] px-2.5 py-1 text-sm transition-colors hover:border-[#25231f]/35", hairline, mute)}
               />
               <HeroProfileButtons
                 profiles={socialProfiles}

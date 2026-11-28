@@ -393,7 +393,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
           )}
 
           <div className="mt-8 flex flex-col gap-3">
-            <ContactChips portfolio={portfolio} chipClassName="rounded-full bg-[#fbfbfc] px-3 py-1.5 text-sm text-[#68717b] shadow-[0_10px_30px_rgba(47,52,58,0.05)]" />
+            <ContactChips portfolio={portfolio} chipClassName="rounded-full border border-[#2f343a]/12 bg-[#fbfbfc] px-3 py-1.5 text-sm text-[#68717b] shadow-[0_10px_30px_rgba(47,52,58,0.05)]" />
             <HeroProfileButtons profiles={socialProfiles} className="rounded-full border border-[#2f343a]/10 bg-[#fbfbfc] px-3 py-1.5 text-sm text-[#2f343a] transition-colors hover:border-[var(--lf-accent)]/40" />
             {hasNonHeroSocialProfiles(socialProfiles) && (
               <SocialPills profiles={socialProfiles} showUsername excludeHeroPlatforms className="rounded-full px-2.5 py-1 text-sm text-[#68717b] transition-colors hover:text-[#2f343a]" />

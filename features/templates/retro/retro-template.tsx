@@ -490,7 +490,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section
         key="github"
-        className="border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:p-8"
+        className="min-w-0 border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:p-8"
       >
         <SectionHeading>{labels.github}</SectionHeading>
         <GitHubContributionHeatmap
@@ -498,7 +498,10 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
           profileUrl={githubProfile?.url}
           username={githubProfile?.username}
           variant="minimal"
-          label={labels.github}
+          stretch
+          label={null}
+          className="mt-0 border-0 pt-0"
+          frameClassName="w-full"
         />
       </section>
     ) : null,

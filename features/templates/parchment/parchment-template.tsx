@@ -371,7 +371,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
             )}
 
             <div className="mt-8 flex flex-col gap-3">
-              <ContactChips portfolio={portfolio} chipClassName="border-b border-[#2c2a24]/20 px-0 py-0.5 text-sm text-[#6d6759]" />
+              <ContactChips portfolio={portfolio} chipClassName="rounded-sm border border-[#2c2a24]/20 bg-[#f3ead7]/70 px-2.5 py-1 text-sm text-[#6d6759]" />
               <HeroProfileButtons profiles={socialProfiles} className="border border-[#2c2a24]/18 bg-[#ebe0c9] px-3 py-1.5 text-sm text-[#2c2a24] transition-colors hover:bg-[#2c2a24]/5" />
               {hasNonHeroSocialProfiles(socialProfiles) && (
                 <SocialPills profiles={socialProfiles} showUsername excludeHeroPlatforms className="border-b border-transparent px-0 py-0.5 text-sm text-[#6d6759] transition-colors hover:border-[#2c2a24]/30 hover:text-[#2c2a24]" />

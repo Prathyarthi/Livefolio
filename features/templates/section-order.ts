@@ -135,7 +135,8 @@ export function resolveSectionLayout(
   const stored = getStoredSectionLayout(customization);
   const hidden = normalizeHidden(stored.hidden);
   const hiddenSet = new Set(hidden);
-  const hasCustomOrder = Array.isArray(stored.order) && stored.order.length > 0;
+  const hasCustomOrder =
+    !layout.fixed && Array.isArray(stored.order) && stored.order.length > 0;
   const templateDefault = layout.groups.flatMap((group) => group.defaultOrder);
   const globalOrder = normalizeOrder(
     hasCustomOrder ? stored.order : templateDefault,

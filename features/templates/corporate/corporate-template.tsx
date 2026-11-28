@@ -132,9 +132,9 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
           {orderedProjects.map((project) => (
             <article
               key={project.id}
-              className={cn("grid min-w-0 grid-cols-1 gap-4 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)_9.5rem] @md:items-start @md:gap-8", hairline)}
+              className={cn("grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8", hairline)}
             >
-              <div className="aspect-[8/5] w-full overflow-hidden rounded-none border border-[#0b1220]/10 bg-white">
+              <div className="min-w-0 w-full overflow-hidden rounded-none border border-[#0b1220]/10 bg-white">
                 <TemplateProjectPreview
                   templateId="corporate"
                   liveUrl={project.liveUrl ?? null}
@@ -144,7 +144,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                   alt={stripRichTextToPlain(project.title)}
                   loading="lazy"
                   accentColor={primaryColor}
-                  containerClassName="size-full bg-white"
+                  containerClassName="bg-white"
                 />
               </div>
               <div className="min-w-0">
@@ -182,16 +182,16 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                       .join(", ")}
                   </p>
                 )}
-              </div>
-              <div className="shrink-0 @md:pt-1">
-                <ProjectActions
-                  liveUrl={project.liveUrl}
-                  sourceUrl={project.sourceUrl}
-                  label={stripRichTextToPlain(project.title)}
-                  projectId={project.id}
-                  liveClassName="rounded-none border border-[#0b1220]/20 bg-transparent px-3 py-1.5 text-xs font-medium text-[#0b1220] hover:border-[#0b1220]/45 hover:bg-transparent"
-                  sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-[#5c6578] hover:bg-transparent hover:text-[#0b1220] hover:underline"
-                />
+                <div className="mt-4">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName="rounded-none border border-[#0b1220]/20 bg-transparent px-3 py-1.5 text-xs font-medium text-[#0b1220] hover:border-[#0b1220]/45 hover:bg-transparent"
+                    sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-[#5c6578] hover:bg-transparent hover:text-[#0b1220] hover:underline"
+                  />
+                </div>
               </div>
             </article>
           ))}

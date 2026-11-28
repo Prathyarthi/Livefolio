@@ -198,7 +198,7 @@ export function SpotlightTemplate({ data }: { data: PortfolioData }) {
                   sourceUrl={project.sourceUrl}
                   label={stripRichTextToPlain(project.title)}
                   projectId={project.id}
-                  liveClassName="rounded-full bg-[#17231f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#24352f]"
+                  liveClassName="rounded-full bg-[#17231f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#24352f] hover:text-white"
                   sourceClassName="rounded-full border border-[#17231f]/15 bg-white px-3 py-1.5 text-xs font-semibold text-[#17231f] hover:border-[var(--lf-accent)]"
                 />
               </div>

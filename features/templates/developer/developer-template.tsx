@@ -342,8 +342,8 @@ export default function DeveloperTemplate({ data }: { data: PortfolioData }) {
                     sourceUrl={project.sourceUrl}
                     label={stripRichTextToPlain(project.title)}
                     projectId={project.id}
-                    liveClassName="rounded-none bg-[var(--lf-accent)] px-3 py-1.5 font-[family-name:var(--font-developer-mono)] text-xs text-[#0b0d0c] hover:bg-[var(--lf-accent)]/85"
-                    sourceClassName="rounded-none border border-[#d7e0c8]/16 bg-transparent px-3 py-1.5 font-[family-name:var(--font-developer-mono)] text-xs text-[#d7e0c8] hover:bg-[#d7e0c8]/5"
+                    liveClassName="rounded-none bg-[var(--lf-accent)] px-3 py-1.5 font-[family-name:var(--font-developer-mono)] text-xs text-[#0b0d0c] hover:bg-[var(--lf-accent)]/85 hover:text-[#0b0d0c]"
+                    sourceClassName="rounded-none border border-[#d7e0c8]/16 bg-transparent px-3 py-1.5 font-[family-name:var(--font-developer-mono)] text-xs text-[#d7e0c8] hover:bg-[#d7e0c8]/8 hover:text-[#d7e0c8]"
                   />
                 </div>
               </div>

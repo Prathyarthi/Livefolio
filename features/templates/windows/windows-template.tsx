@@ -541,7 +541,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
               />
               <ContactChips
                 portfolio={portfolio}
-                chipClassName="text-sm text-black/70"
+                chipClassName="rounded-[2px] border border-[#808080] bg-white px-2.5 py-1 text-sm text-black/80"
               />
               {hasNonHeroSocialProfiles(socialProfiles) && (
                 <SocialPills

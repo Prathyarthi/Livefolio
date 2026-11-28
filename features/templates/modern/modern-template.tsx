@@ -200,11 +200,11 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
                     label={stripRichTextToPlain(project.title)}
                     projectId={project.id}
                     liveClassName={cn(
-                      "rounded-none border bg-transparent px-3 py-1.5 text-xs font-medium hover:bg-[#eceae4]/5",
+                      "rounded-none border bg-transparent px-3 py-1.5 text-xs font-medium hover:bg-[#eceae4]/10 hover:text-[#eceae4]",
                       hairline,
                       ink,
                     )}
-                    sourceClassName={cn("rounded-none px-3 py-1.5 text-xs font-medium hover:underline", mute)}
+                    sourceClassName={cn("rounded-none px-3 py-1.5 text-xs font-medium hover:bg-transparent hover:text-[#eceae4] hover:underline", mute)}
                   />
                 </div>
               </div>
@@ -506,7 +506,8 @@ export function ModernTemplate({ data }: { data: PortfolioData }) {
             <ContactChips
               portfolio={portfolio}
               chipClassName={cn(
-                "rounded-none border-0 bg-transparent px-0 py-0 text-sm underline-offset-4 hover:underline",
+                "rounded-sm border bg-[#eceae4]/[0.04] px-2.5 py-1 text-sm transition-colors hover:border-[#eceae4]/30",
+                hairline,
                 mute,
               )}
             />

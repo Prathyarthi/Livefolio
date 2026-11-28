@@ -501,7 +501,8 @@ export function MinimalTemplate({ data }: { data: PortfolioData }) {
             <ContactChips
               portfolio={portfolio}
               chipClassName={cn(
-                "rounded-none border-0 bg-transparent px-0 py-0 text-sm underline-offset-4 hover:underline",
+                "rounded-sm border bg-white/60 px-2.5 py-1 text-sm transition-colors hover:border-[#171614]/35",
+                hairline,
                 mute,
               )}
             />

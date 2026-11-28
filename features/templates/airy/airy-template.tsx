@@ -187,7 +187,7 @@ export function AiryTemplate({ data }: { data: PortfolioData }) {
                     sourceUrl={project.sourceUrl}
                     label={stripRichTextToPlain(project.title)}
                     projectId={project.id}
-                    liveClassName="rounded-full bg-[#243447] px-4 py-1.5 text-xs font-semibold text-white hover:bg-black"
+                    liveClassName="rounded-full bg-[#243447] px-4 py-1.5 text-xs font-semibold text-white hover:bg-black hover:text-white"
                     sourceClassName="rounded-full border border-[#9ec9e8]/55 bg-white/80 px-4 py-1.5 text-xs font-semibold text-[#5b6d80] hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]"
                   />
                 </div>

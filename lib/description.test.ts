@@ -46,12 +46,6 @@ describe("parseDescription", () => {
     ]);
   });
 
-  test("treats blank-separated paragraphs as a list", () => {
-    expect(parseDescription("Did X.\n\nDid Y.")).toEqual([
-      { type: "list", items: ["Did X.", "Did Y."] },
-    ]);
-  });
-
   test("keeps a prose block separate from a following list", () => {
     expect(
       parseDescription(
@@ -68,24 +62,6 @@ describe("parseDescription", () => {
 
   test("strips source bullet markers", () => {
     expect(parseDescription("• Did X\n- Did Y")).toEqual([
-      { type: "list", items: ["Did X", "Did Y"] },
-    ]);
-  });
-
-  test("turns HTML list items into a list", () => {
-    expect(
-      parseDescription("<ul><li>Did X</li><li>Did Y</li></ul>"),
-    ).toEqual([{ type: "list", items: ["Did X", "Did Y"] }]);
-  });
-
-  test("turns HTML paragraphs into a list", () => {
-    expect(parseDescription("<p>Did X</p><p>Did Y</p>")).toEqual([
-      { type: "list", items: ["Did X", "Did Y"] },
-    ]);
-  });
-
-  test("turns HTML line breaks into a list", () => {
-    expect(parseDescription("<p>Did X<br>Did Y</p>")).toEqual([
       { type: "list", items: ["Did X", "Did Y"] },
     ]);
   });

@@ -218,7 +218,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                     label={stripRichTextToPlain(project.title)}
                     projectId={project.id}
                     liveClassName="rounded-sm border border-white/20 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-white/5 hover:text-white"
-                    sourceClassName="rounded-sm px-2 py-1.5 text-xs font-medium text-slate-400 hover:text-white"
+                    sourceClassName="rounded-sm px-2 py-1.5 text-xs font-medium text-slate-400 hover:bg-transparent hover:text-white"
                   />
                 </div>
               </div>
@@ -545,7 +545,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
               profiles={socialProfiles}
               className="rounded-sm bg-[var(--lf-accent)] px-4 py-2 text-sm font-semibold text-[#04050a] transition-opacity hover:opacity-90"
             />
-            <ContactChips portfolio={portfolio} chipClassName="text-sm text-slate-400" />
+            <ContactChips portfolio={portfolio} chipClassName="rounded-sm border border-white/15 bg-white/[0.04] px-2.5 py-1 text-sm text-slate-300" />
             {hasNonHeroSocialProfiles(socialProfiles) && (
               <SocialPills
                 profiles={socialProfiles}
