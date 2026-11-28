@@ -8,7 +8,7 @@ export function RecruiterCTA() {
           <h2 className="text-h1 font-semibold tracking-[-0.03em] text-text-primary">
             Start hiring on proof
           </h2>
-          <p className="prose-measure mx-auto mt-4 text-body text-text-secondary">
+          <p className="studio-lead prose-measure mx-auto mt-4 text-text-secondary">
             Post a role free. Ranked shortlists and reference-backed profiles,
             no keyword theatre.
           </p>

@@ -51,7 +51,7 @@ function RecruiterFaqCard({ question, answer }: { question: string; answer: stri
       <summary
         className={cn(
           "flex cursor-pointer list-none items-center justify-between gap-3 py-3.5",
-          "text-left text-sm font-semibold text-text-primary",
+          "text-left text-base font-semibold text-text-primary sm:text-lg",
           "marker:content-none [&::-webkit-details-marker]:hidden",
         )}
       >

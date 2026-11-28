@@ -15,7 +15,7 @@ export function RecruiterHero() {
           <span className="block">not resume keywords</span>
         </h1>
 
-        <p className="mx-auto mt-5 max-w-[34rem] text-body text-text-secondary sm:text-body-lg">
+        <p className="studio-lead mx-auto mt-5 max-w-[36rem] text-text-secondary">
           Post a role free. Candidates apply in one click with a live portfolio.
           You get a ranked shortlist that explains itself.
         </p>

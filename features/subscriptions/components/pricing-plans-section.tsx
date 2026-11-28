@@ -25,7 +25,7 @@ export function PricingPlansSection({
         <Heading className="text-h1 text-text-primary md:text-display">
           Two simple plans
         </Heading>
-        <p className="prose-measure mx-auto text-body text-text-secondary">
+        <p className="studio-lead prose-measure mx-auto text-text-secondary">
           Start with a one-month free trial of all core workflows. After that,
           stay on free essentials or upgrade to Pro, billed monthly, quarterly,
           or yearly.

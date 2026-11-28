@@ -112,6 +112,7 @@
 
 .viMark {
   grid-area: 1 / 1;
+  z-index: 0;
   display: inline-grid;
   font-size: clamp(10rem, 34cqw, 21rem);
   line-height: 0.78;
@@ -125,18 +126,53 @@
   position: relative;
 }
 
+/*
+ * Constant letter face. Soft line-light on the rim only:
+ * background-clip text + animated conic angle (no filters on the mover).
+ */
+@property --vg-glow-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.viGlow {
+  z-index: 1;
+  color: transparent;
+  background: conic-gradient(
+    from var(--vg-glow-angle, 0deg),
+    transparent 0deg,
+    transparent 290deg,
+    rgba(255, 210, 238, 0.45) 308deg,
+    #ffd2ee 322deg,
+    #ffa948 338deg,
+    #ff885f 350deg,
+    transparent 360deg
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  transform: scale(1.06);
+  filter:
+    drop-shadow(0 0 0.035em rgba(255, 248, 236, 0.95))
+    drop-shadow(0 0 0.11em rgba(255, 169, 72, 0.8))
+    drop-shadow(0 0 0.2em rgba(204, 70, 160, 0.5));
+  animation: vg-glow-spin 10s linear infinite;
+}
+
 .viOutline {
+  z-index: 2;
   color: var(--vg-board);
-  -webkit-text-stroke: 0.12em var(--vg-board);
-  filter: drop-shadow(0 0.06em 0 rgba(5, 5, 12, 0.85));
+  -webkit-text-stroke: 0.04em var(--vg-board);
 }
 
 .viKeyline {
+  z-index: 3;
   color: #fff;
-  -webkit-text-stroke: 0.045em #fff;
+  -webkit-text-stroke: 4px #fff;
 }
 
 .viFill {
+  z-index: 4;
   background-image: url("/templates/vignette/palms.jpg"), var(--vg-sunset);
   background-size: cover;
   background-position: center 40%;
@@ -145,17 +181,23 @@
   color: transparent;
 }
 
+@keyframes vg-glow-spin {
+  to {
+    --vg-glow-angle: 360deg;
+  }
+}
+
 .titleStack {
   grid-area: 1 / 1;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-transform: uppercase;
-  line-height: 0.82;
-  letter-spacing: 0.04em;
-  color: #fff;
+  text-transform: lowercase;
+  line-height: 0.7;
+  letter-spacing: 0.01em;
+  color: #ffecbd;
   -webkit-text-stroke: 0.09em var(--vg-board);
   paint-order: stroke fill;
   font-size: clamp(2.6rem, 7.4cqw, 5.5rem);
@@ -216,6 +258,57 @@
     rgba(5, 5, 12, 0.7) 55%,
     rgba(5, 5, 12, 0) 100%
   );
+}
+
+/* ---------- Wanted HUD (GTA stars) ---------- */
+
+.wanted {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.4rem 0.5rem;
+  background: rgba(5, 5, 12, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 0 1px rgba(255, 241, 220, 0.08);
+  pointer-events: none;
+}
+
+.wantedStar {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  fill: transparent;
+  stroke: color-mix(in srgb, var(--vg-cream) 48%, transparent);
+  stroke-width: 1.35;
+  stroke-linejoin: round;
+  transition:
+    fill 160ms ease,
+    stroke 160ms ease,
+    filter 160ms ease;
+}
+
+.wantedStar[data-on] {
+  fill: var(--vg-cream);
+  stroke: var(--vg-cream);
+  filter: drop-shadow(0 0 5px rgba(255, 241, 220, 0.8));
+  animation: vg-wanted-pop 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes vg-wanted-pop {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.35;
+  }
+  55% {
+    transform: scale(1.28);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .backdrop {
@@ -557,12 +650,19 @@
 
 @media (prefers-reduced-motion: reduce) {
   .tileImg,
-  .lockup {
+  .lockup,
+  .wantedStar[data-on],
+  .viGlow {
     animation: none;
   }
 
+  .viGlow {
+    --vg-glow-angle: 40deg;
+  }
+
   .vignetteMedia img,
-  .tab {
+  .tab,
+  .wantedStar {
     transition: none;
   }
 

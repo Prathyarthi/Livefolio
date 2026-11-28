@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { Instrument_Sans, Mr_Dafoe } from "next/font/google";
 import { ArrowUp, ArrowUpRight, Trophy } from "lucide-react";
 import {
@@ -106,6 +112,103 @@ function monthYear(date: string | null): string {
   return parsed.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
+function getScrollParent(el: HTMLElement): Element | Window {
+  let parent = el.parentElement;
+  while (parent) {
+    const { overflowY } = getComputedStyle(parent);
+    if (
+      overflowY === "auto" ||
+      overflowY === "scroll" ||
+      overflowY === "overlay"
+    ) {
+      return parent;
+    }
+    parent = parent.parentElement;
+  }
+  return window;
+}
+
+/** GTA wanted level is always five stars; section progress maps into that range. */
+const WANTED_MAX = 5;
+
+/** Five-point star — GTA wanted HUD silhouette. */
+function WantedStarIcon({ lit }: { lit: boolean }) {
+  return (
+    <svg
+      className={styles.wantedStar}
+      data-on={lit || undefined}
+      viewBox="0 0 24 24"
+      aria-hidden
+    >
+      <path d="M12 2.2 14.85 9.1l7.35.7-5.55 4.85 1.65 7.15L12 17.9l-6.3 3.9 1.65-7.15L1.8 9.8l7.35-.7L12 2.2z" />
+    </svg>
+  );
+}
+
+/** Map how many body sections you've cleared onto the classic 0–5 wanted scale. */
+function toWantedLevel(cleared: number, total: number): number {
+  if (cleared <= 0 || total <= 0) return 0;
+  if (cleared >= total) return WANTED_MAX;
+  return Math.max(1, Math.ceil((cleared / total) * WANTED_MAX));
+}
+
+/**
+ * Wanted HUD: empty on the cover, then fills toward 5★ as you move through
+ * chapters — same ceiling as GTA, even when the portfolio has more sections.
+ */
+function WantedStars({
+  mainRef,
+}: {
+  mainRef: RefObject<HTMLElement | null>;
+}) {
+  const [level, setLevel] = useState(0);
+
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+
+    const readSections = () =>
+      Array.from(main.querySelectorAll<HTMLElement>(":scope > section"));
+
+    const update = () => {
+      const sections = readSections();
+      // Band near the top of the viewport — crossing it "clears" a chapter.
+      const marker = window.innerHeight * 0.28;
+      let cleared = 0;
+      for (let i = 0; i < sections.length; i++) {
+        if (sections[i]!.getBoundingClientRect().top <= marker) cleared = i + 1;
+      }
+      setLevel(toWantedLevel(cleared, sections.length));
+    };
+
+    const scrollRoot = getScrollParent(main);
+    update();
+    scrollRoot.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    const mo = new MutationObserver(update);
+    mo.observe(main, { childList: true });
+
+    return () => {
+      scrollRoot.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      mo.disconnect();
+    };
+  }, [mainRef]);
+
+  return (
+    <div
+      className={styles.wanted}
+      role="status"
+      aria-live="polite"
+      aria-label={`Wanted level ${level} of ${WANTED_MAX}`}
+    >
+      {Array.from({ length: WANTED_MAX }, (_, i) => (
+        <WantedStarIcon key={i} lit={i < level} />
+      ))}
+    </div>
+  );
+}
+
 export function VignetteTemplate({ data }: { data: PortfolioData }) {
   const {
     portfolio,
@@ -148,6 +251,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
   const initials = initialsOf(portfolio.title);
   const firstName = plainTitle.split(/\s+/)[0] ?? "";
   const titleLines = plainTitle.split(/\s+/).filter(Boolean);
+  const mainRef = useRef<HTMLElement>(null);
 
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
@@ -207,7 +311,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
               <div className="self-end">
                 <div className={styles.stamp}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- static template art */}
-                  <img src={ART.beach} alt="" />
+                  <img src={portfolio.profileImageUrl || ART.beach} alt="" />
                 </div>
               </div>
               <div className="mt-auto space-y-7 pb-2">
@@ -532,7 +636,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
                 href={`mailto:${portfolio.contactEmail}`}
                 className={cn(
                   styles.emailMark,
-                  "block text-4xl leading-[0.9] tracking-wide text-[var(--vg-cream)] transition-colors hover:text-[var(--lf-accent)] @md:text-6xl [overflow-wrap:anywhere]",
+                  "block text-2xl leading-[0.95] tracking-wide text-[var(--vg-cream)] transition-colors hover:text-[var(--lf-accent)] @md:text-3xl @4xl:text-4xl [overflow-wrap:anywhere]",
                 )}
               >
                 {portfolio.contactEmail}
@@ -610,26 +714,34 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
       )}
       style={accentRootStyle(primaryColor)}
     >
-      {navbarEnabled && (
-        <div className="sticky top-0 z-40 h-0">
-          <div className={cn(styles.navScrim, "flex items-center gap-4 px-4 pb-8 pt-3 @md:px-6")}>
-            {initials && (
-              <a
-                href="#vignette-top"
-                aria-label={plainTitle}
-                className={cn(styles.miniMono, "shrink-0 text-3xl")}
-              >
-                {initials}
-              </a>
-            )}
+      <div className="sticky top-0 z-50 h-0">
+        <div
+          className={cn(
+            styles.navScrim,
+            "flex items-center gap-3 px-4 pb-8 pt-3 @md:gap-4 @md:px-6",
+          )}
+        >
+          {navbarEnabled && initials ? (
+            <a
+              href="#vignette-top"
+              aria-label={plainTitle}
+              className={cn(styles.miniMono, "shrink-0 text-3xl")}
+            >
+              {initials}
+            </a>
+          ) : null}
+          {navbarEnabled ? (
             <TemplateNavbar
               items={sections}
               className="min-w-0 flex-1 border-0 bg-transparent backdrop-blur-none @md:flex @md:justify-end"
               linkClassName="px-2.5 py-1.5 text-sm font-medium text-white/75 transition-colors hover:text-white"
             />
-          </div>
+          ) : (
+            <div className="min-w-0 flex-1" />
+          )}
+          <WantedStars mainRef={mainRef} />
         </div>
-      )}
+      </div>
 
       <header className={styles.cover}>
         <div className={cn(styles.tile, styles.keyTile, "flex min-h-[620px] flex-col justify-between")}>
@@ -641,6 +753,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
             <div className={styles.titleCluster}>
               {initials ? (
                 <div className={styles.viMark} aria-hidden>
+                  <span className={styles.viGlow}>{initials}</span>
                   <span className={styles.viOutline}>{initials}</span>
                   <span className={styles.viKeyline}>{initials}</span>
                   <span className={styles.viFill}>{initials}</span>
@@ -653,7 +766,7 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
               </h1>
             </div>
             {portfolio.location && (
-              <p className={cn(styles.neon, styles.titleNeon)}>
+              <p className={cn(styles.neon, styles.titleNeon,"z-10 relative")}>
                 <RichText text={portfolio.location} />
               </p>
             )}
@@ -696,7 +809,10 @@ export function VignetteTemplate({ data }: { data: PortfolioData }) {
           <img src={ART.night} alt="" />
         </div>
 
-        <main className="relative z-10 mx-auto flex max-w-6xl flex-col gap-24 px-5 py-20 @md:gap-32 @md:px-10 @md:py-28">
+        <main
+          ref={mainRef}
+          className="relative z-10 mx-auto flex max-w-6xl flex-col gap-24 px-5 py-20 @md:gap-32 @md:px-10 @md:py-28"
+        >
           {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.map((cs) => (

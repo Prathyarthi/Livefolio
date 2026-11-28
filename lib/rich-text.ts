@@ -79,12 +79,29 @@ export function sanitizeRichHtml(html: string): string {
 }
 
 /**
+ * tiptap-markdown's delimiter trimmer can drop the opening `***` for
+ * bold+italic, leaving `Word***` instead of `***Word***`. Reattach those
+ * stranded closers so already-saved roles/titles still render.
+ */
+export function repairStrandedEmphasis(text: string): string {
+  return text.replace(
+    /(^|[\s([{"'])([^\s*_([{]*?\S)\*\*\*(?!\*)/g,
+    (full, lead: string, word: string) => {
+      if (/^[*_]/.test(word)) return full;
+      return `${lead}***${word}***`;
+    },
+  );
+}
+
+/**
  * Convert a single inline/block fragment (paragraph, list item, heading label)
  * that may contain Markdown + limited HTML into sanitized HTML.
  */
 export function inlineRichTextToSafeHtml(text: string): string {
   // Stranded markdown hard-break markers (`\` at EOL) render as visible slashes.
-  const cleaned = text.replace(/\\+\s*$/gm, "").trimEnd();
+  const cleaned = repairStrandedEmphasis(
+    text.replace(/\\+\s*$/gm, "").trimEnd(),
+  );
   if (!cleaned.trim()) return "";
   const rendered = md.renderInline(cleaned);
   return sanitizeRichHtml(rendered);
@@ -93,6 +110,6 @@ export function inlineRichTextToSafeHtml(text: string): string {
 /** Full markdown document → sanitized HTML (editor round-trips / tests). */
 export function markdownToSafeHtml(markdown: string): string {
   if (!markdown.trim()) return "";
-  const cleaned = markdown.replace(/\\+\s*$/gm, "");
+  const cleaned = repairStrandedEmphasis(markdown.replace(/\\+\s*$/gm, ""));
   return sanitizeRichHtml(md.render(cleaned));
 }

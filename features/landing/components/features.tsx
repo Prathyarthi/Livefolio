@@ -36,32 +36,46 @@ function GridMark() {
   );
 }
 
-function TemplateThumb({
-  title,
-  tone,
-}: {
-  title: string;
-  tone: "warm" | "ink";
-}) {
+/** Back to front; transforms fan the stack and spread further on card hover. */
+const TEMPLATE_STACK = [
+  {
+    id: "blueprint",
+    name: "Blueprint",
+    className:
+      "-translate-x-[38%] -rotate-[9deg] group-hover:-translate-x-[52%] group-hover:-rotate-[12deg]",
+  },
+  {
+    id: "retro",
+    name: "Retro",
+    className:
+      "translate-x-[38%] rotate-[9deg] group-hover:translate-x-[52%] group-hover:rotate-[12deg]",
+  },
+  {
+    id: "modern",
+    name: "Modern",
+    className: "-translate-y-1 group-hover:-translate-y-3",
+  },
+] as const;
+
+function TemplatePreview({ id, name }: { id: string; name: string }) {
   return (
-    <div
-      className={`w-full overflow-hidden rounded-2xl border shadow-[0_8px_20px_rgba(26,24,40,0.06)] ${
-        tone === "warm"
-          ? "border-[#eadfd4] bg-[#f7f1ea]"
-          : "border-[#e4e1db] bg-white"
-      }`}
-    >
-      <div
-        className={`h-14 ${tone === "warm" ? "bg-[#e7d3c4]" : "bg-[#d9e2ea]"}`}
-      />
-      <div className="space-y-1.5 px-3 py-2.5">
-        <p className="text-[10px] font-medium tracking-[0.14em] text-[#6d675f]">
-          {title}
-        </p>
-        <div className="h-1.5 w-3/4 rounded-full bg-[#e7e2da]" />
-        <div className="h-1.5 w-1/2 rounded-full bg-[#eeeae4]" />
+    <figure className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-[0_14px_30px_rgba(26,24,40,0.16)]">
+      <div className="flex items-center gap-1 border-b border-black/5 bg-[#f4f2ee] px-2 py-1.5">
+        <span className="size-1.5 rounded-full bg-[#ff5f57]" />
+        <span className="size-1.5 rounded-full bg-[#febc2e]" />
+        <span className="size-1.5 rounded-full bg-[#28c840]" />
       </div>
-    </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`/templates/${id}.webp`}
+        alt=""
+        loading="lazy"
+        className="aspect-[4/3] w-full object-cover object-top"
+      />
+      <figcaption className="px-2.5 py-1.5 text-[10px] font-medium tracking-[0.14em] text-[#6d675f] uppercase">
+        {name}
+      </figcaption>
+    </figure>
   );
 }
 
@@ -69,10 +83,10 @@ export function Features() {
   return (
     <StudioSection id="features" padded={false}>
       <div className="px-4 sm:px-6 md:px-8">
-        <h2 className="text-center font-sans text-[clamp(2.1rem,4vw,3.15rem)] font-semibold tracking-[-0.045em] text-text-primary">
+        <h2 className="text-center text-h1 text-text-primary">
           Meet <span className="text-[#e86a5a]">Livefolio</span>
         </h2>
-        <p className="mx-auto mt-2 max-w-md text-center text-[15px] text-text-secondary sm:text-base">
+        <p className="studio-lead mx-auto mt-4 max-w-xl text-center text-text-secondary">
           A portfolio that starts from your resume and stays current.
         </p>
 
@@ -82,10 +96,10 @@ export function Features() {
               <p className="text-[11px] font-medium tracking-[0.16em] text-[#6a463c]">
                 RESUME
               </p>
-              <h3 className="mt-3 font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em] text-[#2a241f] sm:text-[2.05rem]">
+              <h3 className="mt-3 font-sans text-[clamp(1.875rem,1.55rem+0.9vw,2.35rem)] font-semibold leading-[1.15] tracking-[-0.04em] text-[#2a241f]">
                 Start from the resume you already have
               </h3>
-              <p className="mt-3 text-[14px] leading-relaxed text-[#5c4038]">
+              <p className="mt-3 text-base leading-relaxed text-[#5c4038]">
                 Upload your resume PDF (up to 10 MB). We structure your
                 experience, education, skills and projects so you begin with a
                 draft, not a blank page.
@@ -122,10 +136,10 @@ export function Features() {
                 <p className="text-[11px] font-medium tracking-[0.16em] text-white/70">
                   INTEGRATIONS
                 </p>
-                <h3 className="mt-3 max-w-[16ch] font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em] text-white">
+                <h3 className="mt-3 max-w-[16ch] font-sans text-[clamp(1.875rem,1.55rem+0.9vw,2.35rem)] font-semibold leading-[1.15] tracking-[-0.04em] text-white">
                   Bring the work you already shipped
                 </h3>
-                <p className="mt-3 max-w-[34ch] text-[14px] leading-relaxed text-white/75">
+                <p className="mt-3 max-w-[34ch] text-base leading-relaxed text-white/75">
                   Repos, articles, and coding stats can sit next to your resume
                   once you connect them.
                 </p>
@@ -149,37 +163,49 @@ export function Features() {
               <p className="text-[11px] font-medium tracking-[0.16em] text-[#6d675f]">
                 TEMPLATES
               </p>
-              <h3 className="mt-3 font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em] text-[#2a241f]">
+              <h3 className="mt-3 font-sans text-[clamp(1.875rem,1.55rem+0.9vw,2.35rem)] font-semibold leading-[1.15] tracking-[-0.04em] text-[#2a241f]">
                 Pick a layout, then keep editing
               </h3>
             </div>
-            <p className="mt-4 max-w-[36ch] text-[14px] leading-relaxed text-[#5c574f]">
+            <p className="mt-4 max-w-[36ch] text-base leading-relaxed text-[#5c574f]">
               Headings, sections, and accents stay yours after you publish.
               Same story, your choice of personality.
             </p>
           </article>
 
-          <article className="flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-[28px] bg-[#f7f6f3] p-4 lg:col-span-3">
-            <TemplateThumb title="MODERN" tone="ink" />
-            <Link
-              href="/#showcase"
-              className="w-full rounded-2xl border border-dashed border-[#e7b8ae] bg-[#fff7f5] px-3 py-4 text-center text-[11px] font-medium tracking-[0.16em] text-[#8a5348]"
-            >
-              SEE EXAMPLES
-            </Link>
-            <TemplateThumb title="QUIET" tone="warm" />
-          </article>
+          <Link
+            href="/#showcase"
+            aria-label="See all templates"
+            className="group relative flex min-h-[300px] flex-col items-center justify-between overflow-hidden rounded-[28px] bg-[#f7f6f3] p-5 pt-10 lg:col-span-3"
+          >
+            <div className="relative grid w-[58%] max-w-[11rem] place-items-center">
+              {TEMPLATE_STACK.map(({ id, name, className }) => (
+                <div
+                  key={id}
+                  className={`col-start-1 row-start-1 w-full transition-transform duration-300 ease-[var(--ease-out)] motion-reduce:transition-none ${className}`}
+                >
+                  <TemplatePreview id={id} name={name} />
+                </div>
+              ))}
+            </div>
+            <span className="mt-8 inline-flex items-center gap-1.5 rounded-full bg-[#2a241f] px-4 py-2 text-[12px] font-medium tracking-[0.04em] text-white transition-colors group-hover:bg-[#e86a5a]">
+              See all templates
+              <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </span>
+          </Link>
 
           <article className="flex min-h-[240px] flex-col justify-between rounded-[28px] bg-gradient-to-br from-[#e86a5a] via-[#ee8574] to-[#f3b5a4] p-6 text-white sm:p-8 lg:col-span-5">
             <div>
               <p className="text-[11px] font-medium tracking-[0.16em] text-white/80">
                 YOUR LINK
               </p>
-              <h3 className="mt-3 max-w-[16ch] font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em] text-white">
+              <h3 className="mt-3 max-w-[16ch] font-sans text-[clamp(1.875rem,1.55rem+0.9vw,2.35rem)] font-semibold leading-[1.15] tracking-[-0.04em] text-white">
                 One address, instead of a pile of profiles
               </h3>
             </div>
-            <p className="mt-4 max-w-[38ch] text-[14px] leading-relaxed text-white/90">
+            <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-white/90">
               Publish on{" "}
               <span className="rounded-md bg-white px-1.5 py-0.5 font-medium text-[#c24b3c]">
                 yourname.livefolio.me
@@ -195,10 +221,10 @@ export function Features() {
                 <Bot className="size-3.5" aria-hidden />
                 HIRING AGENT
               </p>
-              <h3 className="mt-3 font-sans text-[1.85rem] font-semibold leading-[1.15] tracking-[-0.04em] text-white sm:text-[2.05rem]">
+              <h3 className="mt-3 font-sans text-[clamp(1.875rem,1.55rem+0.9vw,2.35rem)] font-semibold leading-[1.15] tracking-[-0.04em] text-white">
                 Describe the hire. The agent finds the people.
               </h3>
-              <p className="mt-3 text-[14px] leading-relaxed text-white/75">
+              <p className="mt-3 text-base leading-relaxed text-white/75">
                 Hiring teams write the role in plain words. The agent drafts
                 the job, finds people who opted in to be found, and drafts
                 the invites they send.

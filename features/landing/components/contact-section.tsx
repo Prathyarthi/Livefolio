@@ -21,8 +21,8 @@ export function ContactSection() {
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] border border-border-default bg-surface-sunken text-brand-secondary">
             <Mail className="h-4 w-4" aria-hidden />
           </span>
-          <h3 className="mt-4 text-h4 text-text-primary">Email support</h3>
-          <p className="mt-1.5 text-body-sm text-text-secondary">
+          <h3 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text-primary">Email support</h3>
+          <p className="mt-2 text-base leading-relaxed text-text-secondary">
             For account, billing, and product questions, include your account
             email and a short description of the issue.
           </p>
@@ -38,8 +38,8 @@ export function ContactSection() {
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] border border-border-default bg-surface-sunken text-brand-secondary">
             <MessageCircle className="h-4 w-4" aria-hidden />
           </span>
-          <h3 className="mt-4 text-h4 text-text-primary">Support center</h3>
-          <p className="mt-1.5 text-body-sm text-text-secondary">
+          <h3 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-text-primary">Support center</h3>
+          <p className="mt-2 text-base leading-relaxed text-text-secondary">
             Browse common topics, billing guidance, and ways to get started on
             our dedicated contact page.
           </p>

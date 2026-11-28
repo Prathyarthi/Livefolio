@@ -37,8 +37,8 @@ export function RecruiterDifferentiation() {
         {POINTS.map((p) => (
           <li key={p.title} className="bg-surface-base p-6">
             <p.icon className="h-4 w-4 text-brand-secondary" aria-hidden />
-            <h3 className="mt-4 text-body font-semibold text-text-primary">{p.title}</h3>
-            <p className="mt-1 text-body-sm text-text-secondary">{p.body}</p>
+            <h3 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-text-primary">{p.title}</h3>
+            <p className="mt-1.5 text-base leading-relaxed text-text-secondary">{p.body}</p>
           </li>
         ))}
       </ul>

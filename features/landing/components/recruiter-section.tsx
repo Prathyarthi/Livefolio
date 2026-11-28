@@ -29,7 +29,7 @@ export function RecruiterSection({
       )}
     >
       <div className="mx-auto w-full">
-        <div className="mx-auto max-w-[36rem] text-center">
+        <div className="mx-auto max-w-[44rem] text-center">
           <p className="eyebrow uppercase">{label}</p>
           <h2
             id={headingId}
@@ -38,7 +38,7 @@ export function RecruiterSection({
             {title}
           </h2>
           {body ? (
-            <p className="mx-auto mt-3 max-w-[40rem] text-body text-text-secondary">
+            <p className="studio-lead mx-auto mt-4 max-w-[40rem] text-text-secondary">
               {body}
             </p>
           ) : null}
@@ -59,8 +59,8 @@ export function SectionPoints({
     <ul className="mx-auto mt-8 grid max-w-[60rem] gap-6 px-1 sm:grid-cols-3 sm:gap-8 md:mt-10">
       {points.map((p) => (
         <li key={p.title}>
-          <h3 className="text-body font-semibold text-text-primary">{p.title}</h3>
-          <p className="mt-1 text-body-sm text-text-secondary">{p.body}</p>
+          <h3 className="text-xl font-semibold tracking-[-0.02em] text-text-primary">{p.title}</h3>
+          <p className="mt-1.5 text-base leading-relaxed text-text-secondary">{p.body}</p>
         </li>
       ))}
     </ul>
@@ -88,8 +88,8 @@ export function BentoCard({
     >
       <div className="flex-1 p-5">{children}</div>
       <div className="border-t border-dashed border-border-default/70 p-5">
-        <h3 className="text-body font-semibold text-text-primary">{title}</h3>
-        <p className="mt-1 text-body-sm text-text-secondary">{body}</p>
+        <h3 className="text-xl font-semibold tracking-[-0.02em] text-text-primary">{title}</h3>
+        <p className="mt-1.5 text-base leading-relaxed text-text-secondary">{body}</p>
       </div>
     </div>
   );
