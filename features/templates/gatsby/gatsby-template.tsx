@@ -215,7 +215,7 @@ export function GatsbyTemplate({ data }: { data: PortfolioData }) {
                         <DescriptionBlock
                           text={exp.description}
                           paragraphClassName="mb-3"
-                          listClassName="list-none pl-0 space-y-2"
+                          listClassName="space-y-2 pl-5 text-[#a0a0a0] leading-relaxed font-light marker:text-[var(--lf-accent)]"
                         />
                       </div>
                     )}
@@ -406,12 +406,15 @@ export function GatsbyTemplate({ data }: { data: PortfolioData }) {
       <section key="github" className="scroll-mt-32">
 
             <SectionHeading className="mb-10 text-center justify-center">{labels.github}</SectionHeading>
-            <div className="bg-[#111c3d] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] p-8 overflow-x-auto custom-scrollbar">
+            <div className="bg-[#0b132b] border border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] p-8 overflow-x-auto custom-scrollbar">
               <GitHubContributionHeatmap
                 calendar={contributionCalendar}
                 profileUrl={githubProfile?.url}
                 username={githubProfile?.username}
-                variant="minimal"
+                variant="modern"
+                stretch
+                className="mt-0 border-0 pt-0"
+                frameClassName="rounded-none border-0 bg-[#0b132b] p-0 shadow-none"
                 label={labels.github}
               />
             </div>
@@ -444,7 +447,7 @@ export function GatsbyTemplate({ data }: { data: PortfolioData }) {
           </div>
         )}
 
-        <header className="flex flex-col items-center text-center max-w-3xl mx-auto pt-8">
+        <header className="mx-auto flex w-full min-w-0 max-w-3xl flex-col items-center pt-8 text-center">
           <div className="flex items-center gap-4 mb-8">
             <div className="h-px w-12 bg-[var(--lf-accent)]" />
             <Diamond className="w-4 h-4 text-[var(--lf-accent)]" />
@@ -461,25 +464,31 @@ export function GatsbyTemplate({ data }: { data: PortfolioData }) {
             </p>
           )}
 
-          <div className="mb-10 flex w-full min-w-0 flex-wrap justify-center gap-3 sm:gap-6">
-            <ContactChips
-              portfolio={portfolio}
-              chipClassName="max-w-full bg-transparent border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] hover:border-[var(--lf-accent)] px-3 py-2 text-[10px] font-bold text-[var(--lf-accent)] transition-all uppercase tracking-[0.12em] [overflow-wrap:anywhere] sm:px-6 sm:text-xs sm:tracking-[0.15em]"
-            />
-            <HeroProfileButtons
-              profiles={socialProfiles}
-              className="bg-[var(--lf-accent)] text-[#0b132b] border border-[var(--lf-accent)] px-5 py-2 text-[10px] font-bold transition-all hover:bg-transparent hover:text-[var(--lf-accent)] uppercase tracking-[0.12em] sm:px-8 sm:text-xs sm:tracking-[0.15em]"
-            />
+          <div className="mb-10 flex w-full min-w-0 max-w-full flex-col items-center gap-4">
+            <div className="flex w-full min-w-0 max-w-full justify-center [&>div]:w-full [&>div]:justify-center">
+              <ContactChips
+                portfolio={portfolio}
+                chipClassName="max-w-full min-w-0 bg-transparent border border-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] hover:border-[var(--lf-accent)] px-3 py-2 text-[10px] font-bold text-[var(--lf-accent)] transition-all uppercase tracking-[0.08em] [overflow-wrap:anywhere] @sm:px-6 @sm:text-xs @sm:tracking-[0.15em]"
+              />
+            </div>
+            <div className="flex w-full min-w-0 max-w-full justify-center [&>div]:w-full [&>div]:justify-center">
+              <HeroProfileButtons
+                profiles={socialProfiles}
+                className="max-w-full min-w-0 bg-[var(--lf-accent)] text-[#0b132b] border border-[var(--lf-accent)] px-4 py-2 text-[10px] font-bold transition-all hover:bg-transparent hover:text-[var(--lf-accent)] uppercase tracking-[0.08em] @sm:px-8 @sm:text-xs @sm:tracking-[0.15em]"
+              />
+            </div>
           </div>
 
           {hasNonHeroSocialProfiles(socialProfiles) && (
-            <div className="mt-4 border-t border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] pt-6 w-full max-w-md">
-              <SocialPills
-                profiles={socialProfiles}
-                showUsername
-                excludeHeroPlatforms
-                className="text-xs font-bold text-[#888] hover:text-[var(--lf-accent)] transition-colors uppercase tracking-widest"
-              />
+            <div className="mt-4 w-full min-w-0 max-w-full border-t border-[color-mix(in_srgb,var(--lf-accent)_20%,transparent)] pt-6">
+              <div className="flex w-full min-w-0 justify-center [&>div]:w-full [&>div]:justify-center">
+                <SocialPills
+                  profiles={socialProfiles}
+                  showUsername
+                  excludeHeroPlatforms
+                  className="max-w-full min-w-0 text-[10px] font-bold text-[#888] hover:text-[var(--lf-accent)] transition-colors uppercase tracking-[0.12em] [overflow-wrap:anywhere] @sm:text-xs @sm:tracking-widest"
+                />
+              </div>
             </div>
           )}
         </header>

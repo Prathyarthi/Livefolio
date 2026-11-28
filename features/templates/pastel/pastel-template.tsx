@@ -25,8 +25,8 @@ import {
   SocialPills,
   hasNonHeroSocialProfiles,
   TEMPLATE_CONTAINER,
-  TemplateNavbar,
 } from "../shared";
+import { PastelNavbar } from "./pastel-navbar";
 import { CollapsibleList } from "../collapsible-list";
 import { formatDateRange, groupSkillsByCategory } from "../utils";
 import { TemplateProjectPreview } from "@/components/template-project-preview";
@@ -129,8 +129,8 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading tone="blush">{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName={cn("max-w-[42rem] text-lg leading-8", mute)}
-          listClassName={cn("flex max-w-[42rem] flex-col gap-3 pl-5 text-lg leading-8 marker:text-[var(--lf-accent)]", mute)}
+          paragraphClassName={cn("text-lg leading-8", mute)}
+          listClassName={cn("flex flex-col gap-3 pl-5 text-lg leading-8 marker:text-[var(--lf-accent)]", mute)}
         />
       </section>
     ) : null,
@@ -143,11 +143,11 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
             <article
               key={project.id}
               className={cn(
-                "grid min-w-0 grid-cols-1 gap-4 border-t py-6 @md:grid-cols-[9rem_minmax(0,1fr)_auto] @md:items-start @md:gap-6",
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8",
                 hairline,
               )}
             >
-              <div className="overflow-hidden rounded-[1.25rem] bg-[#edf1f0]">
+              <div className="min-w-0 w-full overflow-hidden rounded-[1.25rem] bg-[#edf1f0]">
                 <TemplateProjectPreview
                   templateId="pastel"
                   liveUrl={project.liveUrl ?? null}
@@ -156,6 +156,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                   livePreviewProjectIds={livePreviewProjectIds}
                   alt={stripRichTextToPlain(project.title)}
                   loading="lazy"
+                  containerClassName="aspect-[8/5] w-full bg-[#edf1f0]"
                   accentColor={primaryColor}
                 />
               </div>
@@ -183,16 +184,16 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
                 {project.techStack.length > 0 && (
                   <p className={cn("mt-3 text-xs", mute)}>{project.techStack.slice(0, 5).join(" / ")}</p>
                 )}
-              </div>
-              <div className="shrink-0 @md:pt-1">
-                <ProjectActions
-                  liveUrl={project.liveUrl}
-                  sourceUrl={project.sourceUrl}
-                  label={stripRichTextToPlain(project.title)}
-                  projectId={project.id}
-                  liveClassName="rounded-full border border-[#2f343a]/10 bg-white px-3 py-1.5 text-xs font-medium text-[#2f343a] hover:border-[var(--lf-accent)]/40"
-                  sourceClassName="rounded-full px-3 py-1.5 text-xs font-medium text-[#68717b] hover:text-[#2f343a]"
-                />
+                <div className="mt-4">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName="rounded-full border border-[#2f343a]/10 bg-white px-3 py-1.5 text-xs font-medium text-[#2f343a] hover:border-[var(--lf-accent)]/40"
+                    sourceClassName="rounded-full px-3 py-1.5 text-xs font-medium text-[#68717b] hover:text-[#2f343a]"
+                  />
+                </div>
               </div>
             </article>
           ))}
@@ -205,7 +206,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading tone="lilac">{labels.experience}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {experiences.map((exp) => (
-            <article key={exp.id} className={cn("grid grid-cols-1 gap-3 border-t py-7 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-8", hairline)}>
+            <article key={exp.id} className={cn("grid grid-cols-1 gap-3 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-8", hairline)}>
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>{formatDateRange(exp.startDate, exp.endDate) || "Present"}</p>
               <div className="min-w-0">
                 <h3 className={cn("font-[family-name:var(--font-pastel-display)] text-xl font-semibold", ink)}><RichText text={exp.role} /></h3>
@@ -253,11 +254,11 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading tone="blush">{labels.education}</SectionHeading>
         <CollapsibleList initial={3} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {educations.map((edu) => (
-            <article key={edu.id} className={cn("grid grid-cols-1 gap-3 border-t py-6 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-8", hairline)}>
+            <article key={edu.id} className={cn("grid grid-cols-1 gap-3 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-8", hairline)}>
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>{formatDateRange(edu.startDate, edu.endDate) || "—"}</p>
               <div>
                 <h3 className={cn("font-[family-name:var(--font-pastel-display)] text-lg font-semibold", ink)}>
-                  <RichText text={edu.degree} />{edu.field ? <span className={mute}> in <RichText text={edu.field} /></span> : null}
+                  <RichText text={edu.degree} />{edu.field ? <> in <RichText text={edu.field} /></> : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}><RichText text={edu.institution} /></p>
                 {edu.gpa && <Badge variant="outline" className="mt-3 rounded-full border-[#b8b3d9]/60 bg-[#b8b3d9]/15 px-2 py-0 text-xs font-medium text-[#68619a]">{edu.gpa}</Badge>}
@@ -289,7 +290,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading tone="mint">{labels.achievements}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {achievements.map((ach) => (
-            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5", hairline)}>
+            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <span className="mt-2 size-2 shrink-0 rounded-full bg-[var(--lf-accent)]" />
               <div className="min-w-0">
                 <h3 className={cn("text-sm leading-6", ink)}><RichText text={ach.title} /></h3>
@@ -306,7 +307,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading tone="blush">{labels.articles}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {articles.map((article) => (
-            <article key={article.id} className={cn("border-t py-5", hairline)}>
+            <article key={article.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <ArticleSourceLabel source={article.source} className={cn("mb-1 opacity-70", mute)} />
               <div className="flex flex-col gap-2 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8">
                 <h3 className={cn("font-[family-name:var(--font-pastel-display)] text-lg font-semibold", ink)}>
@@ -343,15 +344,18 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     github: contributionCalendar ? (
-      <section key="github" className={cn("border-t pt-12", hairline)}>
+      <section key="github" className={cn("min-w-0 border-t pt-12", hairline)}>
         <SectionHeading tone="mint">{labels.github}</SectionHeading>
-        <div className="overflow-x-auto rounded-[1.5rem] border border-[#2f343a]/10 bg-[#fbfbfc] p-5">
+        <div className="min-w-0 overflow-x-auto custom-scrollbar">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="minimal"
-            label={labels.github}
+            stretch
+            className="mt-0 border-0 pt-0"
+            frameClassName="rounded-[1.5rem] border-[#2f343a]/10 bg-[#f4f5f7]"
+            label={null}
           />
         </div>
       </section>
@@ -373,7 +377,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
       <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-16 pt-10 sm:px-6 md:px-8 md:pb-28 md:pt-14">
         <div className="pointer-events-none absolute left-5 top-0 h-full w-px bg-linear-to-b from-[#d9a8b0]/45 via-[#a8cbbb]/35 to-[#b8b3d9]/40 md:left-8" />
 
-        <header className="min-w-0 pl-5 md:pl-8">
+        <header className="min-w-0 pl-5 pr-12 md:pl-8 @md:pr-0">
           <div className="mb-7 flex h-3 w-24 overflow-hidden rounded-full">
             <span className="flex-1 bg-[#d9a8b0]" />
             <span className="flex-1 bg-[#a8cbbb]" />
@@ -389,7 +393,7 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
           )}
 
           <div className="mt-8 flex flex-col gap-3">
-            <ContactChips portfolio={portfolio} chipClassName="rounded-full bg-[#fbfbfc] px-3 py-1.5 text-sm text-[#68717b] shadow-[0_10px_30px_rgba(47,52,58,0.05)]" />
+            <ContactChips portfolio={portfolio} chipClassName="rounded-full border border-[#2f343a]/12 bg-[#fbfbfc] px-3 py-1.5 text-sm text-[#68717b] shadow-[0_10px_30px_rgba(47,52,58,0.05)]" />
             <HeroProfileButtons profiles={socialProfiles} className="rounded-full border border-[#2f343a]/10 bg-[#fbfbfc] px-3 py-1.5 text-sm text-[#2f343a] transition-colors hover:border-[var(--lf-accent)]/40" />
             {hasNonHeroSocialProfiles(socialProfiles) && (
               <SocialPills profiles={socialProfiles} showUsername excludeHeroPlatforms className="rounded-full px-2.5 py-1 text-sm text-[#68717b] transition-colors hover:text-[#2f343a]" />
@@ -398,16 +402,12 @@ export function PastelTemplate({ data }: { data: PortfolioData }) {
         </header>
 
         {navbarEnabled && (
-          <div className="mt-10 pl-5 md:pl-8">
-            <TemplateNavbar
-              items={sections}
-              className="rounded-full border-[#2f343a]/10 bg-[#fbfbfc]/85 shadow-[0_18px_45px_rgba(47,52,58,0.08)]"
-              linkClassName="rounded-full px-4 py-2 text-sm text-[#68717b] transition-colors hover:bg-[#eef0f4] hover:text-[#2f343a]"
-            />
+          <div className="min-w-0 pl-5 md:pl-8">
+            <PastelNavbar items={sections} />
           </div>
         )}
 
-        <div className="mt-12 flex min-w-0 flex-col gap-4 pl-5 md:mt-16 md:pl-8">
+        <div className="mt-2 flex min-w-0 flex-col gap-4 pl-5 md:pl-8">
           {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
         </div>
 

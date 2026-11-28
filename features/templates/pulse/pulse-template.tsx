@@ -273,7 +273,7 @@ interface HeroProps {
 
 function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: HeroProps) {
   return (
-    <section className="relative overflow-hidden px-0 pt-8 pb-10 @sm:pt-10 @sm:pb-12 @md:py-16 scroll-mt-20" id="about">
+    <section className="relative overflow-hidden px-0 pt-8 pb-10 @sm:pt-10 @sm:pb-12 @md:py-16 scroll-mt-20" id="top">
       {/* Absolute Ambient Glow */}
       <div
         className="absolute -top-40 right-0 h-96 w-96 rounded-full blur-[120px] opacity-20 pointer-events-none transition-colors duration-500"
@@ -288,7 +288,7 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: H
         <div className="grid grid-cols-1 @lg:grid-cols-12 gap-12 @lg:gap-16 items-center">
 
           {/* Left Column: Core Bio */}
-          <div className="@lg:col-span-7 space-y-8" id="hero-bio-container">
+          <div className="@lg:col-span-full space-y-8" id="hero-bio-container">
 
 
             <div className={cn(HERO_HEADER_COLUMN, "space-y-4")}>
@@ -311,14 +311,6 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary = true }: H
                 >
                   <RichText text={portfolio.headline} />
                 </h2>
-              )}
-
-              {showSummary && portfolio.summary && (
-                <DescriptionBlock
-                  text={portfolio.summary}
-                  paragraphClassName="font-sans text-base @sm:text-lg text-slate-400 leading-relaxed max-w-2xl"
-                  listClassName="space-y-2 pl-5 font-sans text-base @sm:text-lg text-slate-400 leading-relaxed max-w-2xl marker:text-slate-500"
-                />
               )}
 
               <ContactChips
@@ -388,7 +380,7 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
 
                         {/* Timeline Node Point */}
                         <div
-                          className="absolute -left-[27px] @sm:-left-[31px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#0a0a0a] border-2 transition-all group-hover:scale-125"
+                          className="absolute top-1 left-[calc(-1.25rem-0.5px)] @sm:left-[calc(-1.5rem-0.5px)] flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full bg-[#0a0a0a] border-2 transition-all group-hover:scale-125"
                           style={{
                             borderColor: primaryColor,
                             boxShadow: `0 0 10px ${primaryColor}40`
@@ -398,14 +390,14 @@ function Timeline({ experiences, primaryColor, labels }: TimelineProps) {
                         <div className="space-y-4">
                           {/* Title & Metadata Card Header */}
                           <div className="space-y-2">
-                            <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start justify-between gap-4">
                               <h4 className="min-w-0 flex-1 font-display text-base @sm:text-lg font-bold text-white group-hover:text-slate-200 transition-colors break-words">
                                 <RichText text={exp.role} />
                               </h4>
                               {(dateRange || duration) && (
-                                <div className="inline-flex items-start gap-2 text-xs font-mono text-slate-500 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-md shrink-0">
-                                  <Calendar className="h-3 w-3 shrink-0 mt-0.5" />
-                                  <div className="flex flex-col gap-0.5">
+                                <div className="inline-flex items-center gap-2 text-xs font-mono text-slate-500 bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-md shrink-0">
+                                  <Calendar className="h-3 w-3 shrink-0" />
+                                  <div className="flex flex-col gap-1">
                                     {dateRange && (
                                       <span className="whitespace-nowrap text-slate-400">
                                         {dateRange}
@@ -814,12 +806,14 @@ function ArticlesSection({
               id={`article-card-${art.id}`}
             >
               <div className="space-y-1">
-                <ArticleSourceLabel source={art.source} className="mb-1" />
-                {art.publishedAt && (
-                  <span className="text-[10px] font-mono text-slate-500 bg-[#0a0a0a] px-2 py-0.5 rounded border border-white/10">
-                    {displayDate(art.publishedAt)}
-                  </span>
-                )}
+                <div className="flex flex-wrap items-center gap-3">
+                  <ArticleSourceLabel source={art.source} />
+                  {art.publishedAt && (
+                    <span className="text-[10px] font-mono text-slate-500 bg-[#0a0a0a] px-2 py-0.5 rounded border border-white/10">
+                      {displayDate(art.publishedAt)}
+                    </span>
+                  )}
+                </div>
                 <h4 className="font-display text-base font-bold text-white group-hover:text-white leading-snug pt-1">
                   {art.title}
                 </h4>
@@ -995,7 +989,18 @@ export function PulseTemplate({ data }: AppProps) {
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
-    about: null,
+    about: portfolio.summary ? (
+      <section key="about" id="about" className="scroll-mt-20 py-12">
+        <div className="mx-auto max-w-6xl space-y-6 px-4 @sm:px-6 @lg:px-8">
+          <SectionHeading>{labels.about}</SectionHeading>
+          <DescriptionBlock
+            text={portfolio.summary}
+            paragraphClassName="font-sans text-base @sm:text-lg text-slate-400 leading-relaxed"
+            listClassName="space-y-2 pl-5 font-sans text-base @sm:text-lg text-slate-400 leading-relaxed marker:text-slate-500"
+          />
+        </div>
+      </section>
+    ) : null,
     experience: experiences.length > 0 ? (
       <Timeline
         experiences={experiences}
@@ -1031,14 +1036,13 @@ export function PulseTemplate({ data }: AppProps) {
       <section key="github" className="py-12" id="github-activity">
         <div className="mx-auto max-w-6xl px-4 @sm:px-6 @lg:px-8 space-y-6">
           <SectionHeading>{labels.github}</SectionHeading>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 overflow-x-auto">
-            <div className="mx-auto w-max max-w-full">
-              <GitHubContributionHeatmap
-                calendar={contributionCalendar}
-                profileUrl={githubProfile?.url}
-                username={githubProfile?.username}
-              />
-            </div>
+          <div className="min-w-0 overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-5">
+            <GitHubContributionHeatmap
+              calendar={contributionCalendar}
+              profileUrl={githubProfile?.url}
+              username={githubProfile?.username}
+              stretch
+            />
           </div>
         </div>
       </section>
@@ -1133,7 +1137,7 @@ export function PulseTemplate({ data }: AppProps) {
           portfolio={portfolio}
           socialProfiles={socialProfiles}
           primaryColor={primaryColor}
-          showSummary={!resolved.isHidden("about")}
+          showSummary={false}
         />
 
         {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}

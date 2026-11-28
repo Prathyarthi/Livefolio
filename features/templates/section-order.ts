@@ -133,9 +133,14 @@ export function resolveSectionLayout(
   customization: PortfolioCustomization | Record<string, unknown> | null | undefined,
 ): ResolvedSectionLayout {
   const stored = getStoredSectionLayout(customization);
-  const globalOrder = normalizeOrder(stored.order);
   const hidden = normalizeHidden(stored.hidden);
   const hiddenSet = new Set(hidden);
+  const hasCustomOrder =
+    !layout.fixed && Array.isArray(stored.order) && stored.order.length > 0;
+  const templateDefault = layout.groups.flatMap((group) => group.defaultOrder);
+  const globalOrder = normalizeOrder(
+    hasCustomOrder ? stored.order : templateDefault,
+  );
 
   const order = {
     main: [] as ReorderableSectionKey[],
@@ -143,12 +148,18 @@ export function resolveSectionLayout(
     full: [] as ReorderableSectionKey[],
   };
 
-  for (const group of layout.groups) {
-    const groupSet = new Set(group.defaultOrder);
-    const fromGlobal = globalOrder.filter((key) => groupSet.has(key));
-    const seen = new Set(fromGlobal);
-    const missing = group.defaultOrder.filter((key) => !seen.has(key));
-    order[group.id] = [...fromGlobal, ...missing];
+  // A saved Sections-tab order applies to every single-column template.
+  // Template defaults only apply when the user has not set an order yet.
+  if (hasCustomOrder && layout.groups.length === 1) {
+    order[layout.groups[0]!.id] = globalOrder;
+  } else {
+    for (const group of layout.groups) {
+      const groupSet = new Set(group.defaultOrder);
+      const fromGlobal = globalOrder.filter((key) => groupSet.has(key));
+      const seen = new Set(fromGlobal);
+      const missing = group.defaultOrder.filter((key) => !seen.has(key));
+      order[group.id] = [...fromGlobal, ...missing];
+    }
   }
 
   return {

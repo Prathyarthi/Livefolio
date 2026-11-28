@@ -67,9 +67,11 @@ interface AppProps {
   data: PortfolioData;
 }
 
-const SECTION_PAD = "py-12 px-4 @sm:px-6 @md:px-12";
+const SHELL = "max-w-6xl mx-auto px-4 @sm:px-6 @md:px-12";
+const SECTION_Y = "py-12";
 const MUTED = "text-gray-500";
 const INK = "text-[#09090b]";
+const DATE = "text-sm font-bold text-[var(--lf-accent)]";
 const CARD =
   "bg-white border border-black/10";
 const ACCENT_HOVER =
@@ -84,32 +86,49 @@ function getInitials(title: string): string {
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 }
 
-function certificationLine(cert: PortfolioData["certifications"][number]): string {
-  const date = formatDate(cert.issueDate);
-  const parts = [cert.name];
-  if (cert.issuer) parts.push(cert.issuer);
-  let line = parts.join(" — ");
-  if (date) line = `${line} (${date})`;
-  return /[.!?]$/.test(line) ? line : `${line}.`;
-}
-
 function CertificationCard({
   cert,
+  compact = false,
 }: {
   cert: PortfolioData["certifications"][number];
+  compact?: boolean;
 }) {
+  const date = formatDate(cert.issueDate);
   const inner = (
     <>
-      <Trophy className="w-4 h-4 text-[var(--lf-accent)] shrink-0 mt-0.5" />
-      <p className={cn(INK, "font-medium text-sm leading-relaxed text-left")}>
-        {certificationLine(cert)}
-      </p>
+      <Trophy
+        className={cn(
+          "text-[var(--lf-accent)] shrink-0 mt-0.5",
+          compact ? "w-4 h-4" : "w-5 h-5",
+        )}
+      />
+      <div className={cn("min-w-0", !compact && "text-left")}>
+        <p
+          className={cn(
+            INK,
+            compact ? "font-medium text-sm leading-relaxed" : "font-medium leading-relaxed",
+          )}
+        >
+          {cert.name}
+        </p>
+        {cert.issuer && (
+          <p className="text-gray-600 font-medium text-sm mt-0.5">{cert.issuer}</p>
+        )}
+        {date && (
+          <p className={cn(DATE, "mt-1")}>{date}</p>
+        )}
+      </div>
     </>
   );
-  const className = cn(
-    "inline-flex max-w-md items-start gap-3 rounded-2xl border border-black/[0.08] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.06)]",
-    "hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] hover:shadow-md hover:shadow-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] transition-all duration-300",
-  );
+  const className = compact
+    ? cn(
+        CARD,
+        "flex items-start gap-3 rounded-2xl p-4 @sm:p-5 hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] transition-all duration-300",
+      )
+    : cn(
+        CARD,
+        "inline-flex items-start gap-3 rounded-2xl p-5 hover:border-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] hover:-translate-y-0.5 transition-all duration-300",
+      );
 
   if (cert.url) {
     return (
@@ -229,18 +248,27 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
           card: "rounded-2xl bg-white border border-black/10 p-5",
           title: cn(INK, "text-base @sm:text-lg @lg:text-xl font-bold leading-snug"),
           text: cn(MUTED, "leading-relaxed text-sm @sm:text-base"),
-          muted: "text-xs font-bold text-[var(--lf-accent)]",
+          muted: DATE,
           chip: "px-3 py-1.5 rounded-full bg-white border border-black/10 text-xs font-medium text-gray-600",
           link: "text-xs font-bold uppercase tracking-widest text-[var(--lf-accent)] hover:opacity-80",
-          section: "max-w-6xl mx-auto scroll-mt-24 py-16 px-6",
+          section: cn(SHELL, SECTION_Y, "scroll-mt-24"),
       }}
     />
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
-    about: null,
+    about: data.portfolio.summary ? (
+      <section key="about" id="about" className={cn(SHELL, SECTION_Y, "scroll-mt-24")}>
+        <SectionHeading>{labels.about}</SectionHeading>
+        <DescriptionBlock
+          text={data.portfolio.summary}
+          paragraphClassName={cn(MUTED, "text-base leading-relaxed @sm:text-lg")}
+          listClassName={cn(MUTED, "space-y-2 pl-5 text-base leading-relaxed marker:text-[var(--lf-accent)] @sm:text-lg")}
+        />
+      </section>
+    ) : null,
     skills: data.skills.length > 0 ? (
-      <section key="skills" id="skills" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
+      <section key="skills" id="skills" className={cn(SHELL, SECTION_Y, "scroll-mt-24")}>
         <SectionHeading>
           {labels.skills}
         </SectionHeading>
@@ -272,7 +300,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     experience: experiences.length > 0 ? (
-      <section key="experience" id="experience" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
+      <section key="experience" id="experience" className={cn(SHELL, SECTION_Y, "scroll-mt-24")}>
         <SectionHeading>{labels.experience}</SectionHeading>
         <CollapsibleList
           initial={4}
@@ -285,11 +313,11 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
             return (
               <div
                 key={exp.id}
-                className="relative @md:grid @md:grid-cols-[160px_1fr] @md:gap-12"
+                className="relative @md:grid @md:grid-cols-[180px_1fr] @md:gap-12"
               >
                 <div className="hidden @md:block pt-1.5">
                   {dateRange && (
-                    <p className="text-xs font-bold text-[var(--lf-accent)] leading-relaxed">
+                    <p className={cn(DATE, "leading-relaxed")}>
                       {dateRange}
                     </p>
                   )}
@@ -300,9 +328,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     isLast ? "pb-0" : "pb-10 @sm:pb-12",
                   )}
                 >
-                  <div className="absolute top-1.5 -left-1.5 w-3 h-3 rounded-full bg-[var(--lf-accent)] border-4 border-white" />
+                  <div className="absolute top-1.5 -left-0 -translate-x-1/2 w-3 h-3 rounded-full bg-[var(--lf-accent)] border-4 border-white" />
                   {dateRange && (
-                    <p className="@md:hidden text-xs font-bold text-[var(--lf-accent)] mb-1">
+                    <p className={cn(DATE, "@md:hidden mb-1")}>
                       {dateRange}
                     </p>
                   )}
@@ -336,9 +364,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       <section
         key="projects"
         id="work"
-        className={cn(SECTION_PAD, "bg-gray-50/50 scroll-mt-24")}
+        className={cn(SECTION_Y, "bg-gray-50/50 scroll-mt-24")}
       >
-        <div className="max-w-6xl mx-auto">
+        <div className={SHELL}>
           <SectionHeading>
             {labels.projects}
           </SectionHeading>
@@ -425,7 +453,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     education: data.educations.length > 0 ? (
-      <section key="education" id="education" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
+      <section key="education" id="education" className={cn(SHELL, SECTION_Y, "scroll-mt-24")}>
         <SectionHeading>{labels.education}</SectionHeading>
         <CollapsibleList
           initial={4}
@@ -448,7 +476,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     <RichText text={edu.institution} />
                   </p>
                   {(edu.startDate || edu.endDate) && (
-                    <p className="text-xs font-bold text-[var(--lf-accent)] mt-2">
+                    <p className={cn(DATE, "mt-2")}>
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </p>
                   )}
@@ -466,9 +494,9 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       <section
         key="articles"
         id="articles"
-        className={cn(SECTION_PAD, "bg-gray-50/50 scroll-mt-24")}
+        className={cn(SECTION_Y, "bg-gray-50/50 scroll-mt-24")}
       >
-        <div className="max-w-6xl mx-auto">
+        <div className={SHELL}>
           <SectionHeading>
             {labels.articles}
           </SectionHeading>
@@ -544,7 +572,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     certifications: data.certifications.length > 0 ? (
-      <section key="certifications" id="certifications" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
+      <section key="certifications" id="certifications" className={cn(SHELL, SECTION_Y, "scroll-mt-24")}>
         <SectionHeading>{labels.certifications}</SectionHeading>
         <div className="@md:hidden">
           <CollapsibleList
@@ -553,12 +581,12 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
             buttonClassName={COLLAPSE_BTN}
           >
             {data.certifications.map((cert) => (
-              <CertificationCard key={cert.id} cert={cert} />
+              <CertificationCard key={cert.id} cert={cert} compact />
             ))}
           </CollapsibleList>
         </div>
         <div className="relative hidden @md:block">
-          <div className="absolute left-1/2 top-2 bottom-2 w-px -translate-x-1/2 bg-[color-mix(in_srgb,var(--lf-accent)_45%,transparent)]" />
+          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[color-mix(in_srgb,var(--lf-accent)_50%,transparent)] to-transparent -translate-x-px" />
           <CollapsibleList
             initial={6}
             wrapperClassName="space-y-10"
@@ -569,10 +597,10 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
               return (
                 <div
                   key={cert.id}
-                  className="relative grid grid-cols-2 items-center gap-x-16"
+                  className="relative grid grid-cols-2 gap-12 items-center"
                 >
-                  <span className="absolute left-1/2 top-6 z-10 h-3 w-3 -translate-x-1/2 rounded-full bg-[var(--lf-accent)] ring-4 ring-white" />
-                  <div className={isLeft ? "pr-4" : "col-start-2 pl-4"}>
+                  <span className="absolute left-1/2 -translate-x-1/2 top-6 w-3.5 h-3.5 rounded-full bg-[var(--lf-accent)] ring-4 ring-white shadow-md shadow-[color-mix(in_srgb,var(--lf-accent)_40%,transparent)] z-10" />
+                  <div className={isLeft ? "pr-12 text-right" : "col-start-2 pl-12"}>
                     <CertificationCard cert={cert} />
                   </div>
                 </div>
@@ -586,7 +614,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       <section
         key="achievements"
         id="achievements"
-        className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}
+        className={cn(SHELL, SECTION_Y, "scroll-mt-24")}
       >
         <SectionHeading>{labels.achievements}</SectionHeading>
         <div className="@md:hidden">
@@ -609,7 +637,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                   <RichText text={item.title} />
                 </p>
                 {item.date && (
-                  <p className="text-xs font-bold text-[var(--lf-accent)] mt-1">
+                  <p className={cn(DATE, "mt-1")}>
                     {formatDate(item.date)}
                   </p>
                 )}
@@ -641,7 +669,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                           <RichText text={item.title} />
                         </p>
                         {item.date && (
-                          <p className="text-xs font-bold text-[var(--lf-accent)] mt-1">
+                          <p className={cn(DATE, "mt-1")}>
                             {formatDate(item.date)}
                           </p>
                         )}
@@ -656,7 +684,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     profiles: hasProfiles ? (
-      <section key="profiles" id="profiles" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
+      <section key="profiles" id="profiles" className={cn(SHELL, SECTION_Y, "scroll-mt-24")}>
         <SectionHeading>{labels.profiles}</SectionHeading>
         <ProfileLinksSection
           portfolio={data.portfolio}
@@ -669,18 +697,16 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       </section>
     ) : null,
     github: contributionCalendar ? (
-      <section key="github" className={cn(SECTION_PAD, "max-w-6xl mx-auto scroll-mt-24")}>
+      <section key="github" className={cn(SHELL, SECTION_Y, "scroll-mt-24")}>
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className="overflow-x-auto">
-          <div className="mx-auto w-max max-w-full">
-            <GitHubContributionHeatmap
-              calendar={contributionCalendar}
-              profileUrl={githubProfile?.url}
-              username={githubProfile?.username}
-              variant="corporate"
-            />
-          </div>
-        </div>
+        <GitHubContributionHeatmap
+          calendar={contributionCalendar}
+          profileUrl={githubProfile?.url}
+          username={githubProfile?.username}
+          variant="corporate"
+          stretch
+          className="mt-0 border-0 pt-0"
+        />
       </section>
     ) : null,
   };
@@ -702,23 +728,24 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
       <nav
         className={cn(
           "sticky top-0 z-50 transition-all duration-300",
-          scrolled
+          scrolled || mobileMenuOpen
             ? "py-3 @sm:py-4 bg-white/80 backdrop-blur-xl border-b border-black/5"
             : "py-4 @sm:py-6 bg-transparent",
         )}
       >
-        <div className="max-w-6xl mx-auto px-4 @sm:px-6 @md:px-12 flex items-center justify-between">
-          <a href="#about" className="flex items-center gap-2.5 group">
+        <div className={cn(SHELL, "flex items-center justify-between gap-4")}>
+          <a
+            href="#about"
+            className="flex shrink-0 items-center"
+            aria-label={stripRichTextToPlain(data.portfolio.title)}
+          >
             <span className="w-8 h-8 rounded-lg bg-[var(--lf-accent)] text-white text-xs font-bold flex items-center justify-center">
               {getInitials(data.portfolio.title)}
-            </span>
-            <span className={cn(INK, "text-xl font-bold tracking-tight group-hover:text-[var(--lf-accent)] transition-colors")}>
-              <RichText text={data.portfolio.title} />
             </span>
           </a>
 
           {navItems.length > 0 && (
-            <div className="hidden @md:flex gap-6 @lg:gap-8 items-center text-sm font-medium uppercase tracking-wide">
+            <div className="hidden min-w-0 @4xl:flex flex-wrap justify-end gap-x-5 gap-y-2 @5xl:gap-x-8 items-center text-sm font-medium uppercase tracking-wide">
               {navItems.map((item) => {
                 const isActive = activeSection === item.id;
                 return (
@@ -726,7 +753,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                     key={item.id}
                     href={`#${item.id}`}
                     className={cn(
-                      "relative transition-colors duration-300 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:bg-[var(--lf-accent)] after:transition-all after:duration-300",
+                      "relative shrink-0 transition-colors duration-300 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:bg-[var(--lf-accent)] after:transition-all after:duration-300",
                       isActive
                         ? "text-[var(--lf-accent)] after:w-full"
                         : "text-gray-500 hover:text-[var(--lf-accent)] after:w-0 hover:after:w-full",
@@ -741,70 +768,47 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
 
           {navItems.length > 0 && (
             <button
-              className="@md:hidden text-[#09090b] p-2 rounded-full hover:bg-black/5 transition-colors focus:outline-none"
+              type="button"
+              className="@4xl:hidden text-[#09090b] p-2 rounded-full hover:bg-black/5 transition-colors focus:outline-none"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           )}
         </div>
-      </nav>
 
-      {navItems.length > 0 && (
-        <div
-          className={cn(
-            "absolute inset-0 z-40 bg-white flex flex-col @md:hidden transition-all duration-300",
-            mobileMenuOpen
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none",
-          )}
-        >
-          <div className="flex-1 flex flex-col justify-center px-6 gap-2 pt-20">
-            {navItems.map((item, i) => (
-              <a
-                key={item.id}
-                href={`#${item.id}`}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  INK,
-                  "py-4 px-5 text-2xl font-bold uppercase rounded-xl hover:bg-gray-50 hover:text-[var(--lf-accent)] transition-all duration-200",
-                )}
-                style={{ animationDelay: `${i * 50}ms` }}
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-          {visibleSocials.length > 0 && (
-            <div className="px-6 pb-10 flex gap-5 items-center">
-              {visibleSocials.map((profile) => (
+        {mobileMenuOpen && navItems.length > 0 && (
+          <div className="@4xl:hidden border-t border-black/5 bg-white/95 backdrop-blur-xl">
+            <div className={cn(SHELL, "flex max-h-[70dvh] flex-col gap-1 overflow-y-auto py-3")}>
+              {navItems.map((item) => (
                 <a
-                  key={`${profile.platform}-${profile.url}`}
-                  href={profile.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={profile.platform}
-                  data-lf-track="social"
-                  data-lf-label={profile.platform}
+                  key={item.id}
+                  href={`#${item.id}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "rounded-xl px-3 py-3 text-base font-bold uppercase transition-colors",
+                    activeSection === item.id
+                      ? "bg-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] text-[var(--lf-accent)]"
+                      : cn(INK, "hover:bg-gray-50 hover:text-[var(--lf-accent)]"),
+                  )}
                 >
-                  <PlatformIcon
-                    platform={profile.platform}
-                    className="h-6 w-6 text-gray-500 hover:text-[var(--lf-accent)] transition-colors"
-                  />
+                  {item.label}
                 </a>
               ))}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </nav>
 
       <main className="relative z-10">
         <section
-          id="about"
-          className="min-h-0 flex items-center pt-8 pb-12 @sm:pt-10 @sm:pb-14 px-4 @sm:px-6 @md:px-12 max-w-6xl mx-auto scroll-mt-24"
+          id="top"
+          className={cn(SHELL, "min-h-0 flex items-center pt-8 pb-12 @sm:pt-10 @sm:pb-14 scroll-mt-24")}
         >
-          <div className={cn(HERO_HEADER_COLUMN, "w-full max-w-3xl space-y-4")}>
+          <div className={cn(HERO_HEADER_COLUMN, "w-full space-y-4")}>
+            <div className="max-w-3xl space-y-4">
             <h1
               className={cn(
                 HERO_TITLE_BASE,
@@ -819,13 +823,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
                 <RichText text={data.portfolio.headline} />
               </h2>
             )}
-            {!resolved.isHidden("about") && data.portfolio.summary && (
-              <DescriptionBlock
-                text={data.portfolio.summary}
-                paragraphClassName={cn(MUTED, "max-w-2xl text-base leading-relaxed @sm:text-lg")}
-                listClassName={cn(MUTED, "max-w-2xl space-y-2 pl-5 text-base leading-relaxed marker:text-[var(--lf-accent)] @sm:text-lg")}
-              />
-            )}
+            </div>
             <ContactChips
               portfolio={data.portfolio}
               chipClassName="rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-gray-600"
@@ -834,7 +832,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
               {visibleProjects.length > 0 && (
                 <a
                   href="#work"
-                  className="flex items-center gap-2 rounded-xl bg-[var(--lf-accent)] px-5 py-3 text-sm font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] active:scale-[0.98] @sm:px-8 @sm:py-4 @sm:text-base"
+                  className="flex items-center gap-1.5 rounded-lg bg-[var(--lf-accent)] px-3 py-1.5 text-sm font-bold text-white transition-all hover:opacity-90 hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--lf-accent)_25%,transparent)] active:scale-[0.98]"
                 >
                   View Projects <ChevronRight size={16} />
                 </a>
@@ -858,7 +856,7 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
         {data.customSections.length > 0 && (
-          <section className={cn(SECTION_PAD, "max-w-6xl mx-auto")}>
+          <section className={cn(SHELL, SECTION_Y)}>
             {data.customSections.map((sec) => (
               <div key={sec.id} className={cn(CARD, "rounded-2xl p-6 @sm:p-8 mb-8")}>
                 <SectionHeading>{sec.label}</SectionHeading>
@@ -875,8 +873,8 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         )}
 
         {visibleSocials.length > 0 && (
-          <section id="contact" className={cn(SECTION_PAD, "scroll-mt-24")}>
-            <div className="max-w-4xl mx-auto text-center bg-gradient-to-b from-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] to-transparent p-8 @sm:p-12 rounded-[32px] @sm:rounded-[40px] border border-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)]">
+          <section id="contact" className={cn(SHELL, SECTION_Y, "scroll-mt-24")}>
+            <div className="text-center bg-gradient-to-b from-[color-mix(in_srgb,var(--lf-accent)_10%,transparent)] to-transparent p-8 @sm:p-12 rounded-[32px] @sm:rounded-[40px] border border-[color-mix(in_srgb,var(--lf-accent)_12%,transparent)]">
               <h2 className="text-3xl @sm:text-4xl font-bold mb-4 @sm:mb-6 leading-tight !text-[#09090b]">
                 Let&apos;s work together
               </h2>
@@ -913,8 +911,8 @@ export function SynapseTemplate({ data: initialData }: AppProps) {
         )}
       </main>
 
-      <footer className="py-8 @sm:py-12 border-t border-black/5 px-4 @sm:px-6">
-        <div className="max-w-6xl mx-auto flex flex-col @sm:flex-row justify-between items-center gap-4 @sm:gap-6 text-center @sm:text-left">
+      <footer className="py-8 @sm:py-12 border-t border-black/5">
+        <div className={cn(SHELL, "flex flex-col @sm:flex-row justify-between items-center gap-4 @sm:gap-6 text-center @sm:text-left")}>
           <div className={cn(MUTED, "text-xs @sm:text-sm")}>
             © {new Date().getFullYear()} <RichText text={data.portfolio.title} />. Crafted with precision.
           </div>

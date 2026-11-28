@@ -136,8 +136,8 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName={cn("max-w-2xl whitespace-pre-line text-xl leading-9", "text-zinc-300")}
-          listClassName="max-w-2xl flex flex-col gap-3 pl-5 text-xl leading-9 text-zinc-300 marker:text-zinc-600"
+          paragraphClassName={cn("whitespace-pre-line text-xl leading-9", "text-zinc-300")}
+          listClassName="flex flex-col gap-3 pl-5 text-xl leading-9 text-zinc-300 marker:text-zinc-600"
         />
       </section>
     ) : null,
@@ -203,7 +203,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                     label={stripRichTextToPlain(project.title)}
                     projectId={project.id}
                     liveClassName="rounded-full border border-white/15 bg-transparent px-3 py-1 text-xs font-medium text-zinc-100 hover:bg-white/10 hover:text-white"
-                    sourceClassName="rounded-full px-2 py-1 text-xs font-medium text-zinc-400 hover:text-white"
+                    sourceClassName="rounded-full px-2 py-1 text-xs font-medium text-zinc-400 hover:bg-transparent hover:text-white"
                   />
                 </div>
               </div>
@@ -246,7 +246,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
                 <h3 className={cn(displayFont, "text-xl font-semibold tracking-tight", ink)}>
                   <RichText text={exp.role} />
                 </h3>
-                <p className="mt-1 text-sm text-zinc-300">
+                <p className="mt-1 text-sm text-[var(--lf-accent)]">
                   <RichText text={exp.company} />
                   {exp.location ? (
                     <span className="text-zinc-500">
@@ -314,12 +314,12 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
               <div className="min-w-0">
                 <h3 className={cn(displayFont, "text-lg font-semibold", ink)}>
                   <RichText text={edu.degree} />
-                  {edu.field && (
-                    <span className="font-normal text-zinc-400">
+                  {edu.field ? (
+                    <>
                       {" "}
                       in <RichText text={edu.field} />
-                    </span>
-                  )}
+                    </>
+                  ) : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}>
                   <RichText text={edu.institution} />
@@ -448,12 +448,12 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
         <ProfileLinksSection
           portfolio={portfolio}
           profiles={socialProfiles}
-          chipClassName={cn("rounded-full border px-3 py-1.5 text-sm", line, "text-zinc-300")}
+          chipClassName={cn("rounded-full border px-2.5 py-1 text-xs @sm:px-3 @sm:py-1.5 @sm:text-sm", line, "text-zinc-300")}
           pillClassName={cn(
-            "rounded-full border px-3 py-1.5 text-sm text-zinc-100 transition-colors hover:bg-white/10",
+            "rounded-full border px-2.5 py-1 text-xs text-zinc-100 transition-colors hover:bg-white/10 @sm:px-3 @sm:py-1.5 @sm:text-sm",
             line,
           )}
-          titleClassName={cn(displayFont, "text-2xl font-semibold", ink)}
+          titleClassName={cn(displayFont, "text-lg font-semibold @sm:text-2xl", ink)}
           textClassName={mute}
         />
       </section>
@@ -462,13 +462,14 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section key="github">
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className={cn("overflow-x-auto rounded-xl border p-5 custom-scrollbar", line)}>
+        <div className={cn("min-w-0 overflow-x-auto rounded-xl border p-5 custom-scrollbar", line)}>
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="modern"
-            label={labels.github}
+            stretch
+            label={null}
           />
         </div>
       </section>
@@ -526,24 +527,24 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
           <div className="flex flex-col gap-4">
             <HeroProfileButtons
               profiles={socialProfiles}
-              className="rounded-full bg-[var(--lf-accent)] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="rounded-full bg-[var(--lf-accent)] px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 @sm:px-5 @sm:py-2.5 @sm:text-sm"
             />
             <ContactChips
               portfolio={portfolio}
-              chipClassName="text-sm text-zinc-400"
+              chipClassName="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-xs text-zinc-300 @sm:text-sm"
             />
             {hasNonHeroSocialProfiles(socialProfiles) && (
               <SocialPills
                 profiles={socialProfiles}
                 showUsername
                 excludeHeroPlatforms
-                className="text-sm text-zinc-400 underline-offset-4 transition-colors hover:text-white hover:underline"
+                className="text-xs text-zinc-400 underline-offset-4 transition-colors hover:text-white hover:underline @sm:text-sm"
               />
             )}
           </div>
         </header>
 
-        <div className="mt-28 flex min-w-0 flex-col gap-24 md:mt-40 md:gap-32">
+        <div className="mt-16 flex min-w-0 flex-col gap-12 md:mt-20 md:gap-16">
           {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.length > 0 &&
@@ -567,7 +568,7 @@ export function VibrantTemplate({ data }: { data: PortfolioData }) {
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-10">
+    <div className="mb-6">
       <h2
         className={cn(
           displayFont,

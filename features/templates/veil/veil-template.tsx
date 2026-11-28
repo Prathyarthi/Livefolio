@@ -458,7 +458,7 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary }: HeroProp
   });
 
   return (
-    <section id="about" className="relative scroll-mt-20 overflow-hidden pb-16 pt-10 @md:pb-24 @md:pt-14">
+    <section id="top" className="relative scroll-mt-20 overflow-hidden pb-16 pt-10 @md:pb-24 @md:pt-14">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-40 top-10 h-[28rem] w-[28rem] rounded-full opacity-[0.14] blur-[140px]"
@@ -529,16 +529,6 @@ function Hero({ portfolio, socialProfiles, primaryColor, showSummary }: HeroProp
               >
                 <RichText text={portfolio.headline} />
               </motion.p>
-            )}
-
-            {showSummary && portfolio.summary && (
-              <motion.div {...rise(0.26)} className="max-w-2xl">
-                <DescriptionBlock
-                  text={portfolio.summary}
-                  paragraphClassName="text-base leading-relaxed text-[var(--veil-muted)] @sm:text-lg"
-                  listClassName="list-disc space-y-2 pl-5 text-base leading-relaxed text-[var(--veil-muted)] marker:text-[var(--veil-faint)] @sm:text-lg"
-                />
-              </motion.div>
             )}
 
             <motion.div {...rise(0.34)} className="space-y-4">
@@ -1206,7 +1196,7 @@ export function VeilTemplate({ data }: AppProps) {
   ];
 
   const present: Record<ReorderableSectionKey, boolean> = {
-    about: false,
+    about: Boolean(portfolio.summary?.trim()),
     experience: experiences.length > 0,
     education: educations.length > 0,
     skills: skills.length > 0,
@@ -1221,8 +1211,7 @@ export function VeilTemplate({ data }: AppProps) {
   const numbered = resolved.order.full.filter(
     (key) => present[key] && !resolved.isHidden(key),
   );
-  // Hero is (01); body sections continue from (02) in their actual order.
-  const num = (key: ReorderableSectionKey) => numbered.indexOf(key) + 2;
+  const num = (key: ReorderableSectionKey) => numbered.indexOf(key) + 1;
   const linkedinSection = data.linkedin ? (
     <section id="linkedin" className="scroll-mt-20 py-14 @md:py-20">
       <div className={SHELL}>
@@ -1249,7 +1238,18 @@ export function VeilTemplate({ data }: AppProps) {
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
-    about: null,
+    about: present.about ? (
+      <section key="about" id="about" className="scroll-mt-20 py-14 @md:py-20">
+        <div className={SHELL}>
+          <SectionHeading index={num("about")}>{labels.about}</SectionHeading>
+          <DescriptionBlock
+            text={portfolio.summary}
+            paragraphClassName="text-base leading-relaxed text-[var(--veil-muted)] @sm:text-lg"
+            listClassName="list-disc space-y-2 pl-5 text-base leading-relaxed text-[var(--veil-muted)] marker:text-[var(--veil-faint)] @sm:text-lg"
+          />
+        </div>
+      </section>
+    ) : null,
     experience: present.experience ? (
       <ExperienceSection experiences={experiences} labels={labels} index={num("experience")} />
     ) : null,
@@ -1363,7 +1363,7 @@ export function VeilTemplate({ data }: AppProps) {
             portfolio={portfolio}
             socialProfiles={socialProfiles}
             primaryColor={primaryColor}
-            showSummary={!resolved.isHidden("about")}
+            showSummary={false}
           />
 
           {present.skills && <SkillMarquee skills={skills} primaryColor={primaryColor} />}
@@ -1376,7 +1376,7 @@ export function VeilTemplate({ data }: AppProps) {
               <div className={cn(SHELL, "space-y-20")}>
                 {customSections.map((section, i) => (
                   <div key={section.id} id={`custom-section-${section.id}`}>
-                    <SectionHeading index={numbered.length + 2 + i}>{section.label}</SectionHeading>
+                    <SectionHeading index={numbered.length + 1 + i}>{section.label}</SectionHeading>
                     <CustomSectionItems
                       items={section.items}
                       titleClassName="font-serif text-2xl text-[var(--veil-paper)]"

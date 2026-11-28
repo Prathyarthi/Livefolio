@@ -228,10 +228,14 @@ export function TemplateNavbar({
   items,
   className,
   linkClassName,
+  wrap = false,
+  align = "center",
 }: {
   items: Array<{ id: string; label: string }>;
   className?: string;
   linkClassName?: string;
+  wrap?: boolean;
+  align?: "start" | "center";
 }) {
   if (items.length === 0) return null;
 
@@ -242,7 +246,17 @@ export function TemplateNavbar({
         className
       )}
     >
-      <div className="flex w-full max-w-full flex-nowrap items-center justify-start gap-1.5 overflow-x-auto p-1.5 scrollbar-none @md:justify-center @md:gap-2 @md:p-2 @lg:w-max">
+      <div
+        className={cn(
+          "flex w-full max-w-full items-center gap-1.5 p-1.5 scrollbar-none @md:gap-2 @md:p-2",
+          wrap ? "flex-wrap" : "flex-nowrap overflow-x-auto",
+          align === "start"
+            ? "justify-start"
+            : wrap
+              ? "justify-center"
+              : "justify-start @md:justify-center @lg:w-max",
+        )}
+      >
         {items.map((item) => (
           <a
             key={item.id}
@@ -498,7 +512,7 @@ export function ProjectActions({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {liveUrl && (
-        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans", liveClassName)}>
+        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans hover:bg-transparent hover:text-inherit", liveClassName)}>
           <a
             href={liveUrl}
             target="_blank"
@@ -512,7 +526,7 @@ export function ProjectActions({
         </Button>
       )}
       {sourceUrl && (
-        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans", sourceClassName)}>
+        <Button asChild size="sm" variant="ghost" className={cn("h-auto font-sans hover:bg-transparent hover:text-inherit", sourceClassName)}>
           <a
             href={sourceUrl}
             target="_blank"

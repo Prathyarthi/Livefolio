@@ -24,24 +24,33 @@ export function CollapsibleList({
   const hidden = Math.max(0, total - initial);
   const visible = expanded ? items : items.slice(0, initial);
 
-  const content = (
+  const toggle =
+    hidden > 0 ? (
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className={cn(
+          "inline-flex w-fit cursor-pointer items-center justify-center",
+          buttonClassName,
+        )}
+      >
+        {expanded ? hideLabel : showLabel.replace("{n}", String(hidden))}
+      </button>
+    ) : null;
+
+  if (wrapperClassName) {
+    return (
+      <>
+        <div className={wrapperClassName}>{visible}</div>
+        {toggle}
+      </>
+    );
+  }
+
+  return (
     <>
       {visible}
-      {hidden > 0 && (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className={cn("inline-flex cursor-pointer items-center justify-center", buttonClassName)}
-        >
-          {expanded ? hideLabel : showLabel.replace("{n}", String(hidden))}
-        </button>
-      )}
+      {toggle}
     </>
-  );
-
-  return wrapperClassName ? (
-    <div className={wrapperClassName}>{content}</div>
-  ) : (
-    <>{content}</>
   );
 }

@@ -61,32 +61,34 @@ export function LivePreviewImage({
   return (
     <div
       className={cn(
-        "relative aspect-[8/5] w-full shrink-0 overflow-hidden bg-stone-900/20",
+        "relative aspect-[8/5] w-full min-h-0 shrink-0 overflow-hidden bg-stone-900/20",
         containerClassName
       )}
     >
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt={alt}
-          loading={loading}
-          className={cn("block h-full w-full object-cover object-top", className)}
-          onError={() => {
-            if (liveSrc) setLiveFailed(true);
-            else setImageFailed(true);
-          }}
-        />
-      ) : (
-        <ProjectPreviewPlaceholderGraphic
-          title={alt}
-          seedKey={projectId ?? alt}
-          variant={placeholderVariant}
-          templateId={templateId}
-          accentColor={accentColor}
-          className={placeholderClassName}
-        />
-      )}
+      <div className="absolute inset-0">
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={src}
+            alt={alt}
+            loading={loading}
+            className={cn("size-full object-cover object-top", className)}
+            onError={() => {
+              if (liveSrc) setLiveFailed(true);
+              else setImageFailed(true);
+            }}
+          />
+        ) : (
+          <ProjectPreviewPlaceholderGraphic
+            title={alt}
+            seedKey={projectId ?? alt}
+            variant={placeholderVariant}
+            templateId={templateId}
+            accentColor={accentColor}
+            className={cn("size-full", placeholderClassName)}
+          />
+        )}
+      </div>
     </div>
   );
 }

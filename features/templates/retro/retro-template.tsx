@@ -375,7 +375,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
             >
               <h3 className="font-sans text-lg font-black uppercase text-black">
                 <RichText text={edu.degree} />
-                {edu.field && <span className="text-gray-600"> in <RichText text={edu.field} /></span>}
+                {edu.field ? <> in <RichText text={edu.field} /></> : null}
               </h3>
               <p className="mt-2 text-sm font-bold text-gray-700"><RichText text={edu.institution} /></p>
               {(edu.startDate || edu.endDate) && (
@@ -490,7 +490,7 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section
         key="github"
-        className="border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:p-8"
+        className="min-w-0 border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:p-8"
       >
         <SectionHeading>{labels.github}</SectionHeading>
         <GitHubContributionHeatmap
@@ -498,7 +498,10 @@ export function RetroTemplate({ data }: { data: PortfolioData }) {
           profileUrl={githubProfile?.url}
           username={githubProfile?.username}
           variant="minimal"
-          label={labels.github}
+          stretch
+          label={null}
+          className="mt-0 border-0 pt-0"
+          frameClassName="w-full"
         />
       </section>
     ) : null,

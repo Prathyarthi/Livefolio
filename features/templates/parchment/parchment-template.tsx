@@ -58,7 +58,6 @@ const mute = "text-[#6d6759]";
 const paper = "bg-[#e8ddc6]";
 const sheet = "bg-[#f3ead7]";
 const hairline = "border-[#2c2a24]/16";
-const olive = "#6f7651";
 const moreBtn =
   "mt-7 self-start rounded-none border-b border-[#2c2a24]/40 bg-transparent px-0 py-1 font-sans text-sm text-[#6d6759] transition-colors hover:border-[var(--lf-accent)] hover:text-[#2c2a24]";
 
@@ -98,7 +97,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
   const linkedinSection = data.linkedin ? (
     <LinkedInSection
       data={data.linkedin}
-      heading={<SectionHeading folio="LinkedIn">{labels.linkedin}</SectionHeading>}
+      heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
         aboutList: `flex flex-col gap-3 pl-5 text-base leading-8 ${mute} marker:text-[#6f7651]`,
         aboutParagraph: `text-base leading-8 ${mute}`,
@@ -112,16 +111,16 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
         muted: `text-sm ${mute}`,
         chip: `border ${hairline} bg-[#ebe0c9] px-2.5 py-1 text-sm ${mute}`,
         link: "text-sm font-medium text-[var(--lf-accent)] underline-offset-4 hover:underline",
-        section: `scroll-mt-28 border-t ${hairline} pt-12`,
+        section: `scroll-mt-28 border-t ${hairline} pt-12 first:border-t-0`,
       }}
     />
   ) : null;
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary ? (
-      <section key="about" id="about" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
-        <SectionHeading folio="Note">{labels.about}</SectionHeading>
-        <div className="relative max-w-[44rem] pl-5 before:absolute before:left-0 before:top-1 before:h-[calc(100%-0.5rem)] before:w-px before:bg-[#b5aa8e]">
+      <section key="about" id="about" className={cn("scroll-mt-28 border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.about}</SectionHeading>
+        <div className="relative pl-5 before:absolute before:left-0 before:top-1 before:h-[calc(100%-0.5rem)] before:w-px before:bg-[#b5aa8e]">
           <DescriptionBlock
             text={portfolio.summary}
             paragraphClassName={cn("text-lg leading-8", mute)}
@@ -132,8 +131,8 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     projects: visibleProjects.length > 0 ? (
-      <section key="projects" id="work" className={cn("scroll-mt-28 min-w-0 border-t pt-12", hairline)}>
-        <SectionHeading folio="Plate">{labels.projects}</SectionHeading>
+      <section key="projects" id="work" className={cn("scroll-mt-28 min-w-0 border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.projects}</SectionHeading>
 
         <CollapsibleList initial={4} wrapperClassName="grid grid-cols-1 gap-6 @lg:grid-cols-2" buttonClassName={moreBtn}>
           {visibleProjects.map((project) => (
@@ -188,15 +187,15 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     experience: experiences.length > 0 ? (
-      <section key="experience" id="experience" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
-        <SectionHeading folio="Chronicle">{labels.experience}</SectionHeading>
+      <section key="experience" id="experience" className={cn("scroll-mt-28 border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.experience}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {experiences.map((exp) => (
-            <article key={exp.id} className={cn("grid grid-cols-1 gap-3 border-t py-7 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-9", hairline)}>
+            <article key={exp.id} className={cn("grid grid-cols-1 gap-3 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-9", hairline)}>
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>{formatDateRange(exp.startDate, exp.endDate) || "—"}</p>
               <div className="min-w-0">
                 <h3 className={cn("font-[family-name:var(--font-parchment-display)] text-2xl font-semibold leading-tight", ink)}><RichText text={exp.role} /></h3>
-                <p className="mt-1 text-sm text-[#6f7651]">
+                <p className="mt-1 text-sm text-[var(--lf-accent)]">
                   <RichText text={exp.company} />
                   {exp.location ? <span className={mute}>; <RichText text={exp.location} /></span> : null}
                 </p>
@@ -215,15 +214,15 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     education: educations.length > 0 ? (
-      <section key="education" className={cn("border-t pt-12", hairline)}>
-        <SectionHeading folio="Register">{labels.education}</SectionHeading>
+      <section key="education" className={cn("border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.education}</SectionHeading>
         <CollapsibleList initial={3} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {educations.map((edu) => (
-            <article key={edu.id} className={cn("grid grid-cols-1 gap-3 border-t py-6 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-9", hairline)}>
+            <article key={edu.id} className={cn("grid grid-cols-1 gap-3 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-9", hairline)}>
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>{formatDateRange(edu.startDate, edu.endDate) || "—"}</p>
               <div>
                 <h3 className={cn("font-[family-name:var(--font-parchment-display)] text-xl font-semibold", ink)}>
-                  <RichText text={edu.degree} />{edu.field ? <span className={mute}> in <RichText text={edu.field} /></span> : null}
+                  <RichText text={edu.degree} />{edu.field ? <> in <RichText text={edu.field} /></> : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}><RichText text={edu.institution} /></p>
                 {edu.gpa && <Badge variant="outline" className="mt-3 rounded-none border-[#6f7651]/45 bg-[#6f7651]/10 px-2 py-0 text-xs font-medium text-[#4f5937]">{edu.gpa}</Badge>}
@@ -235,8 +234,8 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     skills: skills.length > 0 ? (
-      <section key="skills" className={cn("border-t pt-12", hairline)}>
-        <SectionHeading folio="Index">{labels.skills}</SectionHeading>
+      <section key="skills" className={cn("border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.skills}</SectionHeading>
         <div className="grid grid-cols-1 gap-x-10 gap-y-8 @md:grid-cols-2">
           {Object.entries(groupedSkills).map(([category, items]) => (
             <div key={category} className="min-w-0 border-l border-[#b5aa8e] pl-4">
@@ -253,8 +252,8 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     certifications: certifications.length > 0 ? (
-      <section key="certifications" className={cn("border-t pt-12", hairline)}>
-        <SectionHeading folio="Seal">{labels.certifications}</SectionHeading>
+      <section key="certifications" className={cn("border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.certifications}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="grid grid-cols-1 gap-4 @md:grid-cols-2" buttonClassName={moreBtn}>
           {certifications.map((cert) => (
             <article key={cert.id} className={cn("border bg-[#f3ead7] p-5", hairline)}>
@@ -267,11 +266,11 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     achievements: achievements.length > 0 ? (
-      <section key="achievements" className={cn("border-t pt-12", hairline)}>
-        <SectionHeading folio="Marginalia">{labels.achievements}</SectionHeading>
+      <section key="achievements" className={cn("border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.achievements}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {achievements.map((ach) => (
-            <article key={ach.id} className={cn("flex items-start gap-4 border-t py-5", hairline)}>
+            <article key={ach.id} className={cn("flex items-start gap-4 border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <span className="mt-2 h-px w-8 shrink-0 bg-[#6f7651]" />
               <div className="min-w-0">
                 <h3 className={cn("text-sm leading-6", ink)}><RichText text={ach.title} /></h3>
@@ -284,11 +283,11 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     articles: articles.length > 0 ? (
-      <section key="articles" id="articles" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
-        <SectionHeading folio="Reading">{labels.articles}</SectionHeading>
+      <section key="articles" id="articles" className={cn("scroll-mt-28 border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.articles}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {articles.map((article) => (
-            <article key={article.id} className={cn("border-t py-5", hairline)}>
+            <article key={article.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <ArticleSourceLabel source={article.source} className={cn("mb-1 opacity-70", mute)} />
               <div className="flex flex-col gap-1 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8">
                 <h3 className={cn("font-[family-name:var(--font-parchment-display)] text-xl font-semibold", ink)}>
@@ -309,8 +308,8 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     profiles: hasProfiles ? (
-      <section key="profiles" id="profiles" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
-        <SectionHeading folio="Address">{labels.profiles}</SectionHeading>
+      <section key="profiles" id="profiles" className={cn("scroll-mt-28 border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.profiles}</SectionHeading>
         <div className={cn("border bg-[#f3ead7] p-6", hairline)}>
           <ProfileLinksSection
             portfolio={portfolio}
@@ -325,15 +324,18 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     github: contributionCalendar ? (
-      <section key="github" className={cn("border-t pt-12", hairline)}>
-        <SectionHeading folio="Calendar">{labels.github}</SectionHeading>
-        <div className="overflow-x-auto border border-[#2c2a24]/16 bg-[#f3ead7] p-5">
+      <section key="github" className={cn("scroll-mt-28 min-w-0 border-t pt-12 first:border-t-0", hairline)}>
+        <SectionHeading>{labels.github}</SectionHeading>
+        <div className="min-w-0">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
-            variant="corporate"
-            label={labels.github}
+            variant="minimal"
+            stretch
+            className="mt-0 border-0 pt-0"
+            frameClassName="rounded-none border-0 bg-transparent p-0 shadow-none"
+            label={null}
           />
         </div>
       </section>
@@ -369,7 +371,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
             )}
 
             <div className="mt-8 flex flex-col gap-3">
-              <ContactChips portfolio={portfolio} chipClassName="border-b border-[#2c2a24]/20 px-0 py-0.5 text-sm text-[#6d6759]" />
+              <ContactChips portfolio={portfolio} chipClassName="rounded-sm border border-[#2c2a24]/20 bg-[#f3ead7]/70 px-2.5 py-1 text-sm text-[#6d6759]" />
               <HeroProfileButtons profiles={socialProfiles} className="border border-[#2c2a24]/18 bg-[#ebe0c9] px-3 py-1.5 text-sm text-[#2c2a24] transition-colors hover:bg-[#2c2a24]/5" />
               {hasNonHeroSocialProfiles(socialProfiles) && (
                 <SocialPills profiles={socialProfiles} showUsername excludeHeroPlatforms className="border-b border-transparent px-0 py-0.5 text-sm text-[#6d6759] transition-colors hover:border-[#2c2a24]/30 hover:text-[#2c2a24]" />
@@ -395,7 +397,7 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
             <div className={cn("mt-4 grid gap-10 border-t pt-12 @md:grid-cols-2", hairline)}>
               {customSections.map((cs) => (
                 <section key={cs.id}>
-                  <SectionHeading folio="Appendix">{cs.label}</SectionHeading>
+                  <SectionHeading>{cs.label}</SectionHeading>
                   <CustomSectionItems
                     items={cs.items}
                     titleClassName={cn("font-[family-name:var(--font-parchment-display)] text-xl font-semibold", ink)}
@@ -413,15 +415,12 @@ export function ParchmentTemplate({ data }: { data: PortfolioData }) {
   );
 }
 
-function SectionHeading({ children, folio }: { children: React.ReactNode; folio: string }) {
+function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <div className="mb-8">
-      <div className="grid grid-cols-[minmax(4rem,7rem)_1fr] items-end gap-4">
-        <p className="font-[family-name:var(--font-parchment-display)] text-base italic text-[#6f7651]">{folio}</p>
-        <h2 className={cn("font-[family-name:var(--font-parchment-display)] text-3xl font-semibold leading-none tracking-[-0.02em] md:text-4xl", ink)}>
-          {children}
-        </h2>
-      </div>
+      <h2 className={cn("font-[family-name:var(--font-parchment-display)] text-3xl font-semibold leading-none tracking-[-0.02em] md:text-4xl", ink)}>
+        {children}
+      </h2>
       <Separator className="mt-4 bg-[#b5aa8e]" />
     </div>
   );

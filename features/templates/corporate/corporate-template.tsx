@@ -18,6 +18,7 @@ import {
   buildTemplateSections,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HeroProfileButtons,
   ProfileLinksSection,
   ProjectActions,
@@ -118,8 +119,8 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName={cn("max-w-[44rem] whitespace-pre-line text-lg leading-8", mute)}
-          listClassName={cn("max-w-[44rem] flex flex-col gap-3 pl-5 text-lg leading-8", mute, "marker:text-[#0b1220]/30")}
+          paragraphClassName={cn("whitespace-pre-line text-lg leading-8", mute)}
+          listClassName={cn("flex flex-col gap-3 pl-5 text-lg leading-8", mute, "marker:text-[#0b1220]/30")}
         />
       </section>
     ) : null,
@@ -131,9 +132,9 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
           {orderedProjects.map((project) => (
             <article
               key={project.id}
-              className={cn("grid min-w-0 grid-cols-1 gap-4 border-t py-6 @md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_auto] @md:items-start @md:gap-8", hairline)}
+              className={cn("grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8", hairline)}
             >
-              <div className="min-w-0 overflow-hidden rounded-none border border-[#0b1220]/10 bg-white">
+              <div className="min-w-0 w-full overflow-hidden rounded-none border border-[#0b1220]/10 bg-white">
                 <TemplateProjectPreview
                   templateId="corporate"
                   liveUrl={project.liveUrl ?? null}
@@ -143,6 +144,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                   alt={stripRichTextToPlain(project.title)}
                   loading="lazy"
                   accentColor={primaryColor}
+                  containerClassName="bg-white"
                 />
               </div>
               <div className="min-w-0">
@@ -180,16 +182,16 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
                       .join(", ")}
                   </p>
                 )}
-              </div>
-              <div className="shrink-0 @md:pt-1">
-                <ProjectActions
-                  liveUrl={project.liveUrl}
-                  sourceUrl={project.sourceUrl}
-                  label={stripRichTextToPlain(project.title)}
-                  projectId={project.id}
-                  liveClassName="rounded-none border border-[#0b1220]/20 bg-transparent px-3 py-1.5 text-xs font-medium text-[#0b1220] hover:border-[#0b1220]/45 hover:bg-transparent"
-                  sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-[#5c6578] hover:bg-transparent hover:text-[#0b1220] hover:underline"
-                />
+                <div className="mt-4">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName="rounded-none border border-[#0b1220]/20 bg-transparent px-3 py-1.5 text-xs font-medium text-[#0b1220] hover:border-[#0b1220]/45 hover:bg-transparent"
+                    sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-[#5c6578] hover:bg-transparent hover:text-[#0b1220] hover:underline"
+                  />
+                </div>
               </div>
             </article>
           ))}
@@ -204,7 +206,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
           {experiences.map((exp) => (
             <article
               key={exp.id}
-              className={cn("grid grid-cols-1 gap-3 border-t py-7 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
+              className={cn("grid grid-cols-1 gap-3 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
             >
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>
                 {formatDateRange(exp.startDate, exp.endDate) || "Present"}
@@ -241,7 +243,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.articles}</SectionHeading>
         <CollapsibleList initial={5} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
           {articles.map((article) => (
-            <article key={article.id} className={cn("border-t py-5", hairline)}>
+            <article key={article.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <div className="flex min-w-0 flex-col gap-2 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8">
                 <h3 className={cn("min-w-0 font-[family-name:var(--font-corporate-serif)] text-lg font-medium tracking-tight", ink)}>
                   <a
@@ -282,7 +284,11 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
           {Object.entries(skillsByCategory).map(([category, names]) => (
             <div key={category} className="min-w-0">
               <h3 className={cn("mb-2 font-[family-name:var(--font-corporate-serif)] text-lg font-medium", ink)}>{category}</h3>
-              <p className={cn("text-base leading-7", mute)}>{names.join(", ")}</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                {names.map((name) => (
+                  <TechChip key={name} name={name} className={cn("text-base leading-7", mute)} />
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -296,7 +302,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
           {educations.map((edu) => (
             <article
               key={edu.id}
-              className={cn("grid grid-cols-1 gap-3 border-t py-6 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
+              className={cn("grid grid-cols-1 gap-3 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
             >
               <p className={cn("pt-1 text-sm tabular-nums", mute)}>
                 {formatDateRange(edu.startDate, edu.endDate) || "Completed"}
@@ -304,12 +310,12 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
               <div className="min-w-0">
                 <h3 className={cn("font-[family-name:var(--font-corporate-serif)] text-lg font-medium", ink)}>
                   <RichText text={edu.degree} />
-                  {edu.field && (
-                    <span className={mute}>
+                  {edu.field ? (
+                    <>
                       {" "}
                       in <RichText text={edu.field} />
-                    </span>
-                  )}
+                    </>
+                  ) : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}>
                   <RichText text={edu.institution} />
@@ -329,7 +335,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
           {certifications.map((cert) => (
             <article
               key={cert.id}
-              className={cn("flex min-w-0 flex-col gap-2 border-t py-5 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8", hairline)}
+              className={cn("flex min-w-0 flex-col gap-2 border-t py-5 first:border-t-0 first:pt-0 @md:flex-row @md:items-baseline @md:justify-between @md:gap-8", hairline)}
             >
               <div className="min-w-0">
                 <h3 className={cn("text-base font-medium", ink)}>
@@ -362,7 +368,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.achievements}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreButton}>
           {achievements.map((ach) => (
-            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5", hairline)}>
+            <article key={ach.id} className={cn("flex items-start gap-3 border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <Trophy className="mt-0.5 size-4 shrink-0 text-[var(--lf-accent)]" aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className={cn("text-sm leading-relaxed", ink)}>
@@ -393,13 +399,17 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section key="github" className={cn("border-t pt-12", hairline)}>
         <SectionHeading>{labels.github}</SectionHeading>
-        <GitHubContributionHeatmap
-          calendar={contributionCalendar}
-          profileUrl={githubProfile?.url}
-          username={githubProfile?.username}
-          variant="corporate"
-          label={labels.github}
-        />
+        <div className="min-w-0 overflow-x-auto">
+          <GitHubContributionHeatmap
+            calendar={contributionCalendar}
+            profileUrl={githubProfile?.url}
+            username={githubProfile?.username}
+            variant="corporate"
+            stretch
+            className="mt-0 border-0 pt-0"
+            label={null}
+          />
+        </div>
       </section>
     ) : null,
   };
@@ -459,7 +469,7 @@ export function CorporateTemplate({ data }: { data: PortfolioData }) {
           <div className="mb-10">
             <TemplateNavbar
               items={sections}
-              className={cn("rounded-none border-x-0 border-b border-t-0 bg-transparent", hairline)}
+              className={cn("rounded-none border-0 bg-transparent", hairline)}
               linkClassName={cn("rounded-none px-0 py-3 text-sm transition-colors hover:text-[#0b1220]", mute)}
             />
           </div>

@@ -152,8 +152,8 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
         <div className={cn(well, "p-4 @md:p-6")}>
           <DescriptionBlock
             text={portfolio.summary}
-            paragraphClassName="max-w-3xl whitespace-pre-wrap font-mono text-sm leading-7 text-black"
-            listClassName="max-w-3xl flex flex-col gap-1.5 pl-5 font-mono text-sm leading-7 text-black"
+            paragraphClassName="whitespace-pre-wrap font-mono text-sm leading-7 text-black"
+            listClassName="flex flex-col gap-1.5 pl-5 font-mono text-sm leading-7 text-black"
           />
         </div>
       </Window>
@@ -330,12 +330,12 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
                 <div className="min-w-0">
                   <h3 className="text-sm font-bold text-black">
                     <RichText text={edu.degree} />
-                    {edu.field && (
-                      <span className="font-normal text-black/70">
+                    {edu.field ? (
+                      <>
                         {" "}
                         in <RichText text={edu.field} />
-                      </span>
-                    )}
+                      </>
+                    ) : null}
                   </h3>
                   <p className="mt-0.5 text-xs text-black/70">
                     <RichText text={edu.institution} />
@@ -488,13 +488,19 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
         title={`MS-DOS Prompt — ${labels.github}`}
         icon={<Terminal className="size-4" />}
       >
-        <div className="overflow-x-auto border border-[#808080] bg-black p-4 text-[#c0c0c0] shadow-[inset_1px_1px_0_#404040] custom-scrollbar">
+        <div
+          className={cn(
+            well,
+            "min-w-0 overflow-x-auto p-4 custom-scrollbar [&_.text-stone-400]:!text-stone-700 [&_.text-stone-500]:!text-stone-800",
+          )}
+        >
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="minimal"
-            label={labels.github}
+            stretch
+            label={null}
           />
         </div>
       </Window>
@@ -535,7 +541,7 @@ export function WindowsTemplate({ data }: { data: PortfolioData }) {
               />
               <ContactChips
                 portfolio={portfolio}
-                chipClassName="text-sm text-black/70"
+                chipClassName="rounded-[2px] border border-[#808080] bg-white px-2.5 py-1 text-sm text-black/80"
               />
               {hasNonHeroSocialProfiles(socialProfiles) && (
                 <SocialPills

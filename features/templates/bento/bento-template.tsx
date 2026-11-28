@@ -3,7 +3,7 @@ import { resolveAccentColor, accentRootStyle } from "@/features/templates/templa
 import { stripRichTextToPlain } from "@/lib/rich-text";
 import type { PortfolioData } from "../types";
 import { getTemplateSectionLayout } from "../section-layouts";
-import { resolveSectionLayout } from "../section-order";
+import { resolveSectionLayout, type ReorderableSectionKey } from "../section-order";
 import { cn } from "@/lib/utils";
 import {
   GitHubContributionHeatmap,
@@ -113,6 +113,8 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("bento"),
     portfolio.customization,
   );
+  const slot = (key: ReorderableSectionKey) =>
+    resolved.order.full.indexOf(key) + 1;
 
   return (
     <div
@@ -141,6 +143,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
               tile,
               "relative col-span-1 flex min-w-0 flex-col gap-6 overflow-hidden @md:col-span-2 @lg:col-span-3",
             )}
+            style={{ order: 0 }}
           >
             <div>
               <h1 className="min-w-0 text-balance font-[family-name:var(--font-bento-display)] text-3xl font-semibold tracking-[-0.03em] [overflow-wrap:anywhere] @sm:text-4xl @md:text-5xl @lg:text-6xl">
@@ -165,7 +168,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           </header>
 
           {portfolio.summary && !resolved.isHidden("about") && (
-            <section id="about" className={cn(tileDark, "col-span-1 scroll-mt-24 @md:col-span-3 @lg:col-span-2")}>
+            <section id="about" className={cn(tileDark, "col-span-full scroll-mt-24")} style={{ order: slot("about") }}>
               <TileTitle dark>{labels.about}</TileTitle>
               <DescriptionBlock
                 text={portfolio.summary}
@@ -176,7 +179,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {hasNonHeroSocialProfiles(socialProfiles) && !resolved.isHidden("profiles") && (
-            <div className={cn(tile, "col-span-1 flex flex-col justify-center @lg:col-span-2")}>
+            <div className={cn(tile, "col-span-1 flex flex-col justify-center @lg:col-span-2")} style={{ order: slot("profiles") }}>
               <TileTitle>{labels.profiles}</TileTitle>
               <SocialPills
                 profiles={socialProfiles}
@@ -191,6 +194,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             <section
               id="work"
               className={cn(tile, "col-span-1 scroll-mt-24 @md:col-span-3 @lg:col-span-4")}
+              style={{ order: slot("projects") }}
             >
               <TileTitle>{labels.projects}</TileTitle>
               <CollapsibleList
@@ -243,7 +247,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                           sourceUrl={project.sourceUrl}
                           label={stripRichTextToPlain(project.title)}
                           projectId={project.id}
-                          liveClassName="rounded-lg bg-[#12141a] px-3 py-1.5 text-xs font-medium text-white hover:bg-black"
+                          liveClassName="rounded-lg bg-[#12141a] px-3 py-1.5 text-xs font-medium text-white hover:bg-black hover:text-white"
                           sourceClassName="rounded-lg border border-[#12141a]/12 bg-white px-3 py-1.5 text-xs font-medium text-[#667083] hover:text-[#12141a]"
                         />
                       </div>
@@ -258,6 +262,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             <section
               id="experience"
               className={cn(tile, "col-span-1 row-span-2 scroll-mt-24 @md:col-span-2 @lg:col-span-2")}
+              style={{ order: slot("experience") }}
             >
               <TileTitle>{labels.experience}</TileTitle>
               <CollapsibleList
@@ -304,7 +309,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
               className={cn(
                 "col-span-1 overflow-hidden rounded-2xl p-6 text-white @md:col-span-1 @lg:col-span-2 @md:p-7",
               )}
-              style={{ background: "var(--lf-accent)" }}
+              style={{ background: "var(--lf-accent)", order: slot("skills") }}
             >
               <h2 className="mb-5 font-[family-name:var(--font-bento-display)] text-lg font-semibold tracking-tight @md:text-xl">
                 {labels.skills}
@@ -329,7 +334,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {educations.length > 0 && !resolved.isHidden("education") && (
-            <section className={cn(tile, "col-span-1 @md:col-span-2 @lg:col-span-2")}>
+            <section className={cn(tile, "col-span-1 @md:col-span-2 @lg:col-span-2")} style={{ order: slot("education") }}>
               <TileTitle>{labels.education}</TileTitle>
               <CollapsibleList
                 initial={4}
@@ -340,12 +345,12 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
                   <article key={edu.id} className="border-t border-[#12141a]/10 pt-4 first:border-t-0 first:pt-0">
                     <h3 className="font-[family-name:var(--font-bento-display)] font-semibold">
                       <RichText text={edu.degree} />
-                      {edu.field && (
-                        <span className="font-normal text-[#667083]">
+                      {edu.field ? (
+                        <>
                           {" "}
                           in <RichText text={edu.field} />
-                        </span>
-                      )}
+                        </>
+                      ) : null}
                     </h3>
                     <p className="mt-1 text-sm text-[#667083]">
                       <RichText text={edu.institution} />
@@ -368,6 +373,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             <section
               id="writing"
               className={cn(tile, "col-span-1 scroll-mt-24 @md:col-span-1 @lg:col-span-2")}
+              style={{ order: slot("articles") }}
             >
               <TileTitle>{labels.articles}</TileTitle>
               <CollapsibleList
@@ -412,22 +418,26 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {contributionCalendar && !resolved.isHidden("github") && (
-            <section className={cn(tileDark, "col-span-1 @md:col-span-3 @lg:col-span-4")}>
+            <section className={cn(tileDark, "col-span-1 min-w-0 @md:col-span-3 @lg:col-span-4")} style={{ order: slot("github") }}>
               <TileTitle dark>{labels.github}</TileTitle>
-              <div className="overflow-x-auto pb-2">
+              <div className="min-w-0">
                 <GitHubContributionHeatmap
                   calendar={contributionCalendar}
                   profileUrl={githubProfile?.url}
                   username={githubProfile?.username}
                   variant="minimal"
-                  label={labels.github}
+                  stretch
+                  label={null}
+                  className="mt-0 border-0 pt-0"
+                  frameClassName="w-full"
+                  metaClassName="mb-4 justify-start text-sm text-[#9aa3b2] [&_span]:text-[#eef0f2]"
                 />
               </div>
             </section>
           )}
 
           {certifications.length > 0 && !resolved.isHidden("certifications") && (
-            <section className={cn(tile, "col-span-full")}>
+            <section className={cn(tile, "col-span-full")} style={{ order: slot("certifications") }}>
               <TileTitle>{labels.certifications}</TileTitle>
               <CollapsibleList
                 initial={4}
@@ -463,7 +473,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           )}
 
           {achievements.length > 0 && !resolved.isHidden("achievements") && (
-            <section className={cn(tile, "col-span-full")}>
+            <section className={cn(tile, "col-span-full")} style={{ order: slot("achievements") }}>
               <TileTitle>{labels.achievements}</TileTitle>
               <CollapsibleList
                 initial={4}
@@ -495,8 +505,8 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             </section>
           )}
 
-          {customSections.map((cs) => (
-            <section key={cs.id} className={cn(tile, "col-span-1 @md:col-span-2 @lg:col-span-2")}>
+          {customSections.map((cs, i) => (
+            <section key={cs.id} className={cn(tile, "col-span-1 @md:col-span-2 @lg:col-span-2")} style={{ order: 100 + i }}>
               <TileTitle>{cs.label}</TileTitle>
               <CustomSectionItems
                 items={cs.items}
@@ -509,7 +519,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
           ))}
 
           {data.linkedin && !resolved.isHidden("linkedin") && (
-            <div className={cn(tile, "col-span-1 @md:col-span-3 @lg:col-span-4")}>
+            <div className={cn(tile, "col-span-1 @md:col-span-3 @lg:col-span-4")} style={{ order: slot("linkedin") }}>
               <LinkedInSection
                 data={data.linkedin}
                 heading={<TileTitle>{labels.linkedin}</TileTitle>}
@@ -536,6 +546,7 @@ export function BentoTemplate({ data }: { data: PortfolioData }) {
             <section
               id="profiles"
               className={cn(tile, "col-span-1 scroll-mt-24 @md:col-span-3 @lg:col-span-4")}
+              style={{ order: slot("profiles") }}
             >
               <TileTitle>{labels.profiles}</TileTitle>
               <ProfileLinksSection

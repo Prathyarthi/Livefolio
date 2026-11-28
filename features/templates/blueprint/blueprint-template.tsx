@@ -74,6 +74,36 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     getTemplateSectionLayout("blueprint"),
     portfolio.customization,
   );
+  const numberedSectionKeys = new Set<ReorderableSectionKey>([
+    "about",
+    "projects",
+    "experience",
+    "education",
+    "skills",
+    "certifications",
+    "achievements",
+    "articles",
+    "github",
+  ]);
+  const sectionPresent: Partial<Record<ReorderableSectionKey, boolean>> = {
+    about: Boolean(portfolio.summary),
+    projects: visibleProjects.length > 0,
+    experience: experiences.length > 0,
+    education: educations.length > 0,
+    skills: skills.length > 0,
+    certifications: certifications.length > 0,
+    achievements: achievements.length > 0,
+    articles: articles.length > 0,
+    github: Boolean(contributionCalendar),
+  };
+  const numbered = resolved.order.full.filter(
+    (key) =>
+      numberedSectionKeys.has(key) &&
+      sectionPresent[key] &&
+      !resolved.isHidden(key),
+  );
+  const sectionNumber = (key: ReorderableSectionKey) =>
+    String(numbered.indexOf(key) + 1).padStart(2, "0");
 
 
   const linkedinSection = data.linkedin ? (
@@ -102,7 +132,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     about: portfolio.summary ? (
       <section key="about" id="about" className="scroll-mt-32">
 
-            <SectionHeading number="01">{labels.about}</SectionHeading>
+            <SectionHeading number={sectionNumber("about")}>{labels.about}</SectionHeading>
             <div className="border-2 border-white/50 p-8 md:p-12 bg-[#003366]/80 backdrop-blur-sm relative">
               <div className="absolute top-4 right-4 text-[10px] text-white/50 uppercase tracking-widest">
                 SCALE: 1:1
@@ -119,7 +149,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     projects: visibleProjects.length > 0 ? (
       <section key="projects" id="work" className="scroll-mt-32">
 
-            <SectionHeading number="02">{labels.projects}</SectionHeading>
+            <SectionHeading number={sectionNumber("projects")}>{labels.projects}</SectionHeading>
             <CollapsibleList
               initial={4}
               wrapperClassName={cn(PROJECTS_GRID_2, "gap-8")}
@@ -196,7 +226,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     experience: experiences.length > 0 ? (
       <section key="experience" id="experience" className="scroll-mt-32">
 
-              <SectionHeading number="03">{labels.experience}</SectionHeading>
+              <SectionHeading number={sectionNumber("experience")}>{labels.experience}</SectionHeading>
               <CollapsibleList
                 initial={4}
                 wrapperClassName="space-y-8"
@@ -233,7 +263,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     skills: skills.length > 0 ? (
       <section key="skills">
 
-                <SectionHeading number="04">{labels.skills}</SectionHeading>
+                <SectionHeading number={sectionNumber("skills")}>{labels.skills}</SectionHeading>
                 <div className="border-2 border-white/50 p-6 bg-[#003366]/80 backdrop-blur-sm">
                   <div className="space-y-8">
                     {Object.entries(groupedSkills).map(([category, names], idx) => (
@@ -261,7 +291,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     education: educations.length > 0 ? (
       <section key="education">
 
-                <SectionHeading number="05">{labels.education}</SectionHeading>
+                <SectionHeading number={sectionNumber("education")}>{labels.education}</SectionHeading>
                 <CollapsibleList
                   initial={3}
                   wrapperClassName="space-y-6"
@@ -287,7 +317,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     certifications: certifications.length > 0 ? (
       <section key="certifications">
 
-                <SectionHeading number="06">{labels.certifications}</SectionHeading>
+                <SectionHeading number={sectionNumber("certifications")}>{labels.certifications}</SectionHeading>
                 <CollapsibleList
                   initial={4}
                   wrapperClassName="space-y-4"
@@ -321,7 +351,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     achievements: achievements.length > 0 ? (
       <section key="achievements">
 
-                <SectionHeading number="07">{labels.achievements}</SectionHeading>
+                <SectionHeading number={sectionNumber("achievements")}>{labels.achievements}</SectionHeading>
                 <CollapsibleList
                   initial={4}
                   wrapperClassName="space-y-4"
@@ -347,7 +377,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     articles: articles.length > 0 ? (
       <section key="articles" id="writing" className="scroll-mt-32">
 
-            <SectionHeading number="08">{labels.articles}</SectionHeading>
+            <SectionHeading number={sectionNumber("articles")}>{labels.articles}</SectionHeading>
             <CollapsibleList
               initial={4}
               wrapperClassName="grid grid-cols-1 md:grid-cols-3 gap-6"
@@ -404,18 +434,17 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
     ) : null,
 
     github: contributionCalendar ? (
-      <section key="github" className="scroll-mt-32">
-
-            <SectionHeading number="XX">{labels.github}</SectionHeading>
-            <div className="border-2 border-white/50 p-8 bg-[#003366]/80 backdrop-blur-sm overflow-x-auto custom-scrollbar">
-              <GitHubContributionHeatmap
-                calendar={contributionCalendar}
-                profileUrl={githubProfile?.url}
-                username={githubProfile?.username}
-                variant="minimal"
-                label="GIT_COMMITS"
-              />
-            </div>
+      <section key="github" className="scroll-mt-32 min-w-0">
+            <SectionHeading number={sectionNumber("github")}>{labels.github}</SectionHeading>
+            <GitHubContributionHeatmap
+              calendar={contributionCalendar}
+              profileUrl={githubProfile?.url}
+              username={githubProfile?.username}
+              variant="blueprint"
+              stretch
+              className="mt-0 border-0 pt-0"
+              label={null}
+            />
       </section>
     ) : null,
   };
@@ -497,7 +526,7 @@ export function BlueprintTemplate({ data }: { data: PortfolioData }) {
 
         {customSections.length > 0 && customSections.map((cs, idx) => (
           <section key={cs.id} className="scroll-mt-32">
-            <SectionHeading number={`0${9 + idx}`}>{cs.label}</SectionHeading>
+            <SectionHeading number={String(numbered.length + 1 + idx).padStart(2, "0")}>{cs.label}</SectionHeading>
             <div className="border-2 border-white/50 p-8 bg-[#003366]/80 backdrop-blur-sm">
               <CustomSectionItems
                 items={cs.items}

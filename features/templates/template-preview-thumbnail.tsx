@@ -15,7 +15,7 @@ const TEMPLATE_PREVIEW_GRADIENTS: Record<string, string> = {
   developer: "from-green-500/40 to-emerald-400/30",
   creative: "from-pink-500/40 to-orange-400/30",
   corporate: "from-sky-500/40 to-slate-300/30",
-  spotlight: "from-[#fc3]/50 to-[#fbfffe]",
+  spotlight: "from-[#facc15] to-[#86efac]",
   retro: "from-[#ff90e8]/80 to-[#ffc900]/80",
   bento: "from-zinc-100 to-zinc-200",
   vibrant: "from-fuchsia-600/60 to-cyan-500/60",

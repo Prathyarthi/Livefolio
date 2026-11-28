@@ -148,8 +148,8 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName="max-w-2xl whitespace-pre-line text-lg leading-9 text-slate-300"
-          listClassName="max-w-2xl flex flex-col gap-3 pl-5 text-lg leading-9 text-slate-300 marker:text-slate-600"
+          paragraphClassName="whitespace-pre-line text-lg leading-9 text-slate-300"
+          listClassName="flex flex-col gap-3 pl-5 text-lg leading-9 text-slate-300 marker:text-slate-600"
         />
       </section>
     ) : null,
@@ -167,21 +167,23 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
             <article
               key={project.id}
               className={cn(
-                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_auto] @md:gap-8",
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8",
                 line,
               )}
             >
-              <TemplateProjectPreview
-                templateId="space"
-                liveUrl={project.liveUrl ?? null}
-                imageUrl={project.imageUrl ?? null}
-                projectId={project.id}
-                livePreviewProjectIds={livePreviewProjectIds}
-                alt={stripRichTextToPlain(project.title)}
-                loading="lazy"
-                containerClassName="overflow-hidden rounded-sm bg-[#070914] ring-1 ring-white/10"
-                accentColor={primaryColor}
-              />
+              <div className="min-w-0 w-full overflow-hidden rounded-sm bg-[#070914] ring-1 ring-white/10">
+                <TemplateProjectPreview
+                  templateId="space"
+                  liveUrl={project.liveUrl ?? null}
+                  imageUrl={project.imageUrl ?? null}
+                  projectId={project.id}
+                  livePreviewProjectIds={livePreviewProjectIds}
+                  alt={stripRichTextToPlain(project.title)}
+                  loading="lazy"
+                  containerClassName="bg-[#070914]"
+                  accentColor={primaryColor}
+                />
+              </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className={cn(displayFont, "text-xl font-semibold tracking-tight", ink)}>
@@ -200,8 +202,8 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                 {project.description && (
                   <DescriptionBlock
                     text={project.description}
-                    paragraphClassName={cn("mt-2 text-sm leading-7", mute)}
-                    listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-7", mute)}
+                    paragraphClassName={cn("mt-2 text-sm leading-6", mute)}
+                    listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-6", mute)}
                   />
                 )}
                 {project.techStack.length > 0 && (
@@ -209,16 +211,16 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
                     {project.techStack.slice(0, 5).join(", ")}
                   </p>
                 )}
-              </div>
-              <div className="shrink-0">
-                <ProjectActions
-                  liveUrl={project.liveUrl}
-                  sourceUrl={project.sourceUrl}
-                  label={stripRichTextToPlain(project.title)}
-                  projectId={project.id}
-                  liveClassName="rounded-sm border border-white/20 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-white/5 hover:text-white"
-                  sourceClassName="rounded-sm px-2 py-1.5 text-xs font-medium text-slate-400 hover:text-white"
-                />
+                <div className="mt-4">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName="rounded-sm border border-white/20 bg-transparent px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-white/5 hover:text-white"
+                    sourceClassName="rounded-sm px-2 py-1.5 text-xs font-medium text-slate-400 hover:bg-transparent hover:text-white"
+                  />
+                </div>
               </div>
             </article>
           ))}
@@ -249,7 +251,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
               <h3 className={cn(displayFont, "mt-1.5 text-xl font-semibold tracking-tight", ink)}>
                 <RichText text={exp.role} />
               </h3>
-              <p className="mt-1 text-sm text-slate-300">
+              <p className="mt-1 text-sm text-[var(--lf-accent)]">
                 <RichText text={exp.company} />
                 {exp.location ? (
                   <span className="text-slate-500">
@@ -313,12 +315,12 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
               <div className="min-w-0">
                 <h3 className={cn(displayFont, "text-lg font-semibold", ink)}>
                   <RichText text={edu.degree} />
-                  {edu.field && (
-                    <span className="font-normal text-slate-400">
+                  {edu.field ? (
+                    <>
                       {" "}
                       in <RichText text={edu.field} />
-                    </span>
-                  )}
+                    </>
+                  ) : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}>
                   <RichText text={edu.institution} />
@@ -464,12 +466,13 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section key="github">
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className={cn("overflow-x-auto rounded-sm border p-5 custom-scrollbar", line)}>
+        <div className={cn("min-w-0 overflow-x-auto rounded-sm border p-5 custom-scrollbar", line)}>
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="modern"
+            stretch
             label={labels.github}
           />
         </div>
@@ -542,7 +545,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
               profiles={socialProfiles}
               className="rounded-sm bg-[var(--lf-accent)] px-4 py-2 text-sm font-semibold text-[#04050a] transition-opacity hover:opacity-90"
             />
-            <ContactChips portfolio={portfolio} chipClassName="text-sm text-slate-400" />
+            <ContactChips portfolio={portfolio} chipClassName="rounded-sm border border-white/15 bg-white/[0.04] px-2.5 py-1 text-sm text-slate-300" />
             {hasNonHeroSocialProfiles(socialProfiles) && (
               <SocialPills
                 profiles={socialProfiles}
@@ -554,7 +557,7 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
           </div>
         </header>
 
-        <div className="relative mt-24 flex min-w-0 flex-col gap-20 md:mt-32 md:gap-28">
+        <div className="relative mt-16 flex min-w-0 flex-col gap-12 md:mt-20 md:gap-16">
           {renderSections(resolved, "full", { ...blocks, linkedin: linkedinSection })}
 
           {customSections.length > 0 &&
@@ -576,27 +579,39 @@ export function SpaceTemplate({ data }: { data: PortfolioData }) {
   );
 }
 
-/** One thin orbit with a single satellite: the only illustration on the page. */
+/** Tilted oval orbits with a slow planet around a small sun. */
 function Orbit() {
   return (
     <svg
       aria-hidden
-      viewBox="0 0 400 400"
-      className="pointer-events-none absolute -right-24 -top-16 hidden size-[26rem] text-white/15 @lg:block"
+      viewBox="0 0 400 280"
+      className="pointer-events-none absolute -right-32 -top-8 hidden w-[34rem] -rotate-[18deg] text-white/15 @lg:block"
       fill="none"
       stroke="currentColor"
       strokeWidth="1"
     >
-      <circle cx="200" cy="200" r="190" />
-      <circle cx="200" cy="200" r="120" />
-      <circle cx="200" cy="200" r="3" fill="currentColor" stroke="none" />
+      <ellipse cx="200" cy="140" rx="186" ry="116" />
+      <ellipse cx="200" cy="140" rx="116" ry="72" />
       <circle
-        cx="84"
-        cy="94"
-        r="4"
+        cx="200"
+        cy="140"
+        r="9"
+        fill="var(--lf-accent)"
+        fillOpacity="0.22"
         stroke="none"
-        style={{ fill: "var(--lf-accent)" }}
       />
+      <circle cx="200" cy="140" r="3.5" fill="var(--lf-accent)" stroke="none" />
+      <path
+        id="space-hero-orbit-path"
+        d="M 386 140 A 186 116 0 1 1 14 140 A 186 116 0 1 1 386 140"
+        fill="none"
+        stroke="none"
+      />
+      <circle r="4.5" stroke="none" fill="var(--lf-accent)">
+        <animateMotion dur="36s" repeatCount="indefinite" rotate="0">
+          <mpath href="#space-hero-orbit-path" />
+        </animateMotion>
+      </circle>
     </svg>
   );
 }
@@ -604,7 +619,7 @@ function Orbit() {
 function SectionHeading({ children }: { children: React.ReactNode }) {
   const label = typeof children === "string" ? children : "";
   return (
-    <div className="mb-9">
+    <div className="mb-6">
       <div className="flex items-baseline justify-between gap-4">
         <h2
           className={cn(

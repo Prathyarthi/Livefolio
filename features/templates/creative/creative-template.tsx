@@ -108,8 +108,8 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
       data={data.linkedin}
       heading={<SectionHeading>{labels.linkedin}</SectionHeading>}
       classes={{
-        aboutList: cn("flex max-w-[40rem] flex-col gap-3 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]", mute),
-        aboutParagraph: cn("max-w-[40rem] text-base leading-8", mute),
+        aboutList: cn("flex flex-col gap-3 pl-5 text-base leading-8 marker:text-[var(--lf-accent)]", mute),
+        aboutParagraph: cn("text-base leading-8", mute),
         postList: cn("flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed", ink),
         postParagraph: cn("text-sm leading-relaxed", ink),
         descriptionParagraph: cn("text-sm leading-7", mute),
@@ -129,7 +129,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     about: portfolio.summary ? (
       <section key="about" id="about" className="scroll-mt-28">
         <SectionHeading>{labels.about}</SectionHeading>
-        <div className="relative max-w-[42rem]">
+        <div className="relative">
           <div
             aria-hidden
             className="absolute -left-3 -top-3 h-16 w-16 rounded-[1.25rem] bg-[#e4d4f5]/70"
@@ -158,8 +158,8 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                 key={project.id}
                 className="flex min-w-0 flex-col overflow-hidden rounded-[1.75rem] border border-[#171412]/08 bg-white shadow-[0_22px_60px_-30px_rgba(23,20,18,0.35)]"
               >
-                <div className="p-3 pb-0" style={{ backgroundColor: mat }}>
-                  <div className="overflow-hidden rounded-[1.25rem] bg-white/40">
+                <div className="rounded-b-[1.25rem] p-3" style={{ backgroundColor: mat }}>
+                  <div className="overflow-hidden rounded-[1.25rem] border border-[#171412]/08 bg-white/40">
                     <TemplateProjectPreview
                       templateId="creative"
                       liveUrl={project.liveUrl ?? null}
@@ -205,7 +205,7 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
                       sourceUrl={project.sourceUrl}
                       label={stripRichTextToPlain(project.title)}
                       projectId={project.id}
-                      liveClassName="rounded-full bg-[#171412] px-4 py-1.5 text-xs font-semibold text-[#fff8f1] hover:bg-black"
+                      liveClassName="rounded-full bg-[#171412] px-4 py-1.5 text-xs font-semibold text-[#fff8f1] hover:bg-black hover:text-[#fff8f1]"
                       sourceClassName="rounded-full border border-[#171412]/12 bg-[#fff6ee] px-4 py-1.5 text-xs font-semibold text-[#6d645c] hover:border-[var(--lf-accent)] hover:text-[var(--lf-accent)]"
                     />
                   </div>
@@ -356,10 +356,10 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
               <h3 className={cn("font-[family-name:var(--font-creative-display)] text-lg font-medium", ink)}>
                 <RichText text={edu.degree} />
                 {edu.field ? (
-                  <span className={cn("font-normal", mute)}>
+                  <>
                     {" "}
                     in <RichText text={edu.field} />
-                  </span>
+                  </>
                 ) : null}
               </h3>
               <p className={cn("mt-1 text-sm", mute)}>
@@ -457,13 +457,14 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section key="github">
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className="overflow-x-auto rounded-[1.5rem] border border-[#171412]/08 bg-white/90 p-4 shadow-[0_18px_50px_-28px_rgba(23,20,18,0.25)]">
+        <div className="min-w-0 overflow-x-auto rounded-[1.5rem] border border-[#171412]/08 bg-white/90 p-4">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="creative"
-            label={labels.github}
+            stretch
+            label={null}
           />
         </div>
       </section>
@@ -497,11 +498,12 @@ export default function CreativeTemplate({ data }: { data: PortfolioData }) {
 
       <div className="relative mx-auto min-w-0 max-w-6xl overflow-x-clip px-5 pb-24 pt-8 sm:px-8 md:pb-32 md:pt-10">
         {navbarEnabled && (
-          <div className="mb-10 flex justify-center">
+          <div className="mb-10 min-w-0">
             <TemplateNavbar
               items={sections}
-              className="rounded-full border border-[#171412]/08 bg-white/75 shadow-[0_14px_40px_-18px_rgba(23,20,18,0.35)] backdrop-blur-md"
-              linkClassName="rounded-full px-4 py-2 text-sm font-medium text-[#6d645c] transition-colors hover:bg-[#fff6ee] hover:text-[var(--lf-accent)]"
+              wrap
+              className="rounded-3xl border border-[#171412]/08 bg-white/75 shadow-[0_14px_40px_-18px_rgba(23,20,18,0.35)] backdrop-blur-md @md:rounded-full"
+              linkClassName="rounded-full px-3 py-1.5 text-sm font-medium text-[#6d645c] transition-colors hover:bg-[#fff6ee] hover:text-[var(--lf-accent)] @md:px-4 @md:py-2"
             />
           </div>
         )}

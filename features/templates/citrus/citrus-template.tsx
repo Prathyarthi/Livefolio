@@ -86,7 +86,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
 
   const blocks: Partial<Record<ReorderableSectionKey, React.ReactNode>> = {
     about: portfolio.summary && (
-                <section key="about" id="about" className="scroll-mt-32 max-w-4xl relative">
+                <section key="about" id="about" className="scroll-mt-32 relative">
                   <div className="absolute -left-8 top-0 bottom-0 w-2 bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)]" />
                   <h2 className="mb-6 text-4xl font-black text-[#264653] uppercase tracking-tight">{labels.about}</h2>
                   <DescriptionBlock
@@ -284,15 +284,18 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
                 </section>
               ),
     github: contributionCalendar && (
-                <section key="github" className="scroll-mt-32 max-w-6xl overflow-x-auto pb-4">
+                <section key="github" className="scroll-mt-32 min-w-0">
                   <h2 className="mb-12 text-4xl font-black text-[#264653] uppercase tracking-tight">{labels.github}</h2>
-                  <div className="min-w-[700px] bg-white border-4 border-[#264653] p-8 rounded-xl shadow-[8px_8px_0_0_color-mix(in srgb, var(--lf-accent) 50%, white)]">
+                  <div className="min-w-0">
                     <GitHubContributionHeatmap
                       calendar={contributionCalendar}
                       profileUrl={githubProfile?.url}
                       username={githubProfile?.username}
                       variant="creative"
-                      label={labels.github}
+                      stretch
+                      className="mt-0 border-0 pt-0"
+                      frameClassName="rounded-none border-0 bg-transparent p-0 shadow-none"
+                      label={null}
                     />
                   </div>
                 </section>
@@ -338,7 +341,7 @@ export function CitrusTemplate({ data }: { data: PortfolioData }) {
               )}
 
               <div className="mt-8 flex flex-col gap-4">
-                <ContactChips portfolio={portfolio} chipClassName="text-sm font-bold text-[#264653] bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)]/30 px-3 py-1.5 rounded" />
+                <ContactChips portfolio={portfolio} chipClassName="rounded-md border border-[#264653]/25 bg-[color-mix(in_srgb,var(--lf-accent)_50%,white)]/30 px-3 py-1.5 text-sm font-bold text-[#264653]" />
                 <HeroProfileButtons
                   profiles={socialProfiles}
                   className="bg-[#264653] hover:bg-[var(--lf-accent)] text-white rounded p-2 transition-colors"

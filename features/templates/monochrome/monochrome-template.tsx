@@ -24,6 +24,7 @@ import {
   ContactChips,
   CustomSectionItems,
   DescriptionBlock,
+  TechChip,
   HERO_HEADER_COLUMN,
   HERO_HEADLINE_SCALE,
   HERO_TITLE_BASE,
@@ -122,8 +123,8 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.about}</SectionHeading>
         <DescriptionBlock
           text={portfolio.summary}
-          paragraphClassName="max-w-[54rem] whitespace-pre-line text-2xl font-medium leading-tight tracking-[-0.025em] text-black @md:text-3xl"
-          listClassName="flex max-w-[54rem] flex-col gap-3 pl-6 text-2xl font-medium leading-tight tracking-[-0.025em] text-black marker:text-neutral-400 @md:text-3xl"
+          paragraphClassName="whitespace-pre-line text-2xl font-medium leading-tight tracking-[-0.025em] text-black @md:text-3xl"
+          listClassName="flex flex-col gap-3 pl-6 text-2xl font-medium leading-tight tracking-[-0.025em] text-black marker:text-neutral-400 @md:text-3xl"
         />
       </section>
     ) : null,
@@ -132,15 +133,15 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
       <section key="projects" id="work" className={cn("scroll-mt-28 min-w-0 border-t pt-12", strongRule)}>
         <SectionHeading>{labels.projects}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
-          {visibleProjects.map((project, index) => (
+          {visibleProjects.map((project) => (
             <article
               key={project.id}
               className={cn(
-                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 @md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.3fr)_auto] @md:gap-8",
-                index === 0 ? "border-black" : hairline,
+                "grid min-w-0 grid-cols-1 gap-4 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-2 @md:items-start @md:gap-8",
+                hairline,
               )}
             >
-              <div className="overflow-hidden border border-neutral-200 bg-neutral-100">
+              <div className="min-w-0 w-full overflow-hidden border border-neutral-200 bg-neutral-100">
                 <TemplateProjectPreview
                   templateId="monochrome"
                   liveUrl={project.liveUrl ?? null}
@@ -149,8 +150,8 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                   livePreviewProjectIds={livePreviewProjectIds}
                   alt={stripRichTextToPlain(project.title)}
                   loading="lazy"
-                  containerClassName="bg-neutral-100"
-                  className="h-full w-full object-cover object-top grayscale contrast-125"
+                  containerClassName="aspect-[8/5] w-full bg-neutral-100"
+                  className="h-full w-full object-cover object-top"
                   accentColor={primaryColor}
                 />
               </div>
@@ -165,8 +166,8 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 {project.description && (
                   <DescriptionBlock
                     text={project.description}
-                    paragraphClassName={cn("mt-3 text-sm leading-6", mute)}
-                    listClassName={cn("mt-3 flex flex-col gap-1.5 pl-5 text-sm leading-6 marker:text-neutral-400", mute)}
+                    paragraphClassName={cn("mt-2 text-sm leading-6", mute)}
+                    listClassName={cn("mt-2 flex flex-col gap-1.5 pl-5 text-sm leading-6 marker:text-neutral-400", mute)}
                   />
                 )}
                 {project.techStack.length > 0 && (
@@ -174,16 +175,16 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                     {project.techStack.slice(0, 6).join(" / ")}
                   </p>
                 )}
-              </div>
-              <div className="shrink-0 @md:pt-1">
-                <ProjectActions
-                  liveUrl={project.liveUrl}
-                  sourceUrl={project.sourceUrl}
-                  label={stripRichTextToPlain(project.title)}
-                  projectId={project.id}
-                  liveClassName="rounded-none border border-black bg-white px-3 py-1.5 text-xs font-semibold text-black hover:bg-black hover:text-white"
-                  sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-neutral-600 underline-offset-4 hover:text-black hover:underline"
-                />
+                <div className="mt-4">
+                  <ProjectActions
+                    liveUrl={project.liveUrl}
+                    sourceUrl={project.sourceUrl}
+                    label={stripRichTextToPlain(project.title)}
+                    projectId={project.id}
+                    liveClassName="rounded-none border border-black bg-white px-3 py-1.5 text-xs font-semibold text-black hover:bg-black hover:text-white"
+                    sourceClassName="rounded-none px-3 py-1.5 text-xs font-medium text-neutral-600 underline-offset-4 hover:text-black hover:underline"
+                  />
+                </div>
               </div>
             </article>
           ))}
@@ -198,7 +199,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
           {experiences.map((exp) => (
             <article
               key={exp.id}
-              className={cn("grid grid-cols-1 gap-3 border-t py-7 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
+              className={cn("grid grid-cols-1 gap-3 border-t py-7 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
             >
               <p className={cn("pt-1 text-sm tabular-nums", pale)}>
                 {formatDateRange(exp.startDate, exp.endDate) || "—"}
@@ -207,10 +208,10 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
                 <h3 className="text-2xl font-black leading-none tracking-[-0.04em] text-black">
                   <RichText text={exp.role} />
                 </h3>
-                <p className={cn("mt-2 text-sm", mute)}>
+                <p className="mt-2 text-sm text-[var(--lf-accent)]">
                   <RichText text={exp.company} />
                   {exp.location ? (
-                    <span>
+                    <span className={mute}>
                       {" / "}
                       <RichText text={exp.location} />
                     </span>
@@ -278,9 +279,13 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.skills}</SectionHeading>
         <div className="grid grid-cols-1 gap-8 @md:grid-cols-2">
           {Object.entries(groupedSkills).map(([category, names]) => (
-            <div key={category} className="min-w-0 border-t border-neutral-200 pt-4">
+            <div key={category} className="min-w-0 border-t border-neutral-200 pt-4 first:border-t-0 first:pt-0">
               <h3 className={cn("mb-3 text-sm font-medium", pale)}>{category}</h3>
-              <p className="text-lg font-semibold leading-7 tracking-[-0.02em] text-black">{names.join(" / ")}</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-lg font-semibold leading-7 tracking-[-0.02em] text-black">
+                {names.map((name) => (
+                  <TechChip key={name} name={name} />
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -294,7 +299,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
           {educations.map((edu) => (
             <article
               key={edu.id}
-              className={cn("grid grid-cols-1 gap-3 border-t py-6 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
+              className={cn("grid grid-cols-1 gap-3 border-t py-6 first:border-t-0 first:pt-0 @md:grid-cols-[10rem_minmax(0,1fr)] @md:gap-10", hairline)}
             >
               <p className={cn("pt-1 text-sm tabular-nums", pale)}>
                 {formatDateRange(edu.startDate, edu.endDate) || "—"}
@@ -302,12 +307,12 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
               <div>
                 <h3 className="text-xl font-black leading-tight tracking-[-0.035em] text-black">
                   <RichText text={edu.degree} />
-                  {edu.field && (
-                    <span className={mute}>
+                  {edu.field ? (
+                    <>
                       {" "}
                       in <RichText text={edu.field} />
-                    </span>
-                  )}
+                    </>
+                  ) : null}
                 </h3>
                 <p className={cn("mt-1 text-sm", mute)}>
                   <RichText text={edu.institution} />
@@ -325,7 +330,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.certifications}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {certifications.map((cert) => (
-            <article key={cert.id} className={cn("border-t py-5", hairline)}>
+            <article key={cert.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <h3 className="text-base font-semibold text-black">
                 {cert.url ? (
                   <a href={cert.url} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
@@ -355,7 +360,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
         <SectionHeading>{labels.achievements}</SectionHeading>
         <CollapsibleList initial={4} wrapperClassName="flex flex-col" buttonClassName={moreBtn}>
           {achievements.map((ach) => (
-            <article key={ach.id} className={cn("border-t py-5", hairline)}>
+            <article key={ach.id} className={cn("border-t py-5 first:border-t-0 first:pt-0", hairline)}>
               <p className="text-base font-semibold leading-7 text-black">
                 <RichText text={ach.title} />
               </p>
@@ -390,13 +395,16 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
     github: contributionCalendar ? (
       <section key="github" className={cn("scroll-mt-28 border-t pt-12", hairline)}>
         <SectionHeading>{labels.github}</SectionHeading>
-        <div className="overflow-x-auto pb-4 custom-scrollbar">
+        <div className="min-w-0 overflow-x-auto pb-4 custom-scrollbar">
           <GitHubContributionHeatmap
             calendar={contributionCalendar}
             profileUrl={githubProfile?.url}
             username={githubProfile?.username}
             variant="minimal"
-            label={labels.github}
+            stretch
+            className="mt-0 border-0 pt-0"
+            frameClassName="rounded-none border-neutral-200 bg-white"
+            label={null}
           />
         </div>
       </section>
@@ -450,7 +458,7 @@ export function MonochromeTemplate({ data }: { data: PortfolioData }) {
           <div className="flex min-w-0 flex-col gap-3 border-t border-black pt-4 @lg:border-t-0 @lg:pt-0">
             <ContactChips
               portfolio={portfolio}
-              chipClassName="rounded-none border-0 bg-transparent px-0 py-0 text-left text-sm text-neutral-600 underline-offset-4 hover:text-black hover:underline"
+              chipClassName="rounded-sm border border-neutral-300 bg-white px-2.5 py-1 text-left text-sm text-neutral-700 transition-colors hover:border-black hover:text-black"
             />
             <HeroProfileButtons
               profiles={socialProfiles}

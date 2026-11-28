@@ -214,15 +214,18 @@ function BrowserChrome({
   palette,
   variant,
   seed,
+  templateId,
 }: {
   palette: Palette;
   variant: PreviewPlaceholderVariant;
   seed: number;
+  templateId?: string;
 }) {
   const isRetro = variant === "retro";
   const isDark = variant === "dark";
   const isMinimal = variant === "minimal";
-  const layout = seed % 3;
+  const layout =
+    templateId === "corporate" || templateId === "space" ? 0 : seed % 3;
 
   const x = 72;
   const y = 52;
@@ -467,7 +470,12 @@ export function ProjectPreviewPlaceholderGraphic({
         </defs>
 
         <DecorativeBackground palette={palette} variant={resolvedVariant} seed={seed} />
-        <BrowserChrome palette={palette} variant={resolvedVariant} seed={seed} />
+        <BrowserChrome
+          palette={palette}
+          variant={resolvedVariant}
+          seed={seed}
+          templateId={templateId}
+        />
       </svg>
 
       <span className="sr-only">{title}</span>
